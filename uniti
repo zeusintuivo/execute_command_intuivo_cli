@@ -1,0 +1,93 @@
+#!/bin/bash 
+# 
+# @author Zeus Intuivo <zeus@intuivo.com>
+#
+# uniti
+# 
+if [[ -z "${1+x}"  ]] ; then 
+    echo "
+         Running PHPUNIT  without xdebug- 
+          
+            provide at least one test like: 
+"
+            ls apps/phpuni*.*  | xargs -I {} echo  "
+             ./uniti {} 
+             "
+    exit 130
+fi 
+
+
+                                      # Duplicated from check_system_requirements.sh
+                                       function current_os_system(){
+                                        
+                                            local local_current_system=$(uname -a) 
+                                            if [[ "$(uname)" == "Darwin" ]] ; then 
+                                              # Do something under Mac OS X platform 
+                                                [[ "$(uname -m)" == "x86_64" ]] && local_current_system="Mac 64 Bits" 
+                                                [[ "$(uname -m)" == "i686"   ]] && local_current_system="Mac 32 Bits"
+                                            elif [[ "$(expr substr $(uname -s) 1 5)" == "Linux" ]] ; then 
+                                              # Do something under GNU/Linux platform
+                                                [[ "$(uname -i)" == "x86_64" ]] && local_current_system="Linux 64 Bits"
+                                                [[ "$(uname -i)" == "i686"   ]] && local_current_system="Linux 32 Bits"
+                                            elif [[ "$(expr substr $(uname -s) 1 10)" == "MINGW32_NT" ]] ; then 
+                                              # Do something under Windows NT platform
+                                              local_current_system="Windows" 
+                                              # nothing here
+                                            fi 
+                                            
+                                            echo "$local_current_system"
+                                            
+                                       }
+os_system=$(current_os_system)
+if [[ "${os_system}" == "Mac 64 Bits" ]] ; then
+  {
+    echo "
+         Running PHPUNIT  without xdebug- Based on MAC Brew Setup file system
+    "
+    php                                                                    \
+    -dmemory_limit=9G                                                      \
+    --no-php-ini                                                           \
+    --define extension=/usr/local/Cellar/php54-apcu/4.0.11/apcu.so         \
+    --define extension=/usr/local/Cellar/php54-igbinary/1.2.1/igbinary.so  \
+    --define extension=/usr/local/Cellar/php54-imagick/3.3.0_3/imagick.so  \
+    --define extension=/usr/local/Cellar/php54-intl/5.4.45_1/intl.so       \
+    --define extension=/usr/local/Cellar/php54-mcrypt/5.4.45/mcrypt.so     \
+    --define extension=/usr/local/Cellar/php54-memcache/2.2.7/memcache.so  \
+    --define extension=/usr/local/Cellar/php54-mongo/1.6.14/mongo.so       \
+    --define extension=/usr/local/Cellar/php54-mongodb/1.1.8/mongodb.so    \
+    --define extension=/usr/local/Cellar/php54-redis/2.2.7_1/redis.so      \
+    vendor/phpunit/phpunit/phpunit -c "$@"  
+    exit 0
+  }                        
+fi
+if [[ "${os_system}" == "Linux 64 Bits" ]] ; then
+  {    
+   echo "
+         Running PHPUNIT  without xdebug- Based on Vagrant Scotch Debian -based
+   "   
+    php                                             \
+    --no-php-ini                                    \
+    --define extension=curl.so                      \
+    --define extension=gd.so                        \
+    --define extension=imagick.so                   \
+    --define extension=intl.so                      \
+    --define extension=json.so                      \
+    --define extension=mcrypt.so                    \
+    --define extension=memcached.so                 \
+    --define extension=memcache.so                  \
+    --define extension=mongo.so                     \
+    --define extension=pdo.so                       \
+    --define extension=pdo_sqlite.so                \
+    --define extension=readline.so                  \
+    --define extension=redis.so                     \
+    --define extension=sqlite3.so                   \
+    --define extension=xsl.so                       \
+    vendor/phpunit/phpunit/phpunit -c "$@"          
+    exit 0
+  }
+fi
+
+echo "
+    System not supported: ${os_system}
+    "
+exit 130

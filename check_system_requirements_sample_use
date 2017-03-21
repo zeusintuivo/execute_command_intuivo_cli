@@ -1,0 +1,166 @@
+#!/bin/bash 
+# 
+# @author Zeus Intuivo <zeus@intuivo.com>
+#
+#
+# Sample usage of how to use this script to 
+# check installations 
+#
+
+[ -e "check_system_requirements.sh" ] && \. "check_system_requirements.sh"  # This loads check_system_requirements.sh script
+[ !! -e "check_system_requirements.sh" ] && echo -e "\\033[1;31m Halt ! \\033[38;5;227m
+- This file was meant to be use with the check_system_requirements.sh system. 
+- check_system_requirements.sh File not found! 
+\\033[0m"
+
+- Git clone 
+
+DEBUG="1"
+PROVISIONED=""
+
+- Check OS 
+  Given "current os system" is "Mac 64 Bits"
+  Then provision "Mac 64 Bits" with "Brew Setup" use '
+    # Echo 5.6.24, 5.5.38, 5.4.45
+    ini_content=""
+    php_version_major="5"
+    php_version_minor="5"
+    php_version_patch="38"
+    php_version="$php_version_major.$php_version_minor.$php_version_patch"
+    ini_path="/usr/local/etc/php/$php_version_major.$php_version_minor/php.ini"
+' and "ignore this error"
+
+echo "$php_version" > .required_php
+
+#  Given "current os system" is "Linux 64 Bits"
+#  Then provide "Linux 64 Bits" with "Scotch Box Setup" use '
+#    ini_content=""
+#    php_version_major="5"
+#    php_version_minor="4"
+#    php_version_patch="45"
+#    php_version="$php_version_major.$php_version_minor.$php_version_patch"
+#    ini_path="/usr/local/etc/php/$php_version_major.$php_version_minor/php.ini"
+#' and "ignore this error"
+
+  Stop if "OS not provisioned" on "current os system"
+
+- Loaded Configuration:
+  • php_version: $php_version
+  • ini_path: $ini_path
+
+- Requirements: 
+  • .gitignore must have "#BRANCH-MERGE-AGAINST:" value with branch name
+    Given "branch merge against" is "master" 
+    Otherwise prepend "branch merge against" "#BRANCH-MERGE-AGAINST:" inside ".gitignore" to  "#BRANCH-MERGE-AGAINST:master" 
+    Peek at "#BRANCH-MERGE-AGAINST:" inside ".gitignore"
+
+  • Php $php_version
+    Given "current php version" is "$php_version"
+  
+  • Php Ini must exist 
+    Given "current php ini path" "results in" "$ini_path"
+    Load "$ini_path" into "ini_content"
+  
+  • Timezone Needs to be set 
+    Given "current timezone" "results in" "Europe/Berlin"
+    Otherwise set "current timezone" "date.timezone =" inside "$ini_path" to  "date.timezone = Europe/Berlin" 
+    Peek at "date.timezone =" inside "$ini_path"
+
+  • Parameters Files must be provided 
+
+    File "apps/someserver_name_info/config/parameters.yml" must exist   
+    Otherwise copy file "apps/someserver_name_info/config/parameters.yml.dist" as  "apps/someserver_name_info/config/parameters.yml"
+    List file "apps/someserver_name_info/config/parameters.yml"
+  
+    File "apps/oauthserver/config/parameters.yml" must exist 
+    Otherwise copy file "apps/oauthserver/config/parameters.yml.dist" as  "apps/oauthserver/config/parameters.yml" 
+    List file "apps/oauthserver/config/parameters.yml"
+
+    File "docker-compose.override.yml" must exist 
+    Otherwise copy file "docker-compose.override.yml.dist" as  "docker-compose.override.yml" 
+    List file "docker-compose.override.yml"
+
+    File "apps/oauthserver/config/security.yml" must exist 
+    List file "apps/oauthserver/config/security.yml"
+
+    File "apps/someserver_name_info/config/security.yml" must exist 
+    List file "apps/someserver_name_info/config/security.yml"
+
+oath_security_from="
+            activedirectory:
+                login_path: login
+                check_path: login_check
+                provider: main
+#            legacy_auth:
+#                login_path: login
+#                check_path: login_check
+#                provider: legacy
+"
+oath_security_to="
+#            activedirectory:
+#                login_path: login
+#                check_path: login_check
+#                provider: main
+            legacy_auth:
+                login_path: login
+                check_path: login_check
+                provider: legacy
+"
+
+  • File "apps/oauthserver/config/security.yml" must contain "#            activedirectory:"
+    Reading "apps/oauthserver/config/security.yml" results "$oath_security_to"
+    #Otherwise set "reading" "$oath_security_from" inside "apps/oauthserver/config/security.yml" to  "$oath_security_to"
+
+   
+    set -ux
+    echo other:"$OTHERWISE" 
+    ls -la "apps/oauthserver/config/security.yml"
+    set +xu 
+    exit 
+
+
+- Run Vendor ./compi install --ignore-platform-reqs
+  Folder "vendor" must exist 
+  
+- Hosts file 
+  
+    127.0.0.1         someserver_name_info.local        
+    127.0.0.1         auth.someserver_name_info.local
+    127.0.0.1         www.someserver_name_info.local     
+    127.0.0.1         www.auth.someserver_name_info.local
+    127.0.0.1         mysql.someserver_name_info.local 
+    127.0.0.1         www.mysql.someserver_name_info.local 
+    127.0.0.1         rabbitmq.someserver_name_info.local
+    127.0.0.1         www.rabbitmq.someserver_name_info.local
+
+- Servers          
+  • Nginx  
+    File exists "/usr/local/bin/nginx"
+    Folder exists "/usr/local/etc/nginx"
+
+  • Apache from Mac
+    Reading "inside file" "/etc/apache2/httpd.conf" key "Include /private/etc/apache2/extra/httpd-vhosts.conf" is uncommented 
+    Otherwise uncomment 
+    Reading "inside file" "/etc/apache2/httpd.conf" key "LoadModule vhost_alias_module libexec/apache2/mod_vhost_alias.so" is uncommented 
+    Otherwise uncomment 
+
+-  Docker must execute but before 
+  
+security.yml must look like 
+#            activedirectory:
+#                login_path: login
+#                check_path: login_check
+#                provider: main
+            legacy_auth:
+                login_path: login
+                check_path: login_check
+                provider: legacy
+
+  • Get redmineApiKey from RedMine "https://redmine.company_name.intern/my/account"   
+  • click on Anzeigen  copy paste the key -..it looks like "8e1a2efc5ac1cacfd8237024ea4f3f51ea8b4530"
+
+
+
+
+Results
+

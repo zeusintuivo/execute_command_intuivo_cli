@@ -1,0 +1,25 @@
+#!/bin/bash 
+# 
+# @author Zeus Intuivo <zeus@intuivo.com>
+#
+
+
+                          function load_bash_crm_cli(){
+                            if [ ! -z ${BASHCRMCLI+x} ]; then   # check if a variable is set and not empty
+                              {
+                                . "$BASHCRMCLI/execute_command.sh" && THIS_SCRIPT_NAME=`basename "$0"`
+                                heading Test
+                              }
+                            fi
+                          }
+load_bash_crm_cli
+
+#- Case 1 Say error from worker 
+#  _say_error_and_exit_worker THIS IS AN ERROR 
+
+
+#- Case 2 Say error from worker BANG!
+#  ¡ This is also an error
+
+- Case 3 Say error from worker BANG!
+  ☠ This is also an error 

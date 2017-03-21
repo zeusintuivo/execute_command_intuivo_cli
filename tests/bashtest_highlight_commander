@@ -1,0 +1,54 @@
+#!/bin/bash 
+# 
+# @author Zeus Intuivo <zeus@intuivo.com>
+#
+
+
+                          function load_bash_crm_cli(){
+                            if [ ! -z ${BASHCRMCLI+x} ]; then   # check if a variable is set and not empty
+                              {
+                                . "$BASHCRMCLI/execute_command.sh" && THIS_SCRIPT_NAME=`basename "$0"`
+                                heading Test
+                              }
+                            fi
+                          }
+load_bash_crm_cli
+
+#- Case 0 Show Global Commands SubCommands
+#  echo "$HIGHLIGHT_WORDS" 
+
+#- Case 1 Must show all words 
+#  echo -e "Error: cd: ./bashtest_execute_command_cd: No such file or directory" | highlight_commander   "test"
+
+#- Case 2 Must show all words 
+#  echo -e "Error: cd: ./bashtest_execute_command_cd: No such file or directory" | highlight_commander  "$HIGHLIGHT_WORDS"  "test"
+
+
+#- Case 3 Must color correctly with no test
+#  echo -e "Error: cd: ./bashtest_execute_command_cd: No such file or directory" | highlight_commander  
+
+#- Case 4 Extending commander must fail missing function  with test #
+#
+#CUSTOM_WORDS="$HIGHLIGHT_WORDS
+#bowdlerize
+#    such 
+#    "
+# echo -e "Error: cd: ./bashtest_execute_command_cd: No such file or directory" | highlight_commander  "$CUSTOM_WORDS" "test"
+
+#- Case 5 Extending commander must fail missing function  without test
+#
+#CUSTOM_WORDS="$HIGHLIGHT_WORDS
+#bowdlerize
+#    such 
+#    "
+# echo -e "Error: cd: ./bashtest_execute_command_cd: No such file or directory" | highlight_commander  "$CUSTOM_WORDS" 
+
+- Case 6 Extending commander must pass provided function 
+                          function pinkirize() {
+                            sed 's/'"""${1}"""'/'"""`tput setaf 213`${1}${yellow220}"""'/g'
+                          }
+CUSTOM_WORDS="$HIGHLIGHT_WORDS
+pinkirize
+    such 
+    "
+ echo -e "Error: cd: ./bashtest_execute_command_cd: No such file or directory" | highlight_commander  "$CUSTOM_WORDS" 

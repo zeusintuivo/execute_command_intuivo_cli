@@ -1,0 +1,1572 @@
+#!/bin/bash 
+# 
+# @author Zeus Intuivo <zeus@intuivo.com>
+#
+#
+# Script to check This project is using the correct 
+# system requirements
+#
+                                      function _load_colorful_messenger_FUNCTIONs() {
+                                        if [ ! -z ${BASHCRMCLI+x} ]; then   # check if a variable is set and not empty
+                                          {
+                                            . "$BASHCRMCLI/execute_command.sh" && THIS_SCRIPT_NAME=`basename "$0"`
+                                          }
+                                        else 
+                                          {
+                                            # Prepare Messengers Alternate Functions 
+                                              blue23=$(echo -e "\\033[1;31m")
+                                              reset=$(echo -e "\\033[0m")
+                                              red=$(echo -e "\\033[1;31m")
+                                              lightpurple=$(echo -e "\\033[1;123m")
+                                              lightyellow=$(echo -e "\\033[38;5;227m")
+                                              lightgreen=$(echo -e "\\033[38;5;83m")
+                                              lightpink=$(echo -e "\\033[1;204m")
+                                              lightblue=$(echo -e "\\033[1;93m")
+
+                                              BLANK_SPACE="${blue23} • ${green} "
+                   
+                                              function _say_error_and_exit_worker() {
+                                                echo -e "☠ ${red} ${@} ${reset}";
+                                                exit 130; 
+                                              }
+                                                      function !!!(){
+                                                        _say_error_and_exit_worker "${@}"
+                                                      }
+                                              function _anounce_worker(){
+                                                echo -e "${BLANK_SPACE}${@} ${reset}";
+                                              }
+                                                      function -(){
+                                                        _anounce_worker ${@}
+                                                      }
+                                              function _say_worker() {
+                                                echo -e "${lightpurple} +-- ${lightblue} ${@} ${reset}";
+                                              }
+                                                      function • (){
+                                                        _say_worker "${@}"
+                                                      } 
+                                                      function  ·(){
+                                                        _say_worker "${@}"
+                                                      }
+                                              function trim_start_space() {
+                                                  sed -e 's/^[[:space:]]*//' | sed 's/^\ //g' | sed 's/^\t//g' 
+                                              }                          
+                                              function trim_end_space() {
+                                                  sed -e 's/[[:space:]]*$//' | sed 's/\ $//g' | sed 's/\t$//g' 
+                                              }
+                                              function trim() {
+                                                  trim_start_space | trim_end_space
+                                              }
+                                              function escape_single_quotes() {
+                                                sed "s/'/\\\'/g"
+                                              }
+                                              function escape_double_quotes() {
+                                                  sed 's/\"/\\\"/g' 
+                                              }
+
+                                          }
+                                        fi
+
+                                      }
+
+
+_load_colorful_messenger_FUNCTIONs
+
+# TESTER BASH UNIT CORE
+
+RESULT=""
+DEBUG="0"
+OTHERWISE=""
+THEN=""
+PROVISIONED=""
+IS=""
+SEDVERSION=""
+                                      function replace_spaces_underscores() {
+                                        sed 's/\ /_/g' 
+                                      }
+                                      function passed() {
+                                        RESULT="$RESULT."
+                                        echo -e "${lightgreen}    ✔ ${lightyellow} ${@}  ${reset}"
+                                      }                                      
+                                      function failed() {
+                                        if [ ! -z "${1-x}" ] ; then # if its set and not empty
+                                          {
+                                            RESULT="$RESULT${red}F"
+                                            echo -e "${red}    𝞦 ${lightpink} ${@} ${red} !!!  ${reset}"
+                                          }
+                                        fi
+                                      }
+                                      function results_failed() {
+                                        echo -e "
+    ${red}    ☠ ${lightpink} ${@} ${red} !!!  ${reset}
+                                        "
+                                      }
+                                      function results_passed() {
+                                        echo -e "
+    ${lightpurple}    ✅ ${lightgreen} ${@}  ${reset}
+                                        "
+                                      }
+                                      function debug(){
+                                        if [ ! -z "${DEBUG+x}" ] ; then 
+                                          {
+                                            return 1
+                                          }
+                                        else 
+                                          {
+                                            return 0
+                                          }
+                                        fi
+                                      }
+                                      function function_exists(){
+                                        if [ ! -z "${1+x}" ] ; then # check if parameter is set and not empty
+                                          {
+                                            local local_COMMAND="${1}"
+                                          }
+                                        fi
+                                        local_command_exists=$(declare -f ${local_COMMAND} >/dev/null 2>&1;echo $?)
+                                        # echo "${local_COMMAND}  EXISTS: $local_command_exists";
+                                        if [ "$local_command_exists" -eq 0 ] ; then   # # [ $? -eq 0 ]# function exists 
+                                          {
+                                            return 0
+                                          } 
+                                        else  # [ $? -eq 1 ]# function does not exists 
+                                          {
+                                            return 1
+                                          }
+                                        fi
+                                      } 
+                                      function _given_worker(){
+                                        # _given_worker() USAGE:         0            1                 2     3
+                                        # _given_worker() USAGE:  _given_worker "branch merge against" is "master" 
+                                        if [  -z "${1+x}" ] || [ -z "${2+x}" ] || [ -z "${3+x}" ] ; then # check if all parameters are set and not empty
+                                          {
+                                            !!! ${FUNCNAME[1]} requires to have: "
+                                            1. function tester name
+                                            2. fixed:is, fixed:has to be, fixed:results in, fixed:results 
+                                            3. value
+                                            "
+                                          }
+                                        fi
+                                        if [ ! -z "${1-x}" ] ; then # check if parameter is set and not empty
+                                          {
+                                            local local_function_name=$(replace_spaces_underscores <<< "${1}")
+                                            if ( ! function_exists "$local_function_name" ); then
+                                              {
+                                                failed $local_function_name\(\) Does not exist function was not provided  
+                                                return 0
+                                              } 
+                                            fi
+                                          }
+                                        fi
+
+                                        if [ ! -z "${2+x}" ] ; then # check if parameter is set and not empty
+                                          {
+                                            local local_how_to_test=$(trim <<< "${2}")
+                                          }
+                                        fi
+                                        if [ ! -z "${3+x}" ] ; then # check if parameter is set and not empty
+                                          {
+                                            local value_to_examine=$(trim <<< "${3}")
+                                          }
+                                        fi
+                                        local local_description=$(echo "${FUNCNAME[1]} the ${1} ${local_how_to_test} ${value_to_examine}")
+                                        local local_value=$(trim <<< $(eval $local_function_name))
+                                        local local_failed_message=$(echo "${FUNCNAME[1]} the ${1} ${local_how_to_test} expected to be „${lightyellow}${value_to_examine}${red}“ provided value was „${lightyellow}${local_value}${red}“" ) 
+                                        ( debug ) && ( echo "VALUE ACQUIRED :" $local_value )
+                                        ( debug ) && ( echo "VALUE 4 TESTING:"  $value_to_examine ) 
+                                        #OTHERWISE=""
+                                        if   [[ "${local_how_to_test}" == "is" ]]  || [[ "${local_how_to_test}" == "has to be" ]] || [[ "${local_how_to_test}" == "results in" ]] || [[ "${local_how_to_test}" == "results" ]] ; then 
+                                          {
+                                            ( debug ) && ( set -xu )
+                                            if [[ "${local_value}" == "${value_to_examine}" ]] ; then 
+                                              {
+                                                ( debug ) && ( set +xu )
+                                                passed $local_description
+                                                THEN="passed"
+                                                OTHERWISE="$local_function_name"
+                                                OTHERWISE="" # CRITERIA: When Given() provides an empty $OTHERWISE var, it means to ignore the Otherwise() statement afterwards 
+                                                return 1
+                                              }
+                                            fi     
+                                            ( debug ) && ( set +xu )                               
+                                          } 
+                                        fi
+                                        failed $local_failed_message
+                                        OTHERWISE="$local_function_name" # CRITERIA: When Given() provides an $OTHERWISE var content, it provides the name the of the function to the read by Otherwise() statement afterwards
+                                        THEN="failed"
+                                        #!!! $local_failed_message
+                                        return 0
+                                      }
+                  function Given(){
+                    # Given() USAGE: Given "branch merge against" is "master" 
+                    _given_worker "${@}"
+                  } 
+                                      function _reading_worker(){
+                                        local local_fail="";
+                                        # _reading_worker() USAGE:          0                 1                     2        3                       
+                                        # _reading_worker() USAGE: _reading_worker "apps/kx/config/security.yml" results "$values_to_check"
+                                        if [  -z "${1+x}" ] || [ -z "${2+x}" ] || [ -z "${3+x}" ] ; then # check if all parameters are set and not empty
+                                          {
+                                            !!! ${FUNCNAME[1]} requires to have: "
+                                            1. file path name to read
+                                            2. fixed:is, fixed:has to be, fixed:results in, fixed:results 
+                                            3. values to compare against 
+                                            "
+                                          }
+                                        fi
+                                        if [ ! -z "${1+x}" ] ; then # check if parameter is set and not empty
+                                          {
+                                            local local_file_path=$(trim <<< "${1}")
+                                            if [[ ! -e "${local_file_path}" ]] ; then 
+                                              {
+                                                local_fail="file is does not exist or is not accessible: ${local_file_path} "
+                                              }
+                                            fi
+                                          }
+                                        fi
+
+                                        if [ ! -z "${2+x}" ] ; then # check if parameter is set and not empty
+                                          {
+                                            local local_how_to_test=$(trim <<< "${2}")
+                                          }
+                                        fi
+                                        if [ ! -z "${3+x}" ] ; then # check if parameter is set and not empty
+                                          {
+                                            local value_to_examine=$(trim <<< "${3}")
+                                          }
+                                        fi
+                                        if [ ! -z "${local_fail-x}" ] ; then # if its set and not empty
+                                          {
+                                              !!! "${FUNCNAME[1]}()" "$local_fail"
+                                          }
+                                        fi
+                                        local local_description=$(echo "${FUNCNAME[1]} the ${1} ${local_how_to_test} ${value_to_examine}")
+                                        local local_value=$(<"${local_file_path}")  #read file 
+                                        local_value=$(echo "${local_value}" | egrep "${value_to_examine}")
+                                        local local_failed_message=$(echo "${FUNCNAME[1]} the ${1} ${local_how_to_test} expected to be „${lightyellow}${value_to_examine}${red}“ provided value was „${lightyellow}${local_value}${red}“" ) 
+                                        ( debug ) && ( echo "VALUE ACQUIRED :" $local_value )
+                                        ( debug ) && ( echo "VALUE 4 TESTING:"  $value_to_examine ) 
+                                        #OTHERWISE=""
+                                        if   [[ "${local_how_to_test}" == "is" ]]  || [[ "${local_how_to_test}" == "has to be" ]] || [[ "${local_how_to_test}" == "results in" ]] || [[ "${local_how_to_test}" == "results" ]] ; then 
+                                          {
+                                            ( debug ) && ( set -xu )
+                                            if [[ "${local_value}" == "${value_to_examine}" ]] ; then 
+                                              {
+                                                ( debug ) && ( set +xu )
+                                                passed $local_description
+                                                THEN="passed"
+                                                OTHERWISE="reading"
+                                                OTHERWISE="" # CRITERIA: When Given() provides an empty $OTHERWISE var, it means to ignore the Otherwise() statement afterwards 
+                                                return 1
+                                              }
+                                            fi     
+                                            ( debug ) && ( set +xu )                               
+                                          } 
+                                        fi
+                                        failed $local_failed_message
+                                        OTHERWISE="reading" # CRITERIA: When Given() provides an $OTHERWISE var content, it provides the name the of the function to the read by Otherwise() statement afterwards
+                                        THEN="failed"
+                                        #!!! $local_failed_message
+                                        return 0
+                                      }
+                  function  Reading(){
+                    _reading_worker "${@}"
+                  }                  
+                  function  reading(){
+                    _reading_worker "${@}"
+                  }
+                                      function Results(){
+                                        echo -e "${reset}" 
+                                        echo    "Results:"
+                                        echo -e "        ${RESULT}"
+                                        if [[ "${RESULT}" == **"F"** ]] ; then 
+                                          {
+                                            results_failed TESTS FAILED
+                                          }
+                                        else 
+                                          {
+                                            results_passed All tests passeded successfully 
+                                          }
+                                        fi
+                                      }
+
+
+# BASH UNIT PROVISIONS
+                                      function branch_merge_against(){
+                                         # duplicated from journaladdfiles  (/_/journal_cli)
+                                         # Saved on git description from ≤BASEBRANCH≥${TARGETBASEBRANCH}";  
+                                         local BRANCH_MERGE_AGAINST=$(git config branch.${CURBRANCH}.description  | cut -d'≥' -f2);
+                                         
+                                          #?empty still  --look into .gitignore
+                                          if [[ -z "${BRANCH_MERGE_AGAINST}" ]] ; then 
+                                            # Saved on .gitignore?
+                                            BRANCH_MERGE_AGAINST=$(cat .gitignore | grep "#BRANCH-MERGE-AGAINST:" | cut -d':' -f2)
+                                          fi
+
+                                          #?empty still   --default to 'develop'
+                                          if [[ -z "${BRANCH_MERGE_AGAINST}" ]] ; then 
+                                            {
+                                              BRANCH_MERGE_AGAINST="develop"
+                                            }
+                                          fi
+                                          echo "${BRANCH_MERGE_AGAINST}"
+                                      }
+                                      function OS_not_provisioned(){
+                                        # OS_not_provisioned() USAGE: OS_not_provisioned 
+                                        if [ -z "${PROVISIONED+x}" ] ; then 
+                                          {
+                                            echo "OS not provisioned"
+                                          }
+                                        else 
+                                          {
+                                            echo ""
+                                          }
+                                        fi
+                                      }                                    
+                                      function os_not_provisioned(){
+                                        # os_not_provisioned() USAGE: os_not_provisioned 
+                                        OS_not_provisioned
+                                      }
+                                      function current_php_version() {
+                                        # fn Inspired in phpbrew bashrc file 
+                                        if command -v php >/dev/null 2>&1; then #Command Exists
+                                          {
+                                            php -v | grep -E "PHP [57]" | sed 's/.*PHP \([^-]*\).*/\1/' | cut -c 1-6 > .testing_php
+                                            local version=$(<.testing_php)
+                                            #local version=$(php -v | grep -E "PHP [57]" | sed 's/.*PHP \([^-]*\).*/\1/' | cut -c 1-6)
+                                             rm .testing_php
+                                             echo  "$version"
+                                             #return 1
+                                          } 
+                                        else
+                                          {
+                                           echo "0"
+                                           #!!! PHP Does not exist
+                                           #return 0
+                                          }
+                                        fi
+                                      }
+                                      function current_timezone() {
+                                        if command -v php >/dev/null 2>&1; then #Command Exists
+                                          {
+                                            local local_current=$(php -i >/dev/null 2>&1 | grep "date.timezone" |  cut -d'>' -f3)
+                                             if [ -z "${local_current-x}" ] ; then 
+                                              {
+                                                local local_current=$(php -i  2>&1 | grep "date.timezone" |  cut -d'>' -f3)
+                                              }
+                                            fi
+                                            if [ ! -z "${local_current-x}" ] && [[ "${local_current+x}" != **"no value"** ]];  then  # var is set, not empty equals to ..
+                                              {
+                                                echo "${local_current}" 
+                                              }
+                                            else
+                                              {
+                                                echo "0"
+                                              }
+                                            fi
+                                            
+                                          } 
+                                        else
+                                          {
+                                           echo "0"
+                                           #!!! PHP Does not exist
+                                           #return 0
+                                          }
+                                        fi
+                                      }                                      
+                                      function current_php_ini_path() {
+                                        if command -v php >/dev/null 2>&1; then #Command Exists
+                                          {
+                                            local local_current=$(php -i >/dev/null 2>&1 | grep -E "Loaded Configuration File" |  cut -d'>' -f2)
+                                            if [ -z "${local_current-x}" ] ; then 
+                                              {
+                                                local local_current=$(php -i  2>&1 | grep -E "Loaded Configuration File" |  cut -d'>' -f2)
+                                              }
+                                            fi
+                                            
+                                            if [ ! -z "${local_current+x}" ] && [[ "${local_current+x}" != **"no value"** ]];  then  # var is set, not empty equals to ..
+                                              {
+                                                echo "${local_current}"
+                                              }
+                                            else
+                                              {
+                                                echo "0"
+                                              }
+                                            fi
+                                            
+                                          } 
+                                        else
+                                          {
+                                           echo "0"
+                                           #!!! PHP Does not exist
+                                           #return 0
+                                          }
+                                        fi
+                                      }
+                                      function _load_worker(){
+                                        local local_fail="";
+                                         if [  -z "${1+x}" ] || [ -z "${2+x}" ] || [ -z "${3+x}" ] ; then # check if all parameters are set and not empty
+                                          {
+                                            !!! ${FUNCNAME[1]} requires to have "filepath" "into" "variable name"
+                                          }
+                                        fi
+                                        #!!! ${FUNCNAME[0]}  $1 $2 $3
+                                        if [ ! -z "${1+x}" ] ; then # check if parameter is set and not empty
+                                          {
+                                            local local_file_path=$(trim <<< "${1}")
+                                            if [[ ! -e "${local_file_path}" ]] ; then 
+                                              {
+                                                local_fail="file is does not exist or is not accessible: ${local_file_path} "
+                                              }
+                                            fi
+                                          }
+                                        fi
+                                        if [ ! -z "${2+x}" ] ; then # check if parameter is set and not empty
+                                          {
+                                            local local_into=$(trim <<< "${2}")
+                                            if [[ "$local_into" != "into" ]] ; then  
+                                              {
+                                                local_fail="$local_fail \n has incorrect 2nd argument has to be \"into\" only"
+                                              }
+                                            fi
+                                          }
+                                        fi
+                                        if [ ! -z "${3+x}" ] ; then # check if parameter is set and not empty
+                                          {
+                                            local local_variable_name=$(trim <<< "${3}")
+                                            echo '#!/bin/bash' > /tmp/local_variable_name_temp_script.sh 
+                                            echo "${local_variable_name}=\"" >> /tmp/local_variable_name_temp_script.sh 
+                                            local temp_contents=$(cat "${local_file_path}" | escape_double_quotes)
+                                            echo "${temp_contents}" >> /tmp/local_variable_name_temp_script.sh 
+                                            echo '"' >> /tmp/local_variable_name_temp_script.sh 
+                                            . "/tmp/local_variable_name_temp_script.sh"
+                                            - loaded "${local_file_path}" into \$${local_variable_name}
+                                            #echo  "\$${local_variable_name}" | head -2
+                                            #echo  "${ini_content}" | head -2
+
+                                          }
+                                        fi
+                                        if [ ! -z "${local_fail-x}" ] ; then # if its set and not empty
+                                          {
+                                              !!! "${FUNCNAME[1]}()" "$local_fail"
+                                          }
+                                        fi
+
+                                      }
+                  function Load(){
+                    _load_worker "${@}"
+                  } 
+                                       function current_os_system(){
+                                        
+                                            local local_current_system=$(uname -a) 
+                                            if [[ "$(uname)" == "Darwin" ]] ; then 
+                                              # Do something under Mac OS X platform 
+                                                [[ "$(uname -m)" == "x86_64" ]] && local_current_system="Mac 64 Bits" 
+                                                [[ "$(uname -m)" == "i686"   ]] && local_current_system="Mac 32 Bits"
+                                            elif [[ "$(expr substr $(uname -s) 1 5)" == "Linux" ]] ; then 
+                                              # Do something under GNU/Linux platform
+                                                [[ "$(uname -i)" == "x86_64" ]] && local_current_system="Linux 64 Bits"
+                                                [[ "$(uname -i)" == "i686"   ]] && local_current_system="Linux 32 Bits"
+                                            elif [[ "$(expr substr $(uname -s) 1 10)" == "MINGW32_NT" ]] ; then 
+                                              # Do something under Windows NT platform
+                                              local_current_system="Windows" 
+                                              # nothing here
+                                            fi 
+                                            
+                                            echo "$local_current_system"
+                                            
+                                       }
+                                       function system_os_supported(){
+                                          # check operation systems 
+                                          (
+                                            if [ ! -z "${1+x}" ] ; then # check if parameter is set and not empty
+                                              {
+                                                local system_to_test=$(trim <<< "${1}")
+                                              }
+                                            else 
+                                              {
+                                                !!! "${FUNCNAME[0]}() requires a name from this list: $(allowed_os_support)"
+                                                return 1; #failed
+                                              }
+                                            fi
+                                            local local_current_system=$(current_os_system)
+                                            local allowed_os="";
+                                            while read -r allowed_os; do 
+                                              if [ ! -z "${allowed_os}" ] ; then # if not empty
+                                                {
+                                                  #echo "${allowed_os}"     
+                                                  if [[ "${allowed_os}" ==  "${system_to_test}" ]] ; then
+                                                    {
+                                                      return 0; #found
+                                                    } 
+                                                  fi    
+                                                }
+                                              fi
+                                            done <<< $(allowed_os_support)
+                                            return 1; #failed
+                                          )
+                                      }
+                                      function allowed_os_support(){
+                                        echo "
+                                              Mac 64 Bits
+                                              Mac 32 Bits
+                                              Linux 64 Bits
+                                              Linux 32 Bits
+                                              Windows
+                                              "
+                                      }
+                                      function allowed_setup_descriptions(){
+                                        echo "
+                                              Brew Setup
+                                              "
+                                      }
+                                      function detect_setup_description(){
+                                          # check setup description 
+                                          (
+                                            if [ ! -z "${1+x}" ] ; then # check if parameter is set and not empty
+                                              {
+                                                local system_to_test=$(trim <<< "${1}")
+                                              }
+                                            else 
+                                              {
+                                                !!! "${FUNCNAME[0]}() requires a name from this list: $(allowed_setup_descriptions)"
+                                              }
+                                            fi
+                                            local allowed_setup="";
+                                            while read -r allowed_setup; do 
+                                              if [ ! -z "${allowed_setup}" ] ; then # if not empty
+                                                {
+                                                        #echo "${allowed_setup}"     
+                                                        if [[ "${allowed_setup}" == "Brew Setup" ]]; then 
+                                                          {
+                                                            if command -v brew >/dev/null 2>&1; then #Command Exists
+                                                              {
+                                                                return 1
+                                                              } 
+                                                            else
+                                                              {
+                                                               #!!! ${FUNCNAME[0]}  says Brew does not exists
+                                                               return 0
+                                                              }
+                                                            fi
+                                                          }
+                                                        else
+                                                          {
+                                                            #echo "0"
+                                                            #!!! ${FUNCNAME[0]}  says Setup not supported 
+                                                            return 0
+                                                          }
+                                                        fi   
+                                                }
+                                              fi
+                                            done <<< $(allowed_setup_descriptions)
+                                            return 1; #failed
+
+
+                                        )
+                                        return 1
+                                      }
+                                      function _provision_worker(){
+                                        # if PROVISION has value 1. or not empty then don't provision again
+                                        if [ -z "${PROVISIONED+x}" ] ; then 
+                                          {
+                                            return 1
+                                          }
+                                        fi
+                                        local local_fail="";
+                                        if [  -z "${1+x}" ] || [ -z "${2+x}" ] || [ -z "${3+x}" ] || [ -z "${4+x}" ] || [ -z "${5+x}" ] ; then # check if all parameters are set and not empty
+                                          {
+                                            local_fail=' 
+                                            .....is missing Argument count. It is required to have:
+                                            1 System Os name supported from this list: $(allowed_os_support)
+                                            2 with
+                                            3 setup_description from this list: $(allowed_setup_descriptions)
+                                            4 use
+                                            5 List of variables to initialize like this: 
+
+                                                ini_content=""
+                                                php_version_major="5"
+                                                php_version_minor="4"
+                                                php_version_patch="45"
+                                                php_version="$php_version_major.$php_version_minor.$php_version_patch"
+                                                ini_path="/usr/local/etc/php/$php_version_major.$php_version_minor/php.ini"
+                                            '
+                                            local_fail="$local_fail 
+                                            You provided:
+                                            "
+                                            [ ! -z "${1+x}" ] && local_fail="$local_fail \n 1.„${1}“"                                      
+                                            [ ! -z "${2+x}" ] && local_fail="$local_fail \n 2.„${2}“"                                      
+                                            [ ! -z "${3+x}" ] && local_fail="$local_fail \n 3.„${3}“"                                      
+                                            [ ! -z "${4+x}" ] && local_fail="$local_fail \n 4.„${4}“"                                      
+                                            [ ! -z "${5+x}" ] && local_fail="$local_fail \n 5.„${5}“"                                      
+                                          }                                   
+                                        fi
+
+                                        if [ ! -z "${1+x}" ] ; then # check if parameter is set and not empty
+                                          {
+                                            local local_os=$(trim <<< "${1}")
+                                            if ( system_os_supported "$local_os"  ); then 
+                                              {
+                                                local_fail="$local_fail \n is needing to be added under system_os_supported() . Valid OS support String: $(allowed_os_support)"
+                                              }
+                                            fi
+                                          }
+                                        fi
+ 
+                                        if [ ! -z "${2+x}" ] ; then # check if parameter is set and not empty
+                                          {
+                                            local local_with=$(trim <<< "${2}")
+                                            if [[ "$local_with" != "with" ]] ; then  
+                                              {
+                                                local_fail="$local_fail \n has incorrect 2nd argument has to be \"with\" only"
+                                              }
+                                            fi
+                                          }
+                                        fi
+                                     
+                                        if [ ! -z "${3+x}" ] ; then # check if parameter is set and not empty
+                                          {
+                                            local local_setup_description=$(trim <<< "${3}")
+                                            if ( detect_setup_description "$local_setup_description" ) ; then 
+                                              {
+
+                                                local_fail="$local_fail \n  detected this computer has no $local_setup_description under detect_setup_description()"
+                                              }
+                                            fi
+                                          }
+                                        fi
+
+                                        if [ ! -z "${4+x}" ] ; then # check if parameter is set and not empty
+                                          {
+                                            local local_use=$(trim <<< "${4}")
+                                            if [[ "$local_use" != "use" ]] ; then  
+                                              {
+                                                local_fail="$local_fail \n has incorrect 4th argument has to be \"use\" only"
+                                              }
+                                            fi
+                                          }
+                                        fi
+
+                                        if [ ! -z "${5+x}" ] ; then # check if parameter is set and not empty
+                                          {
+                                            local local_variables_to_be_added=$(trim <<< "${5}")
+                                          }
+                                        fi
+                                        if [ ! -z "${local_fail-x}" ] ; then # if its set and not empty
+                                          {
+                                              PROVISIONED=""
+                                              failed "${FUNCNAME[1]}()" "$local_fail"
+                                              return 0
+                                          }
+                                        fi
+                                        echo '#!/bin/bash' > /tmp/local_variables_to_be_added_temp_script.sh 
+                                        echo "${local_variables_to_be_added}" >> /tmp/local_variables_to_be_added_temp_script.sh 
+                                        .  "/tmp/local_variables_to_be_added_temp_script.sh"
+                                        
+                                        #failed "$local_fail"
+                                        -  "${FUNCNAME[1]}" "$local_os" "$local_with" "${local_setup_description} ${local_use}s these values $local_variables_to_be_added" 
+                                        #- $php_version;
+                                        #!!! stop
+                                        PROVISIONED="1"
+                                        return 1
+
+                                      }
+                  function Provision(){
+                    _provision_worker "${@}"
+                  }                                                       
+                  function Provided(){
+                    _provision_worker "${@}" 
+                  } 
+                  function Provide(){
+                    _provision_worker "${@}" 
+                  } 
+                  function Then(){
+                    if [ ! -z "${1+x}" ] && [[ "${1}" == "provide" ]] && [[ "${THEN}" == "passed" ]] ; then # check if parameter is set and not empty
+                      {
+                        Provide "${2}" "${3}" "${4}" "${5}" "${6}"
+                      }
+                    fi
+                    if [ ! -z "${1+x}" ] && [[ "${1}" == "provision" ]] && [[ "${THEN}" == "passed" ]] ; then # check if parameter is set and not empty
+                      {
+                        Provision "${2}" "${3}" "${4}" "${5}" "${6}"
+                      }
+                    fi
+                  } 
+
+                                    function _otherwise_worker_seven(){
+                                      #                                              0             1            2                  3         4       5         6      7
+                                      # _otherwise_worker_seven() USAGE: _otherwise_worker_seven prepend "branch merge against" "#BRANCH:" inside ".gitignore" to  "#BRANCH:master" 
+                                      #                                             0             1            2                 3          4       5        6       7
+                                      # _otherwise_worker_seven() USAGE: _otherwise_worker_seven set "current timezone" "date.timezone =" inside "$ini_path" to  "date.timezone = Berlin" 
+                                      local local_fail=""
+                                      if [  -z "${1+x}" ] || [ -z "${2+x}" ] || [ -z "${3+x}" ] || [ -z "${4+x}" ] || [ -z "${5+x}" ] || [ -z "${6+x}" ] || [ -z "${7+x}" ] ; then # check if all parameters are set and not 
+                                        {
+                                          local_fail=' .....is missing Argument count. It is required to have:
+                                          1 fixed:change  fixed:prepend   fixed:append   fixed:add   fixed:set 
+                                          2 last used function behind otherwise like "current_zone"
+                                          3 value to change lookup
+                                          4 fixed:inside
+                                          5 file path name
+                                          6 fixed:to 
+                                          7 new value to replace
+                                          '          
+                                        }
+                                      fi
+                                      if [ ! -z "${1+x}" ] ; then # check if parameter is set and not empty
+                                          {
+                                            local local_change=$(trim <<< "${1}")
+                                            if [[ "$local_change" == "change" ]] || [[ "$local_change" == "prepend" ]] || [[ "$local_change" == "set" ]] || [[ "$local_change" == "append" ]] || [[ "$local_change" == "add" ]] || [[ "$local_change" == "uncomment" ]] || [[ "$local_change" == "commentout" ]] ; then  
+                                              {
+                                                local_change=$(trim <<< "${1}")
+                                              }
+                                            else 
+                                              {
+                                                local_fail="$local_fail \n has incorrect 1st argument has to be 
+                                                   „${lightyellow}change${red}“  
+                                                or „${lightyellow}prepend${red}“  
+                                                or „${lightyellow}set${red}“  
+                                                or „${lightyellow}append${red}“  
+                                                or „${lightyellow}add${red}“  
+                                                or „${lightyellow}uncomment${red}“  
+                                                or „${lightyellow}commentout${red}“  
+
+                                                only .Provided „${lightyellow}${local_change}${red}“ "
+                                              }
+                                            fi
+                                          }
+                                        fi
+                                        if [ ! -z "${2-x}" ] ; then # check if parameter is set and not empty
+                                          {
+                                            local local_function_name=$(replace_spaces_underscores <<< "${2}")
+                                            if ( ! function_exists "$local_function_name" ); then
+                                              {
+                                                local_fail="$local_fail \n $local_function_name() Does not exist function was not provided " 
+                                              } 
+                                            fi
+                                            if [[ "${OTHERWISE}" !=  "$local_function_name" ]] ; then
+                                              {
+                                                local_fail="$local_fail \n $local_function_name() Does not match last pointing OTHERWISE:$OTHERWISE"
+                                              }
+                                            fi
+                                          }
+                                        fi                                          
+                                        if [ ! -z "${3+x}" ] ; then # check if parameter is set and not empty
+                                          {
+                                            local local_value_lookup=$(trim <<< "${3}")
+                                          }
+                                        fi                                           
+                                        if [ ! -z "${4+x}" ] ; then # check if parameter is set and not empty
+                                          {
+                                            local local_inside=$(trim <<< "${4}")
+                                            if [[ "$local_inside" != "inside" ]] ; then  
+                                              {
+                                                local_fail="$local_fail \n has incorrect 4th argument has to be \"inside\" only"
+                                              }
+                                            fi
+                                          }
+                                        fi    
+                                        if [ ! -z "${5+x}" ] ; then # check if parameter is set and not empty
+                                          {
+                                            local local_file_path=$(trim <<< "${5}")
+                                            if [[ ! -e "${local_file_path}" ]] ; then 
+                                              {
+                                                local_fail="$local_fail \n file is does not exist or is not accessible: ${local_file_path} "
+                                              }
+                                            fi
+                                          }
+                                        fi
+                                        if [ ! -z "${6+x}" ] ; then # check if parameter is set and not empty
+                                          {
+                                            local local_to=$(trim <<< "${6}")
+                                            if [[ "$local_to" != "to" ]] ; then  
+                                              {
+                                                local_fail="$local_fail \n has incorrect 6th argument has to be \"to\" only"
+                                              }
+                                            fi
+                                          }
+                                        fi
+                                        if [ ! -z "${7+x}" ] ; then # check if parameter is set and not empty
+                                          {
+                                            local local_new_value=$(trim <<< "${7}")
+                                          }
+                                        fi  
+                                        if [ ! -z "${local_fail-x}" ] ; then # if its set and not empty
+                                          {
+                                              !!! "${FUNCNAME[2]}()" "$local_fail"
+                                          }
+                                        fi
+
+                                        # Choose actions 
+
+                                        if [[ "${local_change}" == "change" ]] ; then 
+                                          {
+                                            
+                                            replace this "$local_value_lookup" with "$local_new_value" inside file "$local_file_path"     
+                                            return 0                                   
+                                          }
+                                        fi                                        
+                                        if [[ "${local_change}" == "set" ]] ; then 
+                                          {
+                                            set_this_parameter "$local_value_lookup" with "$local_new_value" inside file "$local_file_path"      
+                                            return 0                                   
+                                          }
+                                        fi
+                                        
+                                        if [[ "${local_change}" == "prepend" ]] ; then 
+                                          {
+                                             #0           1             2  3    4   5   6     7
+                                            prepend "$local_new_value" at the start of file "$local_file_path"                                   
+                                            return 0
+                                          }
+                                        fi
+
+                                        if [[ "${local_change}" == "append" ]] || [[ "${local_change}" == "add" ]] ; then 
+                                          {
+                                             #0           1             2  3  4   5   6     7
+                                            append "$local_new_value" at the end of file "$local_file_path"  
+                                    
+                                            return 0
+                                          }
+                                        fi
+                                        if [[ "${local_change}" == "uncomment" ]] ; then 
+                                          {
+                                            uncomment this value "$local_value_lookup" inside this file "$local_file_path" using this character ";"                                  
+                                            return 0
+                                          }
+                                        fi
+                                        if [[ "${local_change}" == "commentout" ]] ; then 
+                                          {
+                                            comment_out this value "$local_value_lookup" inside this file  "$local_file_path" using this character ";"                                   
+                                            return 0
+                                          }
+                                        fi
+                                        !!! "${FUNCNAME[2]}()" Unknown action "${local_change}"
+                                    }
+                                    function _otherwise_worker_five(){
+                                      #                                  0             1     2                3                       4         5
+                                      # _otherwise_worker() USAGE: _otherwise_worker copy file "apps/oauthserver/parameters.yml.dist" as  "apps/oauthserver/config/parameters.yml" 
+                                      local local_fail=""
+                                      if [ -z "${1+x}" ] || [ -z "${2+x}" ] || [ -z "${3+x}" ] || [ -z "${4+x}" ] || [ -z "${5+x}" ] ; then # check if all parameters are set and not 
+                                        {
+                                          local_fail=' .....is missing Argument count. It is required to have:
+                                          1 fixed:copy
+                                          2 fixed:file
+                                          3 file path name from
+                                          4 fixed:as  fixed:to
+                                          5 file path name to/as
+                                          '          
+                                        }
+                                      fi
+                                      if [ ! -z "${1+x}" ] ; then # check if parameter is set and not empty
+                                        {
+                                          local local_copy=$(trim <<< "${1}")
+                                          if [[ "$local_copy" == "copy" ]] ; then  
+                                            {
+                                              local_copy=$(trim <<< "${1}")
+                                            }
+                                          else 
+                                            {
+                                              local_fail="$local_fail \n has incorrect 1st argument has to be 
+                                                 „${lightyellow}copy${red}“  
+                                              only .Provided „${lightyellow}${local_copy}${red}“ "
+                                            }
+                                          fi
+                                        }
+                                      fi
+                                      if [ ! -z "${2+x}" ] ; then # check if parameter is set and not empty
+                                        {
+                                          local local_file=$(trim <<< "${2}")
+                                          if [[ "$local_file" == "file" ]] ; then  
+                                            {
+                                              local_file=$(trim <<< "${2}")
+                                            }
+                                          else 
+                                            {
+                                              local_fail="$local_fail \n has incorrect 2nd argument has to be 
+                                                 „${lightyellow}file${red}“  
+                                              only .Provided „${lightyellow}${local_file}${red}“ "
+                                            }
+                                          fi
+                                        }
+                                      fi
+                                      if [ ! -z "${3+x}" ] ; then # check if parameter is set and not empty
+                                        {
+                                          local local_file_path_from=$(trim <<< "${3}")
+                                          if [[ ! -e "${local_file_path_from}" ]] ; then 
+                                            {
+                                              local_fail="$local_fail \n file is does not exist or is not accessible: „${lightyellow}${local_file_path_from}${red}“"
+                                            }
+                                          fi
+                                        }
+                                      fi                                    
+                                      if [ ! -z "${4+x}" ] ; then # check if parameter is set and not empty
+                                        {
+                                          local local_to_as=$(trim <<< "${4}")
+                                          if [[ "$local_to_as" == "as" ]] || [[ "$local_to_as" == "to" ]] ; then  
+                                            {
+                                              local_to_as=$(trim <<< "${4}")
+                                            }
+                                          else 
+                                            {
+                                              local_fail="$local_fail \n has incorrect 4th argument has to be 
+                                                 „${lightyellow}as${red}“  
+                                              or „${lightyellow}to${red}“  
+                                              only .Provided „${lightyellow}${local_to_as}${red}“ "
+                                            }
+                                          fi
+                                        }
+                                      fi
+                                      if [ ! -z "${5+x}" ] ; then # check if parameter is set and not empty
+                                        {
+                                          local local_file_path_to=$(trim <<< "${5}")
+                                        }
+                                      fi   
+                                      if [ ! -z "${local_fail-x}" ] ; then # if its set and not empty
+                                        {
+                                            !!! "${FUNCNAME[2]}()" "$local_fail"
+                                            return 1
+                                        }
+                                      fi
+
+                                      # Choose actions   
+                                      if [[ "$local_copy" == "copy" ]] && [[ "$local_file" == "file" ]] ; then 
+                                        {
+                                           cp "${local_file_path_from}" "${local_file_path_to}"
+                                           local error_description="cp \"${local_file_path_from}\" \"${local_file_path_to}\" "
+                                           check_success "${error_description}"
+                                           return 0
+                                        } 
+                                      fi
+                                      !!! "${FUNCNAME[2]}()" Unknown action "${local_change}"
+                                      return 1
+                                    }
+                                    function _otherwise_worker(){
+                                      #                                  0             1            2                  3         4       5         6      7
+                                      # _otherwise_worker() USAGE: _otherwise_worker prepend "branch merge against" "#BRANCH:" inside ".gitignore" to  "#BRANCH:master" 
+                                      #                                  0             1            2                 3          4       5        6       7
+                                      # _otherwise_worker() USAGE: _otherwise_worker set "current timezone" "date.timezone =" inside "$ini_path" to  "date.timezone = Berlin" 
+                                      #                                  0             1     2                3                       4         5
+                                      # _otherwise_worker() USAGE: _otherwise_worker copy file "apps/oauthserver/parameters.yml.dist" as  "apps/oauthserver/config/parameters.yml" 
+
+                                        # silent fail when no error 
+                                        if [ -z "${OTHERWISE-x}" ] ; then # OTHERWISE="$local_function_name"
+                                          {
+                                            return 0
+                                          }
+                                        fi
+                                        if [ $# -eq 7 ] ; then
+                                          {
+                                            _otherwise_worker_seven "${@}"
+                                            return 0
+                                          }
+                                        fi
+                                        if [ $# -eq 5 ] ; then
+                                          {
+                                            _otherwise_worker_five "${@}"
+                                            return 0
+                                          }
+                                        fi
+                                        
+                                      }
+                                      function append(){
+                                        # append() USAGE: append "$local_new_value" at the end of file "$local_file_path" 
+                                        local local_new_value="${1}"
+                                        local local_file_path="${7}"
+                                        local local_temp_contents=$(<"$local_file_path")   # read file contents
+                                        touch "$local_file_path" 
+                                        echo "$local_new_value" >> "$local_file_path"    
+                                      }
+                                      function prepend(){
+                                        # prepend() USAGE: prepend "$local_new_value" at the start of file "$local_file_path"  
+                                        local local_new_value="${1}"
+                                        local local_file_path="${7}"
+                                        local local_temp_contents=$(<"$local_file_path")   # read file contents
+                                        echo "$local_new_value" > "$local_file_path" 
+                                        echo "$local_temp_contents" >> "$local_file_path"  
+                                      }
+                                      function get_sed_version(){
+                                        # get_sed_version() USAGE: local replacer=$(get_sed_version)
+                                        # get_sed_version() USAGE: echo get_sed_version
+                                        local replacer=""
+                                        if [ ! -z "${SEDVERSION-x}" ] ; then # if its set and not empty
+                                          {
+                                            replacer="${SEDVERSION}"
+                                          }
+                                        else
+                                          {
+                                            sed --version &> /tmp/replace_sed_test.txt
+                                            replacer=$(cat /tmp/replace_sed_test.txt)
+                                            SEDVERSION="${replacer}"
+                                          }
+                                        fi
+                                        echo "${replacer}"
+                                      }
+                                      function check_success(){
+                                        # check_success() USAGE: check_success "This command failed so extra information."
+                                        if [ $? == 0 ]; then
+                                          {
+                                            return 0
+                                          }
+                                        else
+                                          { 
+                                            !!! "${FUNCNAME[1]}()" Failed "${@}"
+                                          }
+                                        fi
+                                      }
+                                      function replace(){
+                                        # replace() USAGE:   0       1         2                3           4            5      6       7  
+                                        # replace() USAGE: replace this "$local_value_lookup" with "$local_new_value" inside file "$local_file_path" 
+                                        local replacer=$(get_sed_version)
+                                        local seeking=$(escape_for_sed_sequence <<< "${2}")
+                                        local implacing=$(escape_for_sed_sequence <<< "${4}")
+                                        local target_file="${7}"
+                                        local error_description="sed -i -e s/\"${seeking}\"/\"${implacing}\"/g  ${target_file}  # Failed when trying to replace „${lightyellow}${seeking}${red}“ ${seeking} for „${lightyellow}${implacing}${red}“ inside ${target_file} using sed."
+                                        if [[ "${replacer}" == *"GNU"* ]] ; then 
+                                          {
+                                            eval sed -i -e s/\"${seeking}\"/\"${implacing}\"/g  "${target_file}"
+                                          }
+                                        else 
+                                          {
+                                            # FreeBSD
+                                            eval sed -i'.sedbak' -e s/\"${seeking}\"/\"${implacing}\"/g  "${target_file}"
+                                            [ -e *.sedbak ] && ( rm *.sedbak )
+                                          }
+                                        fi
+                                        check_success "${error_description}"
+                                      }
+                                      function set_this_parameter(){
+                                        # set_this_parameter() USAGE:          0                 1               2              3         4    5        6
+                                        # set_this_parameter() USAGE: set_this_parameter "$local_value_lookup" with "$local_new_value" inside file "$local_file_path"   
+                                        local replacer=$(get_sed_version)
+                                        local seeking="${1}"
+                                        local implacing="${3}"
+                                        local target_file="${6}"
+                                        local error_description="sed -i -e /${seeking}/c\ ${implacing} ${target_file}  # Failed when trying to change „${lightyellow}${seeking}${red}“ ${seeking} for „${lightyellow}${implacing}${red}“ inside ${target_file} using sed."
+                                        if [[ "${replacer}" == *"GNU"* ]] ; then 
+                                          {
+                                            sed -i -e /"${seeking}"/c\ "${implacing}"   "${target_file}"
+                                          }
+                                        else 
+                                          {
+                                            # FreeBSD
+                                            sed -i'.sedbak' -e /"${seeking}"/c\ "${implacing}"   "${target_file}"
+                                            [ -e *.sedbak ] && ( rm *.sedbak )
+                                          }
+                                        fi
+                                        check_success "${error_description}"
+                                      }
+                                      function uncomment(){
+                                        # uncomment() USAGE: 0           1    2        3                   4    5    6            7           8    9    10               11
+                                        # uncomment() USAGE: uncomment this value "$local_value_lookup" inside this file "$local_file_path" using this character "$local_character_to_uncomment_with=;"   
+                                        local replacer=$(get_sed_version)
+                                        local seeking=$(escape_for_sed_sequence <<< "${3}")
+                                        local target_file="${7}"
+                                        local uncomment_char=";"
+                                        local error_description="sed -i -e 's/^\('${uncomment_char}${seeking}'\)*/'${seeking}'/' ${target_file}  # Failed when trying to replace „${lightyellow}${uncomment_char}${seeking}${red}“ ${seeking} for „${lightyellow}${seeking}${red}“ inside ${target_file} using sed."
+                                        if [ ! -z "${11+x}" ] ; then # check if parameter is set and not empty
+                                          {
+                                            uncomment_char=$(trim <<< "${11}")
+                                          }
+                                        fi    
+                                        if [[ "${replacer}" == *"GNU"* ]] ; then 
+                                          {
+                                            eval sed -i -e 's/^\('"${uncomment_char}${seeking}"'\)*/'"${seeking}"'/'   "${target_file}"
+                                          
+                                          }
+                                        else 
+                                          {
+                                            # FreeBSD
+                                            eval sed -i'.sedbak' -e 's/^\('"${uncomment_char}${seeking}"'\)*/'"${seeking}"'/'   "${target_file}"
+                                            [ -e *.sedbak ] && ( rm *.sedbak )
+                                          }
+                                        fi
+                                        check_success "${error_description}"
+                                      }                                      
+                                      function comment_out(){
+                                        # comment_out() USAGE: 0             1    2       4                   5      6    7              8         9    10    11            12
+                                        # comment_out() USAGE: comment_out this value "$local_value_lookup" inside this file  "$local_file_path" using this character "$local_character_to_comment_with=;" 
+                                        local replacer=$(get_sed_version)
+                                        local implacing=$(escape_for_sed_sequence <<< "${4}")
+                                        local target_file="${8}"
+                                        local comment_with=";"
+                                        if [ ! -z "${12+x}" ] ; then # check if parameter is set and not empty
+                                          {
+                                            comment_with=$(trim <<< "${12}")
+                                          }
+                                        fi    
+                                        local seeking="${comment_with}${implacing}"
+                                        replace this "$seeking" with "$implacing" inside file "$target_file"
+                                      }
+                  function Otherwise(){
+                    _otherwise_worker "${@}"
+                  } 
+                                      function _peek_worker(){
+                                        local local_fail="";
+                                        if [  -z "${1+x}" ] || [ -z "${2+x}" ] || [ -z "${3+x}" ] || [ -z "${4+x}" ] ; then # check if all parameters are set and not 
+                                          {
+                                            local_fail=' .....is missing Argument count. It is required to have:
+                                            1 fixed:at  
+                                            2 value to peek at 
+                                            3 fixed:inside
+                                            4 file path name to look inside of
+                                            '          
+                                          }
+                                        fi
+                                        if [ ! -z "${1+x}" ] ; then # check if parameter is set and not empty
+                                          {
+                                            local local_at=$(trim <<< "${1}")
+                                            if [[ "$local_at" != "at" ]] ; then  
+                                              {
+                                                local_fail="$local_fail \n has incorrect 1st argument has to be \"at\" only"
+                                              }
+                                            fi
+                                          }
+                                        fi 
+                                        if [ ! -z "${2+x}" ] ; then # check if parameter is set and not empty
+                                          {
+                                            local local_value=$(trim <<< "${2}")
+                                          }
+                                        fi  
+                                        if [ ! -z "${3+x}" ] ; then # check if parameter is set and not empty
+                                          {
+                                            local local_inside=$(trim <<< "${3}")
+                                            if [[ "$local_inside" != "inside" ]] ; then  
+                                              {
+                                                local_fail="$local_fail \n has incorrect 1st argument has to be \"inside\" only"
+                                              }
+                                            fi
+                                          }
+                                        fi
+                                        if [ ! -z "${4+x}" ] ; then # check if parameter is set and not empty
+                                          {
+                                            local local_file_path=$(trim <<< "${4}")
+                                            if [[ ! -e "${local_file_path}" ]] ; then 
+                                              {
+                                                local_fail="$local_fail \n file is does not exist or is not accessible: ${local_file_path} "
+                                              }
+                                            fi
+                                          }
+                                        fi
+                                        if [ ! -z "${local_fail-x}" ] ; then # if its set and not empty
+                                          {
+                                              !!! "${FUNCNAME[1]}()" "$local_fail"
+                                          }
+                                        fi
+                                        #peek
+                                        local peek_result=$(cat "$local_file_path" | grep -nE "$local_value")
+                                        echo -e "${lightpurple}     ⚯ ${lightyellow} ${peek_result}  ${reset}"  
+                                      }
+
+                  function Peek(){
+                    _peek_worker "${@}"
+                  } 
+
+                                      function _stop_worker(){
+                                        local local_fail="";
+                                        if [  -z "${1+x}" ] || [ -z "${2+x}" ] || [ -z "${3+x}" ] || [ -z "${4+x}" ] ; then # check if all parameters are set and not 
+                                          {
+                                            local_fail=' .....is missing Argument count. It is required to have:
+                                            1 fixed:if  
+                                            2 FUNCTION name in spaces
+                                            3 fixed:on  
+                                            '          
+                                          }
+                                        fi
+                                        if [ ! -z "${1+x}" ] ; then # check if parameter is set and not empty
+                                          {
+                                            local local_if=$(trim <<< "${1}")
+                                            if [[ "$local_if" != "if" ]] ; then  
+                                              {
+                                                local_fail="$local_fail \n has incorrect 1st argument is „${lightyellow}${local_if}${red}“ has to be „${lightyellow}if${red}“ only"
+                                              }
+                                            fi
+                                          }
+                                        fi 
+                                        if [ ! -z "${2-x}" ] ; then # check if parameter is set and not empty
+                                          {
+                                            local local_function_name=$(replace_spaces_underscores <<< "${2}")
+                                            if ( ! function_exists "$local_function_name" ); then
+                                              {
+                                                local_fail="$local_fail \n „${lightyellow}${local_function_name}${red}“() Does not exist function was not provided " 
+                                              } 
+                                            fi
+                                          }
+                                        fi  
+                                        if [ ! -z "${3+x}" ] ; then # check if parameter is set and not empty
+                                          {
+                                            local local_on=$(trim <<< "${3}")
+                                            if [[ "$local_on" != "on" ]] ; then  
+                                              {
+                                                local_fail="$local_fail \n has incorrect 1st argument is „${lightyellow}${local_on}${red}“ has to be „${lightyellow}on${red}“ only"
+                                              }
+                                            fi
+                                          }
+                                        fi 
+                                        if [ ! -z "${4-x}" ] ; then # check if parameter is set and not empty
+                                          {
+                                            local local_other_function=$(replace_spaces_underscores <<< "${4}")
+                                            if ( ! function_exists "$local_other_function" ); then
+                                              {
+                                                local_fail="$local_fail \n „${lightyellow}${local_other_function}${red}“() Does not exist function was not provided " 
+                                              } 
+
+                                            fi
+                                          }
+                                        fi  
+                                        if [ ! -z "${local_fail-x}" ] ; then # if its set and not empty
+                                          {
+                                              !!! "${FUNCNAME[1]}()" "$local_fail"
+                                          }
+                                        fi 
+                                        local local_value=$(trim <<< $(eval $local_function_name)) 
+                                        local local_other_value=$(trim <<< $(eval $local_other_function)) 
+                                        local local_error_description="$2 for $4:$local_other_value" 
+                                        ( debug ) && ( echo "VALUE ACQUIRED :" "$local_value" )
+                                        ( debug ) && ( echo "VALUE 4 TESTING:" "$2" ) 
+                                        if [ "$local_value" == "$2" ] ; then 
+                                          {
+                                            !!! STOP "$local_error_description"
+                                          }
+                                        fi
+                                      }
+                  function Stop(){
+                    _stop_worker "${@}"
+                  } 
+                                      function _file_worker(){
+                                        local local_fail="";
+                                        # _file_worker() USAGE:     0              1                           2    3 
+                                        # _file_worker() USAGE: _file_worker "apps/kx/config/parameters.yml" must exist 
+                                        if [  -z "${1+x}" ] || [ -z "${2+x}" ] || [ -z "${3+x}" ]  ; then # check if all parameters are set and not 
+                                          {
+                                            local_fail=' .....is missing Argument count. It is required to have:
+                                            1 file path name 
+                                            2 fixed:must 
+                                            3 fixed:exist 
+                                            '          
+                                          }
+                                        fi
+                                        if [ ! -z "${1+x}" ] ; then # check if parameter is set and not empty
+                                          {
+                                            local local_file_path=$(trim <<< "${1}")
+                                          }
+                                        fi
+                                        if [ ! -z "${2+x}" ] ; then # check if parameter is set and not empty
+                                          {
+                                            local local_must=$(trim <<< "${2}")
+                                            if [[ "$local_must" != "must" ]] ; then  
+                                              {
+                                                local_fail="$local_fail \n has incorrect 1st argument is „${lightyellow}${local_must}${red}“ has to be „${lightyellow}must${red}“ only"
+                                              }
+                                            fi
+                                          }
+                                        fi 
+                                        if [ ! -z "${3+x}" ] ; then # check if parameter is set and not empty
+                                          {
+                                            local local_exist=$(trim <<< "${3}")
+                                            if [[ "$local_exist" != "exist" ]] ; then  
+                                              {
+                                                local_fail="$local_fail \n has incorrect 1st argument is „${lightyellow}${local_exist}${red}“ has to be „${lightyellow}exist${red}“ only"
+                                              }
+                                            fi
+                                          }
+                                        fi 
+
+  
+                                        #OTHERWISE=""
+                                        
+
+                                        if [[ "${local_must}" == "must" ]] && [[ "${local_exist}" == "exist" ]]; then 
+                                          {
+                                            local local_description=$(echo "${FUNCNAME[1]} „${reset}${local_file_path}${lightyellow}“ ${local_must} ${local_exist}")
+                                            ( debug ) && ( echo "VALUE local_description:"  $local_description ) 
+                                            ( debug ) && ( set -xu )
+                                            if [[ -e "${local_file_path}" ]] ; then 
+                                              {
+                                                ( debug ) && ( set +xu )
+                                                passed $local_description
+                                                THEN="passed"
+                                                OTHERWISE="file"
+                                                OTHERWISE="" # CRITERIA: When Given() provides an empty $OTHERWISE var, it means to ignore the Otherwise() statement afterwards 
+                                                return 1
+                                              }
+                                            else 
+                                              {
+                                                local local_failed_message=$(echo "${FUNCNAME[1]} „${lightyellow}${local_file_path}${red}“ ${local_must} ${local_exist}")
+                                                failed $local_failed_message
+                                                OTHERWISE="file" # CRITERIA: When Given() provides an $OTHERWISE var content, it provides the name the of the function to the read by Otherwise() statement afterwards
+                                                THEN="failed"
+                                                #!!! $local_failed_message  
+                                                return 0
+                                              }
+                                            fi     
+                                            ( debug ) && ( set +xu )                               
+                                          } 
+                                        fi
+
+                                        if [ ! -z "${local_fail-x}" ] ; then # if its set and not empty
+                                          {
+                                              PROVISIONED=""
+                                              failed "${FUNCNAME[1]}()" "$local_fail"
+                                              return 0
+                                          }
+                                        fi
+
+                                      }
+                  function File(){
+                    # File() USAGE: File "apps/kx/config/parameters.yml" must exist 
+                    _file_worker "${@}"
+                  }
+                                      function _validate() {
+                                        # _validate() USAGE:      0      1    2      3     4    5   6     7      8       9
+                                        # _validate() USAGE: _validate "${2}" value with "file" on "2" position using "history")
+                                        # _validate() USAGE:  local_fail=$(Validate "${1}" value with "file" on "1" position using "${local_fail}")
+                                        local local_fail="";
+                                        if [  -z "${1+x}" ] || [ -z "${2+x}" ] || [ -z "${3+x}" ] || [ -z "${3+x}" ] || [ -z "${4+x}" ] || [ -z "${5+x}" ]  || [ -z "${6+x}" ]  || [ -z "${7+x}" ] ; then # check if all parameters are set and not 
+                                          {
+                                            local_fail=' .....is missing Argument count. It is required to have:
+                                            1    variable 
+                                            2 fixed:value 
+                                            3 fixed:with 
+                                            4    string to compare against validate 
+                                            5 fixed:on 
+                                            6    number position 
+                                            7 fixed:position 
+                                            8 fixed:using 
+                                            9    failed history string 
+                                            '          
+                                          }
+                                        fi
+                                        local local_fixed=""
+                                        local local_word=""
+                                        if [ ! -z "${1+x}" ] ; then # check if parameter is set and not empty
+                                          {
+                                            local local_variable=$(trim <<< "${1}")
+                                          }
+                                        fi
+                                        if [ ! -z "${2+x}" ] ; then # check if parameter is set and not empty
+                                          {
+                                            local_fixed=$(trim <<< "${2}")
+                                            local_word="value"
+                                            if [[ "$local_fixed" != "$local_word" ]] ; then  
+                                              {
+                                                local_fail="$local_fail \n has incorrect 2nd argument is „${lightyellow}${local_fixed}${red}“ has to be „${lightyellow}${local_word}${red}“ only"
+                                              }
+                                            fi
+                                          }
+                                        fi
+                                        if [ ! -z "${3+x}" ] ; then # check if parameter is set and not empty
+                                          {
+                                            local_fixed=$(trim <<< "${3}")
+                                            local_word="with"
+                                            if [[ "$local_fixed" != "$local_word" ]] ; then  
+                                              {
+                                                local_fail="$local_fail \n has incorrect 3rd argument is „${lightyellow}${local_fixed}${red}“ has to be „${lightyellow}${local_word}${red}“ only"
+                                              }
+                                            fi
+                                          }
+                                        fi
+                                        if [ ! -z "${4+x}" ] ; then # check if parameter is set and not empty
+                                          {
+                                            local local_string=$(trim <<< "${4}")
+                                          }
+                                        fi
+                                        if [ ! -z "${5+x}" ] ; then # check if parameter is set and not empty
+                                          {
+                                            local_fixed=$(trim <<< "${5}")
+                                            local_word="on"
+                                            if [[ "$local_fixed" != "$local_word" ]] ; then  
+                                              {
+                                                local_fail="$local_fail \n has incorrect 5th argument is „${lightyellow}${local_fixed}${red}“ has to be „${lightyellow}${local_word}${red}“ only"
+                                              }
+                                            fi
+                                          }
+                                        fi
+                                        if [ ! -z "${6+x}" ] ; then # check if parameter is set and not empty
+                                          {
+                                            local local_position=$(trim <<< "${6}")
+                                            if [[ "$local_position" == "1" ]] ; then
+                                              {
+                                                local_position="1st"
+                                              }
+                                            elif [[ "$local_position" == "2" ]] ; then
+                                              {
+                                                local_position="2nd"
+                                              }
+                                            elif [[ "$local_position" == "3" ]] ; then
+                                              {
+                                                local_position="3rd"
+                                              }
+                                            elif [[ "$local_position" == "21" ]] ; then
+                                              {
+                                                local_position="21st"
+                                              }
+                                            elif [[ "$local_position" == "22" ]] ; then
+                                              {
+                                                local_position="22nd"
+                                              }
+                                            elif [[ "$local_position" == "23" ]] ; then
+                                              {
+                                                local_position="23rd"
+                                              }
+                                            else 
+                                              {
+                                                local_position="${local_position}th"                            
+                                              }
+                                            fi
+                                          }
+                                        fi
+                                        if [ ! -z "${7+x}" ] ; then # check if parameter is set and not empty
+                                          {
+                                            local_fixed=$(trim <<< "${7}")
+                                            local_word="position"
+                                            if [[ "$local_fixed" != "$local_word" ]] ; then  
+                                              {
+                                                local_fail="$local_fail \n has incorrect 7th argument is „${lightyellow}${local_fixed}${red}“ has to be „${lightyellow}${local_word}${red}“ only"
+                                              }
+                                            fi
+                                          }
+                                        fi                     
+                                        if [ ! -z "${8+x}" ] ; then # check if parameter is set and not empty
+                                          {
+                                            local_fixed=$(trim <<< "${8}")
+                                            local_word="using"
+                                            if [[ "$local_fixed" != "$local_word" ]] ; then  
+                                              {
+                                                local_fail="$local_fail \n has incorrect 8th argument is „${lightyellow}${local_fixed}${red}“ has to be „${lightyellow}${local_word}${red}“ only"
+                                              }
+                                            fi
+                                          }
+                                        fi 
+                                        if [ ! -z "${9+x}" ] ; then # check if parameter is set and not empty
+                                          {
+                                            local local_history=$(trim <<< "${9}")
+                                          }
+                                        fi
+
+                                        if [ ! -z "${local_fail-x}" ] ; then # if its set and not empty -x works "! -z "${local_fail-x}" when the var is declared previously
+                                          {
+                                              PROVISIONED=""
+                                              !!! "${FUNCNAME[1]}()->${FUNCNAME[0]}()" "$local_fail"
+                                              return 0
+                                          }
+                                        fi
+
+                                        # Do 
+
+                                        local error_description="has incorrect ${local_position} argument is „${lightyellow}${local_variable}${red}“ has to be „${lightyellow}${local_string}${red}“ only"
+                                        if [[ "$local_variable" == "$local_string" ]] ; then  
+                                          {
+                                            if [ -z "${local_history}" ] ; then  # history is empty and var = string ...no error ..no history
+                                              {
+                                                echo ""                      # empty keeps the caller local_fail empty
+                                              }
+                                            else                         # history is has someting and var = string ...no error ..with history
+                                              {
+                                                echo "${local_history}"      # preserve the callers error history
+                                              }
+                                            fi
+                                          }
+                                          return 0
+                                        else 
+                                          {
+                                            if [ -z "${local_history}" ] ; then  # history is empty and var != string ...has error ..no history
+                                              {
+                                                echo "${error_description}"          # return this plain error   
+                                              }
+                                            else                         # history is has someting and var != string ...has error ..with history
+                                              {
+                                                echo "${local_history} \n ${error_description}"         # return error appended to history
+                                              }
+                                            fi
+                                          }
+                                          return 0
+                                        fi
+                                        !!! "${FUNCNAME[1]}()->${FUNCNAME[0]}()"  Condition not considered 
+                                        return 1
+
+                                      }
+                  function Validate(){
+                    # Validate() USAGE:      0      1    2      3     4    5   6     7      8       9
+                    # Validate() USAGE: Validate "${2}" value with "file" on "2" position using "history"
+                    # Validate() USAGE: local local_fail=$(Validate "${2}" value with "file" on "2" position using "${local_fail}")
+                    _validate "${@}"
+                  }
+                                      function _list_worker(){
+                                        local local_fail="";
+                                        # _list_worker() USAGE:     0         1                           2     
+                                        # _list_worker() USAGE: _list_worker file "apps/kx/config/parameters.yml"
+                                        if [  -z "${1+x}" ] || [ -z "${2+x}" ] ; then # check if all parameters are set and not 
+                                          {
+                                            local_fail=' .....is missing Argument count. It is required to have:
+                                            1 fixed:file 
+                                            2 file path name 
+                                            '          
+                                          }
+                                        fi
+                                        if [ ! -z "${1+x}" ] ; then # check if parameter is set and not empty
+                                          {
+                                            local local_file_fixed=$(trim <<< "${1}")
+                                            if [[ "$local_file_fixed" != "file" ]] ; then  
+                                              {
+                                                local_fail="$local_fail \n has incorrect 1st argument is „${lightyellow}${local_file_fixed}${red}“ has to be „${lightyellow}file${red}“ only"
+                                              }
+                                            fi
+                                          }
+                                        fi 
+                                        if [ ! -z "${2+x}" ] ; then # check if parameter is set and not empty
+                                          {
+                                            local local_file_path=$(trim <<< "${2}")
+                                          }
+                                        fi
+                                        
+                                        #OTHERWISE=""
+                                        
+                                        if [ ! -z "${local_fail-x}" ] ; then # if its set and not empty -x works "! -z "${local_fail-x}" when the var is declared previously
+                                          {
+                                              PROVISIONED=""
+                                              failed "${FUNCNAME[1]}()" "$local_fail"
+                                              return 0
+                                          }
+                                        fi
+
+                                        if [[ "${local_file_fixed}" == "file" ]] ; then 
+                                          {
+                                            local local_description=$(echo "${FUNCNAME[1]} file ${red}„${reset}${local_file_path}${lightyellow}${red}“ ${lightyellow}")
+                                            ( debug ) && ( echo "VALUE local_description:"  $local_description ) 
+                                            ( debug ) && ( set -xu )
+                                            if [[ -e "${local_file_path}" ]] ; then 
+                                              {
+                                                ( debug ) && ( set +xu )
+                                                local output=$(ls -la "${local_file_path}")
+                                                passed "$local_description" "->" "$output"
+                                                THEN="passed"
+                                                OTHERWISE="file"
+
+                                                OTHERWISE="" # CRITERIA: When Given() provides an empty $OTHERWISE var, it means to ignore the Otherwise() statement afterwards 
+                                                return 1
+                                              }
+                                            else 
+                                              {
+                                                local local_failed_message=$(echo "${FUNCNAME[1]} file is does not exist or is not accessible: „${lightyellow}${local_file_path}${red}“ ")
+                                                failed $local_failed_message
+                                                OTHERWISE="file" # CRITERIA: When Given() provides an $OTHERWISE var content, it provides the name the of the function to the read by Otherwise() statement afterwards
+                                                THEN="failed"
+                                                #!!! $local_failed_message  
+                                                return 0
+                                              }
+                                            fi     
+                                            ( debug ) && ( set +xu )                               
+                                          } 
+                                        fi
+
+                                        if [ ! -z "${local_fail-x}" ] ; then # if its set and not empty -x works "! -z "${local_fail-x}" when the var is declared previously
+                                          {
+                                              PROVISIONED=""
+                                              failed "${FUNCNAME[1]}()" "$local_fail"
+                                              return 0
+                                          }
+                                        fi
+
+                                      }
+                  function List(){
+                    _list_worker "${@}"
+                  } 

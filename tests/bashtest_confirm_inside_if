@@ -1,0 +1,27 @@
+#!/bin/bash 
+# 
+# @author Zeus Intuivo <zeus@intuivo.com>
+#
+
+
+                          function load_bash_crm_cli(){
+                            if [ ! -z ${BASHCRMCLI+x} ]; then   # check if a variable is set and not empty
+                              {
+                                . "$BASHCRMCLI/execute_command.sh" && THIS_SCRIPT_NAME=`basename "$0"`
+                                heading Test
+                              }
+                            fi
+                          }
+load_bash_crm_cli
+                          function test_confirm_inside_if(){
+                            if confirm Write yes to delete ; then
+                                {
+                                  anounce Yes
+                                }
+                              else 
+                                {
+                                  warn no!!!
+                                }
+                            fi
+                          }
+test_confirm_inside_if

@@ -1,0 +1,34 @@
+#!/bin/bash
+# 
+# @author Zeus Intuivo <zeus@intuivo.com>
+#
+# Description: To be used conjuntion with execute_command.sh function. I separated this functions
+# because making funtions out of simple unicode chars was causing some non stable results 
+# to use with execute command. But when feeling risky, I can include this to play with this functions.
+# 
+#execute_command_minifunctions.sh
+                                            function :(){
+                                              _execute_command_worker  "${@}"
+                                            }
+                                            function ☠() {
+                                              _say_error_and_exit_worker "${@}" 
+                                            }                                            
+                                            function ¡() {
+                                              _say_error_and_exit_worker "${@}"
+                                            }
+                                            function !!!(){
+                                              _say_error_and_exit_worker "${@}"
+                                            }
+                                            function “(){
+                                              _comment_worker "${@}"
+                                            }                                            
+                                            function -(){
+                                              _anounce_worker "${@}"
+                                            }
+                                            function • (){
+                                              _say_worker "${@}"
+                                            } 
+                                            function  ·(){
+                                              _say_worker "${@}"
+                                            }
+                                           
