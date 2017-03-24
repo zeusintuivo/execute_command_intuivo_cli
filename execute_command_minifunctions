@@ -1,34 +1,60 @@
 #!/bin/bash
-# 
+#
 # @author Zeus Intuivo <zeus@intuivo.com>
 #
-# Description: To be used conjuntion with execute_command.sh function. I separated this functions
-# because making funtions out of simple unicode chars was causing some non stable results 
+# Description: To be used conjuntion with execute_command.sh  I separated this functions
+# because making funtions out of simple unicode chars was causing some non stable results
 # to use with execute command. But when feeling risky, I can include this to play with this functions.
-# 
+#
+#
+#  👣 Follow
+#
+#  💛 Love
+#
+#  🏅 Cut
+#
+#  ⭐ Start
+#
+#  👉 Point
+#
+# : Execute "${@}"
+#
+# ☠(Say error "${@}" and exit
+# ¡
+# !!!
+#
+# “ Comment "${@}"
+# - Anounce "${@}"
+# • Say "${@}"
+# ·
 #execute_command_minifunctions.sh
-                                            function :(){
-                                              _execute_command_worker  "${@}"
-                                            }
-                                            function ☠() {
-                                              _say_error_and_exit_worker "${@}" 
-                                            }                                            
-                                            function ¡() {
-                                              _say_error_and_exit_worker "${@}"
-                                            }
-                                            function !!!(){
-                                              _say_error_and_exit_worker "${@}"
-                                            }
-                                            function “(){
-                                              _comment_worker "${@}"
-                                            }                                            
-                                            function -(){
-                                              _anounce_worker "${@}"
-                                            }
-                                            function • (){
-                                              _say_worker "${@}"
-                                            } 
-                                            function  ·(){
-                                              _say_worker "${@}"
-                                            }
-                                           
+:()
+{
+    _execute_command_worker  "${@}"
+}
+☠()
+{
+    _say_error_and_exit_worker "${@}"
+}
+¡()
+{
+    _say_error_and_exit_worker "${@}"
+}
+!!!()
+{
+    _say_error_and_exit_worker "${@}"
+}
+“()
+{
+    _comment_worker "${@}"
+}
+-()
+{
+    _anounce_worker "${@}"
+}
+• (){
+    _say_worker "${@}"
+}
+·(){
+    _say_worker "${@}"
+}

@@ -1,16 +1,16 @@
-#!/bin/bash 
-# 
+#!/bin/bash
+#
 # @author Zeus Intuivo <zeus@intuivo.com>
 #
 #
-#  
-# 
+#
+#
 
                   function load_bash_crm_cli(){
                     if [ ! -z ${BASHCRMCLI+x} ]; then   # check if a variable is set and not empty
                       {
                         . "$BASHCRMCLI/execute_command.sh" && THIS_SCRIPT_NAME=`basename "$0"`
-                        heading Execute composer without xdebug 
+                        heading Execute composer without xdebug
                         get_current_folder_path_and_name
                       }
                     fi
@@ -20,38 +20,38 @@
                       {
                         msg_red "$@"
                       }
-                    else 
+                    else
                       {
-                         echo `tput setaf 1` "$@" `tput sgr0` 
+                         echo `tput setaf 1` "$@" `tput sgr0`
                       }
                     fi
-                    exit 130; 
+                    exit 130;
                   }
                   function _anounce_worker(){
                     echo `tput setaf 23` "${@}" `tput sgr0` ;
                   }
                                     function -(){
-                                      _anounce_worker ${@} 
+                                      _anounce_worker ${@}
                                     }
                                     function anounce(){
-                                       _anounce_worker ${@} 
+                                       _anounce_worker ${@}
                                     }
 
                   function _say_worker() {
-                    echo `tput setaf 1` "$@" `tput sgr0` 
+                    echo `tput setaf 1` "$@" `tput sgr0`
                   }
                                     function say(){
-                                      _say_worker ${@} 
-                                    }                          
+                                      _say_worker ${@}
+                                    }
                                     function •(){
-                                      _say_worker ${@} 
+                                      _say_worker ${@}
                                     }
                   function check_php(){
                     if command -v php >/dev/null 2>&1; then #Command Exists
                       {
-                          echo "PHP ..ok" 
+                          echo "PHP ..ok"
                       }
-                    else 
+                    else
                       {
                         say_error_and_exit PHP Does not exist
                       }
@@ -72,16 +72,16 @@ check_composer_json_existance
 
 XDEBUG_FOLDER=""
 OPTIONS=""
-COMPOSER_EXECUTABLE_FULL_PATH=$(which composer) 
+COMPOSER_EXECUTABLE_FULL_PATH=$(which composer)
 #FOLDER_WITH_COMPOSER_JSON=$(dirname $(find /  -name "composer.json"))   #  or use  export VAR=/home/me/mydir/file.c  && ${VAR%/*}
-                      
+
                   function say_finding_xdebug() {
-                      anounce Finding ... first xdebug.so  
+                      anounce Finding ... first xdebug.so
                   }
                   function say_not_found_xdebug_and_error_exit() {
-                      if [ -z "$XDEBUG_FOLDER"  ] ;  then   # if parameter value is empty  
+                      if [ -z "$XDEBUG_FOLDER"  ] ;  then   # if parameter value is empty
                         {
-                          say_error_and_exit Error could not find any ! ... xdebug.so 
+                          say_error_and_exit Error could not find any ! ... xdebug.so
                         }
                       fi
                   }
@@ -92,88 +92,88 @@ COMPOSER_EXECUTABLE_FULL_PATH=$(which composer)
                       set -eu
                       set -o pipefail
                     XDEBUG_FOLDER=$(dirname  $(find / -name "xdebug.so" -print -quit  | head -1) )   #  or use  export VAR=/home/me/mydir/file.c  && ${VAR%/*}
-                    say $XDEBUG_FOLDER 
+                    say $XDEBUG_FOLDER
                     say_not_found_xdebug_and_error_exit
                   }
 find_xdebug
 
                   function get_options() {
-                    OPTIONS=$(ls -1 "${XDEBUG_FOLDER}" |  grep -v xdebug |   grep --invert-match opcache|   egrep --invert-match 'mysql|wddx|pgsql' |  sed --expression 's/\(.*\)/ --define extension=\1/'|   tr --delete '\n' ) 
+                    OPTIONS=$(ls -1 "${XDEBUG_FOLDER}" |  grep -v xdebug |   grep --invert-match opcache|   egrep --invert-match 'mysql|wddx|pgsql' |  sed --expression 's/\(.*\)/ --define extension=\1/'|   tr --delete '\n' )
 
-                                          # Explanation 
-                                        #   OPTIONS=$(ls -1 "${XDEBUG_FOLDER}" | \ 
-                                        # 
-                                        #      grep --invert-match xdebug| \ 
-                                        #      grep --invert-match opcache| \ 
-                                        # 
-                                        #      # remove problematic extensions 
-                                        #      egrep --invert-match 'mysql|wddx|pgsql'| \ 
-                                        # 
-                                        #      sed --expression 's/\(.*\)/ --define extension=\1/'| \ 
-                                        # 
-                                        #      # join everything together back in one big line 
-                                        #      tr --delete '\n' 
-                                        #    ) 
-                                        # Expected result --define extension=curl.so --define extension=gd.so --define extension=imagick.so --define extension=intl.so --define extension=json.so --define extension=memcached.so --define extension=memcache.so --define extension=opcache.so --define extension=pdo.so --define extension=pdo_sqlite.so --define extension=readline.so --define extension=sqlite3.so --define extension=xsl.so 
-                                         
-                                     
-                                        # build the final command line 
-                                        # php --no-php-ini $options ~/bin/composer $* 
-                                        #php --no-php-ini ${OPTIONS}  -dmemory_limit=9G ${COMPOSER_EXECUTABLE_FULL_PATH} "$1"   
+                                          # Explanation
+                                        #   OPTIONS=$(ls -1 "${XDEBUG_FOLDER}" | \
+                                        #
+                                        #      grep --invert-match xdebug| \
+                                        #      grep --invert-match opcache| \
+                                        #
+                                        #      # remove problematic extensions
+                                        #      egrep --invert-match 'mysql|wddx|pgsql'| \
+                                        #
+                                        #      sed --expression 's/\(.*\)/ --define extension=\1/'| \
+                                        #
+                                        #      # join everything together back in one big line
+                                        #      tr --delete '\n'
+                                        #    )
+                                        # Expected result --define extension=curl.so --define extension=gd.so --define extension=imagick.so --define extension=intl.so --define extension=json.so --define extension=memcached.so --define extension=memcache.so --define extension=opcache.so --define extension=pdo.so --define extension=pdo_sqlite.so --define extension=readline.so --define extension=sqlite3.so --define extension=xsl.so
+
+
+                                        # build the final command line
+                                        # php --no-php-ini $options ~/bin/composer $*
+                                        #php --no-php-ini ${OPTIONS}  -dmemory_limit=9G ${COMPOSER_EXECUTABLE_FULL_PATH} "$1"
                   }
-                  function composer_install(){ 
-                    # check operation systems  
+                  function composer_install(){
+                    # check operation systems
                     (
-                    if [[ "$(uname)" == "Darwin" ]] ; then  
+                    if [[ "$(uname)" == "Darwin" ]] ; then
 
-                      #php --no-php-ini ${OPTIONS}  -dmemory_limit=9G ${COMPOSER_EXECUTABLE_FULL_PATH} "$1" 
+                      #php --no-php-ini ${OPTIONS}  -dmemory_limit=9G ${COMPOSER_EXECUTABLE_FULL_PATH} "$1"
                       get_options
-                      echo "php --no-php-ini " ${OPTIONS} ${COMPOSER_EXECUTABLE_FULL_PATH}  "$1" 
-                      php --no-php-ini ${OPTIONS} ${COMPOSER_EXECUTABLE_FULL_PATH} "$1" 
+                      echo "php --no-php-ini " ${OPTIONS} ${COMPOSER_EXECUTABLE_FULL_PATH}  "$1"
+                      php --no-php-ini ${OPTIONS} ${COMPOSER_EXECUTABLE_FULL_PATH} "$1"
 
-                    elif [[ "$(expr substr $(uname -s) 1 5)" == "Linux" ]] ; then  
+                    elif [[ "$(expr substr $(uname -s) 1 5)" == "Linux" ]] ; then
 
                       get_options
-                      echo "php --no-php-ini " ${OPTIONS} ${COMPOSER_EXECUTABLE_FULL_PATH}  "$1" 
-                      php --no-php-ini ${OPTIONS} ${COMPOSER_EXECUTABLE_FULL_PATH} "$1"   
-                      
-                      #php -n -dextension=json.so -dmemory_limit=9G ${COMPOSER_EXECUTABLE_FULL_PATH} install  
-                      #php -dmemory_limit=9G ${COMPOSER_EXECUTABLE_FULL_PATH} install 
-                     
-                    elif [[ "$(expr substr $(uname -s) 1 10)" == "MINGW32_NT" ]] ; then  
-                      # Do something under Windows NT platform 
-                      #php ${COMPOSER_EXECUTABLE_FULL_PATH} "$1" 
-                      php -dmemory_limit=9G ${COMPOSER_EXECUTABLE_FULL_PATH} "$1" 
-                      # nothing here 
-                    fi  
-                    ) 
-                  } 
-                   
+                      echo "php --no-php-ini " ${OPTIONS} ${COMPOSER_EXECUTABLE_FULL_PATH}  "$1"
+                      php --no-php-ini ${OPTIONS} ${COMPOSER_EXECUTABLE_FULL_PATH} "$1"
+
+                      #php -n -dextension=json.so -dmemory_limit=9G ${COMPOSER_EXECUTABLE_FULL_PATH} install
+                      #php -dmemory_limit=9G ${COMPOSER_EXECUTABLE_FULL_PATH} install
+
+                    elif [[ "$(expr substr $(uname -s) 1 10)" == "MINGW32_NT" ]] ; then
+                      # Do something under Windows NT platform
+                      #php ${COMPOSER_EXECUTABLE_FULL_PATH} "$1"
+                      php -dmemory_limit=9G ${COMPOSER_EXECUTABLE_FULL_PATH} "$1"
+                      # nothing here
+                    fi
+                    )
+                  }
+
                   #@override
                   function show_help(){
                     if [ -z ${BASHCRMCLI+x} ]; then   # check if a variable is set and not empty
                       {
                         function provide_description(){
-                        
-                            heading Run Composer on its own original folder . First run is to make sure we have all the folders 
-                        
-                        
-                            anounce How to call 
+
+                            heading Run Composer on its own original folder . First run is to make sure we have all the folders
+
+
+                            anounce How to call
                             say $THIS_SCRIPT_NAME install
-                        
-                        
+
+
                         }
                         DESCRIPTION=$(provide_description)
-                        
+
                         provide_help
-                        
+
                         if is_help "${1}"; then   # Not empty and help
                           {
                             heading Execute composer without xdebug
-                        
+
                             THIS_SCRIPT_NAME=`basename "$0"`
                             WHERE_IS_THIS=$(which ${THIS_SCRIPT_NAME})
-                            AVAILABLE_COMMANDS=$(cat ${WHERE_IS_THIS}| grep "function " | cüt "function " | cüt "() {" | cüt "(){" | sed '/AVAILABLE_COMMANDS/d' | sort ) 
+                            AVAILABLE_COMMANDS=$(cat ${WHERE_IS_THIS}| grep "function " | cüt "function " | cüt "() {" | cüt "(){" | sed '/AVAILABLE_COMMANDS/d' | sort )
                             echo """$AVAILABLE_COMMANDS"""
                             exit 0;
                           }
@@ -181,22 +181,21 @@ find_xdebug
                       }
                     fi
                   }
-                  
+
 
                   function execute_composer_install() {
                     if [ ! -z ${BASHCRMCLI+x} ] ; then   # check if a variable is set and not empty
                       {
-                        execute_command composer_install "install" 
-                        say DONE ..zu ende   
+                        execute_command composer_install "install"
+                        say DONE ..zu ende
                       }
                     else
                       {
-                        composer_install "install" 
+                        composer_install "install"
                       }
                     fi
-                    exit 0; 
+                    exit 0;
                   }
 execute_composer_install
- 
 
- 
+
