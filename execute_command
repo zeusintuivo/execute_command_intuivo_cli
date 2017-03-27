@@ -49,9 +49,6 @@ escape_money() {
 delete_empty_lines() {
     sed '/^\s*$/d'
 }
-delete_empty_lines() {
-    sed '/^\s*$/d'
-}
 escape_double_quotes() {
     sed 's/\"/\\\"/g'
 }
