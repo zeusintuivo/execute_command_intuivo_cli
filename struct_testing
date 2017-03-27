@@ -1,0 +1,474 @@
+#!/bin/bash
+#
+# @author Zeus Intuivo <zeus@intuivo.com>
+#
+#
+# Helper For testing installations, check files, softlinks, etc......checklist style
+
+# Sample use
+
+function sample_use_verify_mongo() {
+
+
+	MONGO_VERSION="3.0.11"
+	if [ ! -z "${1}" ] ;  then
+	    MONGO_VERSION="${1}"
+	fi
+
+	echo -e "${GREEN} Verify mongo version"
+	CURRENT_VERSION=$(mongo --version  | egrep "MongoDB shell version" | head -1  | cut -d' ' -f4 | cut -d'v' -f2)
+	check_equality "${CURRENT_VERSION}=${MONGO_VERSION}"
+	echo -e "${GREEN} Verify mongod version"
+	MONGOD_VERSION=$(mongod --version | egrep "db version" | head -1 | cut -d'v' -f3)
+	check_equality "${MONGOD_VERSION}=${MONGO_VERSION}"
+
+	TESTING=" verify that MongoDB has started ${CYAN}successfully${LIGHTYELLOW}"
+	if [ ! -z "${MONGO_PID}" ] && [ ! -z "${MONGO_TASKID}" ] && [[ "${MONGO_SERVICE_STATUS}" == *"mongod start/running"* ]] ; then
+	{
+
+	    echo -e " ${PURPLE}+---- ${LIGHTYELLOW}       Service Status: ${CYAN}${MONGO_SERVICE_STATUS} "
+	    echo -e " ${PURPLE}+---- ${LIGHTYELLOW}            Mongo PID: ${CYAN}${MONGO_PID} "
+	    echo -e " ${PURPLE}+---- ${LIGHTYELLOW}        Mongo Task ID: ${CYAN}${MONGO_TASKID} "
+	    echo -e " ${PURPLE}+---- ${LIGHTYELLOW}      Which Mongo cli: ${CYAN}${WHICH_MONGO} "
+	    echo -e " ${PURPLE}+---- ${LIGHTYELLOW}        Mongo version: ${CYAN}${CURRENT_VERSION} "
+	    echo -e " ${PURPLE}+---- ${LIGHTYELLOW}   Which Mongo Server: ${CYAN}${WHICH_MONGOD} "
+	    echo -e " ${PURPLE}+---- ${LIGHTYELLOW} Mongo Server version: ${CYAN}${MONGOD_VERSION} "
+	    echo -e " ${PURPLE}+---- ${LIGHTYELLOW}     Log last 4 lines: ${CYAN}${MONGO_LOG} "
+	    echo -e " ${PURPLE}+---- ${LIGHTYELLOW}     hugepage/enabled: ${CYAN}${FILE_CONTENTS_ENABLED} "
+	    echo -e " ${PURPLE}+---- ${LIGHTYELLOW}      hugepage/defrag: ${CYAN}${FILE_CONTENTS_DEFRAG} "
+	    passed "${TESTING}"
+
+	}
+	else
+	{
+	    failed "${TESTING}"
+	}
+	fi
+
+	directory_exists "
+	/data
+	/data/db
+	/var/log/mongodb
+	"
+
+	# Disabled
+	#/_/version-manager                             # Patch mongoo-manager form nodejs
+	#/home/vagrant/.mongodb
+	#softlink_exists "/root/.mongodb>/home/vagrant/.mongodb"
+
+	file_exists "/etc/mongod.conf
+	/etc/init/mongod.conf
+	/etc/sysfs.conf
+	/etc/mongo_vm_settings.conf
+	/sys/kernel/mm/transparent_hugepage/khugepaged/defrag
+	/sys/kernel/mm/transparent_hugepage/defrag
+	/sys/kernel/mm/transparent_hugepage/enabled
+	"
+	# Extra notes
+	# /etc/init/mongod.conf                           # This is the mongo service start|stop|status
+	# /etc/default/mongod                             # There is ref to this file inside the service /etc/init/mongod.conf
+
+	# Disabled
+	#/etc/systemd/system/mongodb-hugepage-fix.service # service systemd  16.04
+	#/etc/systemd/system/mongodb.service              # service systemd  16.04
+	#/_/version-manager/bin/m.js                      # Patch mongoo-manager form nodejs
+	#/_/version-manager/package.json                  # Patch mongoo-manager form nodejs
+
+	#  softlink_exists "/root/.pyenv>/home/vagrant/.pyenv"
+	#  check_to_be_installed "sysfsutils" "fix for transparent_hugepage"
+	#
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+ ######  ######## ########  ##     ##  ######  ########
+##    ##    ##    ##     ## ##     ## ##    ##    ##
+##          ##    ##     ## ##     ## ##          ##
+ ######     ##    ########  ##     ## ##          ##
+      ##    ##    ##   ##   ##     ## ##          ##
+##    ##    ##    ##    ##  ##     ## ##    ##    ##
+ ######     ##    ##     ##  #######   ######     ##
+
+######## ########  ######  ######## #### ##    ##  ######
+   ##    ##       ##    ##    ##     ##  ###   ## ##    ##
+   ##    ##       ##          ##     ##  ####  ## ##
+   ##    ######    ######     ##     ##  ## ## ## ##   ####
+   ##    ##             ##    ##     ##  ##  #### ##    ##
+   ##    ##       ##    ##    ##     ##  ##   ### ##    ##
+   ##    ########  ######     ##    #### ##    ##  ######
+
+ ######  ########    ###    ########  ########                    ##
+##    ##    ##      ## ##   ##     ##    ##                        ##
+##          ##     ##   ##  ##     ##    ##                         ##
+ ######     ##    ##     ## ########     ##       ####### #######    ##
+      ##    ##    ######### ##   ##      ##                         ##
+##    ##    ##    ##     ## ##    ##     ##                        ##
+ ######     ##    ##     ## ##     ##    ##                       ##
+
+
+#
+# STRUCT TESTING - START
+#
+
+GRAYEDOUT="\033[01;30m"
+RED="\033[01;31m"
+GREEN="\033[01;32m"
+YELLOW="\033[01;33m"
+DARKBLUE="\033[01;34m"
+PURPLE="\033[01;35m"
+CYAN="\033[01;36m"
+WHITEBOLD="\033[01;37m"
+
+LIGHTGREEN="\033[38;5;83m"
+LIGHTPINK="\033[1;204m"
+LIGHTYELLOW="\033[38;5;227m"
+
+YELLOW_OVER_DARKBLUE="\033[38;5;220m\033[48;5;20m"
+
+RESET="\033[0m"
+CERO="\033[01;0m"
+
+        function passed() {
+            ARGS="${@}"
+            if [ ! -z "${ARGS-x}" ] ; then # if its set and not empty
+            {
+                echo -e "${LIGHTGREEN} ✔ ${LIGHTYELLOW} ${ARGS}  ${RESET}"
+            }
+            fi
+        }
+        function kill_execution() {
+            echo -e " ☠ ${LIGHTPINK} KILL EXECUTION SIGNAL SEND ${RESET}"
+            exit 130;
+        }
+
+        function failed() {
+            ARGS="${@}"
+            if [[ ! -z "${ARGS-x}" ]] ; then # if its set and not empty
+            {
+                echo -e "${RED} 𝞦 ${LIGHTYELLOW} ${ARGS} ${RED} has failed!  ${RESET}"
+                kill_execution
+            }
+            fi
+        }
+
+        function directory_exists(){
+            # Sample usage
+            #
+            #     directory_exists "/home/vagrant/.pyenv"
+            #     directory_exists "/root/.pyenv
+            #     /home/vagrant/.pyenv"
+            #
+            DIRS="${@}"
+            if [ ! -z "${DIRS-x}" ] ; then # if its set and not empty
+            {
+                DIRS=$(sed 's/ /\n/g' <<< "${@}")
+                while read -r ONE_DIR; do
+                # if not empty
+                if [ ! -z "${ONE_DIR}" ] ; then
+                    # AS a NOTE ~/  <-- will fail always
+                    # SO ~/.pyenv <-- will fail always
+                    # But /home/user/.pyenv  <-- will pass
+                    # OR Users/administrator/.pyenv  in mac <-- will pass
+                    # ONE_DIR="/Users/administrator/.pyenv"
+                    TESTING="that directory ${CYAN}${ONE_DIR}${LIGHTYELLOW} exists"
+                    if [[ -d "${ONE_DIR}" && ! -L "${ONE_DIR}" ]] ; then
+                    {
+                        passed "${TESTING}"
+                    }
+                    else
+                    {
+                        failed "${TESTING}"
+                    }
+                    fi
+                fi
+                done <<< "${DIRS}"
+            }
+            fi
+
+        }
+
+        function does_not_exist(){
+            # Sample usage
+            #
+            #     does_not_exist "/home/vagrant/.pyenv"
+            #     does_not_exist "/root/.pyenv
+            #     /home/vagrant/.pyenv"
+            #
+            DIRS="${@}"
+            if [ ! -z "${DIRS-x}" ] ; then # if its set and not empty
+            {
+                DIRS=$(sed 's/ /\n/g' <<< "${@}")
+                while read -r ONE_DIR; do
+                # if not empty
+                if [ ! -z "${ONE_DIR}" ] ; then
+                    # AS a NOTE ~/  <-- will fail always
+                    # SO ~/.pyenv <-- will fail always
+                    # But /home/user/.pyenv  <-- will pass
+                    # OR Users/administrator/.pyenv  in mac <-- will pass
+                    # ONE_DIR="/Users/administrator/.pyenv"
+                    TESTING="that $0 ${CYAN}${ONE_DIR}${LIGHTYELLOW} does not exist"
+                    if [[ ! -e "${ONE_DIR}" ]] ; then
+                    {
+                        passed "${TESTING}"
+                    }
+                    else
+                    {
+                        failed "${TESTING}"
+                    }
+                    fi
+                fi
+                done <<< "${DIRS}"
+            }
+            fi
+        }
+
+        function directory_does_not_exist() {
+            does_not_exist $@
+        }
+
+        function file_does_not_exist() {
+            does_not_exist $@
+        }
+
+        function file_exists(){
+            # Sample usage
+            #
+            #     file_exists "/home/vagrant/.zshrc"
+            #     file_exists "/root/.zshrc
+            #     /home/vagrant/.pyenzshrcv"
+            #
+            FILES="${@}"
+            if [ ! -z "${FILES-x}" ] ; then # if its set and not empty
+            {
+                FILES=$(sed 's/ /\n/g' <<< "${@}")
+                while read -r ONE_FILE; do
+                # if not empty
+                if [ ! -z "${ONE_FILE}" ] ; then
+                    # AS a NOTE ~/  <-- will fail always
+                    # SO ~/.zshrc <-- will fail always
+                    # But /home/user/.zshrc  <-- will pass
+                    # OR Users/administrator/.zshrc  in mac <-- will pass
+                    # ONE_FILE="/Users/administrator/.zshrc"
+                    TESTING="that file ${CYAN}${ONE_FILE}${LIGHTYELLOW} exists"
+                    if [[ -s "${ONE_FILE}" && ! -L "${ONE_FILE}" ]] ; then
+                    {
+                        passed "${TESTING}"
+                    }
+                    else
+                    {
+                        failed "${TESTING}"
+                    }
+                    fi
+                fi
+                done <<< "${FILES}"
+            }
+            fi
+
+        }
+
+        function softlink_exists(){
+            # Sample usage
+            #
+            #     softlink_exists "/root/.pyenv>/home/vagrant/.pyenv"
+            #     softlink_exists "/Users/administrator/.nix-profile
+            #     /Users/administrator/.nix-profile>/nix/var/nix/profiles/default"
+            #     softlink_exists "/root/.pyenv"
+            #     softlink_exists "/root/.pyenv
+            #     /root/.pyenv>/home/vagrant/.pyenv"
+            #
+            LINKS="${@}"
+            if [ ! -z "${LINKS-x}" ] ; then # if its set and not empty
+            {
+                LINKS=$(sed 's/ /\n/g' <<< "${@}")
+                while read -r ONE_LINK_ORDER; do
+                    # if not empty
+                    if [ ! -z "${ONE_LINK_ORDER}" ] ; then
+                    {
+                        CHECK_TARGET_TOO="NO"
+                        ONE_LINK_LOCATION="${ONE_LINK_ORDER}"
+                        ONE_LINK_TARGET=""
+
+                        [[ "${ONE_LINK_ORDER}" == *">"* ]] && CHECK_TARGET_TOO="YES"
+                        if [[ "${CHECK_TARGET_TOO}" == "YES" ]] ; then
+                        {
+                            ONE_LINK_LOCATION=$(cut -d'>' -f1 <<< "${ONE_LINK_ORDER}")
+                            ONE_LINK_TARGET=$(cut -d'>' -f2 <<< "${ONE_LINK_ORDER}")
+                        }
+                        fi
+                        # AS a NOTE ~/  <-- will fail always
+                        # SO ~/.pyenv <-- will fail always
+                        # But /home/user/.pyenv  <-- will pass
+                        # OR Users/administrator/.pyenv  in mac <-- will pass
+                        # ONE_LINK_LOCATION="/Users/administrator/.nix-profile"
+                        TESTING="that softlink ${CYAN}${ONE_LINK_LOCATION}${LIGHTYELLOW} exists"
+                        if [[ -L "${ONE_LINK_LOCATION}" ]] ; then
+                        {
+                            # Test pointing
+                            passed "${TESTING}"
+
+                            if [[ "${CHECK_TARGET_TOO}" == "YES" && ! -z "${ONE_LINK_TARGET}" ]] ; then
+                            {
+                                TESTING="${PURPLE} +-- and that softlink ${CYAN}${ONE_LINK_LOCATION}${LIGHTYELLOW} points to ${CYAN}${ONE_LINK_TARGET}${GREEN} location"
+
+                                FOUND_LINK_TARGET=$(ls -l ${ONE_LINK_LOCATION} | awk '{print $11}') # Find target symlink
+                                if [[ "${FOUND_LINK_TARGET}" == "${ONE_LINK_TARGET}" ]] ; then
+                                {
+                                    passed "${TESTING}"
+                                }
+                                else
+                                {
+                                    failed "${TESTING}"
+                                }
+                                fi
+                            }
+                            fi # TACHECK_TARGET_TOO is correct
+
+                        }
+                        else
+                        {
+                            failed "${TESTING}"
+                        }
+                        fi # ONE_LINK_LOCATION Exists
+                    }
+                    fi # not empty one link
+                done <<< "${LINKS}"
+            }
+            fi # not empty links
+        } # end function
+
+        function check_equality(){
+            # Sample usage
+            #
+            #     check_equality "$(cat /home/vagrant/.pyenv/version)=${PYTHON_VERSION}
+            #     $(cat /home/vagrant/.pyenv/version)=2.7.11"
+            #
+            #     check_equality $(cat ~/.pyenv/version)="2.7.11"
+            #
+            ARGS="${@}"
+            if [ ! -z "${ARGS-x}" ] ; then # if its set and not empty
+            {
+                #ARGS=$(sed 's/ /\n/g' <<< "${@}")
+                while read -r ONE_EQUALITY_ORDER; do
+                    # if not empty
+                    if [ ! -z "${ONE_EQUALITY_ORDER}" ] ; then
+                    {
+                        LEFT_VALUE=$(cut -d'=' -f1 <<< "${ONE_EQUALITY_ORDER}")
+                        RIGHT_VALUE=$(cut -d'=' -f2 <<< "${ONE_EQUALITY_ORDER}")
+
+                        TESTING="that value left value: ${CYAN}${LEFT_VALUE}${LIGHTYELLOW} exists"
+                        if [[ -z "${LEFT_VALUE-x}" ]] ; then
+                        {
+                            failed "${TESTING}"
+                        }
+                        fi
+
+                        TESTING="that value right value: ${CYAN}${RIGHT_VALUE}${LIGHTYELLOW} exists"
+                        if [[ -z "${RIGHT_VALUE-x}" ]] ; then
+                        {
+                            failed "${TESTING}"
+                        }
+                        fi
+
+                        TESTING="that value ${YELLOW_OVER_DARKBLUE}${LEFT_VALUE}${RESET}${LIGHTYELLOW} is equal to ${YELLOW_OVER_DARKBLUE}${RIGHT_VALUE}${RESET}"
+                        if [[ "${LEFT_VALUE}" ==  "${RIGHT_VALUE}" ]] ; then
+                        {
+                            passed "${TESTING}"
+                        }
+                        else
+                        {
+                            failed "${TESTING}"
+                        }
+                        fi
+                    }
+                    fi # not empty
+                done <<< "${ARGS}"
+            }
+            fi
+        } # end function check_equality
+
+        function check_to_be_installed(){
+            # Sample usage
+            #
+            # ...  you want to APT-GET install  ... sysfsutils
+            # ...  and you want to say          ... fix for transparent_hugepage
+            #
+            #  check_to_be_installed "sysfsutils" "fix for transparent_hugepage"
+            #
+            package="$1"
+            message="$2"
+            CHECK_INSTALLED=$(dpkg -s "${package}")
+            if [[ "${CHECK_INSTALLED}" == *"Package: ${package}"* ]] ; then
+                echo -e "${GREEN} PACKAGE: ${message}  ${package} is there  ${CERO}"
+            else
+                echo -e "${YELLOW} Installing ${message}   ${CERO}"
+                sudo apt install "${package}" -y
+            fi
+        }
+
+    THISSCRIPTNAME=`basename "$0"`
+
+    # TRAP
+    trap '{  \" ${THISSCRIPTNAME} KEYBOARD INTERRUPT.\"; exit 130; }' INT
+
+        #
+        # Template:
+        #
+        #  echo -e "${GREEN} Installing ${RED}PYENV${GREEN} and ${CYAN} {PYTHON_VERSION}  ${CERO}"
+        #
+        #  procedure "${PYTHON_VERSION}"  >/dev/null 2>&1 # suppress stdln and errln output
+        #
+        #  Testing Checking install
+        #  FOLDER MUST EXIST  /home/vagrant/.pyenv
+        #  LINK MUST EXIST /root/.pyenv
+        #  Python Must be PYTHON VERSION
+        #
+        #  directory_exists "/home/vagrant/.pyenv"
+        #  file_exists "/home/vagrant/.zshrc"
+        #  softlink_exists "/root/.pyenv>/home/vagrant/.pyenv"
+        #  check_to_be_installed "sysfsutils" "fix for transparent_hugepage"
+        #
+        #  CURRENT_VERSION=$(cat /home/vagrant/.pyenv/version)
+        #  check_equality "${CURRENT_VERSION}=${PYTHON_VERSION}"
+
+        #  echo -e " END ${THISSCRIPTNAME} ${CERO}"
+        #  echo -e "${RED}  END ${THISSCRIPTNAME} ${CERO}"
+        #  echo -e " END ${THISSCRIPTNAME} ${CERO}"
+
+#
+# STRUCT TESTING - END
+#
+
+   ##                    ######## ##    ## ########
+  ##                     ##       ###   ## ##     ##
+ ##                      ##       ####  ## ##     ##
+##    ####### #######    ######   ## ## ## ##     ##
+ ##                      ##       ##  #### ##     ##
+  ##                     ##       ##   ### ##     ##
+   ##                    ######## ##    ## ########
+
+ ######  ######## ########  ##     ##  ######  ########
+##    ##    ##    ##     ## ##     ## ##    ##    ##
+##          ##    ##     ## ##     ## ##          ##
+ ######     ##    ########  ##     ## ##          ##
+      ##    ##    ##   ##   ##     ## ##          ##
+##    ##    ##    ##    ##  ##     ## ##    ##    ##
+ ######     ##    ##     ##  #######   ######     ##
+
+######## ########  ######  ######## #### ##    ##  ######
+   ##    ##       ##    ##    ##     ##  ###   ## ##    ##
+   ##    ##       ##          ##     ##  ####  ## ##
+   ##    ######    ######     ##     ##  ## ## ## ##   ####
+   ##    ##             ##    ##     ##  ##  #### ##    ##
+   ##    ##       ##    ##    ##     ##  ##   ### ##    ##
+   ##    ########  ######     ##    #### ##    ##  ######
+
