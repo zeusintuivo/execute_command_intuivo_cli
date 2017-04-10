@@ -415,6 +415,25 @@ CERO="\033[01;0m"
             fi
         }
 
+
+        function is_service_running() {
+            local SERVICE_NAME SERVICE_STATUS SERVICE_FAIL_RESPONSE
+            SERVICE_NAME="${1}"
+            SERVICE_STATUS="${2}"
+            SERVICE_FAIL_RESPONSE="${3}"
+            TESTING="that service ${CYAN}${SERVICE_NAME}${LIGHTYELLOW} is running"
+            if [[ "${SERVICE_STATUS}" == *"${SERVICE_FAIL_RESPONSE}"* ]] ; then
+            {
+                echo "${SERVICE_STATUS}"
+                failed "${TESTING}"
+            }
+            else
+            {
+                passed "${TESTING}"
+            }
+            fi
+        }
+
     THISSCRIPTNAME=`basename "$0"`
 
     # TRAP
