@@ -161,6 +161,37 @@ CERO="\033[01;0m"
             fi
         }
 
+        function ensure() {
+            # Sample usage:
+            # assuming mongo bin is in your path
+            # ensure mongo or " Cancel export"
+            # ensure mongoexport or " Cancel export"
+            # ensure bsondump or " Cancel export"
+            if ! command -v "${1}" >/dev/null 2>&1; then # Command Does not-exist
+                echo " "
+                echo "Error! '${1}' is not in your PATH environment or cannot be reached.!"
+                return 1
+            else
+                local msg=""
+                [[ ! -z "${3+x}"  ]] &&     msg="${3}"  ;  # check if a variable is set and not empty and reassign value
+                msg=$(echo "${msg}" | sed  -e 's/ancel /anceling /g')
+                msg=$(echo "${msg}" | sed  -e 's/uit /uiting /g')
+                msg=$(echo "${msg}" | sed  -e 's/xit /xiting /g')
+                echo "${msg}"
+                [[ "${msg}" == *"anceling "* ]] && exit 130
+                [[ "${msg}" == *"uiting "* ]] && exit 130
+                [[ "${msg}" == *"xiting "* ]] && exit 130
+                return 1
+            fi
+        }
+
+        function not() {
+            local order="empty"  # Tasjgjgggg
+            if [[ ! -z "${1+x}"  ]] ; then  # check if a variable is set and not empty
+                NODE_VERSION="${1}"
+            fi
+        }
+
         function directory_exists(){
             # Sample usage
             #
