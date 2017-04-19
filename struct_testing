@@ -447,7 +447,13 @@ CERO="\033[01;0m"
         }
 
 
-        function is_service_running() {
+        function is_service_reponse_not_this_fail() {
+            #Sample use
+            # ( command -v nginx >/dev/null 2>&1; ) && sudo service nginx start
+            #
+            # is_service_reponse_not_this_fail "nginx" "$(sudo service nginx status)" "not running"
+            # is_service_reponse_not_this_fail "puma" "$(sudo /etc/init.d/pumacontrol.sh status)" "not running"
+            #
             local SERVICE_NAME SERVICE_STATUS SERVICE_FAIL_RESPONSE
             SERVICE_NAME="${1}"
             SERVICE_STATUS="${2}"
@@ -465,6 +471,31 @@ CERO="\033[01;0m"
             fi
         }
 
+        function is_service_running() {
+            #Sample use
+            # ( command -v nginx >/dev/null 2>&1; ) && sudo service nginx start
+            #
+            # is_service_running "nginx" "$(sudo service nginx status)" "is running"
+            # is_service_running "puma" "$(sudo /etc/init.d/pumacontrol.sh status)" "is running"
+            #
+            local SERVICE_NAME="${1}"
+            local SERVICE_STATUS="${2}"
+            local EXPECTED_RESPONSE="${3}"
+            echo SERVICE_NAME="${1}"
+            echo SERVICE_STATUS="${2}"
+            echo EXPECTED_RESPONSE="${3}"
+            TESTING="that service ${CYAN}${SERVICE_NAME}${LIGHTYELLOW} ${EXPECTED_RESPONSE}"
+            if [[ "${SERVICE_STATUS}" == *"${EXPECTED_RESPONSE}"* ]] ; then
+            {
+                passed "${TESTING}"
+            }
+            else
+            {
+                echo "${SERVICE_STATUS}"
+                failed "${TESTING}"
+            }
+            fi
+        }
     THISSCRIPTNAME=`basename "$0"`
 
     # TRAP
