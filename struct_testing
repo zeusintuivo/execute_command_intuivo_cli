@@ -77,15 +77,60 @@ function sample_use_verify_mongo() {
 	#  softlink_exists "/root/.pyenv>/home/vagrant/.pyenv"
 	#  check_to_be_installed "sysfsutils" "fix for transparent_hugepage"
 	#
-}
+
+} # end function sample_use_verify_mongo
 
 
 
 
+function HOW_TO_LOAD_SEVERAL_FILES() {
 
 
+    load_struct_testing(){
+        local URL=""
+        local EXECOMCLI=""
+        local provider=""
+        [ -d "/_/clis/execute_command_intuivo_cli/" ] &&  provider="file:///_/clis/execute_command_intuivo_cli/"
+        [ ! -d "/_/clis/execute_command_intuivo_cli/" ] && provider="https://raw.githubusercontent.com/zeusintuivo/execute_command_intuivo_cli/master/"
+        local BASH_SCRIPTS="
+    struct_testing
+    "
+    #execute_command
+        while read -r ONE_SCRIPT; do
+        {
+            if [ ! -z "${ONE_SCRIPT}" ] ; then         # if not empty
+            {
+                URL="${provider}${ONE_SCRIPT}"
+                EXECOMCLI=$(wget --quiet --no-check-certificate $URL  -O -  2>/dev/null )   # suppress only curl download messages, but keep curl output for variable
+                eval """${EXECOMCLI}"""
+                anounce $URL Loaded
+            }
+            fi
+        }
+        done <<< "${BASH_SCRIPTS}"
+        unset URL
+        unset EXECOMCLI
+        unset ONE_SCRIPT
+        unset BASH_SCRIPTS
+        unset provider
+        ( ( ! command -v type passed >/dev/null 2>&1;) && echo -e "\n \n  ERROR! Loading struct_testing \n \n " && exit 130; )
+    } # end function load_struct_testing
+    load_struct_testing
+
+} # end function HOW_TO_LOAD_SEVERAL_FILES
 
 
+function HOW_TO_LOAD_JUST_ONE_SCRIPT() {
+
+    load_struct_testing(){
+        # HOW TO LOAD JUST ONE SCRIPT
+        EXECOMCLI=$(wget --quiet --no-check-certificate https://raw.githubusercontent.com/zeusintuivo/execute_command_intuivo_cli/master/struct_testing -O -  2>/dev/null )   # suppress only curl download messages, but keep curl output for variable
+        eval """${EXECOMCLI}"""
+        ( ( ! command -v type passed >/dev/null 2>&1;) && echo -e "\n \n  ERROR! Loading struct_testing \n \n " && exit 130; )
+    } # end function load_struct_testing
+    load_struct_testing
+
+} # end function HOW_TO_LOAD_SEVERAL_FILES
 
 
 
