@@ -541,6 +541,70 @@ CERO="\033[01;0m"
             }
             fi
         }
+
+        type_function_exists() {
+          type "$1" > /dev/null 2>&1
+        } # type_function_exists
+
+
+        function is_installed() {
+            # Sample use
+            #
+            #          if  ! is_installed wget ; then    is like is NOT installed
+            #          if  is_installed wget ; then      it makes more sense to make it this way
+            #
+            local SERVICE_NAME="${1}"
+            if ! type_function_exists "${SERVICE_NAME}"; then
+            {
+                #failed "${TESTING}"
+                return 1
+            }
+            else
+            {
+                #passed "${TESTING}"
+                return 0
+            }
+            fi
+        }
+
+        function is_not_installed() {
+            # Sample use
+            #
+            #          if  ! is_not_installed wget ; then # you can, but not recommended, because it is confusing to read
+            #          if  is_not_installed wget ; then
+            #
+            local SERVICE_NAME="${1}"
+            if ! type_function_exists "${SERVICE_NAME}"; then
+            {
+                #passed "${TESTING}"
+                return 0
+            }
+            else
+            {
+                #failed "${TESTING}"
+                return 1
+            }
+            fi
+        }
+
+        function verify_is_installed() {
+            # Sample use
+            #
+            #            verify_is_installed wget
+            #
+            local SERVICE_NAME="${1}"
+            TESTING="that: ${CYAN}${SERVICE_NAME}${GREEN} is installed"
+            if ! is_installed "${SERVICE_NAME}"; then
+            {
+                failed "${TESTING}"
+            }
+            else
+            {
+                passed "${TESTING}"
+            }
+            fi
+        }
+
     THISSCRIPTNAME=`basename "$0"`
 
     # TRAP
