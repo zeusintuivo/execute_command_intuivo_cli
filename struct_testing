@@ -10,73 +10,73 @@
 function sample_use_verify_mongo() {
 
 
-	MONGO_VERSION="3.0.11"
-	if [ ! -z "${1}" ] ;  then
-	    MONGO_VERSION="${1}"
-	fi
+    MONGO_VERSION="3.0.11"
+    if [ ! -z "${1}" ] ;  then
+        MONGO_VERSION="${1}"
+    fi
 
-	echo -e "${GREEN} Verify mongo version"
-	CURRENT_VERSION=$(mongo --version  | egrep "MongoDB shell version" | head -1  | cut -d' ' -f4 | cut -d'v' -f2)
-	check_equality "${CURRENT_VERSION}=${MONGO_VERSION}"
-	echo -e "${GREEN} Verify mongod version"
-	MONGOD_VERSION=$(mongod --version | egrep "db version" | head -1 | cut -d'v' -f3)
-	check_equality "${MONGOD_VERSION}=${MONGO_VERSION}"
+    echo -e "${GREEN} Verify mongo version"
+    CURRENT_VERSION=$(mongo --version  | egrep "MongoDB shell version" | head -1  | cut -d' ' -f4 | cut -d'v' -f2)
+    check_equality "${CURRENT_VERSION}=${MONGO_VERSION}"
+    echo -e "${GREEN} Verify mongod version"
+    MONGOD_VERSION=$(mongod --version | egrep "db version" | head -1 | cut -d'v' -f3)
+    check_equality "${MONGOD_VERSION}=${MONGO_VERSION}"
 
-	TESTING=" verify that MongoDB has started ${CYAN}successfully${LIGHTYELLOW}"
-	if [ ! -z "${MONGO_PID}" ] && [ ! -z "${MONGO_TASKID}" ] && [[ "${MONGO_SERVICE_STATUS}" == *"mongod start/running"* ]] ; then
-	{
+    TESTING=" verify that MongoDB has started ${CYAN}successfully${LIGHTYELLOW}"
+    if [ ! -z "${MONGO_PID}" ] && [ ! -z "${MONGO_TASKID}" ] && [[ "${MONGO_SERVICE_STATUS}" == *"mongod start/running"* ]] ; then
+    {
 
-	    echo -e " ${PURPLE}+---- ${LIGHTYELLOW}       Service Status: ${CYAN}${MONGO_SERVICE_STATUS} "
-	    echo -e " ${PURPLE}+---- ${LIGHTYELLOW}            Mongo PID: ${CYAN}${MONGO_PID} "
-	    echo -e " ${PURPLE}+---- ${LIGHTYELLOW}        Mongo Task ID: ${CYAN}${MONGO_TASKID} "
-	    echo -e " ${PURPLE}+---- ${LIGHTYELLOW}      Which Mongo cli: ${CYAN}${WHICH_MONGO} "
-	    echo -e " ${PURPLE}+---- ${LIGHTYELLOW}        Mongo version: ${CYAN}${CURRENT_VERSION} "
-	    echo -e " ${PURPLE}+---- ${LIGHTYELLOW}   Which Mongo Server: ${CYAN}${WHICH_MONGOD} "
-	    echo -e " ${PURPLE}+---- ${LIGHTYELLOW} Mongo Server version: ${CYAN}${MONGOD_VERSION} "
-	    echo -e " ${PURPLE}+---- ${LIGHTYELLOW}     Log last 4 lines: ${CYAN}${MONGO_LOG} "
-	    echo -e " ${PURPLE}+---- ${LIGHTYELLOW}     hugepage/enabled: ${CYAN}${FILE_CONTENTS_ENABLED} "
-	    echo -e " ${PURPLE}+---- ${LIGHTYELLOW}      hugepage/defrag: ${CYAN}${FILE_CONTENTS_DEFRAG} "
-	    passed "${TESTING}"
+        echo -e " ${PURPLE}+---- ${LIGHTYELLOW}       Service Status: ${CYAN}${MONGO_SERVICE_STATUS} "
+        echo -e " ${PURPLE}+---- ${LIGHTYELLOW}            Mongo PID: ${CYAN}${MONGO_PID} "
+        echo -e " ${PURPLE}+---- ${LIGHTYELLOW}        Mongo Task ID: ${CYAN}${MONGO_TASKID} "
+        echo -e " ${PURPLE}+---- ${LIGHTYELLOW}      Which Mongo cli: ${CYAN}${WHICH_MONGO} "
+        echo -e " ${PURPLE}+---- ${LIGHTYELLOW}        Mongo version: ${CYAN}${CURRENT_VERSION} "
+        echo -e " ${PURPLE}+---- ${LIGHTYELLOW}   Which Mongo Server: ${CYAN}${WHICH_MONGOD} "
+        echo -e " ${PURPLE}+---- ${LIGHTYELLOW} Mongo Server version: ${CYAN}${MONGOD_VERSION} "
+        echo -e " ${PURPLE}+---- ${LIGHTYELLOW}     Log last 4 lines: ${CYAN}${MONGO_LOG} "
+        echo -e " ${PURPLE}+---- ${LIGHTYELLOW}     hugepage/enabled: ${CYAN}${FILE_CONTENTS_ENABLED} "
+        echo -e " ${PURPLE}+---- ${LIGHTYELLOW}      hugepage/defrag: ${CYAN}${FILE_CONTENTS_DEFRAG} "
+        passed "${TESTING}"
 
-	}
-	else
-	{
-	    failed "${TESTING}"
-	}
-	fi
+    }
+    else
+    {
+        failed "${TESTING}"
+    }
+    fi
 
-	directory_exists "
-	/data
-	/data/db
-	/var/log/mongodb
-	"
+    directory_exists "
+    /data
+    /data/db
+    /var/log/mongodb
+    "
 
-	# Disabled
-	#/_/version-manager                             # Patch mongoo-manager form nodejs
-	#/home/vagrant/.mongodb
-	#softlink_exists "/root/.mongodb>/home/vagrant/.mongodb"
+    # Disabled
+    #/_/version-manager                             # Patch mongoo-manager form nodejs
+    #/home/vagrant/.mongodb
+    #softlink_exists "/root/.mongodb>/home/vagrant/.mongodb"
 
-	file_exists "/etc/mongod.conf
-	/etc/init/mongod.conf
-	/etc/sysfs.conf
-	/etc/mongo_vm_settings.conf
-	/sys/kernel/mm/transparent_hugepage/khugepaged/defrag
-	/sys/kernel/mm/transparent_hugepage/defrag
-	/sys/kernel/mm/transparent_hugepage/enabled
-	"
-	# Extra notes
-	# /etc/init/mongod.conf                           # This is the mongo service start|stop|status
-	# /etc/default/mongod                             # There is ref to this file inside the service /etc/init/mongod.conf
+    file_exists "/etc/mongod.conf
+    /etc/init/mongod.conf
+    /etc/sysfs.conf
+    /etc/mongo_vm_settings.conf
+    /sys/kernel/mm/transparent_hugepage/khugepaged/defrag
+    /sys/kernel/mm/transparent_hugepage/defrag
+    /sys/kernel/mm/transparent_hugepage/enabled
+    "
+    # Extra notes
+    # /etc/init/mongod.conf                           # This is the mongo service start|stop|status
+    # /etc/default/mongod                             # There is ref to this file inside the service /etc/init/mongod.conf
 
-	# Disabled
-	#/etc/systemd/system/mongodb-hugepage-fix.service # service systemd  16.04
-	#/etc/systemd/system/mongodb.service              # service systemd  16.04
-	#/_/version-manager/bin/m.js                      # Patch mongoo-manager form nodejs
-	#/_/version-manager/package.json                  # Patch mongoo-manager form nodejs
+    # Disabled
+    #/etc/systemd/system/mongodb-hugepage-fix.service # service systemd  16.04
+    #/etc/systemd/system/mongodb.service              # service systemd  16.04
+    #/_/version-manager/bin/m.js                      # Patch mongoo-manager form nodejs
+    #/_/version-manager/package.json                  # Patch mongoo-manager form nodejs
 
-	#  softlink_exists "/root/.pyenv>/home/vagrant/.pyenv"
-	#  check_to_be_installed "sysfsutils" "fix for transparent_hugepage"
-	#
+    #  softlink_exists "/root/.pyenv>/home/vagrant/.pyenv"
+    #  check_to_be_installed "sysfsutils" "fix for transparent_hugepage"
+    #
 
 } # end function sample_use_verify_mongo
 
@@ -616,14 +616,14 @@ CERO="\033[01;0m"
             local VERSION_EXPECTED="${2}"
 
             TESTING="that installed version for ${1} is ${CYAN}${VERSION_EXPECTED}${GREEN}"
-            if [[ "${EVAL_GET_VERSION_STRING}" == *"${VERSION_EXPECTED}"* ]] ; then
+            if [[ "${EVAL_GET_VERSION_STRING}" == *"${VERSION_EXPECTED}"* ]] || [[ "${EVAL_GET_VERSION_STRING}" == "${VERSION_EXPECTED}" ]]; then
             {
-                echo -e "${RED}I got response: ${YELLOW_OVER_DARKBLUE}${EVAL_GET_VERSION_STRING}"
-                failed "${TESTING}"
+                passed "${TESTING}"
             }
             else
             {
-                passed "${TESTING}"
+                echo -e "${RED} 𝞦 I got response: ${YELLOW_OVER_DARKBLUE}${EVAL_GET_VERSION_STRING}"
+                failed "${TESTING}"
             }
             fi
         }
