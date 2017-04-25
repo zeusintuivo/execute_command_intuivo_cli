@@ -605,6 +605,27 @@ CERO="\033[01;0m"
             fi
         }
 
+        function verify_installed_version() {
+            # Sample use
+            #
+            #            verify_installed_version "node --version"  "${node_version}"
+            #            verify_installed_version "phantomjs --version"  "${phantomjs_version}"
+            #            verify_installed_version "casperjs --version"  "${casper_version}"
+            #
+            local EVAL_GET_VERSION_STRING=$(eval "${1}")
+            local VERSION_EXPECTED="${2}"
+            TESTING="that installed version for ${1} is {CYAN}${VERSION_EXPECTED}${GREEN}"
+            if [[ "${EVAL_GET_VERSION_STRING}" == *"${VERSION_EXPECTED}"* ]] ; then
+            {
+                failed "${TESTING}"
+            }
+            else
+            {
+                passed "${TESTING}"
+            }
+            fi
+        }
+
     THISSCRIPTNAME=`basename "$0"`
 
     # TRAP
