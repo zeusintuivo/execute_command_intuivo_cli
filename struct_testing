@@ -618,7 +618,7 @@ CERO="\033[01;0m"
             TESTING="that installed version for ${1} is ${CYAN}${VERSION_EXPECTED}${GREEN}"
             if [[ "${EVAL_GET_VERSION_STRING}" == *"${VERSION_EXPECTED}"* ]] ; then
             {
-                echo "${RED}I got response: ${YELLOW_OVER_DARKBLUE}${EVAL_GET_VERSION_STRING}"
+                echo -e "${RED}I got response: ${YELLOW_OVER_DARKBLUE}${EVAL_GET_VERSION_STRING}"
                 failed "${TESTING}"
             }
             else
