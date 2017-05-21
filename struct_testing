@@ -628,6 +628,43 @@ CERO="\033[01;0m"
             fi
         }
 
+        function if_user_exists(){
+            local ${TARGET_USER}="${@}"
+            _subinfo param: ${TARGET_USER}
+            _subinfo Checking if ${TARGET_USER} exists ${gray242}
+            local LIST_ALL_USERS=$(cut -d: -f1 /etc/passwd) # REF: http://askubuntu.com/questions/410244/a-command-to-list-all-users-and-how-to-add-delete-modify-users
+            local USERID=$(id -u ${TARGET_USER})
+            # Alternative to check getent passwd $user  > /dev/null
+            # Alternative to check getent passwd mongodb  > /dev/null
+            THISSCRIPTNAME=`basename "$0"`
+
+            if [ -z "${USERID}" ] ; then
+            {
+                return 1 #failed
+            }
+            fi
+            return 0 #found
+        }
+        function check_if_user_exists(){
+            local ${TARGET_USER}="${@}"
+            if ( ! if_user_exists "${TARGET_USER}"  ); then
+            {
+                 failed "The user '${TARGET_USER}'
+                        you provided does not exist
+
+                        ${orange208}  Please use like:
+
+                            check_if_user_exists username_here
+
+                        Sample:
+
+                            check_if_user_exists zeus      <-- This will check for the zeus user
+                        ${reset}"
+            }
+            fi
+            passed "The user ${TARGET_USER} exists"
+        }
+
     THISSCRIPTNAME=`basename "$0"`
 
     # TRAP
