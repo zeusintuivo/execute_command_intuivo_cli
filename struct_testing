@@ -654,10 +654,9 @@ CERO="\033[01;0m"
             passed "${TESTING}"
         }
 
-    THISSCRIPTNAME=`basename "$0"`
 
     # TRAP
-    trap '{  \" ${THISSCRIPTNAME} KEYBOARD INTERRUPT.\"; exit 130; }' INT
+    trap '{  \" `basename "$0"` KEYBOARD INTERRUPT.\"; exit 130; }' INT
 
         #
         # Template:
