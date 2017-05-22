@@ -615,7 +615,7 @@ CERO="\033[01;0m"
             local EVAL_GET_VERSION_STRING=$(eval "${1}")
             local VERSION_EXPECTED="${2}"
 
-            TESTING="that installed version for ${1} is ${CYAN}${VERSION_EXPECTED}${GREEN}"
+            local TESTING="that installed version for ${1} is ${CYAN}${VERSION_EXPECTED}${GREEN}"
             if [[ "${EVAL_GET_VERSION_STRING}" == *"${VERSION_EXPECTED}"* ]] || [[ "${EVAL_GET_VERSION_STRING}" == "${VERSION_EXPECTED}" ]]; then
             {
                 passed "${TESTING}"
@@ -629,40 +629,29 @@ CERO="\033[01;0m"
         }
 
         function if_user_exists(){
-            local ${TARGET_USER}="${@}"
-            _subinfo param: ${TARGET_USER}
-            _subinfo Checking if ${TARGET_USER} exists ${gray242}
+            # Sample use
+            #
+            #            ( ! if_user_exists "postgres"  ) && failed "${TESTING}"
+            #            ( if_user_exists "postgres"  ) && passed "${TESTING}"
+            #
+            local ${TARGET_USER}="${1}"
+            local TESTING="that user ${TARGET_USER} is ${CYAN}exists${GREEN}"
             local LIST_ALL_USERS=$(cut -d: -f1 /etc/passwd) # REF: http://askubuntu.com/questions/410244/a-command-to-list-all-users-and-how-to-add-delete-modify-users
             local USERID=$(id -u ${TARGET_USER})
             # Alternative to check getent passwd $user  > /dev/null
             # Alternative to check getent passwd mongodb  > /dev/null
-            THISSCRIPTNAME=`basename "$0"`
-
-            if [ -z "${USERID}" ] ; then
-            {
-                return 1 #failed
-            }
-            fi
+            [ -z "${USERID}" ] &&  return 1 #failed
             return 0 #found
         }
         function check_if_user_exists(){
-            local ${TARGET_USER}="${@}"
-            if ( ! if_user_exists "${TARGET_USER}"  ); then
-            {
-                 failed "The user '${TARGET_USER}'
-                        you provided does not exist
-
-                        ${orange208}  Please use like:
-
-                            check_if_user_exists username_here
-
-                        Sample:
-
-                            check_if_user_exists zeus      <-- This will check for the zeus user
-                        ${reset}"
-            }
-            fi
-            passed "The user ${TARGET_USER} exists"
+            # Sample use
+            #
+            #            check_if_user_exists "postgres"
+            #
+            local ${TARGET_USER}="${1}"
+            local TESTING="checking that user ${TARGET_USER} is ${CYAN}exists${GREEN}"
+            ( ! if_user_exists "${TARGET_USER}"  ) && failed "${TESTING}"
+            passed "${TESTING}"
         }
 
     THISSCRIPTNAME=`basename "$0"`
