@@ -30,7 +30,7 @@ function load_colors {
 load_colors
 msg_red() {
     echo  " "
-    echo  "${red} $@"
+    echo  -e "${red} $@"
     echo  " "
 }
 BLANK_SPACE="${blue23} • ${green} "
@@ -39,6 +39,12 @@ trap ' { msg_red "KEYBOARD INTERRUPT."; exit 130; }' INT
                           # Escape chars / !
 escape_slashes() {
     sed 's/\//\\\//g'
+}
+escape_parentheses() {
+    sed 's/[(]/\(/g' | sed 's/[)]/\)/g'
+}
+escape_filename() {
+    escape_parentheses | escape_spaces
 }
 escape_backslashes() {
     sed 's/\\/\\\\/g'
