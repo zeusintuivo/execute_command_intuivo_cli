@@ -41,7 +41,7 @@ escape_slashes() {
     sed 's/\//\\\//g'
 }
 escape_parentheses() {
-    sed 's/[(]/\(/g' | sed 's/[)]/\)/g'
+    sed 's/[(]/\\\(/g' | sed 's/[)]/\\\)/g'
 }
 escape_filename() {
     escape_parentheses | escape_spaces
