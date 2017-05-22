@@ -292,7 +292,7 @@ CERO="\033[01;0m"
                     # But /home/user/.pyenv  <-- will pass
                     # OR Users/administrator/.pyenv  in mac <-- will pass
                     # ONE_DIR="/Users/administrator/.pyenv"
-                    TESTING="that $0 ${CYAN}${ONE_DIR}${LIGHTYELLOW} does not exist"
+                    TESTING="that ${CYAN}${ONE_DIR}${LIGHTYELLOW} does not exist"
                     if [[ ! -e "${ONE_DIR}" ]] ; then
                     {
                         passed "${TESTING}"
