@@ -654,6 +654,36 @@ CERO="\033[01;0m"
             passed "${TESTING}"
         }
 
+        function install_apt_get_requirements(){
+
+            # room for detecting Linux and OS systems
+            local OS="${1}"
+            local missing=""
+            local one_required=""
+            local required="${2}"
+            for one_required in ${required}; do
+            {
+                dpkg -l | egrep "$one_required" &>/dev/null
+                if [ $? == 0 ]; then
+                {
+                    echo -e " ${GREEN} $one_required ${YELLOW} INSTALLED."
+                }
+                else
+                {
+                    echo -e " ${RED}  NEED TO INSTALL ${YELLOW} $one_required."
+                    missing="${missing} ${one_required}"
+                }
+                fi
+            }
+            done
+            missing=$(echo ${missing} | sed -e 's/^[[:space:]]*//' | sed 's/^\ //g' | sed 's/^\t//g' ) # trim_start_space
+
+            # Check Requirements OS Ubuntu 14.04 REF: https://wiki.postgresql.org/wiki/Compile_and_Install_from_source_code#Ubuntu
+            [[ ! -z "${missing}" ]] && echo -e " ${CYAN} Installing missing packages: ${missing} ${RESET}"
+            [[ ! -z "${missing}" ]] && sudo apt-get install ${missing} -yfq
+
+        } # end install_apt_get_requirements
+
     THISSCRIPTNAME=`basename "$0"`
 
     # TRAP
