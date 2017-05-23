@@ -674,7 +674,7 @@ CERO="\033[01;0m"
             local OS="${1}"
             local missing=""
             local one_required=""
-            local required="${2}"
+            local required=$(grep -vE '^\s+#'<<<"${2}")
             for one_required in ${required}; do
             {
                 dpkg -l | egrep "$one_required" &>/dev/null
