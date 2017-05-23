@@ -655,7 +655,21 @@ CERO="\033[01;0m"
         }
 
         function install_apt_get_requirements(){
-
+            # Sample use
+            #               local OS="${1}"
+            #               install_apt_get_requirements "${OS}" "
+            #                        build-essential
+            #                        libreadline-dev
+            #                        zlib1g-dev
+            #                        flex
+            #                        bison
+            #                        libxml2-dev
+            #                        libxslt-dev
+            #                        libssl-dev
+            #
+            #                        libreadline6-dev
+            #                        libossp-uuid-dev
+            #                        uuid"
             # room for detecting Linux and OS systems
             local OS="${1}"
             local missing=""
@@ -687,19 +701,36 @@ CERO="\033[01;0m"
         # C H E C K   H O W   C O M P U T E R   H A N D L E S   E R R O R S   --Start
         #
         function test_positives(){
-          KIND=""
-          ls werwerwerwerwerwerwerwerwerwerwerr >/dev/null 2>&1;
-          if (( $? == 0 )) ;  then  # Intel processor
+            # Sample use
+            #
+            #
+            #    message_response=$(ls asdasdfas1234  2>&1 )  # Perform an action with error ,capture all output, error will return 1 to $?
+            #    ERROR_HAPPENED=""
+            #    [[ "${PROCESSOR_ERROR}" == *"MAC"* ]] && [ $? != 0 ] && ERROR_HAPPENED="1"
+            #    [[ "${PROCESSOR_ERROR}" == *"INTEL"* ]] && (( $? != 0 )) && ERROR_HAPPENED="1"
+            #    if [ "${ERROR_HAPPENED}" ] || \
+            #        [[ "${message_response}" == *"error"* ]] || \
+            #        [[ "${message_response}" == *"ERROR"* ]] || \
+            #        [[ "${message_response}" == *"denied"* ]] \
+            #    ; then
+            #    {
+            #        failed "There was an error- do something- show something ${message_response}"
+            #    }
+            #    fi
+
+            KIND=""
+            ls werwerwerwerwerwerwerwerwerwerwerr >/dev/null 2>&1;
+            if (( $? == 0 )) ;  then  # Intel processor
             KIND="INTEL"
-          fi
-          if [ $? == 0 ]; then   # Mac Intel processor
+            fi
+            if [ $? == 0 ]; then   # Mac Intel processor
             KIND="${KIND}MAC"
-          fi
-          echo "${KIND}"
+            fi
+            echo "${KIND}"
         }
         PROCESSOR_ERROR=$(test_positives)
-        # DEBUG MACPOSITIVE MACPOSITIVE echo "${MACPOSITIVE}"
-        # DEBUG MACPOSITIVE exit 1
+        # DEBUG test_positives echo "${PROCESSOR_ERROR}"
+        # DEBUG test_positives exit 1
         #
         # C H E C K   H O W   C O M P U T E R   H A N D L E S   E R R O R S   --End
         #
