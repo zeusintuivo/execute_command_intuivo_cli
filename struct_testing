@@ -704,8 +704,8 @@ CERO="\033[01;0m"
             # Sample use
             #
             #
-            #    message_response=$(ls asdasdfas1234  2>&1 )  # Perform an action with error ,capture all output, error will return 1 to $?
-            #    ERROR_HAPPENED=""
+            #    local message_response=$(ls asdasdfas1234  2>&1 )  # Perform an action with error ,capture all output, error will return 1 to $?
+            #    local ERROR_HAPPENED=""
             #    [[ "${PROCESSOR_ERROR}" == *"MAC"* ]] && [ $? != 0 ] && ERROR_HAPPENED="1"
             #    [[ "${PROCESSOR_ERROR}" == *"INTEL"* ]] && (( $? != 0 )) && ERROR_HAPPENED="1"
             #    if [ "${ERROR_HAPPENED}" ] || \
