@@ -683,7 +683,26 @@ CERO="\033[01;0m"
             [[ ! -z "${missing}" ]] && sudo apt-get install ${missing} -yfq
 
         } # end install_apt_get_requirements
-
+        #
+        # C H E C K   H O W   C O M P U T E R   H A N D L E S   E R R O R S   --Start
+        #
+        function test_positives(){
+          KIND=""
+          ls werwerwerwerwerwerwerwerwerwerwerr >/dev/null 2>&1;
+          if (( $? == 0 )) ;  then  # Intel processor
+            KIND="INTEL"
+          fi
+          if [ $? == 0 ]; then   # Mac Intel processor
+            KIND="${KIND}MAC"
+          fi
+          echo "${KIND}"
+        }
+        PROCESSOR_ERROR=$(test_positives)
+        # DEBUG MACPOSITIVE MACPOSITIVE echo "${MACPOSITIVE}"
+        # DEBUG MACPOSITIVE exit 1
+        #
+        # C H E C K   H O W   C O M P U T E R   H A N D L E S   E R R O R S   --End
+        #
     THISSCRIPTNAME=`basename "$0"`
 
     # TRAP
