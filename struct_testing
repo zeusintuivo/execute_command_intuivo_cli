@@ -732,6 +732,43 @@ CERO="\033[01;0m"
             passed "${TESTING}"
         }
 
+        function has_error_keyword() {
+            local bulk="${*}"
+            return    [[ "${bulk}" == *"Could not resolve"* ]] || \
+                      [[ "${bulk}" == *"Repository not found"* ]] || \
+                      [[ "${bulk}" == *"Could not read from"* ]] || \
+                      [[ "${bulk}" == *"Could not"* ]] || \
+                      [[ "${bulk}" == *"could not"* ]] || \
+                      [[ "${bulk}" == *"Fatal"* ]] || \
+                      [[ "${bulk}" == *"FATAL"* ]] || \
+                      [[ "${bulk}" == *"fatal"* ]] || \
+                      [[ "${bulk}" == *"FAILED"* ]] || \
+                      [[ "${bulk}" == *"failed"* ]] || \
+                      [[ "${bulk}" == *"Failed"* ]] || \
+                      [[ "${bulk}" == *"error"* ]] || \
+                      [[ "${bulk}" == *"ERROR"* ]] || \
+                      [[ "${bulk}" == *"Error"* ]] || \
+                      [[ "${bulk}" == *"Denied"* ]] || \
+                      [[ "${bulk}" == *"denied"* ]]
+        } # end has_error_keyword
+
+        function handle_error() {
+            local bulk="${*}"
+            local error_happened=""
+            [[ "${PROCESSOR_ERROR}" == *"MAC"* ]] && [ $? != 0 ] && error_happened="1"
+            [[ "${PROCESSOR_ERROR}" == *"INTEL"* ]] && (( $? != 0 )) && error_happened="1"
+            if [ "${error_happened}" ]  ||  ( has_error_keyword "${bulk}" ) ; then
+            {
+              echo -e "${PURPLE_BLUE} fetch ${RED}Failed ${YELLOW226}!!!  ${RESET}"
+              [[ "${bulk}" == *"Could not resolve"* ]] && echo -e "${BRIGHT_BLUE87} It appears YOU HAVE ${YELLOW226}NO INTERNET CONNECTION \o_0/ ${RESET}"
+              [[ "${bulk}" == *"Repository not found"* ]] && echo -e "${BRIGHT_BLUE87} It appears YOU HAVE ${YELLOW226}NO ACCESS TO THIS FOR YOU ${RED} ${GIT_USER_NAME} ${RESET}"
+              [[ "${bulk}" == *"Could not read from"* ]] && echo -e "${BRIGHT_BLUE87} It appears it exists but you are ${RED}NOT ${YELLOW226} ALLOWED ${RED} ${GIT_USER_NAME} ${YELLOW226}!!! ${RESET}"
+              echo -e "${RESET}${bulk}  "
+              exit 69;
+            }
+            fi
+
+        } # end handle_error
         function install_apt_get_requirements(){
             # Sample use
             #               local OS="${1}"
@@ -773,7 +810,6 @@ CERO="\033[01;0m"
             # Check Requirements OS Ubuntu 14.04 REF: https://wiki.postgresql.org/wiki/Compile_and_Install_from_source_code#Ubuntu
             [[ ! -z "${missing}" ]] && echo -e " ${CYAN} Installing missing packages: ${missing} ${RESET}"
             [[ ! -z "${missing}" ]] && local install_result=$(sudo apt-get install ${missing} -yfq   2>&1) # capture all input and output
-
         } # end install_apt_get_requirements
         #
         # C H E C K   H O W   C O M P U T E R   H A N D L E S   E R R O R S   --Start
