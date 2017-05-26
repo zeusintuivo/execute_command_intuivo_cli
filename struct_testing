@@ -740,7 +740,7 @@ CERO="\033[01;0m"
 
             # Check Requirements OS Ubuntu 14.04 REF: https://wiki.postgresql.org/wiki/Compile_and_Install_from_source_code#Ubuntu
             [[ ! -z "${missing}" ]] && echo -e " ${CYAN} Installing missing packages: ${missing} ${RESET}"
-            [[ ! -z "${missing}" ]] && sudo apt-get install ${missing} -yfq
+            [[ ! -z "${missing}" ]] && local install_result=$(sudo apt-get install ${missing} -yfq   2>&1) # capture all input and output
 
         } # end install_apt_get_requirements
         #
@@ -780,10 +780,12 @@ CERO="\033[01;0m"
         #
         # C H E C K   H O W   C O M P U T E R   H A N D L E S   E R R O R S   --End
         #
-    THISSCRIPTNAME=`basename "$0"`
+    [ ! -z "$0" ] && [ -e "$0" ] && THISSCRIPTNAME=`basename "$0"`
 
     # TRAP
-    trap '{  \" `basename "$0"` KEYBOARD INTERRUPT.\"; exit 69; }' INT
+    [ ! -z "$0" ] && [   -e "$0" ] &&  trap '{  \" `basename "$0"` KEYBOARD INTERRUPT.\"; exit 69; }' INT
+    [   -z "$0" ] && [ ! -e "$0" ] &&  trap '{  \" STRUCT TESTING KEYBOARD INTERRUPT.\"; exit 69; }' INT
+    [ ! -z "$0" ] && [ ! -e "$0" ] &&  trap '{  \" STRUCT TESTING KEYBOARD INTERRUPT.\"; exit 69; }' INT
 
         #
         # Template:
