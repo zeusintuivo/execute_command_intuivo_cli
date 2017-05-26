@@ -235,10 +235,13 @@ function HOW_TO_LOAD_JUST_ONE_SCRIPT_ONLINE_ALWAYS_STRUCT_USING_WGET() {
 #
 
 RED="\033[01;31m"
+#RED="\033[38;5;1m"
 ORANGE="\033[38;5;202m"
 
-YELLOW="\033[01;33m"
+WHITE="\033[38;5;15m"
 WHITEBOLD="\033[01;37m"
+YELLOW="\033[01;33m"
+YELLOW226="\033[38;5;226m"
 
 
 GRAY="\033[38;5;8m"
@@ -254,6 +257,8 @@ LIGHTYELLOW="\033[38;5;227m"
 CYAN="\033[01;36m"
 PURPLE="\033[01;35m"
 DARKBLUE="\033[01;34m"
+PURPLE_BLUE="\033[38;5;93m"
+BRIGHT_BLUE87="\033[38;5;87m"
 
 YELLOW_OVER_DARKBLUE="\033[38;5;220m\033[48;5;20m"
 YELLOW_OVER_DARKBLUE2="\033[38;5;11m\033[48;5;18m"
@@ -759,7 +764,7 @@ CERO="\033[01;0m"
             [[ "${PROCESSOR_ERROR}" == *"INTEL"* ]] && (( $? != 0 )) && error_happened="1"
             if [ "${error_happened}" ]  ||  ( has_error_keyword "${bulk}" ) ; then
             {
-              echo -e "${PURPLE_BLUE} fetch ${RED}Failed ${YELLOW226}!!!  ${RESET}"
+              echo -e "${PURPLE_BLUE} action ${RED}failed ${YELLOW226}!!!  ${RESET}"
               [[ "${bulk}" == *"Could not resolve"* ]] && echo -e "${BRIGHT_BLUE87} It appears YOU HAVE ${YELLOW226}NO INTERNET CONNECTION \o_0/ ${RESET}"
               [[ "${bulk}" == *"Repository not found"* ]] && echo -e "${BRIGHT_BLUE87} It appears YOU HAVE ${YELLOW226}NO ACCESS TO THIS FOR YOU ${RED} ${GIT_USER_NAME} ${RESET}"
               [[ "${bulk}" == *"Could not read from"* ]] && echo -e "${BRIGHT_BLUE87} It appears it exists but you are ${RED}NOT ${YELLOW226} ALLOWED ${RED} ${GIT_USER_NAME} ${YELLOW226}!!! ${RESET}"
@@ -810,6 +815,7 @@ CERO="\033[01;0m"
             # Check Requirements OS Ubuntu 14.04 REF: https://wiki.postgresql.org/wiki/Compile_and_Install_from_source_code#Ubuntu
             [[ ! -z "${missing}" ]] && echo -e " ${CYAN} Installing missing packages: ${missing} ${RESET}"
             [[ ! -z "${missing}" ]] && local install_result=$(sudo apt-get install ${missing} -yfq   2>&1) # capture all input and output
+            [[ ! -z "${install_result}" ]] handle_error "${install_result}"
         } # end install_apt_get_requirements
         #
         # C H E C K   H O W   C O M P U T E R   H A N D L E S   E R R O R S   --Start
