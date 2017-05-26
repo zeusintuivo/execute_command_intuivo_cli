@@ -25,7 +25,7 @@
                          echo `tput setaf 1` "$@" `tput sgr0`
                       }
                     fi
-                    exit 130;
+                    exit 69;
                   }
                   function _anounce_worker(){
                     echo `tput setaf 23` "${@}" `tput sgr0` ;

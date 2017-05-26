@@ -37,7 +37,7 @@ _load_colorful_messenger_FUNCTIONs() {
 
         _say_error_and_exit_worker() {
             echo -e "☠ ${red} ${@} ${reset}";
-            exit 130;
+            exit 69;
         }
         !!!() {
             _say_error_and_exit_worker "${@}"

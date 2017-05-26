@@ -34,7 +34,7 @@ msg_red() {
     echo  " "
 }
 BLANK_SPACE="${blue23} • ${green} "
-trap ' { msg_red "KEYBOARD INTERRUPT."; exit 130; }' INT
+trap ' { msg_red "KEYBOARD INTERRUPT."; exit 69; }' INT
 
                           # Escape chars / !
 escape_slashes() {
@@ -337,7 +337,7 @@ highlight_commander() {
         local mosagio="Expecting Command list. 1st Parameter \
         Missing, Global Var HIGHLIGHT_WORDS missing"
         msg_red "$PWD/$0:${LINENO} ${FUNCNAME[0]}() $mosagio"
-        exit 130
+        exit 69
         return 2
     }
     fi
@@ -350,7 +350,7 @@ highlight_commander() {
     }
     fi
     #echo "$local_WORDS"
-    #exit 130 ;
+    #exit 69 ;
     # FORCE TEST ? local_TEST="test"
     if [ -t 0 ]; then
     {
@@ -471,7 +471,7 @@ $local_PIPED
                     local mosagio="Failed to call Function. Function Missing "
                     mosagio="$mosagio or Misspelled:${local_COMMAND}"
                     msg_red "$PWD/$0:${LINENO} ${FUNCNAME[0]}() $mosagio"
-                    exit 130
+                    exit 69
                     return 2
                 }
                 fi
@@ -691,7 +691,7 @@ _execute_command_worker() {
         fi
         echo -e " ${reset}";
         echo -e " "
-        exit 130;
+        exit 69;
     }
     else
     {
@@ -732,7 +732,7 @@ mock_command() {
 }
 _say_error_and_exit_worker() {
     echo -e "☠"  `tput setaf 1` "$@" "!!!" `tput sgr0`
-    exit 130;
+    exit 69;
 }
 _anounce_worker() {
     echo -e "${BLANK_SPACE}${@} ${reset}";
@@ -759,7 +759,7 @@ comment() {
 
 debug() {
     echo -e "${red} +-- ${lightblue} ${@} ${reset}";
-    exit 130;
+    exit 69;
 }
 list() {
     echo -e "${lightpurple} · ${lightblue} ${@} ${reset}";

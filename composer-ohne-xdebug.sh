@@ -10,7 +10,7 @@
                     echo -e "\\033[1;31m"
                     echo  "$@" "!!!"
                     echo -e "\\033[0m "
-                    exit 130;
+                    exit 69;
                   }
                           function !!!(){
                             _say_error_and_exit_worker "${@}"

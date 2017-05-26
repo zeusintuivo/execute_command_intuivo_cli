@@ -16,7 +16,7 @@ if [[ -z "${1+x}"  ]] ; then
           provide at least one option: 
 "
           "$composer" "$@" 
-    exit 130
+    exit 69
 fi 
 
 
@@ -93,7 +93,7 @@ fi
 echo "
     System not supported: ${os_system}
     "
-exit 130
+exit 69
 
 
 
