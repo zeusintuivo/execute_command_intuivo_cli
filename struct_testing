@@ -80,13 +80,9 @@ function sample_use_verify_mongo() {
 
 } # end function sample_use_verify_mongo
 
-
-
-
 function HOW_TO_LOAD_SEVERAL_FILES() {
 
-
-    load_struct_testing(){
+    load_execute_commands_wget(){
         local URL=""
         local EXECOMCLI=""
         local provider=""
@@ -94,6 +90,7 @@ function HOW_TO_LOAD_SEVERAL_FILES() {
         [ ! -d "/_/clis/execute_command_intuivo_cli/" ] && provider="https://raw.githubusercontent.com/zeusintuivo/execute_command_intuivo_cli/master/"
         local BASH_SCRIPTS="
     struct_testing
+    execute_command
     "
     #execute_command
         while read -r ONE_SCRIPT; do
@@ -114,23 +111,63 @@ function HOW_TO_LOAD_SEVERAL_FILES() {
         unset BASH_SCRIPTS
         unset provider
         ( ( ! command -v type passed >/dev/null 2>&1;) && echo -e "\n \n  ERROR! Loading struct_testing \n \n " && exit 130; )
-    } # end function load_struct_testing
-    load_struct_testing
+    } # end load_execute_commands_wget
+    load_execute_commands_wget
 
 } # end function HOW_TO_LOAD_SEVERAL_FILES
 
+function HOW_TO_LOAD_JUST_ONE_SCRIPT_LOCAL_AND_ONLINE_EXECUTE_COMMAND() {
 
-function HOW_TO_LOAD_JUST_ONE_SCRIPT() {
+    #Sample short call for loading execute command
+    load_execute_command_curl(){
+        local provider="file:///_/clis/execute_command_intuivo_cli/execute_command"
+        [ ! -d "/_/clis/execute_command_intuivo_cli/" ] && provider="https://raw.githubusercontent.com/zeusintuivo/execute_command_intuivo_cli/master/execute_command"
+        local EXECOMCLI=$(curl $provider  2>/dev/null )   # suppress only curl download messages, but keep curl output for variable
+        eval """${EXECOMCLI}"""
+        ( ( ! command -v type passed >/dev/null 2>&1; ) && echo -e "\n \n  ERROR! Loading execute_command \n \n " && exit 130; )
+    } # end load_struct_testing_curl
+    load_struct_testing_curl
+} # end HOW_TO_LOAD_JUST_ONE_SCRIPT_EXECUTE_COMMAND
 
-    load_struct_testing(){
+function HOW_TO_LOAD_JUST_ONE_SCRIPT_LOCAL_AND_ONLINE_STRUCT_USING_CURL() {
+
+    #Sample short call for loading struct_testing
+    load_struct_testing_curl(){
+        local provider="file:///_/clis/execute_command_intuivo_cli/struct_testing"
+        [ ! -d "/_/clis/execute_command_intuivo_cli/" ] && provider="https://raw.githubusercontent.com/zeusintuivo/execute_command_intuivo_cli/master/struct_testing"
+        local EXECOMCLI=$(curl $provider  2>/dev/null )   # suppress only curl download messages, but keep curl output for variable
+        eval """${EXECOMCLI}"""
+        ( ( ! command -v type passed >/dev/null 2>&1; ) && echo -e "\n \n  ERROR! Loading struct_testing \n \n " && exit 130; )
+    } # end load_struct_testing_curl
+    load_struct_testing_curl
+
+} # end HOW_TO_LOAD_JUST_ONE_SCRIPT_LOCAL_AND_ONLINE_STRUCT_USING_CURL
+
+function HOW_TO_LOAD_JUST_ONE_SCRIPT_LOCAL_AND_ONLINE_STRUCT_USING_WGET() {
+
+    #Sample short call for loading struct_testing
+    load_struct_testing_wget(){
+        local provider="/_/clis/execute_command_intuivo_cli/struct_testing"
+        [   -e "${provider}"  ] && local EXECOMCLI=$(<"${provider}")
+        [ ! -e "${provider}"  ] && local EXECOMCLI=$(wget --quiet --no-check-certificate  https://raw.githubusercontent.com/zeusintuivo/execute_command_intuivo_cli/master/struct_testing -O -  2>/dev/null )   # suppress only curl download messages, but keep curl output for variable
+        [ ! -z "${EXECOMCLI}" ] && eval """${EXECOMCLI}"""
+        ( ( ! command -v type passed >/dev/null 2>&1; ) && echo -e "\n \n  ERROR! Loading struct_testing \n \n " && exit 130; )
+    } # end load_struct_testing_wget
+    load_struct_testing_wget
+
+} # end HOW_TO_LOAD_JUST_ONE_SCRIPT_LOCAL_AND_ONLINE_STRUCT_USING_CURL
+
+function HOW_TO_LOAD_JUST_ONE_SCRIPT_ONLINE_ALWAYS_STRUCT_USING_WGET() {
+
+    load_struct_testing_wget(){
         # HOW TO LOAD JUST ONE SCRIPT
         EXECOMCLI=$(wget --quiet --no-check-certificate https://raw.githubusercontent.com/zeusintuivo/execute_command_intuivo_cli/master/struct_testing -O -  2>/dev/null )   # suppress only curl download messages, but keep curl output for variable
         eval """${EXECOMCLI}"""
         ( ( ! command -v type passed >/dev/null 2>&1;) && echo -e "\n \n  ERROR! Loading struct_testing \n \n " && exit 130; )
-    } # end function load_struct_testing
-    load_struct_testing
+    } # end load_struct_testing_wget
+    load_struct_testing_wget
 
-} # end function HOW_TO_LOAD_SEVERAL_FILES
+} # end HOW_TO_LOAD_JUST_ONE_SCRIPT_ONLINE_ALWAYS_STRUCT_USING_WGET
 
 
 
