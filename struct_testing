@@ -858,6 +858,7 @@ CERO="\033[01;0m"
             if [ $? == 0 ]; then   # Mac Intel processor
             KIND="${KIND}MAC"
             fi
+            echo "clear_error_output" >/dev/null 2>&1;
             echo "${KIND}"
         }
         PROCESSOR_ERROR=$(test_positives)
@@ -866,6 +867,213 @@ CERO="\033[01;0m"
         #
         # C H E C K   H O W   C O M P U T E R   H A N D L E S   E R R O R S   --End
         #
+
+
+        # Bash extract version from a string REF:  https://superuser.com/questions/363865/how-to-extract-a-version-number-using-sed
+        function extract_version(){
+          sed -nre 's/^[^0-9]*(([0-9]+\.)*[0-9]+).*/\1/p'
+        }
+        function remove_letters() {
+          sed 's/[a-z-]\|[A-Z-]\|[ -]\|[(-)-]\|[, -]\|86_64//g'
+        }
+        function trim_start_space() {
+            sed -e 's/^[[:space:]]*//' | sed 's/^\ //g' | sed 's/^\t//g'
+        }
+        function trim_end_space() {
+            sed -e 's/[[:space:]]*$//' | sed 's/\ $//g' | sed 's/\t$//g'
+        }
+        function trim() {
+            trim_start_space | trim_end_space
+        }
+        # duplicated at commit
+        function get_longest_name_length() {
+          # Sample usage:
+          #               LONGEST_NAME=$(get_longest_name_length "${LIST_OF_FILENAMES_OR_STRINGS}")
+          local ONE_CHANGED_FILES_WITH_STATUS
+          local CHANGED_FILES_WITH_STATUS_WITH_TAB_CHANGED_TO_PIPE="${1}"
+          local FILENAME_LENGTH=0
+          local LONGEST_NAME=0
+
+          #while read -r ONE_CHANGED_FILES_WITH_STATUS; do                                                  # Get longest file name
+          while read -r ONE_CHANGED_FILES_WITH_STATUS; do
+          {
+            # if not empty
+            if [ ! -z "${ONE_CHANGED_FILES_WITH_STATUS}" ] ; then
+            {
+              FILENAME_LENGTH="${#ONE_CHANGED_FILES_WITH_STATUS}"   # get string length
+              (( FILENAME_LENGTH > LONGEST_NAME )) && LONGEST_NAME=$FILENAME_LENGTH
+            }
+            fi
+            #echo "$(echo "$ONE_CHANGED_FILES_WITH_STATUS" | xargs -I {} echo "{}:1")"
+          }
+          done <<< "${CHANGED_FILES_WITH_STATUS_WITH_TAB_CHANGED_TO_PIPE}"
+          #done <<< "${CHANGED_FILES_WITH_STATUS_WITH_TAB_CHANGED_TO_PIPE}"
+          echo $LONGEST_NAME
+        } #end get_longest_name_length
+        # duplicated at commit
+        function repeat_single_char_spacer() {
+          # Sample usage:
+          #               SPACER=$(repeat_single_char_spacer " " $CALCULATE_SPACER)
+          #
+          #
+          # Complete Preparation:
+          #
+          #               LONGEST_NAME=$(get_longest_name_length "${LIST_OF_FILENAMES_OR_STRINGS}")
+          #               FILENAME_LENGTH="${#FILENAME}"   # get string length
+          #               CALCULATE_SPACER=$(( $LONGEST_NAME - $FILENAME_LENGTH ))
+          #               SPACER=$(repeat_single_char_spacer " " $CALCULATE_SPACER)
+          #               echo ${FILENAME}${SPACER}
+          #
+          local pad="${1}"
+          local total=${2}
+          [ ${total} -lt 1 ] && echo "${YELLOW} Warning ${FUNCNAME[*]}: ${CYAN} Expected number 'total' to be more than 0 and I got :${total}: value ${RESET}" && total=10
+          [ -z "${pad}" ] && [ "${#pad}" -lt 1 ] && echo "${YELLOW} Warning ${FUNCNAME[*]}: ${CYAN} Expected padding 'pad' to be something and I got :${pad}: value ${RESET}" && pad=" "
+          for ((x = 0; x < ${total}; x++)); do
+            #echo "${1}"
+            printf %s "${pad}"
+          done
+        } # end repeat_single_char_spacer
+
+        function add_right_padding(){
+          # Sample usage:
+          #               add_right_padding "${ONE_VERSION}" ${LONGEST_NAME}  " "
+          #
+          local string="${1}"
+          local longest=${2}
+          local pad="${3}"
+          local length="${#string}"   # get string length
+          local calculate=$(( $longest - $length ))
+          local padding=$(repeat_single_char_spacer "${pad}" ${calculate})
+          echo "${string}${padding}"
+        } # end add_right_padding
+
+        function add_left_padding(){
+          # Sample usage:
+          #               add_left_padding " " ${LONGEST_NAME}   "${ONE_VERSION}"
+          #
+          local pad="${1}"
+          local longest=${2}
+          local string="${3}"
+          local length="${#string}"   # get string length
+          local calculate=$(( $longest - $length ))
+          local padding=$(repeat_single_char_spacer ${pad} $calculate)
+          echo "${padding}${string}"
+        } # end add_left_padding
+
+        function build_table_from_installed_components() {
+            # Sample usage:
+            #                build_table_from_installed_components "${USER_TO_INSTALL}"
+            #                build_table_from_installed_components "${USER}"
+            #
+            local USER_TO_INSTALL="${1}"
+            local GOODIES="
+echo \" \"
+echo \"
+
+
+"
+            local README_TABLE="INSTALLED_MACHINE=\"
+ Service/Software | Version                        | Executable
+------------------|--------------------------------|-------------------------------------------"
+            local local_commands="
+=, Instanced on     , date       , date
+=, OS               , lsb_release, lsb_release -sd
+=, Timezone         ,            , cat /etc/timezone
+=, Processor        , uname      , uname -p
+=, CPUS             , getconf    , getconf _NPROCESSORS_ONLN
+=, LOCALE LANG      , locale     , locale | grep 'LANG=' | cut -d= -f2
+=, LOCALE LC_ALL    , locale     , locale | grep 'LC_ALL=' | cut -d= -f2
+x, Nginx            , nginx      , nginx -v
+x, localtunnel.me   , lt         ,
+x, NodeJS           , node       ,
+x, NPM              , npm        ,
+x, NVM              , nvm        ,
+x, PhantomJS        , phantomjs  ,
+x, Ruby             , ruby       ,
+x, RVM              , rvm        ,
+x, Puma             , puma       ,
+x, Python           , python     ,
+x, PyENV            , pyenv      ,
+x, Mongo            , mongo      ,
+x, Redis            , redis-cli  ,
+x, PostgresQL       , psql       ,
+x, Mysql 5          , mysql      ,  echo \"\${\$(mysql --version 2>&1)#*Distrib}\"
+x, PHP 7            , php7.0     ,
+x, PHP 7 Xdebug     , php7.0     ,  php7.0 --version | grep Xdebug
+x, PHP 7 FPM        , php-fpm7.0 ,
+x, PHP 7 FPM Xdebug , php-fpm7.0 ,  php-fpm7.0 --version | grep Xdebug
+x, PHP 5            , php5.6     ,
+x, PHP 5 Xdebug     , php5.6     ,  php5.6 --version | grep Xdebug
+x, PHP 5 FPM        , php-fpm5.6 ,
+x, PHP 5 FPM Xdebug , php-fpm5.6 ,  php-fpm5.6 --version | grep Xdebug
+x, WP CLI           , wp         ,
+"
+            local IFS
+            local FILTER_THIS
+            local ONE_TITLE
+            local ONE_COMMAND
+            local ONE_TEST
+            local ONE_VERSION
+            local ONE_WHICH
+            local MIDDLE__LONGEST=$(get_longest_name_length "$(date)")
+            local VERSION_EXTRACT_COMMAND
+            (( MIDDLE__LONGEST ++ ))
+            (( MIDDLE__LONGEST ++ ))
+            local TABLE_VERSION_LENGTH
+            #for one_line in "$(echo ${local_commands})"; do
+            #while read -r one_line; do
+            while read one_line; do
+            {
+              if [ ! -z "${one_line}" ]; then
+              {
+                IFS=\, read FILTER_THIS ONE_TITLE ONE_COMMAND ONE_TEST<<EOF
+${one_line}
+EOF
+    echo "sudo -u ${USER_TO_INSTALL} -i -- command -v ${ONE_COMMAND}"
+                if [[ -z "$( sudo -u "${USER_TO_INSTALL}" -i -- command -v "${ONE_COMMAND}" 2>&1; )" ]] ; then
+                {
+                    echo "yup"
+                  [ -z "${ONE_TEST}" ] && ONE_TEST="command ${ONE_COMMAND} --version"
+                  ONE_VERSION=""
+                  [[ "${FILTER_THIS}" == "x" ]] && ONE_VERSION=$(sudo -u "${USER_TO_INSTALL}"  -i -- eval """${ONE_TEST}""" 2>&1 | extract_version  |  remove_letters | head -1)
+                  [[ "${FILTER_THIS}" == "=" ]] && ONE_VERSION=$(sudo -u "${USER_TO_INSTALL}"  -i -- eval """${ONE_TEST}""" 2>&1 | head -1 )
+                  ONE_WHICH=""
+                  [[ "${FILTER_THIS}" != "=" ]] && ONE_WHICH=$(sudo -u "${USER_TO_INSTALL}"  -i -- which ${ONE_COMMAND} 2>&1 | head -1 )
+                  ONE_VERSION=$(add_right_padding  "${ONE_VERSION}" ${MIDDLE__LONGEST} " ")
+                  README_TABLE="${README_TABLE}
+${ONE_TITLE}| ${ONE_VERSION} | ${ONE_WHICH}"
+
+                  [ ! -z "${ONE_WHICH}" ] && ONE_WHICH="${GREEN}\t\t:${GRAYEDOUT}${ONE_WHICH}"
+                  VERSION_EXTRACT_COMMAND="${RED}${ONE_TITLE}${GREEN}:${CYAN}${ONE_VERSION}${ONE_WHICH}"
+                  GOODIES="${GOODIES}
+${VERSION_EXTRACT_COMMAND}"
+                }
+                else
+                {
+                    echo "nop"
+                     sudo -u "${USER_TO_INSTALL}" -i -- echo "command was ${ONE_COMMAND}"
+
+                }
+                fi
+              }
+              fi
+            }
+            done <<< "${local_commands}"
+            #done <<< "${local_commands}"
+
+            README_TABLE="${README_TABLE}
+\""
+
+
+            GOODIES="${GOODIES}
+\"
+echo \" \"
+echo \" \"
+${README_TABLE}
+"
+            echo "${GOODIES}"
+} # end build_table_from_installed_components
+
     [ ! -z "$0" ] && [ -e "$0" ] && THISSCRIPTNAME=`basename "$0"`
 
     # TRAP
