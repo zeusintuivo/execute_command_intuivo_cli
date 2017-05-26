@@ -743,22 +743,34 @@ CERO="\033[01;0m"
             #            has_error_keyword "${bulk}"
             #
             local bulk="${*}"
-            return    [[ "${bulk}" == *"Could not resolve"* ]] || \
-                      [[ "${bulk}" == *"Repository not found"* ]] || \
-                      [[ "${bulk}" == *"Could not read from"* ]] || \
-                      [[ "${bulk}" == *"Could not"* ]] || \
-                      [[ "${bulk}" == *"could not"* ]] || \
-                      [[ "${bulk}" == *"Fatal"* ]] || \
-                      [[ "${bulk}" == *"FATAL"* ]] || \
-                      [[ "${bulk}" == *"fatal"* ]] || \
-                      [[ "${bulk}" == *"FAILED"* ]] || \
-                      [[ "${bulk}" == *"failed"* ]] || \
-                      [[ "${bulk}" == *"Failed"* ]] || \
-                      [[ "${bulk}" == *"error"* ]] || \
-                      [[ "${bulk}" == *"ERROR"* ]] || \
-                      [[ "${bulk}" == *"Error"* ]] || \
-                      [[ "${bulk}" == *"Denied"* ]] || \
-                      [[ "${bulk}" == *"denied"* ]]
+            if    [[ "${bulk}" == *"Could not resolve"*    ]] || \
+                  [[ "${bulk}" == *"Repository not found"* ]] || \
+                  [[ "${bulk}" == *"Could not read from"*  ]] || \
+                  [[ "${bulk}" == *"Could not"*            ]] || \
+                  [[ "${bulk}" == *"could not"*            ]] || \
+                  [[ "${bulk}" == *"unmatched"*            ]] || \
+                  [[ "${bulk}" == *"Fatal"*                ]] || \
+                  [[ "${bulk}" == *"FATAL"*                ]] || \
+                  [[ "${bulk}" == *"fatal"*                ]] || \
+                  [[ "${bulk}" == *"FAILED"*               ]] || \
+                  [[ "${bulk}" == *"failed"*               ]] || \
+                  [[ "${bulk}" == *"Failed"*               ]] || \
+                  [[ "${bulk}" == *"error"*                ]] || \
+                  [[ "${bulk}" == *"ERROR"*                ]] || \
+                  [[ "${bulk}" == *"Error"*                ]] || \
+                  [[ "${bulk}" == *"Denied"*               ]] || \
+                  [[ "${bulk}" == *"denied"*               ]] ; then
+            {
+                #passed "${TESTING}"
+                return 0
+            }
+            else
+            {
+                #failed "${TESTING}"
+                return 1
+            }
+            fi
+
         } # end has_error_keyword
 
         function handle_error() {
@@ -777,8 +789,7 @@ CERO="\033[01;0m"
               [[ "${bulk}" == *"Could not resolve"* ]] && echo -e "${BRIGHT_BLUE87} It appears YOU HAVE ${YELLOW226}NO INTERNET CONNECTION \o_0/ ${RESET}"
               [[ "${bulk}" == *"Repository not found"* ]] && echo -e "${BRIGHT_BLUE87} It appears YOU HAVE ${YELLOW226}NO ACCESS TO THIS FOR YOU ${RED} ${GIT_USER_NAME} ${RESET}"
               [[ "${bulk}" == *"Could not read from"* ]] && echo -e "${BRIGHT_BLUE87} It appears it exists but you are ${RED}NOT ${YELLOW226} ALLOWED ${RED} ${GIT_USER_NAME} ${YELLOW226}!!! ${RESET}"
-              echo -e "${RESET}${bulk}  "
-              exit 69;
+              failed "${RESET}${bulk}  "
             }
             fi
 
@@ -966,12 +977,7 @@ CERO="\033[01;0m"
             #                build_table_from_installed_components "${USER}"
             #
             local USER_TO_INSTALL="${1}"
-            local GOODIES="
-echo \" \"
-echo \"
 
-
-"
             local README_TABLE="INSTALLED_MACHINE=\"
  Service/Software | Version                        | Executable
 ------------------|--------------------------------|-------------------------------------------"
@@ -1007,6 +1013,8 @@ x, PHP 5 Xdebug     , php5.6     ,  php5.6 --version | grep Xdebug
 x, PHP 5 FPM        , php-fpm5.6 ,
 x, PHP 5 FPM Xdebug , php-fpm5.6 ,  php-fpm5.6 --version | grep Xdebug
 x, WP CLI           , wp         ,
+x, FRENO            , freno         ,
+x, sent            , sentimineo         ,
 "
             local IFS
             local FILTER_THIS
@@ -1020,9 +1028,13 @@ x, WP CLI           , wp         ,
             (( MIDDLE__LONGEST ++ ))
             (( MIDDLE__LONGEST ++ ))
             local TABLE_VERSION_LENGTH
-            #for one_line in "$(echo ${local_commands})"; do
-            #while read -r one_line; do
-            while read one_line; do
+            local GOODIES="
+echo \" \"
+echo -e \"
+
+
+"
+            while read -r one_line; do
             {
               if [ ! -z "${one_line}" ]; then
               {
@@ -1030,15 +1042,15 @@ x, WP CLI           , wp         ,
 ${one_line}
 EOF
     echo "sudo -u ${USER_TO_INSTALL} -i -- command -v ${ONE_COMMAND}"
-                if [[ -z "$( sudo -u "${USER_TO_INSTALL}" -i -- command -v "${ONE_COMMAND}" 2>&1; )" ]] ; then
+                if ( is_installed ${ONE_COMMAND} ) ; then
                 {
                     echo "yup"
                   [ -z "${ONE_TEST}" ] && ONE_TEST="command ${ONE_COMMAND} --version"
                   ONE_VERSION=""
-                  [[ "${FILTER_THIS}" == "x" ]] && ONE_VERSION=$(sudo -u "${USER_TO_INSTALL}"  -i -- eval """${ONE_TEST}""" 2>&1 | extract_version  |  remove_letters | head -1)
-                  [[ "${FILTER_THIS}" == "=" ]] && ONE_VERSION=$(sudo -u "${USER_TO_INSTALL}"  -i -- eval """${ONE_TEST}""" 2>&1 | head -1 )
+                  [[ "${FILTER_THIS}" == "x" ]] && ONE_VERSION=$(sudo -u ${USER_TO_INSTALL}  -i -- eval """${ONE_TEST}""" 2>&1 | extract_version  |  remove_letters | head -1)
+                  [[ "${FILTER_THIS}" == "=" ]] && ONE_VERSION=$(sudo -u ${USER_TO_INSTALL}  -i -- eval """${ONE_TEST}""" 2>&1 | head -1 )
                   ONE_WHICH=""
-                  [[ "${FILTER_THIS}" != "=" ]] && ONE_WHICH=$(sudo -u "${USER_TO_INSTALL}"  -i -- which ${ONE_COMMAND} 2>&1 | head -1 )
+                  [[ "${FILTER_THIS}" != "=" ]] && ONE_WHICH="$(sudo -u ${USER_TO_INSTALL} -i -- which ${ONE_COMMAND} 2>&1 | head -1 )"
                   ONE_VERSION=$(add_right_padding  "${ONE_VERSION}" ${MIDDLE__LONGEST} " ")
                   README_TABLE="${README_TABLE}
 ${ONE_TITLE}| ${ONE_VERSION} | ${ONE_WHICH}"
@@ -1059,7 +1071,6 @@ ${VERSION_EXTRACT_COMMAND}"
               fi
             }
             done <<< "${local_commands}"
-            #done <<< "${local_commands}"
 
             README_TABLE="${README_TABLE}
 \""
@@ -1070,16 +1081,41 @@ ${VERSION_EXTRACT_COMMAND}"
 echo \" \"
 echo \" \"
 ${README_TABLE}
+
+# bash completion for the wp command
+
+_wp_complete() {
+  local OLD_IFS=\"\$IFS\"
+  local cur=\${COMP_WORDS[COMP_CWORD]}
+
+  IFS=\$'\n';  # want to preserve spaces at the end
+  local opts=\"\$(wp cli completions --line=\"\$COMP_LINE\" --point=\"\$COMP_POINT\")\"
+
+  if [[ \"\$opts\" =~ \<file\>\s* ]]
+  then
+    COMPREPLY=( \$(compgen -f -- \$cur) )
+  elif [[ \$opts = \"\" ]]
+  then
+    COMPREPLY=( \$(compgen -f -- \$cur) )
+  else
+    COMPREPLY=( \${opts[*]} )
+  fi
+
+  IFS=\"\$OLD_IFS\"
+  return 0
+}
+complete -o nospace -F _wp_complete wp
+
 "
             echo "${GOODIES}"
 } # end build_table_from_installed_components
 
-    [ ! -z "$0" ] && [ -e "$0" ] && THISSCRIPTNAME=`basename "$0"`
+    #[ ! -z "$0" ] && [ -e "$0" ] && THISSCRIPTNAME=`basename "$0"`
 
     # TRAP
-    [ ! -z "$0" ] && [   -e "$0" ] &&  trap '{  \" `basename "$0"` KEYBOARD INTERRUPT.\"; exit 69; }' INT
-    [   -z "$0" ] && [ ! -e "$0" ] &&  trap '{  \" STRUCT TESTING KEYBOARD INTERRUPT.\"; exit 69; }' INT
-    [ ! -z "$0" ] && [ ! -e "$0" ] &&  trap '{  \" STRUCT TESTING KEYBOARD INTERRUPT.\"; exit 69; }' INT
+    #[ ! -z "$0" ] && [   -e "$0" ] &&  trap '{  \" `basename "$0"` KEYBOARD INTERRUPT.\"; exit 69; }' INT
+    #[   -z "$0" ] && [ ! -e "$0" ] &&  trap '{  \" STRUCT TESTING KEYBOARD INTERRUPT.\"; exit 69; }' INT
+    #[ ! -z "$0" ] && [ ! -e "$0" ] &&  trap '{  \" STRUCT TESTING KEYBOARD INTERRUPT.\"; exit 69; }' INT
 
         #
         # Template:
