@@ -738,6 +738,10 @@ CERO="\033[01;0m"
         }
 
         function has_error_keyword() {
+            # Sample use
+            #
+            #            has_error_keyword "${bulk}"
+            #
             local bulk="${*}"
             return    [[ "${bulk}" == *"Could not resolve"* ]] || \
                       [[ "${bulk}" == *"Repository not found"* ]] || \
@@ -758,6 +762,11 @@ CERO="\033[01;0m"
         } # end has_error_keyword
 
         function handle_error() {
+            # Sample use
+            #
+            #            local install_result=$(sudo apt-get install ${missing} -yfq   2>&1)  # capture all input and output
+            #            [[ ! -z "${install_result}" ]] && handle_error "${install_result}"
+            #
             local bulk="${*}"
             local error_happened=""
             [[ "${PROCESSOR_ERROR}" == *"MAC"* ]] && [ $? != 0 ] && error_happened="1"
@@ -790,6 +799,9 @@ CERO="\033[01;0m"
             #                        libreadline6-dev
             #                        libossp-uuid-dev
             #                        uuid"
+            #
+            #
+
             # room for detecting Linux and OS systems
             local OS="${1}"
             local missing=""
@@ -815,7 +827,7 @@ CERO="\033[01;0m"
             # Check Requirements OS Ubuntu 14.04 REF: https://wiki.postgresql.org/wiki/Compile_and_Install_from_source_code#Ubuntu
             [[ ! -z "${missing}" ]] && echo -e " ${CYAN} Installing missing packages: ${missing} ${RESET}"
             [[ ! -z "${missing}" ]] && local install_result=$(sudo apt-get install ${missing} -yfq   2>&1) # capture all input and output
-            [[ ! -z "${install_result}" ]] handle_error "${install_result}"
+            [[ ! -z "${install_result}" ]] && handle_error "${install_result}"
         } # end install_apt_get_requirements
         #
         # C H E C K   H O W   C O M P U T E R   H A N D L E S   E R R O R S   --Start
