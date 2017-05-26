@@ -84,10 +84,11 @@ function HOW_TO_LOAD_SEVERAL_FILES() {
 
     load_execute_commands_wget(){
         local URL=""
+        local cached_directory="/_/clis/execute_command_intuivo_cli/"
         local EXECOMCLI=""
         local provider=""
-        [ -d "/_/clis/execute_command_intuivo_cli/" ] &&  provider="file:///_/clis/execute_command_intuivo_cli/"
-        [ ! -d "/_/clis/execute_command_intuivo_cli/" ] && provider="https://raw.githubusercontent.com/zeusintuivo/execute_command_intuivo_cli/master/"
+        [   -d "${cached_directory}" ] &&  provider="file://${cached_directory}"
+        [ ! -d "${cached_directory}" ] &&  provider="https://raw.githubusercontent.com/zeusintuivo/execute_command_intuivo_cli/master/"
         local BASH_SCRIPTS="
     struct_testing
     execute_command
@@ -98,9 +99,9 @@ function HOW_TO_LOAD_SEVERAL_FILES() {
             if [ ! -z "${ONE_SCRIPT}" ] ; then         # if not empty
             {
                 URL="${provider}${ONE_SCRIPT}"
-                EXECOMCLI=$(wget --quiet --no-check-certificate $URL  -O -  2>/dev/null )   # suppress only curl download messages, but keep curl output for variable
-                eval """${EXECOMCLI}"""
-                anounce $URL Loaded
+                [   -d "${cached_directory}" ] && source "$URL"
+                [ ! -d "${cached_directory}" ] &&eval """$(wget --quiet --no-check-certificate $URL  -O -  2>/dev/null )"""   # suppress only wget download messages, but keep wget output for variable
+                echo "$URL Loaded"
             }
             fi
         }
@@ -113,6 +114,38 @@ function HOW_TO_LOAD_SEVERAL_FILES() {
         ( ( ! command -v type passed >/dev/null 2>&1;) && echo -e "\n \n  ERROR! Loading struct_testing \n \n " && exit 69; )
     } # end load_execute_commands_wget
     load_execute_commands_wget
+
+    load_execute_commands_curl(){
+        local URL=""
+        local EXECOMCLI=""
+        local cached_directory="/_/clis/execute_command_intuivo_cli/"
+        local provider=""
+        [   -d "${cached_directory}" ] &&  provider="file://${cached_directory}"
+        [ ! -d "${cached_directory}" ] &&  provider="https://raw.githubusercontent.com/zeusintuivo/execute_command_intuivo_cli/master/"
+        local BASH_SCRIPTS="
+    struct_testing
+    execute_command
+    "
+    #execute_command
+        while read -r ONE_SCRIPT; do
+        {
+            if [ ! -z "${ONE_SCRIPT}" ] ; then         # if not empty
+            {
+                URL="${provider}${ONE_SCRIPT}"
+                eval """$(curl $URL  2>/dev/null )"""  # suppress only curl download messages, but keep curl output for variable
+                echo "$URL Loaded"
+            }
+            fi
+        }
+        done <<< "${BASH_SCRIPTS}"
+        unset URL
+        unset EXECOMCLI
+        unset ONE_SCRIPT
+        unset BASH_SCRIPTS
+        unset provider
+        ( ( ! command -v type passed >/dev/null 2>&1;) && echo -e "\n \n  ERROR! Loading struct_testing \n \n " && exit 69; )
+    } # end load_execute_commands_curl
+    load_execute_commands_curl
 
 } # end function HOW_TO_LOAD_SEVERAL_FILES
 
@@ -148,9 +181,8 @@ function HOW_TO_LOAD_JUST_ONE_SCRIPT_LOCAL_AND_ONLINE_STRUCT_USING_WGET() {
     #Sample short call for loading struct_testing
     load_struct_testing_wget(){
         local provider="/_/clis/execute_command_intuivo_cli/struct_testing"
-        [   -e "${provider}"  ] && local EXECOMCLI=$(<"${provider}")
-        [ ! -e "${provider}"  ] && local EXECOMCLI=$(wget --quiet --no-check-certificate  https://raw.githubusercontent.com/zeusintuivo/execute_command_intuivo_cli/master/struct_testing -O -  2>/dev/null )   # suppress only curl download messages, but keep curl output for variable
-        [ ! -z "${EXECOMCLI}" ] && eval """${EXECOMCLI}"""
+        [   -e "${provider}"  ] && source "${provider}"
+        [ ! -e "${provider}"  ] && eval """$(wget --quiet --no-check-certificate  https://raw.githubusercontent.com/zeusintuivo/execute_command_intuivo_cli/master/struct_testing -O -  2>/dev/null )"""   # suppress only wget download messages, but keep wget output for variable
         ( ( ! command -v type passed >/dev/null 2>&1; ) && echo -e "\n \n  ERROR! Loading struct_testing \n \n " && exit 69; )
     } # end load_struct_testing_wget
     load_struct_testing_wget
