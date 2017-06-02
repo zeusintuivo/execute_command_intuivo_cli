@@ -1110,6 +1110,37 @@ complete -o nospace -F _wp_complete wp
             echo "${GOODIES}"
 } # end build_table_from_installed_components
 
+        function assert(){
+            # Sample usage
+            #
+            #     assert not empty "${SUBLIMEDEVLASTESTBUILD}"
+            #     assert not empty "${SUBLIMEDEVLASTESTBUILD}"
+            #     /home/vagrant/.pyenv"
+            #
+                0     1    2    3
+            # assert not empty $VALUE
+            if [  -z "${1+x}" ] || [ -z "${2+x}" ] || [ -z "${3+x}" ] ; then # check if all parameters are set and not empty
+            {
+                failed ${FUNCNAME[1]} requires to have 3 parameters :: ${FUNCNAME[1]} not empty \$VALUE ::
+            }
+            fi
+            local not="${1}"
+            local empty="${2}"
+            local value="${2}"
+            TESTING="that value ${CYAN}${value}${LIGHTYELLOW} is not empty"
+            if [[ ! -z "${value+x}" ]] ; then
+            {
+                passed "${TESTING}"
+            }
+            else
+            {
+                failed "${TESTING}"
+            }
+            fi
+
+        } # end assert
+        alias ensure=assert
+
     #[ ! -z "$0" ] && [ -e "$0" ] && THISSCRIPTNAME=`basename "$0"`
 
     # TRAP
