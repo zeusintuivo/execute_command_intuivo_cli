@@ -554,6 +554,8 @@ CERO="\033[01;0m"
             }
             fi
         } # end function check_equality
+        alias verify_equality=check_equality
+        alias ensure_equality=check_equality
 
         function check_to_be_installed(){
             # Sample usage
