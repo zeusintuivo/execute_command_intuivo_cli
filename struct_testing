@@ -738,7 +738,55 @@ CERO="\033[01;0m"
             fi
         }
 
+        function version_installed_is() {
+            # Sample use
+            #
+            #          if  ! version_installed_is "node --version"  "${node_version}" ;           then    is like     version installed is  12.3.4.1 ?
+            #          if  version_installed_is   "phantomjs --version"  "${phantomjs_version}" ; then    it like     NOT version is installed version 12.31.23 ?
+            #
+            local EVAL_GET_VERSION_STRING=$(eval "${1}")
+            local VERSION_EXPECTED="${2}"
+
+            if [[ "${EVAL_GET_VERSION_STRING}" == *"${VERSION_EXPECTED}"* ]] || [[ "${EVAL_GET_VERSION_STRING}" == "${VERSION_EXPECTED}" ]]; then
+            {
+                #failed "${TESTING}"
+                return 1
+            }
+            else
+            {
+                #passed "${TESTING}"
+                return 0
+            }
+            fi
+        }
+        alias is_version_installed=version_installed_is
+        alias is_installed_version=version_installed_is
+        alias is_version=version_installed_is
+        alias version_is=version_installed_is
+
         function verify_installed_version() {
+            # Sample use
+            #
+            #            verify_installed_version "node --version"  "${node_version}"
+            #            verify_installed_version "phantomjs --version"  "${phantomjs_version}"
+            #            verify_installed_version "casperjs --version"  "${casper_version}"
+            #
+            local COMMAND_TO_EVAL="${1}"
+            local VERSION_EXPECTED="${2}"
+
+            local TESTING="that installed version for ${COMMAND_TO_EVAL} is ${CYAN}${VERSION_EXPECTED}${GREEN}"
+            if ! version_installed_is "${COMMAND_TO_EVAL}" "${SERVICE_NAME}"; then
+            {
+                failed "${TESTING}"
+            }
+            else
+            {
+                passed "${TESTING}"
+            }
+            fi
+        }
+
+        function verify_installed_version_old() {
             # Sample use
             #
             #            verify_installed_version "node --version"  "${node_version}"
