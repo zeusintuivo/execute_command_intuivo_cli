@@ -744,18 +744,16 @@ CERO="\033[01;0m"
             #          if  ! version_installed_is "node --version"  "${node_version}" ;           then    is like     version installed is  12.3.4.1 ?
             #          if  version_installed_is   "phantomjs --version"  "${phantomjs_version}" ; then    it like     NOT version is installed version 12.31.23 ?
             #
-            local EVAL_GET_VERSION_STRING=$(eval """${1}""" 2>&1 | head -1)
-            local VERSION_EXPECTED="${2}"
+            local give_me_something=$(eval """${1}""" 2>&1 | extract_version | head -1)
+            local expected="${2}"
 
-            if [[ "${EVAL_GET_VERSION_STRING}" == *"${VERSION_EXPECTED}"* ]] || [[ "${EVAL_GET_VERSION_STRING}" == "${VERSION_EXPECTED}" ]]; then
+            if [[ "${give_me_something}" == *"${expected}"* ]] || [[ "${give_me_something}" == "${expected}" ]]; then
             {
-                #failed "${TESTING}"
-                return 1
+                return 0  #failed  "${TESTING}"
             }
             else
             {
-                #passed "${TESTING}"
-                return 0
+                return 1  #passed  "${TESTING}"
             }
             fi
         }
