@@ -289,12 +289,43 @@ CERO="\033[01;0m"
             fi
         }
 
+        function assert(){
+            # Sample usage
+            #
+            #     assert not empty "${SUBLIMEDEVLASTESTBUILD}"
+            #     assert not empty "${SUBLIMEDEVLASTESTBUILD}"
+            #     /home/vagrant/.pyenv"
+            #
+                0     1    2    3
+            # assert not empty $VALUE
+            if [  -z "${1+x}" ] || [ -z "${2+x}" ] || [ -z "${3+x}" ] ; then # check if all parameters are set and not empty
+            {
+                failed ${FUNCNAME[1]} requires to have 3 parameters :: ${FUNCNAME[1]} not empty \$VALUE ::
+            }
+            fi
+            local not="${1}"
+            local empty="${2}"
+            local value="${2}"
+            TESTING="that value ${CYAN}${value}${LIGHTYELLOW} is not empty"
+            if [[ ! -z "${value+x}" ]] ; then
+            {
+                passed "${TESTING}"
+            }
+            else
+            {
+                failed "${TESTING}"
+            }
+            fi
+
+        } # end assert
+
         function ensure() {
             # Sample usage:
             # assuming mongo bin is in your path
-            # ensure mongo or " Cancel export"
-            # ensure mongoexport or " Cancel export"
-            # ensure bsondump or " Cancel export"
+            #            ensure mongo or " Cancel export"
+            #            ensure mongoexport or " Cancel export"
+            #            ensure bsondump or " Cancel export"
+            #
             if ! command -v "${1}" >/dev/null 2>&1; then # Command Does not-exist
                 echo " "
                 echo "Error! '${1}' is not in your PATH environment or cannot be reached.!"
@@ -312,6 +343,23 @@ CERO="\033[01;0m"
                 return 1
             fi
         }
+
+        function Installing() {
+            echo -e "${GREEN} Installing ${RED}${1}${GREEN}, ${RED}${2} ${GREEN}${3} ${CYAN}${4}, ${RED}${5} ${GREEN}${6} ${CYAN}${7} ${GREEN}.${RESET}"
+        }
+        alias installing=Installing
+        function Configuring() {
+            echo -e "${GREEN} Configuring ${RED}${1}${GREEN}, ${RED}${2} ${GREEN}${3} ${CYAN}${4}, ${RED}${5} ${GREEN}${6} ${CYAN}${7} ${GREEN}.${RESET}"
+        }
+        alias configuring=Configuring
+        function Setting() {
+            echo -e "${GREEN} Setting ${RED}${1}${GREEN}, ${RED}${2} ${GREEN}${3} ${CYAN}${4}, ${RED}${5} ${GREEN}${6} ${CYAN}${7} ${GREEN}.${RESET}"
+        }
+        alias setting=Setting
+        function Final() {
+            echo -e "${GREEN} Setting ${RED}${1}${GREEN}, ${RED}${2} ${GREEN}${3} ${CYAN}${4}, ${RED}${5} ${GREEN}${6} ${CYAN}${7} ${GREEN}.${RESET}"
+        }
+        alias final=Final
 
         function not() {
             local order="empty"  # Tasjgjgggg
@@ -796,6 +844,7 @@ CERO="\033[01;0m"
             fi
 
         } # end handle_error
+
         function install_apt_get_requirements(){
             # Sample use
             #               local OS="${1}"
@@ -825,11 +874,11 @@ CERO="\033[01;0m"
                 dpkg -l | egrep "$one_required" &>/dev/null
                 if [ $? == 0 ]; then
                 {
-                    echo -e " ${GREEN} $one_required ${YELLOW} INSTALLED."
+                    passed " ${GREEN} $one_required ${YELLOW} INSTALLED${RESET} ."
                 }
                 else
                 {
-                    echo -e " ${RED}  NEED TO INSTALL ${YELLOW} $one_required."
+                    echo -e " ${RED}  NEED TO INSTALL ${YELLOW} $one_required${RESET} ."
                     missing="${missing} ${one_required}"
                 }
                 fi
@@ -838,10 +887,56 @@ CERO="\033[01;0m"
             missing=$(echo ${missing} | sed -e 's/^[[:space:]]*//' | sed 's/^\ //g' | sed 's/^\t//g' ) # trim_start_space
 
             # Check Requirements OS Ubuntu 14.04 REF: https://wiki.postgresql.org/wiki/Compile_and_Install_from_source_code#Ubuntu
-            [[ ! -z "${missing}" ]] && echo -e " ${CYAN} Installing missing packages: ${missing} ${RESET}"
+            [[ ! -z "${missing}" ]] && echo -e " ${CYAN} Installing missing packages: ${YELLOW} ${missing} ${RESET} ."
             [[ ! -z "${missing}" ]] && local install_result=$(sudo apt-get install ${missing} -yfq   2>&1) # capture all input and output
             [[ ! -z "${install_result}" ]] && handle_error "${install_result}"
         } # end install_apt_get_requirements
+
+        function install_apt_get_should_not_be_installed(){
+            # Sample use
+            #               local OS="${1}"
+            #               install_apt_get_should_not_be_installed "${OS}" "
+            #                        build-essential
+            #                        libreadline-dev
+            #                        zlib1g-dev
+            #                        flex
+            #                        bison
+            #                        libxml2-dev
+            #                        libxslt-dev
+            #                        libssl-dev
+            #
+            #                        libreadline6-dev
+            #                        libossp-uuid-dev
+            #                        uuid"
+            #
+            #
+
+            # room for detecting Linux and OS systems
+            local OS="${1}"
+            local removing=""
+            local one_required=""
+            local required=$(grep -vE '^\s+#'<<<"${2}")
+            for one_required in ${required}; do
+            {
+                dpkg -l | egrep "$one_required" &>/dev/null
+                if [ $? == 0 ]; then
+                {
+                    echo -e " ${RED}  NEED TO REMOVE ${YELLOW} $one_required${RESET} ."
+                    removing="${removing} ${one_required}"
+                }
+                else
+                {
+                    passed " ${GREEN} $one_required ${YELLOW} NOT PRESENT${RESET} ."
+                }
+                fi
+            }
+            done
+            removing=$(echo ${removing} | sed -e 's/^[[:space:]]*//' | sed 's/^\ //g' | sed 's/^\t//g' ) # trim_start_space
+
+            [[ ! -z "${removing}" ]] && echo -e " ${CYAN} Apt-get removing packages: ${YELLOW} ${removing} ${RESET} ."
+            [[ ! -z "${removing}" ]] && local remove_result=$(sudo apt-get remove ${removing} -yfq   2>&1 && sudo apt-get purge ${removing} -yfq   2>&1 && sudo apt-get autoremove -yfq   2>&1) # capture all input and output
+            [[ ! -z "${remove_result}" ]] && handle_error "${remove_result}"
+        } # end install_apt_get_should_not_be_installed
         #
         # C H E C K   H O W   C O M P U T E R   H A N D L E S   E R R O R S   --Start
         #
@@ -1111,37 +1206,6 @@ complete -o nospace -F _wp_complete wp
 "
             echo "${GOODIES}"
 } # end build_table_from_installed_components
-
-        function assert(){
-            # Sample usage
-            #
-            #     assert not empty "${SUBLIMEDEVLASTESTBUILD}"
-            #     assert not empty "${SUBLIMEDEVLASTESTBUILD}"
-            #     /home/vagrant/.pyenv"
-            #
-                0     1    2    3
-            # assert not empty $VALUE
-            if [  -z "${1+x}" ] || [ -z "${2+x}" ] || [ -z "${3+x}" ] ; then # check if all parameters are set and not empty
-            {
-                failed ${FUNCNAME[1]} requires to have 3 parameters :: ${FUNCNAME[1]} not empty \$VALUE ::
-            }
-            fi
-            local not="${1}"
-            local empty="${2}"
-            local value="${2}"
-            TESTING="that value ${CYAN}${value}${LIGHTYELLOW} is not empty"
-            if [[ ! -z "${value+x}" ]] ; then
-            {
-                passed "${TESTING}"
-            }
-            else
-            {
-                failed "${TESTING}"
-            }
-            fi
-
-        } # end assert
-        alias ensure=assert
 
     #[ ! -z "$0" ] && [ -e "$0" ] && THISSCRIPTNAME=`basename "$0"`
 
