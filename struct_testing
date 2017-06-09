@@ -744,7 +744,7 @@ CERO="\033[01;0m"
             #          if  ! version_installed_is "node --version"  "${node_version}" ;           then    is like     version installed is  12.3.4.1 ?
             #          if  version_installed_is   "phantomjs --version"  "${phantomjs_version}" ; then    it like     NOT version is installed version 12.31.23 ?
             #
-            local EVAL_GET_VERSION_STRING=$(eval "${1}")
+            local EVAL_GET_VERSION_STRING=$(eval """${1}""" 2>&1 | head -1)
             local VERSION_EXPECTED="${2}"
 
             if [[ "${EVAL_GET_VERSION_STRING}" == *"${VERSION_EXPECTED}"* ]] || [[ "${EVAL_GET_VERSION_STRING}" == "${VERSION_EXPECTED}" ]]; then
@@ -793,7 +793,7 @@ CERO="\033[01;0m"
             #            verify_installed_version "phantomjs --version"  "${phantomjs_version}"
             #            verify_installed_version "casperjs --version"  "${casper_version}"
             #
-            local EVAL_GET_VERSION_STRING=$(eval "${1}")
+            local EVAL_GET_VERSION_STRING=$(eval """${1}""" 2>&1 | head -1)
             local VERSION_EXPECTED="${2}"
 
             local TESTING="that installed version for ${1} is ${CYAN}${VERSION_EXPECTED}${GREEN}"
