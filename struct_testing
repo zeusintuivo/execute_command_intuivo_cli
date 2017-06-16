@@ -1253,38 +1253,66 @@ complete -o nospace -F _wp_complete wp
             echo "${GOODIES}"
 } # end build_table_from_installed_components
 
+
+        function chown_it() {
+            # Sample use
+            #            chown_it "${USER_TO_INSTALL}" /usr/local/rvm
+            local USER_TO_INSTALL="${1}"
+            local path="${2}"
+            [ -e "${path}" ] && sudo chown -R "${USER_TO_INSTALL}":"${USER_TO_INSTALL}" "${path}"
+        } # end chown_it
+
+        function contains_newlines() {
+            # Sample use
+            #            test1="asdf asdf asdf asdf "
+            # test2="asdf\nasdf\nasdf"
+            #            if
+            [[ "${@}" == *$"\n"* ]] && return 1
+            return 0
+        } # end contains_newlines
+
         function move_to_user_folder_and_soft_link_root_to_it() {
             # Sample use
             #            move_to_user_folder_and_soft_link_root_to_it "${USER_TO_INSTALL}" .bundle
+            #            move_to_user_folder_and_soft_link_root_to_it "${USER_TO_INSTALL}" .bundle .gem .gems
             local USER_TO_INSTALL="${1}"
-            local target="${2}"
+            local target=""
+            local targets=$(sed 's/ /\n/g' <<< "${@}")
 
-            [ -d "/home/${USER_TO_INSTALL}/${target}/" ] && sudo rm -rf "/home/${USER_TO_INSTALL}/${target}/"
-            [ -d "/root/${target}/" ] && sudo mv "/root/${target}" "/home/${USER_TO_INSTALL}/"
-            [ -d "/home/${USER_TO_INSTALL}/${target}/" ] && sudo ln -sf  "/home/${USER_TO_INSTALL}/${target}" "/root/${target}"
-            [ -d "/home/${USER_TO_INSTALL}/${target}/" ] && sudo chown -R "${USER_TO_INSTALL}":"${USER_TO_INSTALL}" "/home/${USER_TO_INSTALL}/${target}/"
-
-            # ${target} root -- different procedure ??? WTF
-            # [ -d "/root/${target}/" ] && ( sudo rm -rf  "/root/${target}" )
-            # [ ! -d "/home/${USER_TO_INSTALL}/${target}/" ] && ( sudo mkdir -p "/home/${USER_TO_INSTALL}/${target}" )
-            # [ ! -d "/root/${target}/" ] && ( sudo ln -sf "/home/${USER_TO_INSTALL}/${target}"  "/root/${target}" )
+            while read -r target; do
+            {
+              if [ ! -z "${target}" ]; then
+              {
+                [ -d "/home/${USER_TO_INSTALL}/${target}/" ] && sudo rm -rf "/home/${USER_TO_INSTALL}/${target}/"
+                [ -d "/root/${target}/" ] && sudo mv "/root/${target}" "/home/${USER_TO_INSTALL}/"
+                [ -d "/home/${USER_TO_INSTALL}/${target}/" ] && sudo ln -sf  "/home/${USER_TO_INSTALL}/${target}" "/root/${target}"
+                [ -d "/home/${USER_TO_INSTALL}/${target}/" ] && sudo chown -R "${USER_TO_INSTALL}":"${USER_TO_INSTALL}" "/home/${USER_TO_INSTALL}/${target}/"
+              }
+              fi
+            }
+            done <<< "${targets}"
         } # end move_to_user_folder_and_soft_link_root_to_it
 
         function move_to_user_file_and_soft_link_root_to_it() {
             # Sample use
             #            move_to_user_file_and_soft_link_root_to_it "${USER_TO_INSTALL}" .bundle
+            #            move_to_user_file_and_soft_link_root_to_it "${USER_TO_INSTALL}" .bundle .gem .gems
             local USER_TO_INSTALL="${1}"
-            local target="${2}"
+            local target=""
+            local targets=$(sed 's/ /\n/g' <<< "${@}")
 
-            [ -f "/home/${USER_TO_INSTALL}/${target}" ] && sudo rm -rf "/home/${USER_TO_INSTALL}/${target}"
-            [ -f "/root/${target}" ] && sudo mv "/root/${target}" "/home/${USER_TO_INSTALL}"
-            [ -f "/home/${USER_TO_INSTALL}/${target}" ] && sudo ln -sf  "/home/${USER_TO_INSTALL}/${target}" "/root/${target}"
-            [ -f "/home/${USER_TO_INSTALL}/${target}" ] && sudo chown -R "${USER_TO_INSTALL}":"${USER_TO_INSTALL}" "/home/${USER_TO_INSTALL}/${target}"
-
-            # ${target} root -- different procedure ??? WTF
-            # [ -f "/root/${target}" ] && ( sudo rm -rf  "/root/${target}" )
-            # [ ! -f "/home/${USER_TO_INSTALL}/${target}" ] && ( sudo mkdir -p "/home/${USER_TO_INSTALL}/${target}" )
-            # [ ! -f "/root/${target}" ] && ( sudo ln -sf "/home/${USER_TO_INSTALL}/${target}"  "/root/${target}" )
+            while read -r target; do
+            {
+              if [ ! -z "${target}" ]; then
+              {
+                [ -f "/home/${USER_TO_INSTALL}/${target}" ] && sudo rm -rf "/home/${USER_TO_INSTALL}/${target}"
+                [ -f "/root/${target}" ] && sudo mv "/root/${target}" "/home/${USER_TO_INSTALL}"
+                [ -f "/home/${USER_TO_INSTALL}/${target}" ] && sudo ln -sf  "/home/${USER_TO_INSTALL}/${target}" "/root/${target}"
+                [ -f "/home/${USER_TO_INSTALL}/${target}" ] && sudo chown -R "${USER_TO_INSTALL}":"${USER_TO_INSTALL}" "/home/${USER_TO_INSTALL}/${target}"
+              }
+              fi
+            }
+            done <<< "${targets}"
         } # end move_to_user_file_and_soft_link_root_to_it
 
     #[ ! -z "$0" ] && [ -e "$0" ] && THISSCRIPTNAME=`basename "$0"`
