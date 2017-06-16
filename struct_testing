@@ -1290,7 +1290,8 @@ complete -o nospace -F _wp_complete wp
               {
                 if [ ! -z "${one_action}" ] ; then  # if not empty
                 {
-                  action="${one_action/\{\#\}/$one_item}"  # replace value inside string substitution expresion bash
+                  # replace value inside string substitution expresion bash
+                  action="${one_action/\{\#\}/${one_item}}"
                   eval ${action}
                 }
                 fi
@@ -1332,18 +1333,20 @@ complete -o nospace -F _wp_complete wp
             return 1 # false no newlines
         } # end contains_newlines
 
-        function move_to_user_folder_and_soft_link_root_to_it() {
+        function root_out_and_link_back() {
             # Sample use
             #           you have:       /root/.folder
             #           and you want:  to move from  __root__     to     /home/${USER_TO_INSTALL}
             #           and link it back
             #           and you want:   /root/.folder  --->  /home/${USER_TO_INSTALL}/.folder
             #
-            #            move_to_user_folder_and_soft_link_root_to_it "${USER_TO_INSTALL}" .bundle
-            #            move_to_user_folder_and_soft_link_root_to_it "${USER_TO_INSTALL}" .bundle .gem .gems
+            #            sudo mkdir /root/.test
+            #            sudo root_out_and_link_back jesus .test
+            #            sudo root_out_and_link_back "${USER_TO_INSTALL}" .bundle
+            #            sudo root_out_and_link_back "${USER_TO_INSTALL}" .bundle .gem .gems
             local USER_TO_INSTALL="${1}"
             local target=""
-            local targets=$(switch_spaces_to_newlines <<< "${@}")
+            local targets=$(echo "${@}" | switch_spaces_to_newlines)
             local actions="
                 [ -d \"/home/${USER_TO_INSTALL}/{#}/\" ] && sudo rm -rf \"/home/${USER_TO_INSTALL}/{#}/\"
                 [ -d \"/root/{#}/\" ] && sudo mv \"/root/{#}\" \"/home/${USER_TO_INSTALL}/\"
@@ -1351,7 +1354,7 @@ complete -o nospace -F _wp_complete wp
                 [ -d \"/home/${USER_TO_INSTALL}/{#}/\" ] && sudo chown -R \"${USER_TO_INSTALL}\":\"${USER_TO_INSTALL}\" \"/home/${USER_TO_INSTALL}/{#}/\"
             "
             .each  "${actions}"   "${targets}"
-        } # end move_to_user_folder_and_soft_link_root_to_it
+        } # end root_out_and_link_back
 
         function move_to_user_file_and_soft_link_root_to_it() {
             # Sample use
