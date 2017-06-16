@@ -1269,7 +1269,7 @@ complete -o nospace -F _wp_complete wp
         function .each() {
             # Sample use
             #           ITEMS=$(find * -maxdepth 0 -type d | egrep -v "\.git")
-            #           ACTIONS="echo \"Showing list for {#}\" \n ls -la {#} "
+            #           ACTIONS="echo \"Showing list for {#}\"  ls -la {#} "
             #
             #                    Perform all actions in
             #                           LIST1
@@ -1284,21 +1284,23 @@ complete -o nospace -F _wp_complete wp
 
             while read -r one_item; do
             {
-            if [ ! -z "${one_item}" ] ; then  # if not empty
-            {
-              while read -r one_action; do
-              {
-                if [ ! -z "${one_action}" ] ; then  # if not empty
+                if [ ! -z "${one_item}" ] ; then  # if not empty
                 {
-                  # replace value inside string substitution expresion bash
-                  action="${one_action/\{\#\}/${one_item}}"
-                  eval ${action}
+                      while read -r one_action; do
+                      {
+                            if [ ! -z "${one_action}" ] ; then  # if not empty
+                            {
+                                  # replace value inside string substitution expresion bash
+                                  action="${one_action/\{\#\}/${one_item}}"
+                                  action="${action/\{\#\}/${one_item}}"
+                                  action="${action/\{\#\}/${one_item}}"
+                                  eval """${action}"""
+                            }
+                            fi
+                      }
+                      done <<< "${local_actions}"
                 }
                 fi
-              }
-              done <<< "${local_actions}"
-            }
-            fi
             }
             done <<< "${local_items}"
         } # end .each
