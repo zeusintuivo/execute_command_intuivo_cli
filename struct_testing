@@ -1253,7 +1253,6 @@ complete -o nospace -F _wp_complete wp
             echo "${GOODIES}"
 } # end build_table_from_installed_components
 
-
         function chown_it() {
             # Sample use
             #            chown_it "${USER_TO_INSTALL}" /usr/local/rvm
@@ -1265,8 +1264,11 @@ complete -o nospace -F _wp_complete wp
         function contains_newlines() {
             # Sample use
             #            test1="asdf asdf asdf asdf "
-            # test2="asdf\nasdf\nasdf"
-            #            if
+            #            test2="asdf\nasdf\nasdf"
+            #            ( ! contains_newlines "${test1}" ) && echo "no newlines"
+            #            ( contains_newlines "${test2}" ) && echo "newlines"
+            #            if contains_newlines "${test1}" ; then
+            #            if contains_newlines "${test2}" ; then
             [[ "${@}" == *$"\n"* ]] && return 1
             return 0
         } # end contains_newlines
