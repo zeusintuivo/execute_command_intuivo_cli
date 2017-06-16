@@ -378,7 +378,7 @@ CERO="\033[01;0m"
             DIRS="${@}"
             if [ ! -z "${DIRS-x}" ] ; then # if its set and not empty
             {
-                DIRS=$(sed 's/ /\n/g' <<< "${@}")
+                DIRS=$(switch_spaces_to_newlines <<< "${@}")
                 while read -r ONE_DIR; do
                 # if not empty
                 if [ ! -z "${ONE_DIR}" ] ; then
@@ -414,7 +414,7 @@ CERO="\033[01;0m"
             DIRS="${@}"
             if [ ! -z "${DIRS-x}" ] ; then # if its set and not empty
             {
-                DIRS=$(sed 's/ /\n/g' <<< "${@}")
+                DIRS=$(switch_spaces_to_newlines <<< "${@}")
                 while read -r ONE_DIR; do
                 # if not empty
                 if [ ! -z "${ONE_DIR}" ] ; then
@@ -457,7 +457,7 @@ CERO="\033[01;0m"
             FILES="${@}"
             if [ ! -z "${FILES-x}" ] ; then # if its set and not empty
             {
-                FILES=$(sed 's/ /\n/g' <<< "${@}")
+                FILES=$(switch_spaces_to_newlines <<< "${@}")
                 while read -r ONE_FILE; do
                 # if not empty
                 if [ ! -z "${ONE_FILE}" ] ; then
@@ -496,7 +496,7 @@ CERO="\033[01;0m"
             LINKS="${@}"
             if [ ! -z "${LINKS-x}" ] ; then # if its set and not empty
             {
-                LINKS=$(sed 's/ /\n/g' <<< "${@}")
+                LINKS=$(switch_spaces_to_newlines <<< "${@}")
                 while read -r ONE_LINK_ORDER; do
                     # if not empty
                     if [ ! -z "${ONE_LINK_ORDER}" ] ; then
@@ -564,7 +564,7 @@ CERO="\033[01;0m"
             ARGS="${@}"
             if [ ! -z "${ARGS-x}" ] ; then # if its set and not empty
             {
-                #ARGS=$(sed 's/ /\n/g' <<< "${@}")
+                #ARGS=$(switch_spaces_to_newlines <<< "${@}")
                 while read -r ONE_EQUALITY_ORDER; do
                     # if not empty
                     if [ ! -z "${ONE_EQUALITY_ORDER}" ] ; then
@@ -1261,6 +1261,17 @@ complete -o nospace -F _wp_complete wp
             [ -e "${path}" ] && sudo chown -R "${USER_TO_INSTALL}":"${USER_TO_INSTALL}" "${path}"
         } # end chown_it
 
+        function trim_end_newlines() {
+            # enter_last_only_removed() {
+              #sed ':a;N;$!ba;s/\n$//g' # GNU sed
+              sed -e ':a' -e 'N' -e '$!ba' -e 's/\n$//g'  #  cross-platform compatible syntax which works with BSD sed
+            # }
+        } # end trim_end_newlines
+
+        function switch_spaces_to_newlines() {
+            sed 's/ /\n/g'
+        } # end switch_spaces_to_newlines
+
         function contains_newlines() {
             # Sample use
             #            test1="asdf asdf asdf asdf "
@@ -1269,9 +1280,14 @@ complete -o nospace -F _wp_complete wp
             #            ( contains_newlines "${test2}" ) && echo "newlines"
             #            if contains_newlines "${test1}" ; then
             #            if contains_newlines "${test2}" ; then
-            [[ "${@}" == *$"\n"* ]] && return 1
+            local trimmed_testing=$(trim_end_newlines <<< "${@}")
+            [[ "${trimmed_testing}" == *$'\n'* ]] && return 1
             return 0
         } # end contains_newlines
+test1="asdf asdf asdf asdf "
+test2="asdf\nasdf\nasdf"
+( contains_newlines "${test1}" ) && echo "no newlines"
+( contains_newlines "${test2}" ) && echo "newlines"
 
         function move_to_user_folder_and_soft_link_root_to_it() {
             # Sample use
@@ -1279,7 +1295,7 @@ complete -o nospace -F _wp_complete wp
             #            move_to_user_folder_and_soft_link_root_to_it "${USER_TO_INSTALL}" .bundle .gem .gems
             local USER_TO_INSTALL="${1}"
             local target=""
-            local targets=$(sed 's/ /\n/g' <<< "${@}")
+            local targets=$(switch_spaces_to_newlines <<< "${@}")
 
             while read -r target; do
             {
@@ -1301,7 +1317,7 @@ complete -o nospace -F _wp_complete wp
             #            move_to_user_file_and_soft_link_root_to_it "${USER_TO_INSTALL}" .bundle .gem .gems
             local USER_TO_INSTALL="${1}"
             local target=""
-            local targets=$(sed 's/ /\n/g' <<< "${@}")
+            local targets=$(switch_spaces_to_newlines <<< "${@}")
 
             while read -r target; do
             {
