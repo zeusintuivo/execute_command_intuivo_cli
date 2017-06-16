@@ -1256,9 +1256,14 @@ complete -o nospace -F _wp_complete wp
         function chown_it() {
             # Sample use
             #            chown_it "${USER_TO_INSTALL}" /usr/local/rvm
+            #            chown_it "${USER_TO_INSTALL}" /usr/local/rvm /usr/local/.nvm
             local USER_TO_INSTALL="${1}"
-            local path="${2}"
-            [ -e "${path}" ] && sudo chown -R "${USER_TO_INSTALL}":"${USER_TO_INSTALL}" "${path}"
+            local paths=$(switch_spaces_to_newlines <<< "${@}")
+            local actions="
+                [ -e \"{#}\" ] && sudo chown -R \"${USER_TO_INSTALL}\":\"${USER_TO_INSTALL}\" \"{#}\"
+            "
+            .each  "${actions}"   "${paths}"
+
         } # end chown_it
 
         function .each() {
@@ -1299,14 +1304,14 @@ complete -o nospace -F _wp_complete wp
 
         function trim_end_newlines() {
             # enter_last_only_removed() {
-              #sed ':a;N;$!ba;s/\n$//g' # GNU sed
-              sed -e ':a' -e 'N' -e '$!ba' -e 's/\n$//g'  #  cross-platform compatible syntax which works with BSD sed
+            #sed ':a;N;$!ba;s/\n$//g' # GNU sed
+            sed -e ':a' -e 'N' -e '$!ba' -e 's/\n$//g'  #  cross-platform compatible syntax which works with BSD sed
             # }
         } # end trim_end_newlines
 
         function enter_encode() {
-          #sed ':a;N;$!ba;s/\n/0N33NT3R/g'  # GNU sed
-          sed -e ':a' -e 'N' -e '$!ba' -e 's/\n/0N33NT3R/g'  #  cross-platform compatible syntax which works with BSD sed
+            #sed ':a;N;$!ba;s/\n/0N33NT3R/g'  # GNU sed
+            sed -e ':a' -e 'N' -e '$!ba' -e 's/\n/0N33NT3R/g'  #  cross-platform compatible syntax which works with BSD sed
         } # end enter_encode
 
         function switch_spaces_to_newlines() {
@@ -1319,42 +1324,33 @@ complete -o nospace -F _wp_complete wp
             #            test2="asdf\nasdf\nasdf"
             #            ( ! contains_newlines "${test1}" ) && echo "no newlines"
             #            ( contains_newlines "${test2}" ) && echo "newlines"
-            #            if contains_newlines "${test1}" ; then
+            #            if ! contains_newlines "${test1}" ; then
             #            if contains_newlines "${test2}" ; then
-            local trimmed_testing=$(echo "${@}" | enter_encode) # 2>&1) # Check and catch capture all stout sdout output, error will return none 0 to $?)
-            echo "${@}"
-            echo "-----"
-            if [[ "${trimmed_testing}" == *"0N33NT3R"* ]] ; then
-                return 1
-            else
-                return 0
-            fi
+            local trimmed_testing=$(echo "${@}" | enter_encode)
+            # ' Here I changed \n to 0N33NT3R' why? - For a weird reasons when assigning a var " " it adds \n to the  end of it so t="a" is actually t="a\n"
+            [[ "${trimmed_testing}" == *"0N33NT3R"* ]] && return 0 # true contains enters
+            return 1 # false no newlines
         } # end contains_newlines
-test1="asdf asdf asdf asdf "  # For a weird reasons when assigning a var " " it adds \n to the  end of it so t="a" is actually t="a\n"
-test2="asdf\nasdf\nasdf"
-( ! contains_newlines "${test1}" ) && echo "no newlines"
-( contains_newlines "${test2}" ) && echo "newlines"
 
         function move_to_user_folder_and_soft_link_root_to_it() {
             # Sample use
+            #           you have:       /root/.folder
+            #           and you want:  to move from  __root__     to     /home/${USER_TO_INSTALL}
+            #           and link it back
+            #           and you want:   /root/.folder  --->  /home/${USER_TO_INSTALL}/.folder
+            #
             #            move_to_user_folder_and_soft_link_root_to_it "${USER_TO_INSTALL}" .bundle
             #            move_to_user_folder_and_soft_link_root_to_it "${USER_TO_INSTALL}" .bundle .gem .gems
             local USER_TO_INSTALL="${1}"
             local target=""
             local targets=$(switch_spaces_to_newlines <<< "${@}")
-
-            while read -r target; do
-            {
-              if [ ! -z "${target}" ]; then
-              {
-                [ -d "/home/${USER_TO_INSTALL}/${target}/" ] && sudo rm -rf "/home/${USER_TO_INSTALL}/${target}/"
-                [ -d "/root/${target}/" ] && sudo mv "/root/${target}" "/home/${USER_TO_INSTALL}/"
-                [ -d "/home/${USER_TO_INSTALL}/${target}/" ] && sudo ln -sf  "/home/${USER_TO_INSTALL}/${target}" "/root/${target}"
-                [ -d "/home/${USER_TO_INSTALL}/${target}/" ] && sudo chown -R "${USER_TO_INSTALL}":"${USER_TO_INSTALL}" "/home/${USER_TO_INSTALL}/${target}/"
-              }
-              fi
-            }
-            done <<< "${targets}"
+            local actions="
+                [ -d \"/home/${USER_TO_INSTALL}/{#}/\" ] && sudo rm -rf \"/home/${USER_TO_INSTALL}/{#}/\"
+                [ -d \"/root/{#}/\" ] && sudo mv \"/root/{#}\" \"/home/${USER_TO_INSTALL}/\"
+                [ -d \"/home/${USER_TO_INSTALL}/{#}/\" ] && sudo ln -sf  \"/home/${USER_TO_INSTALL}/{#}\" \"/root/{#}\"
+                [ -d \"/home/${USER_TO_INSTALL}/{#}/\" ] && sudo chown -R \"${USER_TO_INSTALL}\":\"${USER_TO_INSTALL}\" \"/home/${USER_TO_INSTALL}/{#}/\"
+            "
+            .each  "${actions}"   "${targets}"
         } # end move_to_user_folder_and_soft_link_root_to_it
 
         function move_to_user_file_and_soft_link_root_to_it() {
@@ -1364,19 +1360,13 @@ test2="asdf\nasdf\nasdf"
             local USER_TO_INSTALL="${1}"
             local target=""
             local targets=$(switch_spaces_to_newlines <<< "${@}")
-
-            while read -r target; do
-            {
-              if [ ! -z "${target}" ]; then
-              {
-                [ -f "/home/${USER_TO_INSTALL}/${target}" ] && sudo rm -rf "/home/${USER_TO_INSTALL}/${target}"
-                [ -f "/root/${target}" ] && sudo mv "/root/${target}" "/home/${USER_TO_INSTALL}"
-                [ -f "/home/${USER_TO_INSTALL}/${target}" ] && sudo ln -sf  "/home/${USER_TO_INSTALL}/${target}" "/root/${target}"
-                [ -f "/home/${USER_TO_INSTALL}/${target}" ] && sudo chown -R "${USER_TO_INSTALL}":"${USER_TO_INSTALL}" "/home/${USER_TO_INSTALL}/${target}"
-              }
-              fi
-            }
-            done <<< "${targets}"
+            local actions="
+                [ -f \"/home/${USER_TO_INSTALL}/{#}\" ] && sudo rm -rf \"/home/${USER_TO_INSTALL}/{#}\"
+                [ -f \"/root/{#}\" ] && sudo mv \"/root/{#}\" \"/home/${USER_TO_INSTALL}\"
+                [ -f \"/home/${USER_TO_INSTALL}/{#}\" ] && sudo ln -sf  \"/home/${USER_TO_INSTALL}/{#}\" \"/root/{#}\"
+                [ -f \"/home/${USER_TO_INSTALL}/{#}\" ] && sudo chown -R \"${USER_TO_INSTALL}\":\"${USER_TO_INSTALL}\" \"/home/${USER_TO_INSTALL}/{#}\"
+            "
+            .each  "${actions}"   "${targets}"
         } # end move_to_user_file_and_soft_link_root_to_it
 
     #[ ! -z "$0" ] && [ -e "$0" ] && THISSCRIPTNAME=`basename "$0"`
