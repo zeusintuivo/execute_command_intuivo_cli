@@ -1261,6 +1261,42 @@ complete -o nospace -F _wp_complete wp
             [ -e "${path}" ] && sudo chown -R "${USER_TO_INSTALL}":"${USER_TO_INSTALL}" "${path}"
         } # end chown_it
 
+        function .each() {
+            # Sample use
+            #           ITEMS=$(find * -maxdepth 0 -type d | egrep -v "\.git")
+            #           ACTIONS="echo \"Showing list for {#}\" \n ls -la {#} "
+            #
+            #                    Perform all actions in
+            #                           LIST1
+            #                             for each element in
+            #                                              LIST2
+            #           .each  "${ACTIONS}"   "${ITEMS}"
+            local local_actions="${1}"
+            local local_items="${2}"
+            local one_item
+            local one_action
+            local action
+
+            while read -r one_item; do
+            {
+            if [ ! -z "${one_item}" ] ; then  # if not empty
+            {
+              while read -r one_action; do
+              {
+                if [ ! -z "${one_action}" ] ; then  # if not empty
+                {
+                  action="${one_action/\{\#\}/$one_item}"  # replace value inside string substitution expresion bash
+                  eval ${action}
+                }
+                fi
+              }
+              done <<< "${local_actions}"
+            }
+            fi
+            }
+            done <<< "${local_items}"
+        } # end .each
+
         function trim_end_newlines() {
             # enter_last_only_removed() {
               #sed ':a;N;$!ba;s/\n$//g' # GNU sed
