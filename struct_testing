@@ -1268,6 +1268,11 @@ complete -o nospace -F _wp_complete wp
             # }
         } # end trim_end_newlines
 
+        function enter_encode() {
+          #sed ':a;N;$!ba;s/\n/0N33NT3R/g'  # GNU sed
+          sed -e ':a' -e 'N' -e '$!ba' -e 's/\n/0N33NT3R/g'  #  cross-platform compatible syntax which works with BSD sed
+        } # end enter_encode
+
         function switch_spaces_to_newlines() {
             sed 's/ /\n/g'
         } # end switch_spaces_to_newlines
@@ -1280,13 +1285,15 @@ complete -o nospace -F _wp_complete wp
             #            ( contains_newlines "${test2}" ) && echo "newlines"
             #            if contains_newlines "${test1}" ; then
             #            if contains_newlines "${test2}" ; then
-            local trimmed_testing=$(trim_end_newlines <<< "${@}")
-            [[ "${trimmed_testing}" == *$'\n'* ]] && return 1
+            local trimmed_testing=$(echo "${@}" | enter_encode) # 2>&1) # Check and catch capture all stout sdout output, error will return none 0 to $?)
+            echo "${@}"
+            echo "-----"
+            [[ "${trimmed_testing}" == *"0N33NT3R"* ]] && return 1
             return 0
         } # end contains_newlines
-test1="asdf asdf asdf asdf "
+test1="asdf asdf asdf asdf "  # For a weird reasons when assigning a var " " it adds \n to the  end of it so t="a" is actually t="a\n"
 test2="asdf\nasdf\nasdf"
-( contains_newlines "${test1}" ) && echo "no newlines"
+( ! contains_newlines "${test1}" ) && echo "no newlines"
 ( contains_newlines "${test2}" ) && echo "newlines"
 
         function move_to_user_folder_and_soft_link_root_to_it() {
