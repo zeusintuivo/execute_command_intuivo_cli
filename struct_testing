@@ -1288,8 +1288,11 @@ complete -o nospace -F _wp_complete wp
             local trimmed_testing=$(echo "${@}" | enter_encode) # 2>&1) # Check and catch capture all stout sdout output, error will return none 0 to $?)
             echo "${@}"
             echo "-----"
-            [[ "${trimmed_testing}" == *"0N33NT3R"* ]] && return 1
-            return 0
+            if [[ "${trimmed_testing}" == *"0N33NT3R"* ]] ; then
+                return 1
+            else
+                return 0
+            fi
         } # end contains_newlines
 test1="asdf asdf asdf asdf "  # For a weird reasons when assigning a var " " it adds \n to the  end of it so t="a" is actually t="a\n"
 test2="asdf\nasdf\nasdf"
