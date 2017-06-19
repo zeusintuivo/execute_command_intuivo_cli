@@ -1349,8 +1349,6 @@ complete -o nospace -F _wp_complete wp
             #           and you want:   /root/.folder  --->  /home/${USER_TO_INSTALL}/.folder
             #
             #            sudo mkdir /root/.test
-            #            sudo out_of_root_folder_and_soft_link_back zeus .test
-            #            sudo out_of_root_folder_and_soft_link_back jesus .test
             #            sudo out_of_root_folder_and_soft_link_back docker .test
             #            sudo out_of_root_folder_and_soft_link_back vagrant .test
             #            sudo out_of_root_folder_and_soft_link_back "${USER_TO_INSTALL}" .bundle
