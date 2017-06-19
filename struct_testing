@@ -1,3 +1,4 @@
+#!/usr/bin/env bash
 #!/bin/bash
 #
 # @author Zeus Intuivo <zeus@intuivo.com>
@@ -1268,7 +1269,7 @@ complete -o nospace -F _wp_complete wp
 
         function .each() {
             # Sample use
-            #           ITEMS=$(find * -maxdepth 0 -type d | egrep -v "\.git")
+            #           ITEMS=$(find . -maxdepth 0 -type d | egrep -v "\.git")
             #           ACTIONS="echo \"Showing list for {#}\"  ls -la {#} "
             #
             #                    Perform all actions in
@@ -1305,17 +1306,21 @@ complete -o nospace -F _wp_complete wp
             done <<< "${local_items}"
         } # end .each
 
+        # enter_last_only_removed() {
+        # sed ':a;N;$!ba;s/\n$//g' # GNU sed
         function trim_end_newlines() {
-            # enter_last_only_removed() {
-            #sed ':a;N;$!ba;s/\n$//g' # GNU sed
             sed -e ':a' -e 'N' -e '$!ba' -e 's/\n$//g'  #  cross-platform compatible syntax which works with BSD sed
-            # }
         } # end trim_end_newlines
+        # }
 
         function enter_encode() {
-            #sed ':a;N;$!ba;s/\n/0N33NT3R/g'  # GNU sed
-            sed -e ':a' -e 'N' -e '$!ba' -e 's/\n/0N33NT3R/g'  #  cross-platform compatible syntax which works with BSD sed
+          #sed ':a;N;$!ba;s/\n/0N33NT3R/g'  # GNU sed
+          sed -e ':a' -e 'N' -e '$!ba' -e 's/\n/0N33NT3R/g'  #  cross-platform compatible syntax which works with BSD sed
         } # end enter_encode
+
+        function enter_decode() {
+          sed 's/0N33NT3R/\n/g'
+        } # end enter_decode
 
         function switch_spaces_to_newlines() {
             sed 's/ /\n/g'
@@ -1323,19 +1328,20 @@ complete -o nospace -F _wp_complete wp
 
         function contains_newlines() {
             # Sample use
-            #            test1="asdf asdf asdf asdf "
+            #            test1="asdf xcvb qwe sdfs "
             #            test2="asdf\nasdf\nasdf"
             #            ( ! contains_newlines "${test1}" ) && echo "no newlines"
             #            ( contains_newlines "${test2}" ) && echo "newlines"
             #            if ! contains_newlines "${test1}" ; then
             #            if contains_newlines "${test2}" ; then
+            echo "${@}" | enter_encode
             local trimmed_testing=$(echo "${@}" | enter_encode)
             # ' Here I changed \n to 0N33NT3R' why? - For a weird reasons when assigning a var " " it adds \n to the  end of it so t="a" is actually t="a\n"
             [[ "${trimmed_testing}" == *"0N33NT3R"* ]] && return 0 # true contains enters
             return 1 # false no newlines
         } # end contains_newlines
 
-        function root_out_and_link_back() {
+        function out_of_root_folder_and_soft_link_back() {
             # Sample use
             #           you have:       /root/.folder
             #           and you want:  to move from  __root__     to     /home/${USER_TO_INSTALL}
@@ -1343,12 +1349,23 @@ complete -o nospace -F _wp_complete wp
             #           and you want:   /root/.folder  --->  /home/${USER_TO_INSTALL}/.folder
             #
             #            sudo mkdir /root/.test
-            #            sudo root_out_and_link_back jesus .test
-            #            sudo root_out_and_link_back "${USER_TO_INSTALL}" .bundle
-            #            sudo root_out_and_link_back "${USER_TO_INSTALL}" .bundle .gem .gems
+            #            sudo out_of_root_folder_and_soft_link_back zeus .test
+            #            sudo out_of_root_folder_and_soft_link_back jesus .test
+            #            sudo out_of_root_folder_and_soft_link_back docker .test
+            #            sudo out_of_root_folder_and_soft_link_back vagrant .test
+            #            sudo out_of_root_folder_and_soft_link_back "${USER_TO_INSTALL}" .bundle
+            #            sudo out_of_root_folder_and_soft_link_back "${USER_TO_INSTALL}" .bundle .gem .gems
             local USER_TO_INSTALL="${1}"
-            local target=""
-            local targets=$(echo "${@}" | switch_spaces_to_newlines)
+            if ( contains_newlines "${@}" ); then
+            {
+                local targets="${@}"
+            }
+            else
+            {
+                local targets=$(echo "${@}" | switch_spaces_to_newlines)
+            }
+            fi
+            echo "${targets}"
             local actions="
                 [ -d \"/home/${USER_TO_INSTALL}/{#}/\" ] && sudo rm -rf \"/home/${USER_TO_INSTALL}/{#}/\"
                 [ -d \"/root/{#}/\" ] && sudo mv \"/root/{#}\" \"/home/${USER_TO_INSTALL}/\"
@@ -1356,15 +1373,22 @@ complete -o nospace -F _wp_complete wp
                 [ -d \"/home/${USER_TO_INSTALL}/{#}/\" ] && sudo chown -R \"${USER_TO_INSTALL}\":\"${USER_TO_INSTALL}\" \"/home/${USER_TO_INSTALL}/{#}/\"
             "
             .each  "${actions}"   "${targets}"
-        } # end root_out_and_link_back
+        } # end out_of_root_folder_and_soft_link_back
 
-        function move_to_user_file_and_soft_link_root_to_it() {
+        function out_of_root_file_and_soft_link_back() {
             # Sample use
-            #            move_to_user_file_and_soft_link_root_to_it "${USER_TO_INSTALL}" .bundle
-            #            move_to_user_file_and_soft_link_root_to_it "${USER_TO_INSTALL}" .bundle .gem .gems
+            #            out_of_root_file_and_soft_link_back "${USER_TO_INSTALL}" .bundle
+            #            out_of_root_file_and_soft_link_back "${USER_TO_INSTALL}" .bundle .gem .gems
             local USER_TO_INSTALL="${1}"
-            local target=""
-            local targets=$(switch_spaces_to_newlines <<< "${@}")
+            if contains_newlines "${@}" ; then
+            {
+                local targets="${@}"
+            }
+            else
+            {
+                local targets=$(echo "${@}" | switch_spaces_to_newlines)
+            }
+            fi
             local actions="
                 [ -f \"/home/${USER_TO_INSTALL}/{#}\" ] && sudo rm -rf \"/home/${USER_TO_INSTALL}/{#}\"
                 [ -f \"/root/{#}\" ] && sudo mv \"/root/{#}\" \"/home/${USER_TO_INSTALL}\"
@@ -1372,6 +1396,40 @@ complete -o nospace -F _wp_complete wp
                 [ -f \"/home/${USER_TO_INSTALL}/{#}\" ] && sudo chown -R \"${USER_TO_INSTALL}\":\"${USER_TO_INSTALL}\" \"/home/${USER_TO_INSTALL}/{#}\"
             "
             .each  "${actions}"   "${targets}"
+        } # end out_of_root_file_and_soft_link_back
+
+        function move_to_user_folder_and_soft_link_root_to_it() {
+            # Sample use
+            #            move_to_user_folder_and_soft_link_root_to_it "${USER_TO_INSTALL}" .bundle
+            local USER_TO_INSTALL="${1}"
+            local target="${2}"
+
+            [ -d "/home/${USER_TO_INSTALL}/${target}/" ] && sudo rm -rf "/home/${USER_TO_INSTALL}/${target}/"
+            [ -d "/root/${target}/" ] && sudo mv "/root/${target}" "/home/${USER_TO_INSTALL}/"
+            [ -d "/home/${USER_TO_INSTALL}/${target}/" ] && sudo ln -sf  "/home/${USER_TO_INSTALL}/${target}" "/root/${target}"
+            [ -d "/home/${USER_TO_INSTALL}/${target}/" ] && sudo chown -R "${USER_TO_INSTALL}":"${USER_TO_INSTALL}" "/home/${USER_TO_INSTALL}/${target}/"
+
+            # ${target} root -- different procedure ??? WTF
+            # [ -d "/root/${target}/" ] && ( sudo rm -rf  "/root/${target}" )
+            # [ ! -d "/home/${USER_TO_INSTALL}/${target}/" ] && ( sudo mkdir -p "/home/${USER_TO_INSTALL}/${target}" )
+            # [ ! -d "/root/${target}/" ] && ( sudo ln -sf "/home/${USER_TO_INSTALL}/${target}"  "/root/${target}" )
+        } # end move_to_user_folder_and_soft_link_root_to_it
+
+        function move_to_user_file_and_soft_link_root_to_it() {
+            # Sample use
+            #            move_to_user_file_and_soft_link_root_to_it "${USER_TO_INSTALL}" .bundle
+            local USER_TO_INSTALL="${1}"
+            local target="${2}"
+
+            [ -f "/home/${USER_TO_INSTALL}/${target}" ] && sudo rm -rf "/home/${USER_TO_INSTALL}/${target}"
+            [ -f "/root/${target}" ] && sudo mv "/root/${target}" "/home/${USER_TO_INSTALL}"
+            [ -f "/home/${USER_TO_INSTALL}/${target}" ] && sudo ln -sf  "/home/${USER_TO_INSTALL}/${target}" "/root/${target}"
+            [ -f "/home/${USER_TO_INSTALL}/${target}" ] && sudo chown -R "${USER_TO_INSTALL}":"${USER_TO_INSTALL}" "/home/${USER_TO_INSTALL}/${target}"
+
+            # ${target} root -- different procedure ??? WTF
+            # [ -f "/root/${target}" ] && ( sudo rm -rf  "/root/${target}" )
+            # [ ! -f "/home/${USER_TO_INSTALL}/${target}" ] && ( sudo mkdir -p "/home/${USER_TO_INSTALL}/${target}" )
+            # [ ! -f "/root/${target}" ] && ( sudo ln -sf "/home/${USER_TO_INSTALL}/${target}"  "/root/${target}" )
         } # end move_to_user_file_and_soft_link_root_to_it
 
     #[ ! -z "$0" ] && [ -e "$0" ] && THISSCRIPTNAME=`basename "$0"`
