@@ -1304,6 +1304,7 @@ complete -o nospace -F _wp_complete wp
             local paths=$(switch_spaces_to_newlines <<< "${@}") 
             local actions="
                 [ -e \"{#}\" ] && rm -rf \"{#}\"
+                [ -L \"{#}\" ] && unlink \"{#}\"
             "
             .each  "${actions}"   "${paths}"
         } 
