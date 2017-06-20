@@ -79,7 +79,8 @@ function sample_use_verify_mongo() {
     #  check_to_be_installed "sysfsutils" "fix for transparent_hugepage"
     #
 
-} # end function sample_use_verify_mongo
+} 
+# end function sample_use_verify_mongo
 
 function HOW_TO_LOAD_SEVERAL_FILES() {
 
@@ -113,7 +114,8 @@ function HOW_TO_LOAD_SEVERAL_FILES() {
         unset BASH_SCRIPTS
         unset provider
         ( ( ! command -v type passed >/dev/null 2>&1;) && echo -e "\n \n  ERROR! Loading struct_testing \n \n " && exit 69; )
-    } # end load_execute_commands_wget
+    } 
+    # end load_execute_commands_wget
     load_execute_commands_wget
 
     load_execute_commands_curl(){
@@ -145,10 +147,12 @@ function HOW_TO_LOAD_SEVERAL_FILES() {
         unset BASH_SCRIPTS
         unset provider
         ( ( ! command -v type passed >/dev/null 2>&1;) && echo -e "\n \n  ERROR! Loading struct_testing \n \n " && exit 69; )
-    } # end load_execute_commands_curl
+    } 
+    # end load_execute_commands_curl
     load_execute_commands_curl
 
-} # end function HOW_TO_LOAD_SEVERAL_FILES
+} 
+# end function HOW_TO_LOAD_SEVERAL_FILES
 
 function HOW_TO_LOAD_JUST_ONE_SCRIPT_LOCAL_AND_ONLINE_EXECUTE_COMMAND() {
 
@@ -159,9 +163,11 @@ function HOW_TO_LOAD_JUST_ONE_SCRIPT_LOCAL_AND_ONLINE_EXECUTE_COMMAND() {
         local EXECOMCLI=$(curl $provider  2>/dev/null )   # suppress only curl download messages, but keep curl output for variable
         eval """${EXECOMCLI}"""
         ( ( ! command -v type passed >/dev/null 2>&1; ) && echo -e "\n \n  ERROR! Loading execute_command \n \n " && exit 69; )
-    } # end load_struct_testing_curl
+    } 
+    # end load_struct_testing_curl
     load_struct_testing_curl
-} # end HOW_TO_LOAD_JUST_ONE_SCRIPT_EXECUTE_COMMAND
+} 
+# end HOW_TO_LOAD_JUST_ONE_SCRIPT_EXECUTE_COMMAND
 
 function HOW_TO_LOAD_JUST_ONE_SCRIPT_LOCAL_AND_ONLINE_STRUCT_USING_CURL() {
 
@@ -172,10 +178,12 @@ function HOW_TO_LOAD_JUST_ONE_SCRIPT_LOCAL_AND_ONLINE_STRUCT_USING_CURL() {
         local EXECOMCLI=$(curl $provider  2>/dev/null )   # suppress only curl download messages, but keep curl output for variable
         eval """${EXECOMCLI}"""
         ( ( ! command -v type passed >/dev/null 2>&1; ) && echo -e "\n \n  ERROR! Loading struct_testing \n \n " && exit 69; )
-    } # end load_struct_testing_curl
+    } 
+    # end load_struct_testing_curl
     load_struct_testing_curl
 
-} # end HOW_TO_LOAD_JUST_ONE_SCRIPT_LOCAL_AND_ONLINE_STRUCT_USING_CURL
+} 
+# end HOW_TO_LOAD_JUST_ONE_SCRIPT_LOCAL_AND_ONLINE_STRUCT_USING_CURL
 
 function HOW_TO_LOAD_JUST_ONE_SCRIPT_LOCAL_AND_ONLINE_STRUCT_USING_WGET() {
 
@@ -185,10 +193,12 @@ function HOW_TO_LOAD_JUST_ONE_SCRIPT_LOCAL_AND_ONLINE_STRUCT_USING_WGET() {
         [   -e "${provider}"  ] && source "${provider}"
         [ ! -e "${provider}"  ] && eval """$(wget --quiet --no-check-certificate  https://raw.githubusercontent.com/zeusintuivo/execute_command_intuivo_cli/master/struct_testing -O -  2>/dev/null )"""   # suppress only wget download messages, but keep wget output for variable
         ( ( ! command -v type passed >/dev/null 2>&1; ) && echo -e "\n \n  ERROR! Loading struct_testing \n \n " && exit 69; )
-    } # end load_struct_testing_wget
+    } 
+    # end load_struct_testing_wget
     load_struct_testing_wget
 
-} # end HOW_TO_LOAD_JUST_ONE_SCRIPT_LOCAL_AND_ONLINE_STRUCT_USING_CURL
+} 
+# end HOW_TO_LOAD_JUST_ONE_SCRIPT_LOCAL_AND_ONLINE_STRUCT_USING_CURL
 
 function HOW_TO_LOAD_JUST_ONE_SCRIPT_ONLINE_ALWAYS_STRUCT_USING_WGET() {
 
@@ -197,10 +207,12 @@ function HOW_TO_LOAD_JUST_ONE_SCRIPT_ONLINE_ALWAYS_STRUCT_USING_WGET() {
         EXECOMCLI=$(wget --quiet --no-check-certificate https://raw.githubusercontent.com/zeusintuivo/execute_command_intuivo_cli/master/struct_testing -O -  2>/dev/null )   # suppress only curl download messages, but keep curl output for variable
         eval """${EXECOMCLI}"""
         ( ( ! command -v type passed >/dev/null 2>&1;) && echo -e "\n \n  ERROR! Loading struct_testing \n \n " && exit 69; )
-    } # end load_struct_testing_wget
+    } 
+    # end load_struct_testing_wget
     load_struct_testing_wget
 
-} # end HOW_TO_LOAD_JUST_ONE_SCRIPT_ONLINE_ALWAYS_STRUCT_USING_WGET
+} 
+# end HOW_TO_LOAD_JUST_ONE_SCRIPT_ONLINE_ALWAYS_STRUCT_USING_WGET
 
 
 
@@ -318,7 +330,8 @@ CERO="\033[01;0m"
             }
             fi
 
-        } # end assert
+        } 
+        # end assert
 
         function ensure() {
             # Sample usage:
@@ -552,7 +565,8 @@ CERO="\033[01;0m"
                 done <<< "${LINKS}"
             }
             fi # not empty links
-        } # end function
+        } 
+        # end function
 
         function check_equality(){
             # Sample usage
@@ -602,7 +616,8 @@ CERO="\033[01;0m"
                 done <<< "${ARGS}"
             }
             fi
-        } # end function check_equality
+        } 
+        # end function check_equality
         alias verify_equality=check_equality
         alias ensure_equality=check_equality
 
@@ -868,7 +883,8 @@ CERO="\033[01;0m"
             }
             fi
 
-        } # end has_error_keyword
+        } 
+        # end has_error_keyword
 
         function handle_error() {
             # Sample use
@@ -890,7 +906,8 @@ CERO="\033[01;0m"
             }
             fi
 
-        } # end handle_error
+        } 
+        # end handle_error
 
         function install_apt_get_requirements(){
             # Sample use
@@ -937,7 +954,8 @@ CERO="\033[01;0m"
             [[ ! -z "${missing}" ]] && echo -e " ${CYAN} Installing missing packages: ${YELLOW} ${missing} ${RESET} ."
             [[ ! -z "${missing}" ]] && local install_result=$(sudo apt-get install ${missing} -yfq   2>&1) # capture all input and output
             [[ ! -z "${install_result}" ]] && handle_error "${install_result}"
-        } # end install_apt_get_requirements
+        } 
+        # end install_apt_get_requirements
 
         function install_apt_get_should_not_be_installed(){
             # Sample use
@@ -983,7 +1001,8 @@ CERO="\033[01;0m"
             [[ ! -z "${removing}" ]] && echo -e " ${CYAN} Apt-get removing packages: ${YELLOW} ${removing} ${RESET} ."
             [[ ! -z "${removing}" ]] && local remove_result=$(sudo apt-get remove ${removing} -yfq   2>&1 && sudo apt-get purge ${removing} -yfq   2>&1 && sudo apt-get autoremove -yfq   2>&1) # capture all input and output
             [[ ! -z "${remove_result}" ]] && handle_error "${remove_result}"
-        } # end install_apt_get_should_not_be_installed
+        } 
+        # end install_apt_get_should_not_be_installed
         #
         # C H E C K   H O W   C O M P U T E R   H A N D L E S   E R R O R S   --Start
         #
@@ -1064,7 +1083,8 @@ CERO="\033[01;0m"
           done <<< "${CHANGED_FILES_WITH_STATUS_WITH_TAB_CHANGED_TO_PIPE}"
           #done <<< "${CHANGED_FILES_WITH_STATUS_WITH_TAB_CHANGED_TO_PIPE}"
           echo $LONGEST_NAME
-        } #end get_longest_name_length
+        } 
+        # end get_longest_name_length
         # duplicated at commit
         function repeat_single_char_spacer() {
           # Sample usage:
@@ -1087,7 +1107,8 @@ CERO="\033[01;0m"
             #echo "${1}"
             printf %s "${pad}"
           done
-        } # end repeat_single_char_spacer
+        } 
+        # end repeat_single_char_spacer
 
         function add_right_padding(){
           # Sample usage:
@@ -1100,7 +1121,8 @@ CERO="\033[01;0m"
           local calculate=$(( $longest - $length ))
           local padding=$(repeat_single_char_spacer "${pad}" ${calculate})
           echo "${string}${padding}"
-        } # end add_right_padding
+        } 
+        # end add_right_padding
 
         function add_left_padding(){
           # Sample usage:
@@ -1113,7 +1135,8 @@ CERO="\033[01;0m"
           local calculate=$(( $longest - $length ))
           local padding=$(repeat_single_char_spacer ${pad} $calculate)
           echo "${padding}${string}"
-        } # end add_left_padding
+        } 
+        # end add_left_padding
 
         function build_table_from_installed_components() {
             # Sample usage:
@@ -1252,7 +1275,8 @@ complete -o nospace -F _wp_complete wp
 
 "
             echo "${GOODIES}"
-} # end build_table_from_installed_components
+} 
+# end build_table_from_installed_components
 
         function chown_it() {
             # Sample use
@@ -1265,7 +1289,8 @@ complete -o nospace -F _wp_complete wp
             "
             .each  "${actions}"   "${paths}"
 
-        } # end chown_it
+        } 
+        # end chown_it
 
         function .each() {
             # Sample use
@@ -1304,27 +1329,32 @@ complete -o nospace -F _wp_complete wp
                 fi
             }
             done <<< "${local_items}"
-        } # end .each
+        } 
+        # end .each
 
         # enter_last_only_removed() {
-        # sed ':a;N;$!ba;s/\n$//g' # GNU sed
+        #  sed ':a;N;$!ba;s/\n$//g' # GNU sed
         function trim_end_newlines() {
             sed -e ':a' -e 'N' -e '$!ba' -e 's/\n$//g'  #  cross-platform compatible syntax which works with BSD sed
-        } # end trim_end_newlines
+        } 
+        # end trim_end_newlines
         # }
 
         function enter_encode() {
           #sed ':a;N;$!ba;s/\n/0N33NT3R/g'  # GNU sed
           sed -e ':a' -e 'N' -e '$!ba' -e 's/\n/0N33NT3R/g'  #  cross-platform compatible syntax which works with BSD sed
-        } # end enter_encode
+        } 
+        # end enter_encode
 
         function enter_decode() {
           sed 's/0N33NT3R/\n/g'
-        } # end enter_decode
+        } 
+        # end enter_decode
 
         function switch_spaces_to_newlines() {
             sed 's/ /\n/g'
-        } # end switch_spaces_to_newlines
+        } 
+        # end switch_spaces_to_newlines
 
         function contains_newlines() {
             # Sample use
@@ -1339,7 +1369,8 @@ complete -o nospace -F _wp_complete wp
             # ' Here I changed \n to 0N33NT3R' why? - For a weird reasons when assigning a var " " it adds \n to the  end of it so t="a" is actually t="a\n"
             [[ "${trimmed_testing}" == *"0N33NT3R"* ]] && return 0 # true contains enters
             return 1 # false no newlines
-        } # end contains_newlines
+        } 
+        # end contains_newlines
 
         function out_of_root_folder_and_soft_link_back() {
             # Sample use
@@ -1371,7 +1402,8 @@ complete -o nospace -F _wp_complete wp
                 [ -d \"/home/${USER_TO_INSTALL}/{#}/\" ] && sudo chown -R \"${USER_TO_INSTALL}\":\"${USER_TO_INSTALL}\" \"/home/${USER_TO_INSTALL}/{#}/\"
             "
             .each  "${actions}"   "${targets}"
-        } # end out_of_root_folder_and_soft_link_back
+        } 
+        # end out_of_root_folder_and_soft_link_back
 
         function out_of_root_file_and_soft_link_back() {
             # Sample use
@@ -1394,9 +1426,11 @@ complete -o nospace -F _wp_complete wp
                 [ -f \"/home/${USER_TO_INSTALL}/{#}\" ] && sudo chown -R \"${USER_TO_INSTALL}\":\"${USER_TO_INSTALL}\" \"/home/${USER_TO_INSTALL}/{#}\"
             "
             .each  "${actions}"   "${targets}"
-        } # end out_of_root_file_and_soft_link_back
+        } 
+        # end out_of_root_file_and_soft_link_back
 
         function move_to_user_folder_and_soft_link_root_to_it() {
+        
             # Sample use
             #            move_to_user_folder_and_soft_link_root_to_it "${USER_TO_INSTALL}" .bundle
             local USER_TO_INSTALL="${1}"
@@ -1411,7 +1445,8 @@ complete -o nospace -F _wp_complete wp
             # [ -d "/root/${target}/" ] && ( sudo rm -rf  "/root/${target}" )
             # [ ! -d "/home/${USER_TO_INSTALL}/${target}/" ] && ( sudo mkdir -p "/home/${USER_TO_INSTALL}/${target}" )
             # [ ! -d "/root/${target}/" ] && ( sudo ln -sf "/home/${USER_TO_INSTALL}/${target}"  "/root/${target}" )
-        } # end move_to_user_folder_and_soft_link_root_to_it
+        }
+        # end move_to_user_folder_and_soft_link_root_to_it
 
         function move_to_user_file_and_soft_link_root_to_it() {
             # Sample use
@@ -1428,8 +1463,30 @@ complete -o nospace -F _wp_complete wp
             # [ -f "/root/${target}" ] && ( sudo rm -rf  "/root/${target}" )
             # [ ! -f "/home/${USER_TO_INSTALL}/${target}" ] && ( sudo mkdir -p "/home/${USER_TO_INSTALL}/${target}" )
             # [ ! -f "/root/${target}" ] && ( sudo ln -sf "/home/${USER_TO_INSTALL}/${target}"  "/root/${target}" )
-        } # end move_to_user_file_and_soft_link_root_to_it
+        } 
+        # end move_to_user_file_and_soft_link_root_to_it
 
+        move_to_user_file_and_soft_link_root_to_it() {
+            local USER_TO_INSTALL="${1}"
+            local target="${2}"
+
+            [ -f "/home/${USER_TO_INSTALL}/${target}" ] && sudo rm -rf "/home/${USER_TO_INSTALL}/${target}"
+            [ -f "/root/${target}" ] && sudo mv "/root/${target}" "/home/${USER_TO_INSTALL}"
+            [ -f "/home/${USER_TO_INSTALL}/${target}" ] && sudo ln -sf  "/home/${USER_TO_INSTALL}/${target}" "/root/${target}"
+            [ -f "/home/${USER_TO_INSTALL}/${target}" ] && sudo chown -R "${USER_TO_INSTALL}":"${USER_TO_INSTALL}" "/home/${USER_TO_INSTALL}/${target}"
+        } 
+        alias move_folder_out_root_to_user_and_link_it_back=move_to_user_folder_and_soft_link_root_to_it 
+        
+        move_to_user_file_and_soft_link_root_to_it() {
+            local USER_TO_INSTALL="${1}"
+            local target="${2}"
+
+            [ -f "/home/${USER_TO_INSTALL}/${target}" ] && sudo rm -rf "/home/${USER_TO_INSTALL}/${target}"
+            [ -f "/root/${target}" ] && sudo mv "/root/${target}" "/home/${USER_TO_INSTALL}"
+            [ -f "/home/${USER_TO_INSTALL}/${target}" ] && sudo ln -sf  "/home/${USER_TO_INSTALL}/${target}" "/root/${target}"
+            [ -f "/home/${USER_TO_INSTALL}/${target}" ] && sudo chown -R "${USER_TO_INSTALL}":"${USER_TO_INSTALL}" "/home/${USER_TO_INSTALL}/${target}"
+        } 
+        alias move_file_out_root_to_user_and_link_it_back=move_to_user_file_and_soft_link_root_to_it 
     #[ ! -z "$0" ] && [ -e "$0" ] && THISSCRIPTNAME=`basename "$0"`
 
     # TRAP
