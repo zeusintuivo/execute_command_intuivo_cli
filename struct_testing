@@ -1277,6 +1277,11 @@ complete -o nospace -F _wp_complete wp
             echo "${GOODIES}"
 } 
 # end build_table_from_installed_components
+        
+        function switch_spaces_to_newlines() {
+            sed 's/ /\n/g'
+        } 
+        # end switch_spaces_to_newlines
 
         function chown_it() {
             # Sample use
@@ -1350,11 +1355,6 @@ complete -o nospace -F _wp_complete wp
           sed 's/0N33NT3R/\n/g'
         } 
         # end enter_decode
-
-        function switch_spaces_to_newlines() {
-            sed 's/ /\n/g'
-        } 
-        # end switch_spaces_to_newlines
 
         function contains_newlines() {
             # Sample use
