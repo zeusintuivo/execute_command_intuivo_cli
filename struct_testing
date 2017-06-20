@@ -1283,10 +1283,10 @@ complete -o nospace -F _wp_complete wp
         } 
         # end switch_spaces_to_newlines
 
-        function chown_it() {
             # Sample use
             #            chown_it "${USER_TO_INSTALL}" /usr/local/rvm
-            #            chown_it "${USER_TO_INSTALL}" /usr/local/rvm /usr/local/.nvm
+            #            chown_it "${USER_TO_INSTALL}" /usr/local/rvm /usr/local/.nvm /usr/local/.nvm  /usr/local/rvm  /root/.temp
+        function chown_it() {
             local USER_TO_INSTALL="${1}"
             local paths=$(switch_spaces_to_newlines <<< "${@}")
             local actions="
@@ -1297,19 +1297,18 @@ complete -o nospace -F _wp_complete wp
         } 
         # end chown_it
 
-        function remove_it() {
             # Sample use
-            #            chown_it "${USER_TO_INSTALL}" /usr/local/rvm
-            #            chown_it "${USER_TO_INSTALL}" /usr/local/rvm /usr/local/.nvm
-            local USER_TO_INSTALL="${1}"
-            local paths=$(switch_spaces_to_newlines <<< "${@}")
+            #            remove_it  /usr/local/rvm
+            #            remove_it  /usr/local/rvm /usr/local/.nvm  /usr/local/rvm  /root/.temp
+        function remove_it() {
+            local paths=$(switch_spaces_to_newlines <<< "${@}") 
             local actions="
                 [ -e \"{#}\" ] && chown -R \"${USER_TO_INSTALL}\":\"${USER_TO_INSTALL}\" \"{#}\"
             "
             .each  "${actions}"   "${paths}"
         } 
-        # end chown_it
-        function .each() {
+        # end remove_it
+
             # Sample use
             #           ITEMS=$(find . -maxdepth 0 -type d | egrep -v "\.git")
             #           ACTIONS="echo \"Showing list for {#}\"  ls -la {#} "
@@ -1319,6 +1318,7 @@ complete -o nospace -F _wp_complete wp
             #                             for each element in
             #                                              LIST2
             #           .each  "${ACTIONS}"   "${ITEMS}"
+        function .each() {
             local local_actions="${1}"
             local local_items="${2}"
             local one_item
@@ -1357,8 +1357,8 @@ complete -o nospace -F _wp_complete wp
         # end trim_end_newlines
         # }
 
-        function enter_encode() {
           #sed ':a;N;$!ba;s/\n/0N33NT3R/g'  # GNU sed
+        function enter_encode() {
           sed -e ':a' -e 'N' -e '$!ba' -e 's/\n/0N33NT3R/g'  #  cross-platform compatible syntax which works with BSD sed
         } 
         # end enter_encode
@@ -1368,7 +1368,6 @@ complete -o nospace -F _wp_complete wp
         } 
         # end enter_decode
 
-        function contains_newlines() {
             # Sample use
             #            test1="asdf xcvb qwe sdfs "
             #            test2="asdf\nasdf\nasdf"
@@ -1376,15 +1375,15 @@ complete -o nospace -F _wp_complete wp
             #            ( contains_newlines "${test2}" ) && echo "newlines"
             #            if ! contains_newlines "${test1}" ; then
             #            if contains_newlines "${test2}" ; then
+            # ' Here I changed \n to 0N33NT3R' why? - For a weird reasons when assigning a var " " it adds \n to the  end of it so t="a" is actually t="a\n"
+        function contains_newlines() {
             echo "${@}" | enter_encode
             local trimmed_testing=$(echo "${@}" | enter_encode)
-            # ' Here I changed \n to 0N33NT3R' why? - For a weird reasons when assigning a var " " it adds \n to the  end of it so t="a" is actually t="a\n"
             [[ "${trimmed_testing}" == *"0N33NT3R"* ]] && return 0 # true contains enters
             return 1 # false no newlines
         } 
         # end contains_newlines
 
-        function out_of_root_folder_and_soft_link_back() {
             # Sample use
             #           you have:       /root/.folder
             #           and you want:  to move from  __root__     to     /home/${USER_TO_INSTALL}
@@ -1396,6 +1395,7 @@ complete -o nospace -F _wp_complete wp
             #            sudo out_of_root_folder_and_soft_link_back vagrant .test
             #            sudo out_of_root_folder_and_soft_link_back "${USER_TO_INSTALL}" .bundle
             #            sudo out_of_root_folder_and_soft_link_back "${USER_TO_INSTALL}" .bundle .gem .gems
+        function out_of_root_folder_and_soft_link_back() {
             local USER_TO_INSTALL="${1}"
             if ( contains_newlines "${@}" ); then
             {
@@ -1417,10 +1417,10 @@ complete -o nospace -F _wp_complete wp
         } 
         # end out_of_root_folder_and_soft_link_back
 
-        function out_of_root_file_and_soft_link_back() {
             # Sample use
             #            out_of_root_file_and_soft_link_back "${USER_TO_INSTALL}" .bundle
             #            out_of_root_file_and_soft_link_back "${USER_TO_INSTALL}" .bundle .gem .gems
+        function out_of_root_file_and_soft_link_back() {
             local USER_TO_INSTALL="${1}"
             if contains_newlines "${@}" ; then
             {
