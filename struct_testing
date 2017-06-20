@@ -540,6 +540,7 @@ CERO="\033[01;0m"
                             if [[ "${CHECK_TARGET_TOO}" == "YES" && ! -z "${ONE_LINK_TARGET}" ]] ; then
                             {
                                 TESTING="${PURPLE} +-- and that softlink ${CYAN}${ONE_LINK_LOCATION}${LIGHTYELLOW} points to ${CYAN}${ONE_LINK_TARGET}${GREEN} location"
+                                TESTING+="${GREEN} +++ expected ${LIGHTYELLOW}:${CYAN}${ONE_LINK_TARGET}${LIGHTYELLOW}:${RED} --- actual ${LIGHTYELLOW}:${RED}${FOUND_LINK_TARGET}${LIGHTYELLOW}:"
 
                                 FOUND_LINK_TARGET=$(ls -l ${ONE_LINK_LOCATION} | awk '{print $11}') # Find target symlink
                                 if [[ "${FOUND_LINK_TARGET}" == "${ONE_LINK_TARGET}" ]] ; then
