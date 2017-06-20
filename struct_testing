@@ -552,6 +552,7 @@ CERO="\033[01;0m"
                                     if [[ -z "${empty_means_not_broken}" ]] ; then
                                     {
                                         # points to right location
+                                        TESTING=""
                                         passed "${TESTING}"
                                     }
                                     else
