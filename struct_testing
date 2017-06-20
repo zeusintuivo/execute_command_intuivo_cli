@@ -593,7 +593,10 @@ CERO="\033[01;0m"
             #
             #     check_equality $(cat ~/.pyenv/version)="2.7.11"
             #
-            ARGS="${@}"
+            local ARGS="${@}"
+            local LEFT_VALUE=""
+            local RIGHT_VALUE=""
+            local ONE_EQUALITY_ORDER=""
             if [ ! -z "${ARGS-x}" ] ; then # if its set and not empty
             {
                 #ARGS=$(switch_spaces_to_newlines <<< "${@}")
@@ -601,10 +604,10 @@ CERO="\033[01;0m"
                     # if not empty
                     if [ ! -z "${ONE_EQUALITY_ORDER}" ] ; then
                     {
-                        LEFT_VALUE=$(cut -d'=' -f1 <<< "${ONE_EQUALITY_ORDER}")
-                        RIGHT_VALUE=$(cut -d'=' -f2 <<< "${ONE_EQUALITY_ORDER}")
+                        LEFT_VALUE=$(echo """${ONE_EQUALITY_ORDER}""" | cut -d'=' -f1 | trim)
+                        RIGHT_VALUE=$(echo """${ONE_EQUALITY_ORDER}""" | cut -d'=' -f2 | trim)
 
-                        TESTING="that value left value: ${CYAN}${LEFT_VALUE}${LIGHTYELLOW} exists"
+                        local TESTING="that value left value: ${CYAN}${LEFT_VALUE}${LIGHTYELLOW} exists"
                         if [[ -z "${LEFT_VALUE-x}" ]] ; then
                         {
                             failed "${TESTING}"
@@ -618,7 +621,7 @@ CERO="\033[01;0m"
                         }
                         fi
 
-                        TESTING="that value ${YELLOW_OVER_DARKBLUE}${LEFT_VALUE}${RESET}${LIGHTYELLOW} is equal to ${YELLOW_OVER_DARKBLUE}${RIGHT_VALUE}${RESET}"
+                        TESTING="that expected:${YELLOW_OVER_DARKBLUE}${RIGHT_VALUE}${RESET}${LIGHTYELLOW}: is equal to actual:${YELLOW_OVER_DARKBLUE}${LEFT_VALUE}${RESET}:"
                         if [[ "${LEFT_VALUE}" ==  "${RIGHT_VALUE}" ]] ; then
                         {
                             passed "${TESTING}"
