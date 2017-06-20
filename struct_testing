@@ -1290,7 +1290,7 @@ complete -o nospace -F _wp_complete wp
             local USER_TO_INSTALL="${1}"
             local paths=$(switch_spaces_to_newlines <<< "${@}")
             local actions="
-                [ -e \"{#}\" ] && rm -rf \"{#}\"
+                [ -e \"{#}\" ] && chown -R \"${USER_TO_INSTALL}\":\"${USER_TO_INSTALL}\" \"{#}\"                
             "
             .each  "${actions}"   "${paths}"
 
@@ -1303,7 +1303,7 @@ complete -o nospace -F _wp_complete wp
         function remove_it() {
             local paths=$(switch_spaces_to_newlines <<< "${@}") 
             local actions="
-                [ -e \"{#}\" ] && chown -R \"${USER_TO_INSTALL}\":\"${USER_TO_INSTALL}\" \"{#}\"
+                [ -e \"{#}\" ] && rm -rf \"{#}\"
             "
             .each  "${actions}"   "${paths}"
         } 
