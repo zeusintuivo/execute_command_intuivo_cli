@@ -534,18 +534,32 @@ CERO="\033[01;0m"
                         local TESTING="that softlink ${CYAN}${ONE_LINK_LOCATION}${LIGHTYELLOW} exists"
                         if [[ -L "${ONE_LINK_LOCATION}" ]] ; then
                         {
-                            # Passed is as softlink existence
+                            # is a softlink 
                             passed "${TESTING}"
 
                             # Test pointing
                             if [[ "${CHECK_TARGET_TOO}" == "YES" && ! -z "${ONE_LINK_TARGET}" ]] ; then
                             {
                                 TESTING="${PURPLE} +-- and that softlink ${CYAN}${ONE_LINK_LOCATION}${LIGHTYELLOW} points to ${CYAN}${ONE_LINK_TARGET}${GREEN} location \n"
-
                                 FOUND_LINK_TARGET=$(ls -l ${ONE_LINK_LOCATION} | awk '{print $11}') # Find target symlink
                                 if [[ "${FOUND_LINK_TARGET}" == "${ONE_LINK_TARGET}" ]] ; then
                                 {
+                                    # points to right location
                                     passed "${TESTING}"
+                                    
+                                    TESTING="that softlink ${CYAN}${ONE_LINK_LOCATION}${LIGHTYELLOW} is not broken"
+                                    local empty_means_not_broken=$(find ${ONE_LINK_LOCATION} -type l ! -exec test -e {} \; -print  | xargs -I {} ls -la "{}")
+                                    if [[ -z "${empty_means_not_broken}" ]] ; then
+                                    {
+                                        # points to right location
+                                        passed "${TESTING}"
+                                    }
+                                    else
+                                    {
+                                        TESTING="but softlink ${CYAN}${ONE_LINK_LOCATION}${LIGHTYELLOW} is broken"
+                                        failed "${TESTING}"
+                                    }
+                                    fi
                                 }
                                 else
                                 {
@@ -1043,6 +1057,34 @@ CERO="\033[01;0m"
         #
         # C H E C K   H O W   C O M P U T E R   H A N D L E S   E R R O R S   --End
         #
+        
+        function escape_single_quotes() {
+            sed "s/'/\\\'/g"
+        }
+        function escape_double_quotes() {
+            sed 's/\"/\\\"/g'
+        }
+        function escape_more_than() {
+            sed s/""">"""/\\\>/g
+        }
+        function escape_less_than() {
+            sed s/"""<"""/\\\</g
+        }
+        function escape_slashes() {
+            sed 's/\//\\\//g'
+        }
+        function escape_bangs() {
+            sed 's/\!/\\\!/g'
+        }
+        function escape_dots() {
+            sed 's/\./\\\./g'
+        }
+        function escape_for_sed_sequence() {
+            escape_double_quotes | \
+            escape_less_than | escape_more_than | \
+            escape_slashes  | escape_single_quotes | \
+            escape_bangs | escape_dots
+        }
 
 
         # Bash extract version from a string REF:  https://superuser.com/questions/363865/how-to-extract-a-version-number-using-sed
