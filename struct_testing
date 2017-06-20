@@ -507,7 +507,7 @@ CERO="\033[01;0m"
             #     softlink_exists "/root/.pyenv
             #     /root/.pyenv>/home/vagrant/.pyenv"
             #
-            LINKS="${@}"
+            local LINKS="${@}"
             if [ ! -z "${LINKS-x}" ] ; then # if its set and not empty
             {
                 LINKS=$(switch_spaces_to_newlines <<< "${@}")
@@ -515,9 +515,9 @@ CERO="\033[01;0m"
                     # if not empty
                     if [ ! -z "${ONE_LINK_ORDER}" ] ; then
                     {
-                        CHECK_TARGET_TOO="NO"
-                        ONE_LINK_LOCATION="${ONE_LINK_ORDER}"
-                        ONE_LINK_TARGET=""
+                        local CHECK_TARGET_TOO="NO"
+                        local ONE_LINK_LOCATION="${ONE_LINK_ORDER}"
+                        local ONE_LINK_TARGET=""
 
                         [[ "${ONE_LINK_ORDER}" == *">"* ]] && CHECK_TARGET_TOO="YES"
                         if [[ "${CHECK_TARGET_TOO}" == "YES" ]] ; then
@@ -531,16 +531,16 @@ CERO="\033[01;0m"
                         # But /home/user/.pyenv  <-- will pass
                         # OR Users/administrator/.pyenv  in mac <-- will pass
                         # ONE_LINK_LOCATION="/Users/administrator/.nix-profile"
-                        TESTING="that softlink ${CYAN}${ONE_LINK_LOCATION}${LIGHTYELLOW} exists"
+                        local TESTING="that softlink ${CYAN}${ONE_LINK_LOCATION}${LIGHTYELLOW} exists"
                         if [[ -L "${ONE_LINK_LOCATION}" ]] ; then
                         {
-                            # Test pointing
+                            # Passed is as softlink existence
                             passed "${TESTING}"
 
+                            # Test pointing
                             if [[ "${CHECK_TARGET_TOO}" == "YES" && ! -z "${ONE_LINK_TARGET}" ]] ; then
                             {
-                                TESTING="${PURPLE} +-- and that softlink ${CYAN}${ONE_LINK_LOCATION}${LIGHTYELLOW} points to ${CYAN}${ONE_LINK_TARGET}${GREEN} location"
-                                TESTING+="${GREEN} +++ expected ${LIGHTYELLOW}:${CYAN}${ONE_LINK_TARGET}${LIGHTYELLOW}:${RED} --- actual ${LIGHTYELLOW}:${RED}${FOUND_LINK_TARGET}${LIGHTYELLOW}:"
+                                TESTING="${PURPLE} +-- and that softlink ${CYAN}${ONE_LINK_LOCATION}${LIGHTYELLOW} points to ${CYAN}${ONE_LINK_TARGET}${GREEN} location \n"
 
                                 FOUND_LINK_TARGET=$(ls -l ${ONE_LINK_LOCATION} | awk '{print $11}') # Find target symlink
                                 if [[ "${FOUND_LINK_TARGET}" == "${ONE_LINK_TARGET}" ]] ; then
@@ -549,6 +549,7 @@ CERO="\033[01;0m"
                                 }
                                 else
                                 {
+                                    TESTING+="${GREEN}     +++ expected${LIGHTYELLOW}:${CYAN}${ONE_LINK_TARGET}${LIGHTYELLOW}:${RED} --- actual${LIGHTYELLOW}:${RED}${FOUND_LINK_TARGET}${LIGHTYELLOW}:"
                                     failed "${TESTING}"
                                 }
                                 fi
