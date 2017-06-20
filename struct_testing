@@ -1466,25 +1466,25 @@ complete -o nospace -F _wp_complete wp
         } 
         # end move_to_user_file_and_soft_link_root_to_it
 
-        move_to_user_file_and_soft_link_root_to_it() {
+        move_to_user_folder_and_soft_link_root_to_it() {
             local USER_TO_INSTALL="${1}"
             local target="${2}"
-
-            [ -f "/home/${USER_TO_INSTALL}/${target}" ] && sudo rm -rf "/home/${USER_TO_INSTALL}/${target}"
-            [ -f "/root/${target}" ] && sudo mv "/root/${target}" "/home/${USER_TO_INSTALL}"
-            [ -f "/home/${USER_TO_INSTALL}/${target}" ] && sudo ln -sf  "/home/${USER_TO_INSTALL}/${target}" "/root/${target}"
-            [ -f "/home/${USER_TO_INSTALL}/${target}" ] && sudo chown -R "${USER_TO_INSTALL}":"${USER_TO_INSTALL}" "/home/${USER_TO_INSTALL}/${target}"
+            [ -d "/home/${USER_TO_INSTALL}/${target}/" ] && sudo rm -rf "/home/${USER_TO_INSTALL}/${target}/"
+            [ -d "/root/${target}/" ] && sudo mv "/root/${target}" "/home/${USER_TO_INSTALL}/"
+            [ -d "/home/${USER_TO_INSTALL}/${target}/" ] && sudo ln -sf  "/home/${USER_TO_INSTALL}/${target}" "/root/${target}"
+            [ -d "/home/${USER_TO_INSTALL}/${target}/" ] && sudo chown -R "${USER_TO_INSTALL}":"${USER_TO_INSTALL}" "/home/${USER_TO_INSTALL}/${target}/"
+            [ -d "/home/${USER_TO_INSTALL}/${target}/" ] && sudo chown -R "${USER_TO_INSTALL}":"${USER_TO_INSTALL}" "/root/${target}"
         } 
         alias move_folder_out_root_to_user_and_link_it_back=move_to_user_folder_and_soft_link_root_to_it 
         
         move_to_user_file_and_soft_link_root_to_it() {
             local USER_TO_INSTALL="${1}"
             local target="${2}"
-
             [ -f "/home/${USER_TO_INSTALL}/${target}" ] && sudo rm -rf "/home/${USER_TO_INSTALL}/${target}"
             [ -f "/root/${target}" ] && sudo mv "/root/${target}" "/home/${USER_TO_INSTALL}"
             [ -f "/home/${USER_TO_INSTALL}/${target}" ] && sudo ln -sf  "/home/${USER_TO_INSTALL}/${target}" "/root/${target}"
             [ -f "/home/${USER_TO_INSTALL}/${target}" ] && sudo chown -R "${USER_TO_INSTALL}":"${USER_TO_INSTALL}" "/home/${USER_TO_INSTALL}/${target}"
+            [ -f "/home/${USER_TO_INSTALL}/${target}" ] && sudo chown -R "${USER_TO_INSTALL}":"${USER_TO_INSTALL}" "/root/${target}"
         } 
         alias move_file_out_root_to_user_and_link_it_back=move_to_user_file_and_soft_link_root_to_it 
     #[ ! -z "$0" ] && [ -e "$0" ] && THISSCRIPTNAME=`basename "$0"`
