@@ -929,6 +929,54 @@ CERO="\033[01;0m"
         }
         # end handle_error
 
+        function is_included(){
+            # Sample use
+            #            ( is_included imagemagick "imagemagick imagemagick-common" ) && echo "is included"
+            #
+            #    vagrant@:/var/www$ pacaga=$(dpkg -l | egrep imagemagick | cut -d' ' -f3  2>&1)
+            #    vagrant@:/var/www$ [ $? == 0 ] && ( is_included "imagemagick" "${pacaga}" ) && echo "is included"
+            #    vagrant@:$ = --->  is included
+
+            #    vagrant@:/var/www$ pacaga=$(dpkg -l | egrep imagemagick | cut -d' ' -f3  2>&1)
+            #    vagrant@:/var/www$ [ $? == 0 ] && ( is_included "imick" "${pacaga}" ) && echo "is included"
+            #    vagrant@:$ = --->  (nil)
+
+            #    local packages=$(dpkg -l | egrep "$one_required" | cut -d' ' -f3 2>&1)
+            #    if [ $? == 0 ] && ( is_included "$one_required" "${packages}" ) ; then
+            #    {
+            #        passed " ${GREEN} $one_required ${YELLOW} INSTALLED${RESET} ."
+            #    }
+            #    else
+            #    {
+            #        echo -e " ${RED}  NEED TO INSTALL ${YELLOW} $one_required${RESET} ."
+            #        missing="${missing} ${one_required}"
+            #    }
+            #    fi
+            local seeking=$(trim <<< "${1}")
+            local haystack=$(switch_spaces_to_newlines <<< "${2}")
+            local one_hay
+            local one_action
+            local action
+
+            while read -r one_hay; do
+            {
+                if [ ! -z "${one_hay}" ] ; then  # if not empty
+                {
+                        if [[ "${one_hay}" == "${seeking}" ]] ; then
+                        {
+                            return 0  # yes it is included
+                        }
+                        else
+                        {
+                            return 1  # No is not included
+                        }
+                        fi
+                }
+                fi
+            }
+            done <<< "${haystack}"
+        } # end is_included
+
         function install_apt_get_requirements(){
             # Sample use
             #               local OS="${1}"
@@ -955,8 +1003,8 @@ CERO="\033[01;0m"
             local required=$(grep -vE '^\s+#'<<<"${2}")
             for one_required in ${required}; do
             {
-                dpkg -l | egrep "$one_required" &>/dev/null
-                if [ $? == 0 ]; then
+                local packages=$(dpkg -l | egrep "$one_required" | cut -d' ' -f3 2>&1)
+                if [ $? == 0 ] && ( is_included "$one_required" "${packages}" ) ; then
                 {
                     passed " ${GREEN} $one_required ${YELLOW} INSTALLED${RESET} ."
                 }
@@ -1047,10 +1095,10 @@ CERO="\033[01;0m"
             KIND=""
             ls werwerwerwerwerwerwerwerwerwerwerr >/dev/null 2>&1;
             if (( $? == 0 )) ;  then  # Intel processor
-            KIND="INTEL"
+                KIND="INTEL"
             fi
             if [ $? == 0 ]; then   # Mac Intel processor
-            KIND="${KIND}MAC"
+                KIND="${KIND}MAC"
             fi
             echo "clear_error_output" >/dev/null 2>&1;
             echo "${KIND}"
