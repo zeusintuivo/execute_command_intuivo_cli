@@ -1004,7 +1004,8 @@ CERO="\033[01;0m"
                 # REF: https://www.cyberciti.biz/faq/find-out-if-package-is-installed-in-linux/
                 local packages=$(dpkg -l | egrep "$one_required" | cut -d' ' -f3 2>&1)
                 local query=$(dpkg-query -W -f='${Status} ${Version}\n' "$one_required"  2>&1)
-                if [[ "${query}" == "install ok"* ]] && ( is_included "$one_required" "${packages}" ); then
+                #if [[ "${query}" == "install ok"* ]] && ( is_included "$one_required" "${packages}" ); then
+                if [[ "${query}" == "install ok"* ]] ; then
                 {
                     passed " ${GREEN} $one_required ${YELLOW} INSTALLED${RESET} ."
                 }
