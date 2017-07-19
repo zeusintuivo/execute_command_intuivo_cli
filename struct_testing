@@ -914,8 +914,9 @@ CERO="\033[01;0m"
             #
             local bulk="${*}"
             local error_happened=""
-            [[ "${PROCESSOR_ERROR}" == *"MAC"* ]] && [ $? != 0 ] && error_happened="1"
-            [[ "${PROCESSOR_ERROR}" == *"INTEL"* ]] && (( $? != 0 )) && error_happened="1"
+            local err_buff=$?
+            [[ "${PROCESSOR_ERROR}" == *"MAC"* ]] && [ $err_buff != 0 ] && error_happened="1"
+            [[ "${PROCESSOR_ERROR}" == *"INTEL"* ]] && (( $err_buff != 0 )) && error_happened="1"
             if [ "${error_happened}" ]  ||  ( has_error_keyword "${bulk}" ) ; then
             {
               echo -e "${PURPLE_BLUE} action ${RED}failed ${YELLOW226}!!!  ${RESET}"
