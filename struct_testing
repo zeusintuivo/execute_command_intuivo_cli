@@ -954,32 +954,16 @@ CERO="\033[01;0m"
             #        missing="${missing} ${one_required}"
             #    }
             #    fi
-            #echo "1: ${1} "
-            #echo "2: ${2} "  | hexdump -c
-            #local seeking=$(echo "${1}" | trim)
-            #local seeking=$(echo "${1}" | trim)
             local seeking=$(trim <<< "${1}")
-            #local haystack=$(echo "${2}" | make_itarable)
-            #local haystack=$(switch_spaces_to_newlines <<< "${2}")
-            #local haystack=$(make_itarable <<< "${2}")
-            #ocal haystack=$(trim <<< "${2}")
             local one_hay
             local one_action
             local action
-            #echo "seeking: ${seeking} "
-            #echo "haystack: ${haystack} "
-            #echo "-------"
-
-            #for one_hay in "${2}"; do
             while read -r one_hay; do
             {
                 if [ ! -z "${one_hay}" ] ; then  # if not empty
                 {
-                    #echo ":${one_hay}: == :${seeking}:"
-                    #echo ":${one_hay}: == :${seeking}:" | hexdump -c
                         if [[ "${one_hay}" == "${seeking}" ]] ; then
                         {
-                            #echo "returning 0 "
                             return 0  # yes it is included
                         }
                         fi
@@ -987,8 +971,6 @@ CERO="\033[01;0m"
                 fi
             }
             done <<< "${2}"
-            #done
-            #echo "returning 1 "
             return 1  # No is not included
         } # end is_included
 
