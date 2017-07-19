@@ -1009,8 +1009,8 @@ CERO="\033[01;0m"
                 }
                 else
                 {
-                    echo -e " ${RED}  NEED TO INSTALL ${YELLOW} $one_required${RESET} ."
-                    missing="${missing} ${one_required} ..${query}"
+                    echo -e " ${RED}  NEED TO INSTALL ${YELLOW} $one_required${RESET} ${RED}...${query}"
+                    missing="${missing} ${one_required}"
                 }
                 fi
             }
