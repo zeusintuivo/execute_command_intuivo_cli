@@ -1,12 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="1193bf1b-edf2-4a8c-af81-698e910b40a5" name="Default" comment="">
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/.gitignore" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/.idea/encodings.xml" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/.idea/vcs.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/struct_testing" afterPath="$PROJECT_DIR$/struct_testing" />
-    </list>
+    <list default="true" id="1193bf1b-edf2-4a8c-af81-698e910b40a5" name="Default" comment="" />
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="TRACKING_ENABLED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -19,8 +14,8 @@
       <file leaf-file-name="struct_testing" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/struct_testing">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="672">
-              <caret line="1014" column="0" lean-forward="false" selection-start-line="1014" selection-start-column="0" selection-end-line="1014" selection-end-column="0" />
+            <state relative-caret-position="150">
+              <caret line="985" column="7" lean-forward="true" selection-start-line="985" selection-start-column="7" selection-end-line="985" selection-end-column="7" />
               <folding />
             </state>
           </provider>
@@ -99,6 +94,9 @@
   <component name="ShelveChangesManager" show_recycled="false">
     <option name="remove_strategy" value="false" />
   </component>
+  <component name="SvnConfiguration">
+    <configuration />
+  </component>
   <component name="TaskManager">
     <task active="true" id="Default" summary="Default task">
       <changelist id="1193bf1b-edf2-4a8c-af81-698e910b40a5" name="Default" comment="" />
@@ -106,12 +104,12 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1500460302482</updated>
-      <workItem from="1500460303763" duration="272000" />
+      <workItem from="1500460303763" duration="1005000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="272000" />
+    <option name="totallyTimeSpent" value="1005000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="30" y="65" width="1890" height="779" extended-state="0" />
@@ -137,6 +135,16 @@
   </component>
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="1" />
+  </component>
+  <component name="Vcs.Log.History.Properties">
+    <option name="COLUMN_ORDER">
+      <list>
+        <option value="0" />
+        <option value="2" />
+        <option value="3" />
+        <option value="1" />
+      </list>
+    </option>
   </component>
   <component name="VcsContentAnnotationSettings">
     <option name="myLimit" value="2678400000" />
@@ -164,8 +172,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/struct_testing">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="672">
-          <caret line="1014" column="0" lean-forward="false" selection-start-line="1014" selection-start-column="0" selection-end-line="1014" selection-end-column="0" />
+        <state relative-caret-position="150">
+          <caret line="985" column="7" lean-forward="true" selection-start-line="985" selection-start-column="7" selection-end-line="985" selection-end-column="7" />
           <folding />
         </state>
       </provider>
