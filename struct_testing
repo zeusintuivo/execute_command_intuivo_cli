@@ -1004,9 +1004,11 @@ CERO="\033[01;0m"
             for one_required in ${required}; do
             {
                 local packages_complete=$(dpkg -l | egrep "$one_required" 2>&1)
-                local error=$?
+                local err_buff=$?
+                local ERROR_HAPPENED=""
+                (  ( [[ "${PROCESSOR_ERROR}" == *"MAC"* ]] && [ $err_buff != 0 ]  )  ||  (  [[ "${PROCESSOR_ERROR}" == *"INTEL"* ]] && (( $err_buff != 0 ))  )   )  && ERROR_HAPPENED="1"
                 local packages=$(echo "${packages_complete}" | cut -d' ' -f3 2>&1)
-                if [ ${error} == 0 ] && ( is_included "$one_required" "${packages}" ) ; then
+                if [ "${ERROR_HAPPENED}no_error" == "no_error" ] && ( is_included "$one_required" "${packages}" ) ; then
                 {
                     passed " ${GREEN} $one_required ${YELLOW} INSTALLED${RESET} ."
                 }
@@ -1099,6 +1101,15 @@ CERO="\033[01;0m"
             #    local err_buff=$?
             #    local ERROR_HAPPENED=""
             #    (  ( [[ "${PROCESSOR_ERROR}" == *"MAC"* ]] && [ $err_buff != 0 ]  )  ||  (  [[ "${PROCESSOR_ERROR}" == *"INTEL"* ]] && (( $err_buff != 0 ))  )   )  && ERROR_HAPPENED="1"
+            #    if [ "${ERROR_HAPPENED}" ] || \
+            #        [[ "${message_response}" == *"error"* ]] || \
+            #        [[ "${message_response}" == *"ERROR"* ]] || \
+            #        [[ "${message_response}" == *"denied"* ]] \
+            #    ; then
+            #    {
+            #        failed "There was an error- do something- show something ${message_response}"
+            #    }
+            #    fi
 
             KIND=""
             ls werwerwerwerwerwerwerwerwerwerwerr >/dev/null 2>&1;
