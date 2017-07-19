@@ -1009,9 +1009,10 @@ CERO="\033[01;0m"
                 (  ( [[ "${PROCESSOR_ERROR}" == *"MAC"* ]] && [ $err_buff != 0 ]  )  ||  (  [[ "${PROCESSOR_ERROR}" == *"INTEL"* ]] && (( $err_buff != 0 ))  )   )  && ERROR_HAPPENED="1"
                 local packages=$(echo "${packages_complete}" | cut -d' ' -f3 2>&1)
                 local included=$(is_included "$one_required" "${packages}")
+                echo "err_buff: ${err_buff}"
                 echo "ERROR: ${ERROR_HAPPENED}"
                 echo "is_included: ${included}"
-                if [ "${ERROR_HAPPENED}" ] && ( is_included "$one_required" "${packages}" ) ; then
+                if [ "${ERROR_HAPPENED}" ] && [ "${included}" ] ; then
                 {
                     passed " ${GREEN} $one_required ${YELLOW} INSTALLED${RESET} ."
                 }
