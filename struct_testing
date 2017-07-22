@@ -1434,8 +1434,6 @@ complete -o nospace -F _wp_complete wp
         }
         # end chown_it
 
-
-
             # Sample use
             #            chmod_it 644 /usr/local/rvm
             #            chmod_it "${chmodmod}" /usr/local/rvm /usr/local/.nvm /usr/local/.nvm  /usr/local/rvm  /root/.temp
