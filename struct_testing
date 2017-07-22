@@ -1434,7 +1434,21 @@ complete -o nospace -F _wp_complete wp
         }
         # end chown_it
 
+
+
             # Sample use
+            #            chmod_it 644 /usr/local/rvm
+            #            chmod_it "${chmodmod}" /usr/local/rvm /usr/local/.nvm /usr/local/.nvm  /usr/local/rvm  /root/.temp
+        function chmod_it() {
+            local chmodmod="${1}"
+            local paths=$(switch_spaces_to_newlines <<< "${@}")
+            local actions="
+                [ -e \"{#}\" ] && chmod -R \"${chmodmod}\" \"{#}\"
+            "
+            .each  "${actions}"   "${paths}"
+        }
+        # end chmod_it
+                    # Sample use
             #            link_it "${USER_TO_INSTALL}" /usr/local/bin/python  /home/${USER_TO_INSTALL}/.pyenv/shims/python
 
         function link_it() {
