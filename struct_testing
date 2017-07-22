@@ -912,9 +912,10 @@ CERO="\033[01;0m"
             #            local install_result=$(sudo apt-get install ${missing} -yfq   2>&1)  # capture all input and output
             #            [[ ! -z "${install_result}" ]] && handle_error "${install_result}"
             #
+            local err_buff=$?
+            [ $err_buff -eq 0 ] && [ $1 -gt 0 ] err_buff=$1
             local bulk="${*}"
             local error_happened=""
-            local err_buff=$?
             [[ "${PROCESSOR_ERROR}" == *"MAC"* ]] && [ $err_buff != 0 ] && error_happened="1"
             [[ "${PROCESSOR_ERROR}" == *"INTEL"* ]] && (( $err_buff != 0 )) && error_happened="1"
             if [ "${error_happened}" ]  ||  ( has_error_keyword "${bulk}" ) ; then
@@ -929,6 +930,21 @@ CERO="\033[01;0m"
 
         }
         # end handle_error
+
+        function to_lowercase(){
+            [ -z "${1}" ] && return 1  # No is not included, failed because no list to find
+            if [ $BASH_VERSION -qt 3 ] ; then
+            {
+                echo "${1,,}"         # bash Convert string to lowercase Bash 4 REF: https://stackoverflow.com/questions/2264428/converting-string-to-lower-case-in-bash-shell-scripting
+            }
+            else
+            {
+                echo "${seoking}" | sed 'y/ABCDEFGHIJKLMNOPQRSTUVWXYZ/abcdefghijklmnopqrstuvwxyz/')          # bash Convert string to lowercase Bash 4 REF: https://stackoverflow.com/questions/2264428/converting-string-to-lower-case-in-bash-shell-scripting
+            }
+            fi
+        }
+        # end to_lowercase
+        alias downcase=to_lowercase
 
         function is_included(){
             # Sample use
@@ -955,14 +971,18 @@ CERO="\033[01;0m"
             #        missing="${missing} ${one_required}"
             #    }
             #    fi
-            local seeking=$(trim <<< "${1}")
-            local one_hay
-            local one_action
-            local action
-            while read -r one_hay; do
+            [ -z "${1}" ] && return 1  # No is not included, failed because word is empty
+            local seoking=$(trim <<< "${1}")
+            [ -z "${seoking}" ] && return 1  # No is not included, failed because word is empty after trimming
+            [ -z "${2}" ] && return 1  # No is not included, failed because no list to find
+            local seeking=$(to_lowercase "${seoking}")
+            local one_item one_hay
+            while read -r one_item; do
             {
-                if [ ! -z "${one_hay}" ] ; then  # if not empty
+                if [ ! -z "${one_item}" ] ; then  # if not empty
                 {
+                        one_hay=$(trim <<< "${one_item}")
+                        one_hay=$(to_lowercase "${one_hay}")
                         if [[ "${one_hay}" == "${seeking}" ]] ; then
                         {
                             return 0  # yes it is included
@@ -1022,6 +1042,7 @@ CERO="\033[01;0m"
             # Check Requirements OS Ubuntu 14.04 REF: https://wiki.postgresql.org/wiki/Compile_and_Install_from_source_code#Ubuntu
             [[ ! -z "${missing}" ]] && echo -e " ${CYAN} Installing missing packages: ${YELLOW} ${missing} ${RESET} ."
             [[ ! -z "${missing}" ]] && local install_result=$(sudo apt-get install ${missing} -yfq   2>&1) # capture all input and output
+            echo $install_result;
             [[ ! -z "${install_result}" ]] && handle_error "${install_result}"
         }
         # end install_apt_get_requirements
@@ -1069,7 +1090,8 @@ CERO="\033[01;0m"
 
             [[ ! -z "${removing}" ]] && echo -e " ${CYAN} Apt-get removing packages: ${YELLOW} ${removing} ${RESET} ."
             [[ ! -z "${removing}" ]] && local remove_result=$(sudo apt-get remove ${removing} -yfq   2>&1 && sudo apt-get purge ${removing} -yfq   2>&1 && sudo apt-get autoremove -yfq   2>&1) # capture all input and output
-            [[ ! -z "${remove_result}" ]] && handle_error "${remove_result}"
+            local err_buff=$?
+            [[ ! -z "${remove_result}" ]] && handle_error "${err_buff}" "${remove_result}"
         }
         # end install_apt_get_should_not_be_installed
         #
