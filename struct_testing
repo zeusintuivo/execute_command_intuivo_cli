@@ -1446,9 +1446,9 @@ complete -o nospace -F _wp_complete wp
             .each  "${actions}"   "${paths}"
         }
         # end chmod_it
-                    # Sample use
-            #            link_it "${USER_TO_INSTALL}" /usr/local/bin/python  /home/${USER_TO_INSTALL}/.pyenv/shims/python
 
+            # Sample use
+            #            link_it "${USER_TO_INSTALL}" /usr/local/bin/python  /home/${USER_TO_INSTALL}/.pyenv/shims/python
         function link_it() {
             local USER_TO_INSTALL="${1}"
             local from="${2}"
