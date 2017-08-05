@@ -457,6 +457,10 @@ CERO="\033[01;0m"
             does_not_exist $@
         }
 
+        function file_does_not_exists() {
+            does_not_exist $@
+        }
+
         function file_does_not_exist() {
             does_not_exist $@
         }
@@ -481,15 +485,12 @@ CERO="\033[01;0m"
                     # ONE_FILE="/Users/administrator/.zshrc"
                     if [[ -s "${ONE_FILE}" && ! -L "${ONE_FILE}" ]] ; then
                     {
-                        return 1 # it exists
-                    }
-                    else
-                    {
-                        return 0 # it doest not exists
+                        return 0 # it exists
                     }
                     fi
                 fi
                 done <<< "${FILES}"
+                return 1 # it doest not exists
             }
             fi
         } # end it_exists
@@ -1452,7 +1453,7 @@ complete -o nospace -F _wp_complete wp
             #            chown_it "${USER_TO_INSTALL}" /usr/local/rvm
             #            chown_it "${USER_TO_INSTALL}" /usr/local/rvm /usr/local/.nvm /usr/local/.nvm  /usr/local/rvm  /root/.temp
             local USER_TO_INSTALL="${1}"
-            local paths=$(switch_spaces_to_newlines <<< "${@}")
+            local paths=$(switch_spaces_to_newlines <<< "${2}")
             local actions="
                 [ -e \"{#}\" ] && chown -R \"${USER_TO_INSTALL}\":\"${USER_TO_INSTALL}\" \"{#}\"
             "
@@ -1465,7 +1466,7 @@ complete -o nospace -F _wp_complete wp
             #            chmod_it 644 /usr/local/rvm
             #            chmod_it "${chmodmod}" /usr/local/rvm /usr/local/.nvm /usr/local/.nvm  /usr/local/rvm  /root/.temp
             local chmodmod="${1}"
-            local paths=$(switch_spaces_to_newlines <<< "${@}")
+            local paths=$(switch_spaces_to_newlines <<< "${2}")
             local actions="
                 [ -e \"{#}\" ] && chmod -R \"${chmodmod}\" \"{#}\"
             "
@@ -1524,6 +1525,11 @@ complete -o nospace -F _wp_complete wp
                                   action="${action/\{\#\}/${one_item}}"
                                   action="${action/\{\#\}/${one_item}}"
                                   eval """${action}"""
+                                  if [ $? -gt 0 ] ; then
+                                  {
+                                    echo "Error executing: ${action}"
+                                  }
+                                  fi
                             }
                             fi
                       }
