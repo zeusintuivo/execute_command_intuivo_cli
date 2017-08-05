@@ -494,7 +494,6 @@ CERO="\033[01;0m"
                 done <<< "${FILES}"
             }
             fi
-
         }
 
         function softlink_exists(){
@@ -1421,10 +1420,10 @@ complete -o nospace -F _wp_complete wp
         }
         # end make_itarable
 
+        function chown_it() {
             # Sample use
             #            chown_it "${USER_TO_INSTALL}" /usr/local/rvm
             #            chown_it "${USER_TO_INSTALL}" /usr/local/rvm /usr/local/.nvm /usr/local/.nvm  /usr/local/rvm  /root/.temp
-        function chown_it() {
             local USER_TO_INSTALL="${1}"
             local paths=$(switch_spaces_to_newlines <<< "${@}")
             local actions="
@@ -1434,44 +1433,42 @@ complete -o nospace -F _wp_complete wp
         }
         # end chown_it
 
+        function chmod_it() {
             # Sample use
             #            chmod_it 644 /usr/local/rvm
             #            chmod_it "${chmodmod}" /usr/local/rvm /usr/local/.nvm /usr/local/.nvm  /usr/local/rvm  /root/.temp
-        function chmod_it() {
             local chmodmod="${1}"
             local paths=$(switch_spaces_to_newlines <<< "${@}")
             local actions="
                 [ -e \"{#}\" ] && chmod -R \"${chmodmod}\" \"{#}\"
             "
             .each  "${actions}"   "${paths}"
-        }
-        # end chmod_it
+        } # end chmod_it
 
+        function link_it() {
             # Sample use
             #            link_it "${USER_TO_INSTALL}" /usr/local/bin/python  /home/${USER_TO_INSTALL}/.pyenv/shims/python
-        function link_it() {
             local USER_TO_INSTALL="${1}"
             local from="${2}"
             local to="${3}"
             [ ! -e "${to}" ] && failed "Trying to link_it sudo ln -sf \"${to}\"      \"${from}\" but target :${to}: does not exist"
             sudo ln -sf "${to}"    "${from}"
             [ -e "${from}" ] && chown -R "${USER_TO_INSTALL}":"${USER_TO_INSTALL}" "${from}"
-        }
-        # end link_it
+        } # end link_it
 
+        function remove_it() {
             # Sample use
             #            remove_it  /usr/local/rvm
             #            remove_it  /usr/local/rvm /usr/local/.nvm  /usr/local/rvm  /root/.temp
-        function remove_it() {
             local paths=$(switch_spaces_to_newlines <<< "${@}")
             local actions="
                 [ -e \"{#}\" ] && rm -rf \"{#}\"
                 [ -L \"{#}\" ] && unlink \"{#}\"
             "
             .each  "${actions}"   "${paths}"
-        }
-        # end remove_it
+        } # end remove_it
 
+        function .each() {
             # Sample use
             #           ITEMS=$(find . -maxdepth 0 -type d | egrep -v "\.git")
             #           ACTIONS="echo \"Showing list for {#}\"  ls -la {#} "
@@ -1481,7 +1478,6 @@ complete -o nospace -F _wp_complete wp
             #                             for each element in
             #                                              LIST2
             #           .each  "${ACTIONS}"   "${ITEMS}"
-        function .each() {
             local local_actions="${1}"
             local local_items="${2}"
             local one_item
@@ -1509,8 +1505,43 @@ complete -o nospace -F _wp_complete wp
                 fi
             }
             done <<< "${local_items}"
-        }
-        # end .each
+        } # end .each
+
+        function .mix_with() {
+            # Sample use
+            #           ITEMS=$(find . -maxdepth 0 -type d | egrep -v "\.git")
+            #           ACTIONS="echo \"Showing list for {#}\"  ls -la {#} "
+            #
+            #                    Perform all actions in
+            #                           LIST1
+            #                             for each element in
+            #                                              LIST2
+            #           .mix  "${ACTIONS}"   "${ITEMS}"
+            local glue="${1}"
+            local local_actions="${2}"
+            local local_items="${3}"
+            local one_item
+            local one_action
+            local action
+
+            while read -r one_item; do
+            {
+                if [ ! -z "${one_item}" ] ; then  # if not empty
+                {
+                      while read -r one_action; do
+                      {
+                            if [ ! -z "${one_action}" ] ; then  # if not empty
+                            {
+                                  echo """${one_action}${glue}${one_item}"""
+                            }
+                            fi
+                      }
+                      done <<< "${local_actions}"
+                }
+                fi
+            }
+            done <<< "${local_items}"
+        } # end .mix_with
 
         # enter_last_only_removed() {
         #  sed ':a;N;$!ba;s/\n$//g' # GNU sed
