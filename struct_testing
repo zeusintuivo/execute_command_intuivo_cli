@@ -1479,7 +1479,7 @@ complete -o nospace -F _wp_complete wp
             local USER_TO_INSTALL="${1}"
             local from="${2}"
             local to="${3}"
-            [ ! -e "${to}" ] && failed "Trying to link_it sudo ln -sf \"${to}\"      \"${from}\" but target :${to}: does not exist"
+            [ ! -e "${to}" ] && failed "Trying to link_it ln -sf \"${to}\"      \"${from}\" but target :${to}: does not exist"
             ln -sf "${to}"    "${from}"
             [ -e "${from}" ] && chown -R "${USER_TO_INSTALL}":"${USER_TO_INSTALL}" "${from}"
         } # end link_it
