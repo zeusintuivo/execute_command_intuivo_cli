@@ -576,16 +576,23 @@ CERO="\033[01;0m"
                                     passed "${TESTING}"
 
                                     TESTING="that softlink ${CYAN}${ONE_LINK_LOCATION}${LIGHTYELLOW} is not broken"
-                                    local empty_means_not_broken=$(find ${ONE_LINK_LOCATION} -type l ! -exec test -e {} \; -print  | xargs -I {} ls -la "{}")
+                                    local empty_means_not_broken=$(find ${ONE_LINK_LOCATION} -type l ! -exec test -e {} \; -print  2>&1 | xargs -I {} ls -la "{}")
                                     if [[ -z "${empty_means_not_broken}" ]] ; then
                                     {
                                         # points to right location
                                         TESTING=""
                                         passed "${TESTING}"
                                     }
-                                    else
+                                    elif  [[ "${empty_means_not_broken}" == *"No such file or directory"* ]] ; then
                                     {
-                                        TESTING="but softlink ${CYAN}${ONE_LINK_LOCATION}${LIGHTYELLOW} is broken"
+                                        TESTING="but softlink ${CYAN}${ONE_LINK_LOCATION}${LIGHTYELLOW} is was not created"
+                                        failed "${TESTING}"
+                                    }
+                                    elif  [[ "${empty_means_not_broken}" == *"Permission denied"* ]] ; then
+                                    {
+                                        TESTING="but softlink ${CYAN}${ONE_LINK_LOCATION}${LIGHTYELLOW}. Permission denied. Check Target -> ${ONE_LINK_TARGET} is accesible."
+                                        failed "${TESTING}"
+                                    } else {
                                         failed "${TESTING}"
                                     }
                                     fi
