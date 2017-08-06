@@ -1475,7 +1475,7 @@ complete -o nospace -F _wp_complete wp
             local chmodmod="${1}"
             local paths=$(switch_spaces_to_newlines <<< "${2}")
             local actions="
-                [ -e \"{#}\" ] && chmod -R \"${chmodmod}\" \"{#}\"
+                [ -e \"{#}\" ] && chmod \"${chmodmod}\" \"{#}\"
             "
             .each  "${actions}"   "${paths}"
         } # end chmod_it
