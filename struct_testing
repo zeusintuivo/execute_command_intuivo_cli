@@ -1464,7 +1464,29 @@ complete -o nospace -F _wp_complete wp
             local actions="
                 [ -e \"{#}\" ] && chown -R \"${USER_TO_INSTALL}\":\"${USER_TO_INSTALL}\" \"{#}\"
             "
-            .each  "${actions}"   "${paths}"
+             while read -r one_item; do
+            {
+                if [ ! -z "${one_item}" ] ; then  # if not empty
+                {
+                    if [ ! -e "${one_item}" ] ; then
+                    {
+                        echo -e "${RED}WARNING: chown_it() ${YELLOW}FILE DOES NOT Exist: ${one_item}"
+                    }
+                    else
+                    {
+                        chown -R "${USER_TO_INSTALL}" "${one_item}"
+                        if [ $? -gt 0 ] ; then
+                        {
+                            echo "${RED}ERROR: chown_it() ${YELLOW}Error executing: chown -R \"${USER_TO_INSTALL}\" \"${one_item}\""
+                        }
+                        fi
+                    }
+                    fi
+
+                }
+                fi
+            }
+            done <<< "${paths}"
         }
         # end chown_it
 
@@ -1477,7 +1499,30 @@ complete -o nospace -F _wp_complete wp
             local actions="
                 [ -e \"{#}\" ] && chmod \"${chmodmod}\" \"{#}\"
             "
-            .each  "${actions}"   "${paths}"
+            while read -r one_item; do
+            {
+                if [ ! -z "${one_item}" ] ; then  # if not empty
+                {
+                    if [ ! -e "${one_item}" ] ; then
+                    {
+                        echo -e "${RED}WARNING: chmod_it() ${YELLOW}FILE DOES NOT Exist: ${one_item}"
+                    }
+                    else
+                    {
+                        chmod "${chmodmod}" "${one_item}"
+                        if [ $? -gt 0 ] ; then
+                        {
+                            echo "${RED}ERROR: chmod_it() ${YELLOW}Error executing: chmod \"${chmodmod}\" \"${one_item}\""
+                        }
+                        fi
+                    }
+                    fi
+
+                }
+                fi
+            }
+            done <<< "${paths}"
+
         } # end chmod_it
 
         function link_it() {
