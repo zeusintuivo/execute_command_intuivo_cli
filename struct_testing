@@ -292,14 +292,18 @@ CERO="\033[01;0m"
             exit 69;
         }
 
-        function failed() {
+        function warning() {
             ARGS="${@}"
             if [[ ! -z "${ARGS-x}" ]] ; then # if its set and not empty
             {
-                echo -e "${RED} 𝞦 ${LIGHTYELLOW} ${ARGS} ${RED} has failed!  ${RESET}"
-                kill_execution
+                echo -e "${RED} 𝞦 ${LIGHTYELLOW} ${ARGS} ${RESET}"
             }
             fi
+        }
+
+        function failed() {
+            warning "${@}  ${RED} has failed! "
+            kill_execution
         }
 
         function assert(){
