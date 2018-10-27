@@ -744,6 +744,12 @@ anounce() {
 
 _say_worker() {
     echo -e "${lightpurple} +-- ${lightblue} ${@} ${reset}";
+
+}
+speak(){
+    say /usr/bin/say -v "${1}" $(echo "${@}" | sed 's'"${1}"'g') &
+    /usr/bin/say -v "${1}" $(echo "${@}" | sed 's'"${1}"'g') &
+    wait
 }
 say() {
     _say_worker ${@}
@@ -756,9 +762,11 @@ comment() {
     _comment_worker ${@}
 }
 
-
 debug() {
     echo -e "${red} +-- ${lightblue} ${@} ${reset}";
+}
+debug_and_exit() {
+    debug "${@}";
     exit 69;
 }
 list() {
