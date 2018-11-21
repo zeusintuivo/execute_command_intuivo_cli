@@ -695,6 +695,28 @@ CERO="\033[01;0m"
         trim() {
             trim_start_space | trim_end_space
         }
+        convert_null() {
+            if [ -z "${@}" ] ; then
+            {
+                echo "n8u8l"
+            }
+            else
+            {
+                echo """${@}"""
+            }
+            fi
+        }
+        convert_expects_internals() {
+            if [[ "${@}" == '=' ]] ||  [[ "${@}" == '!' ]] ; then
+            {
+                echo "n8u8l"
+            }
+            else
+            {
+                echo """${@}"""
+            }
+            fi
+        }
         function expect(){
             # Sample usage
             #
@@ -729,23 +751,29 @@ CERO="\033[01;0m"
             #     expect $(echo "hola") ≠ "hello"
             #       0       1            2  3   4     5
             local statement=$(echo """${@}""")
+                #| sed 's/'"="'/3QU4L51GN/g' \
+                #| sed 's/'"!"'/3XCL4M4T10N/g' \
             local inputo=$(echo """${@}""" \
-                | sed 's/'"not to be equal to"'/≠/g' \
-                | sed 's/'"to not be equal to"'/≠/g' \
-                | sed 's/'"to be not equal to"'/≠/g' \
-                | sed 's/'"to be equal not to"'/≠/g' \
-                | sed 's/'"not to be equal"'/≠/g' \
-                | sed 's/'"to not be equal"'/≠/g' \
-                | sed 's/'"to be not equal"'/≠/g' \
-                | sed 's/'"not to equal"'/≠/g' \
-                | sed 's/'"to not equal"'/≠/g' \
-                | sed 's/'"to equal not"'/≠/g' \
-                | sed 's/'"not to be"'/≠/g' \
-                | sed 's/'"to not be"'/≠/g' \
-                | sed 's/'"to be not"'/≠/g' \
-                | sed 's/'"not be"'/≠/g' \
-                | sed 's/'"be not"'/≠/g' \
-                | sed 's/'"not"'/≠/g' \
+                | sed 's/'"not to be equal to"'/!/g' \
+                | sed 's/'"to not be equal to"'/!/g' \
+                | sed 's/'"to be not equal to"'/!/g' \
+                | sed 's/'"to be equal not to"'/!/g' \
+                | sed 's/'"not to be equal"'/!/g' \
+                | sed 's/'"to not be equal"'/!/g' \
+                | sed 's/'"to be not equal"'/!/g' \
+                | sed 's/'"not to equal"'/!/g' \
+                | sed 's/'"to not equal"'/!/g' \
+                | sed 's/'"to equal not"'/!/g' \
+                | sed 's/'"not to be"'/!/g' \
+                | sed 's/'"to not be"'/!/g' \
+                | sed 's/'"to be not"'/!/g' \
+                | sed 's/'"not be"'/!/g' \
+                | sed 's/'"be not"'/!/g' \
+                | sed 's/'"not"'/!/g' \
+                | sed 's/'"≠"'/!/g' \
+                | sed 's/'"!!"'/!/g' \
+                | sed 's/'"!!"'/!/g' \
+                | sed 's/'"!!"'/!/g' \
                 | sed 's/'"to be equal to"'/=/g' \
                 | sed 's/'"to be equal"'/=/g' \
                 | sed 's/'"to equal to"'/=/g' \
@@ -754,6 +782,9 @@ CERO="\033[01;0m"
                 | sed 's/'"be equal"'/=/g' \
                 | sed 's/'"to be"'/=/g' \
                 | sed 's/'"be"'/=/g' \
+                | sed 's/'"=="'/=/g' \
+                | sed 's/'"=="'/=/g' \
+                | sed 's/'"=="'/=/g' \
             )
             # echo $inputo
             # return 0
@@ -770,16 +801,38 @@ CERO="\033[01;0m"
             IFS=\  read value_one equality value_two<<EOF
                 ${inputo}
 EOF
-            TESTING=$(echo "${FUNCNAME[0]} that value ${statement}" | ag "${value_one}" |ag "${value_two}")
+            value_one=$(convert_expects_internals $(convert_null "${value_one}"))
+            # DEBUG echo "0.value_one:,,$value_one''"
+            value_two=$(convert_null "${value_two}")
+            # DEBUG echo "0.value_two:,,$value_two''"
+
+            # TESTING=$(echo "${FUNCNAME[0]} that value ${statement}" | ag "${value_one}" | ag "${value_two}")
+            TESTING=$(echo "${FUNCNAME[0]} that value ${statement}")
+            # DEBUG echo "${FUNCNAME[0]} that value ${statement}"
+            # DEBUG echo "//"
+            # DEBUG echo "${FUNCNAME[0]} that value ${statement}"
+            # DEBUG echo "TESTING:${TESTING}"
+            # DEBUG echo "inputo:,,$inputo''"
             if [[ "${inputo}" == *"="* ]] ; then
             {
+                if [[ "${inputo}" == "=" ]] ; then
+                {
+                    passed "${TESTING}"
+                    return 0
+                }
+                fi
                 value_one=$(echo "${inputo}" | cut -d= -f1 | trim)
+                # DEBUG echo "value_one:,,$value_one''"
                 value_two=$(echo "${inputo}" | cut -d= -f2 | trim)
+                # DEBUG echo "value_two:,,$value_two''"
+                value_one=$(convert_null "${value_one}")
+                # DEBUG echo "value_one:,,$value_one''"
+                value_two=$(convert_null "${value_two}")
+                # DEBUG echo "value_two:,,$value_two''"
                 if [[ "${value_one}" == "${value_two}" ]] ; then
                 {
                     passed "${TESTING}"
                     return 0
-
                 }
                 else
                 {
@@ -790,8 +843,20 @@ EOF
             }
             else
             {
-                value_one=$(echo "${inputo}" | cut -d≠ -f1 | trim)
-                value_two=$(echo "${inputo}" | cut -d≠ -f2 | trim)
+                if [[ "${inputo}" == "!" ]] ; then
+                {
+                    failed "${TESTING}"
+                    return 1
+                }
+                fi
+                value_one=$(echo "${inputo}" | cut -d! -f1 | trim)
+                # DEBUG echo "value_one:,,$value_one''"
+                value_two=$(echo "${inputo}" | cut -d! -f2 | trim)
+                # DEBUG echo "value_two:,,$value_two''"
+                value_one=$(convert_null "${value_one}")
+                # DEBUG echo "value_one:,,$value_one''"
+                value_two=$(convert_null "${value_two}")
+                # DEBUG echo "value_two:,,$value_two''"
                 if [[ "${value_one}" != "${value_two}" ]] ; then
                 {
                     passed "${TESTING}"
@@ -808,12 +873,14 @@ EOF
 
         }
 #expect "hola" = "hello"
+#expect "hola" = "hola"
 
         testself_expect(){
             local -a caso
             local -a exito
             local COUNTER=0
             local res
+            local nada=""
             caso[0]="hola"
             exito[0]="hola"
             caso[0]="hola el mundo"
@@ -822,45 +889,50 @@ EOF
             {
                 test_case="Error: Self test failed: ${FUNCNAME[0]} ... expected <${caso}> to be equal to <${exito[$COUNTER]}>"
                 pass_case="Passed: Self test: ${FUNCNAME[0]} ... expected <${caso}> to be equal to <${exito[$COUNTER]}>"
+                # DEPRECATED if/pass/fail idea if ( expect "a{caso}" "not to be equal to" "${exito[$COUNTER]}" ) ; then passed "$pass_case"; else failed  "$test_case"; exit 69; fi
 
-                if ( expect "a{caso}" "not to be equal to" "${exito[$COUNTER]}" ) ; then passed "$pass_case"; else failed  "$test_case"; exit 69; fi
-                if ( expect "a{caso}" not to be equal to "${exito[$COUNTER]}" ) ; then passed "$pass_case"; else failed  "$test_case"; exit 69; fi
-                if ( expect "${caso}" "to be equal to" "${exito[$COUNTER]}" ) ; then passed "$pass_case"; else failed  "$test_case"; exit 69; fi
-                if ( expect "${caso}" to be equal to "${exito[$COUNTER]}" ) ; then passed "$pass_case"; else failed  "$test_case"; exit 69; fi
+                expect "${nada}" "not to be equal to" "${exito[$COUNTER]}"
+                expect "a{caso}" "not to be equal to" "${exito[$COUNTER]}"
+                expect "a{caso}" not to be equal to "${exito[$COUNTER]}"
+                expect "${nada}" "to be equal to" "${nada}"
+                expect "${caso}" "to be equal to" "${exito[$COUNTER]}"
+                expect "${caso}" "not to be equal to" "${nada}"
+                expect "${nada}" "not to be equal to" "${exito[$COUNTER]}"
+                expect "${caso}" to be equal to "${exito[$COUNTER]}"
 
-                if ( expect $(echo "${caso}") to be equal "${exito[$COUNTER]}" ) ; then passed "$pass_case"; else failed  "$test_case"; exit 69; fi
-                if ( expect $(echo "${caso}") to equal to "${exito[$COUNTER]}" ) ; then passed "$pass_case"; else failed  "$test_case"; exit 69; fi
-                if ( expect $(echo "${caso}") to equal "${exito[$COUNTER]}" ) ; then passed "$pass_case"; else failed  "$test_case"; exit 69; fi
-                if ( expect $(echo "${caso}") be equal to "${exito[$COUNTER]}" ) ; then passed "$pass_case"; else failed  "$test_case"; exit 69; fi
-                if ( expect $(echo "${caso}") be equal "${exito[$COUNTER]}" ) ; then passed "$pass_case"; else failed  "$test_case"; exit 69; fi
-                if ( expect $(echo "${caso}") to be "${exito[$COUNTER]}" ) ; then passed "$pass_case"; else failed  "$test_case"; exit 69; fi
-                if ( expect $(echo "${caso}") be "${exito[$COUNTER]}" ) ; then passed "$pass_case"; else failed  "$test_case"; exit 69; fi
-                if ( expect $(echo "${caso}") = "${exito[$COUNTER]}" ) ; then passed "$pass_case"; else failed  "$test_case"; exit 69; fi
+                expect $(echo "${caso}") to be equal "${exito[$COUNTER]}"
+                expect $(echo "${caso}") to equal to "${exito[$COUNTER]}"
+                expect $(echo "${caso}") to equal "${exito[$COUNTER]}"
+                expect $(echo "${caso}") be equal to "${exito[$COUNTER]}"
+                expect $(echo "${caso}") be equal "${exito[$COUNTER]}"
+                expect $(echo "${caso}") to be "${exito[$COUNTER]}"
+                expect $(echo "${caso}") be "${exito[$COUNTER]}"
+                expect $(echo "${caso}") = "${exito[$COUNTER]}"
 
-                if ( expect $(echo "${caso}") not to be equal to "hello"  ) ; then passed "$pass_case"; else failed  "$test_case"; exit 69; fi
-                if ( expect $(echo "${caso}") to not be equal to "hello"  ) ; then passed "$pass_case"; else failed  "$test_case"; exit 69; fi
-                if ( expect $(echo "${caso}") to be not equal to "hello"  ) ; then passed "$pass_case"; else failed  "$test_case"; exit 69; fi
-                if ( expect $(echo "${caso}") to be equal not to "hello"  ) ; then passed "$pass_case"; else failed  "$test_case"; exit 69; fi
-                if ( expect $(echo "${caso}") not to be equal "hello"  ) ; then passed "$pass_case"; else failed  "$test_case"; exit 69; fi
-                if ( expect $(echo "${caso}") to not be equal "hello"  ) ; then passed "$pass_case"; else failed  "$test_case"; exit 69; fi
-                if ( expect $(echo "${caso}") to be not equal "hello"  ) ; then passed "$pass_case"; else failed  "$test_case"; exit 69; fi
-                if ( expect $(echo "${caso}") not to equal "hello"  ) ; then passed "$pass_case"; else failed  "$test_case"; exit 69; fi
-                if ( expect $(echo "${caso}") to not equal "hello"  ) ; then passed "$pass_case"; else failed  "$test_case"; exit 69; fi
-                if ( expect $(echo "${caso}") to equal not "hello"  ) ; then passed "$pass_case"; else failed  "$test_case"; exit 69; fi
-                if ( expect $(echo "${caso}") not to be "hello"  ) ; then passed "$pass_case"; else failed  "$test_case"; exit 69; fi
-                if ( expect $(echo "${caso}") to not be "hello"  ) ; then passed "$pass_case"; else failed  "$test_case"; exit 69; fi
-                if ( expect $(echo "${caso}") to be not "hello"  ) ; then passed "$pass_case"; else failed  "$test_case"; exit 69; fi
-                if ( expect $(echo "${caso}") not be "hello"  ) ; then passed "$pass_case"; else failed  "$test_case"; exit 69; fi
-                if ( expect $(echo "${caso}") be not "hello"  ) ; then passed "$pass_case"; else failed  "$test_case"; exit 69; fi
-                if ( expect $(echo "${caso}") not "hello"  ) ; then passed "$pass_case"; else failed  "$test_case"; exit 69; fi
-                if ( expect $(echo "${caso}") ≠ "hello"  ) ; then passed "$pass_case"; else failed  "$test_case"; exit 69; fi
+                expect $(echo "${caso}") not to be equal to "hello"
+                expect $(echo "${caso}") to not be equal to "hello"
+                expect $(echo "${caso}") to be not equal to "hello"
+                expect $(echo "${caso}") to be equal not to "hello"
+                expect $(echo "${caso}") not to be equal "hello"
+                expect $(echo "${caso}") to not be equal "hello"
+                expect $(echo "${caso}") to be not equal "hello"
+                expect $(echo "${caso}") not to equal "hello"
+                expect $(echo "${caso}") to not equal "hello"
+                expect $(echo "${caso}") to equal not "hello"
+                expect $(echo "${caso}") not to be "hello"
+                expect $(echo "${caso}") to not be "hello"
+                expect $(echo "${caso}") to be not "hello"
+                expect $(echo "${caso}") not be "hello"
+                expect $(echo "${caso}") be not "hello"
+                expect $(echo "${caso}") not "hello"
+                expect $(echo "${caso}") ≠ "hello"
                 (( COUNTER++ )) # if (( $COUNTER > 37 )) ; then
             }
             done
 
         }
         #testself_expect #&> /dev/null # stdln to hide command output in bash
-        testself_expect  2>&1 >/dev/null #  capture onlly sterr error output
+        testself_expect 2>&1 >/dev/null #  capture onlly sterr error output
 
 
         function check_to_be_installed(){
