@@ -37,9 +37,7 @@ BLANK_SPACE="${blue23} • ${green} "
 trap ' { msg_red "KEYBOARD INTERRUPT."; exit 69; }' INT
 
                           # Escape chars / !
-escape_slashes() {
-    sed 's/\//\\\//g'
-}
+
 escape_parentheses() {
     sed 's/[(]/\\\(/g' | sed 's/[)]/\\\)/g'
 }
@@ -58,23 +56,8 @@ delete_empty_lines() {
 remove_empty_lines() {
     sed '/^\s*$/d'
 }
-escape_double_quotes() {
-    sed 's/\"/\\\"/g'
-}
-escape_single_quotes() {
-    sed "s/'/\\\'/g"
-}
-escape_bangs() {
-    sed 's/\!/\\\!/g'
-}
 escape_plus() {
     sed 's/\+/\\\+/g'
-}
-escape_dots() {
-    sed 's/\./\\\./g'
-}
-escape_spaces() {
-    sed 's/\ /\\\ /g'
 }
 trim_start_space() {
     sed -e 's/^[[:space:]]*//' | sed 's/^\ //g' | sed 's/^\t//g'
@@ -94,7 +77,6 @@ add_marker_start() {
 remove_slashy() {
     sed 's/^·\\\ \\\ \\\ \\\ //g'
 }
-
 trim_start_single_quote() {
     sed "s/^'//g"
 }
@@ -104,11 +86,30 @@ trim_end_single_quote() {
 trim_single_quotes() {
     trim_start_single_quote | trim_end_single_quote
 }
-escape_more_than() {
-    sed s/""">"""/\\\>/g
+
+escape_spaces() {
+    sed 's/\ /\\\ /g'
+}
+escape_double_quotes() {
+    sed 's/\"/\\\"/g'
 }
 escape_less_than() {
     sed s/"""<"""/\\\</g
+}
+escape_more_than() {
+    sed s/""">"""/\\\>/g
+}
+escape_slashes() {
+    sed 's/\//\\\//g'
+}
+escape_single_quotes() {
+    sed "s/'/\\\'/g"
+}
+escape_bangs() {
+    sed 's/\!/\\\!/g'
+}
+escape_dots() {
+    sed 's/\./\\\./g'
 }
 escape_for_sed_sequence() {
     escape_spaces | escape_double_quotes | \
