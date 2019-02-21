@@ -443,6 +443,7 @@ bundle_install(){
 	    	{
 	    		passed "bundle install" 
 	    		results_passed "bundle install" 
+	    		bin/rails db:migrate RAILS_ENV=development
 	    	} 
 	    	fi
     	}
@@ -450,6 +451,7 @@ bundle_install(){
     	{
     		passed "bundle install" 
     		results_passed "bundle install" 
+    		bin/rails db:migrate RAILS_ENV=development
     	} 
     	fi
 
