@@ -391,42 +391,77 @@ CERO="\033[01;0m"
             fi
         }
 
-        function directory_exists(){
+        function directory_exists() {
             # Sample usage
             #
             #     directory_exists "/home/vagrant/.pyenv"
             #     directory_exists "/root/.pyenv
             #     /home/vagrant/.pyenv"
             #
-            DIRS="${@}"
+            local _TESTING _ONE_DIR _DIRS="${@}"
             if [ ! -z "${DIRS-x}" ] ; then # if its set and not empty
             {
-                DIRS=$(switch_spaces_to_newlines <<< "${@}")
-                while read -r ONE_DIR; do
+                _DIRS=$(switch_spaces_to_newlines <<< "${@}")
+                while read -r _ONE_DIR; do
                 # if not empty
-                if [ ! -z "${ONE_DIR}" ] ; then
+                if [ ! -z "${_ONE_DIR}" ] ; then
                     # AS a NOTE ~/  <-- will fail always
                     # SO ~/.pyenv <-- will fail always
                     # But /home/user/.pyenv  <-- will pass
                     # OR Users/administrator/.pyenv  in mac <-- will pass
-                    # ONE_DIR="/Users/administrator/.pyenv"
-                    TESTING="that directory ${CYAN}${ONE_DIR}${LIGHTYELLOW} exists"
-                    if [[ -d "${ONE_DIR}" && ! -L "${ONE_DIR}" ]] ; then
+                    # _ONE_DIR="/Users/administrator/.pyenv"
+                    _TESTING="that directory ${CYAN}${_ONE_DIR}${LIGHTYELLOW} exists"
+                    if [[ -d "${_ONE_DIR}" && ! -L "${_ONE_DIR}" ]] ; then
                     {
-                        passed "${TESTING}"
+                        passed "${_TESTING}"
                     }
                     else
                     {
-                        failed "${TESTING}"
+                        failed "${_TESTING}"
                     }
                     fi
                 fi
-                done <<< "${DIRS}"
+                done <<< "${_DIRS}"
             }
             fi
-
         }
 
+        
+        function directory_exists_with_spaces() {
+            # Sample usage
+            #
+            #     directory_exists_with_spaces "/Applications/Google Chrome.app/"
+            #     directory_exists_with_spaces "/Applications/Google\ Chrome.app/"
+            #
+            local _TESTING _ONE_DIR="${*}"
+            if [ ! -z "${_ONE_DIR-x}" ] ; then # if its set and not empty
+            {
+                # if not empty
+                if [ ! -z "${_ONE_DIR}" ] ; then
+                {
+                    # AS a NOTE ~/  <-- will fail always
+                    # SO ~/.pyenv <-- will fail always
+                    # But /home/user/.pyenv  <-- will pass
+                    # OR Users/administrator/.pyenv  in mac <-- will pass
+                    # _ONE_DIR="/Users/administrator/.pyenv"
+                    _TESTING="that directory ${CYAN}${_ONE_DIR}${LIGHTYELLOW} exists"
+                    if [[ -d "${_ONE_DIR}" && ! -L "${_ONE_DIR}" ]] ; then
+                    {
+                        passed "${_TESTING}"
+                    }
+                    else
+                    {
+                        failed "${_TESTING}"
+                    }
+                    fi
+                }
+                fi
+
+            }
+            fi
+        }
+
+        
         function does_not_exist(){
             # Sample usage
             #
@@ -434,36 +469,74 @@ CERO="\033[01;0m"
             #     does_not_exist "/root/.pyenv
             #     /home/vagrant/.pyenv"
             #
-            DIRS="${@}"
-            if [ ! -z "${DIRS-x}" ] ; then # if its set and not empty
+            local _TESTING _ONE_DIR  _DIRS="${@}"
+            if [ ! -z "${_DIRS-x}" ] ; then # if its set and not empty
             {
-                DIRS=$(switch_spaces_to_newlines <<< "${@}")
-                while read -r ONE_DIR; do
+                _DIRS=$(switch_spaces_to_newlines <<< "${@}")
+                while read -r _ONE_DIR; do
                 # if not empty
-                if [ ! -z "${ONE_DIR}" ] ; then
+                if [ ! -z "${_ONE_DIR}" ] ; then
+                {
                     # AS a NOTE ~/  <-- will fail always
                     # SO ~/.pyenv <-- will fail always
                     # But /home/user/.pyenv  <-- will pass
                     # OR Users/administrator/.pyenv  in mac <-- will pass
-                    # ONE_DIR="/Users/administrator/.pyenv"
-                    TESTING="that ${CYAN}${ONE_DIR}${LIGHTYELLOW} does not exist"
-                    if [[ ! -e "${ONE_DIR}" ]] ; then
+                    # _ONE_DIR="/Users/administrator/.pyenv"
+                    _TESTING="that ${CYAN}${_ONE_DIR}${LIGHTYELLOW} does not exist"
+                    if [[ ! -e "${_ONE_DIR}" ]] ; then
                     {
-                        passed "${TESTING}"
+                        passed "${_TESTING}"
                     }
                     else
                     {
-                        failed "${TESTING}"
+                        failed "${_TESTING}"
                     }
                     fi
+                }
                 fi
-                done <<< "${DIRS}"
+                done <<< "${_DIRS}"
+            }
+            fi
+        }
+        function does_not_exist_with_spaces(){
+            # Sample usage
+            #
+            #     does_not_exist_with_spaces "/Applications/Google\ Chrome.app/"
+            #     does_not_exist_with_spaces "/Applications/Google Chrome.app/"
+            #
+            local _TESTING _ONE_DIR="${*}"
+            if [ ! -z "${_ONE_DIR-x}" ] ; then # if its set and not empty
+            {
+                # if not empty
+                if [ ! -z "${_ONE_DIR}" ] ; then
+                {
+                    # AS a NOTE ~/  <-- will fail always
+                    # SO ~/.pyenv <-- will fail always
+                    # But /home/user/.pyenv  <-- will pass
+                    # OR Users/administrator/.pyenv  in mac <-- will pass
+                    # _ONE_DIR="/Users/administrator/.pyenv"
+                    _TESTING="that ${CYAN}${_ONE_DIR}${LIGHTYELLOW} does not exist"
+                    if [[ ! -e "${_ONE_DIR}" ]] ; then
+                    {
+                        passed "${_TESTING}"
+                    }
+                    else
+                    {
+                        failed "${_TESTING}"
+                    }
+                    fi
+                }
+                fi
             }
             fi
         }
 
         function directory_does_not_exist() {
             does_not_exist $@
+        }
+
+        function directory_does_not_exist_with_spaces() {
+            does_not_exist_with_spaces "${*}"
         }
 
         function file_does_not_exists() {
@@ -544,10 +617,10 @@ CERO="\033[01;0m"
             #     softlink_exists "/root/.pyenv
             #     /root/.pyenv>/home/vagrant/.pyenv"
             #
-            local LINKS="${@}"
-            if [ ! -z "${LINKS-x}" ] ; then # if its set and not empty
+            local FOUND_LINK_TARGET ONE_LINK_ORDER _LINKS="${@}"
+            if [ ! -z "${_LINKS-x}" ] ; then # if its set and not empty
             {
-                LINKS=$(switch_spaces_to_newlines <<< "${@}")
+                _LINKS=$(switch_spaces_to_newlines <<< "${@}")
                 while read -r ONE_LINK_ORDER; do
                     # if not empty
                     if [ ! -z "${ONE_LINK_ORDER}" ] ; then
@@ -623,10 +696,101 @@ CERO="\033[01;0m"
                         fi # ONE_LINK_LOCATION Exists
                     }
                     fi # not empty one link
-                done <<< "${LINKS}"
+                done <<< "${_LINKS}"
             }
             fi # not empty links
         } # end softlink_exists
+
+        function softlink_exists_with_spaces(){
+            # Sample usage
+            #
+            #     softlink_exists_with_spaces "/Applications/Google\ Chrome.app/Contents/Profile/NativeMessagingHosts"
+            #     softlink_exists_with_spaces "~/Library/Application\ Support/Google/Chrome/NativeMessagingHosts"
+            #
+            local FOUND_LINK_TARGET ONE_LINK_ORDER _LINKS="${*}"
+            if [ ! -z "${_LINKS-x}" ] ; then # if its set and not empty
+            {
+                ONE_LINK_ORDER="${_LINKS}"
+                
+                    # if not empty
+                    if [ ! -z "${ONE_LINK_ORDER}" ] ; then
+                    {
+                        local CHECK_TARGET_TOO="NO"
+                        local ONE_LINK_LOCATION="${ONE_LINK_ORDER}"
+                        local ONE_LINK_TARGET=""
+
+                        [[ "${ONE_LINK_ORDER}" == *">"* ]] && CHECK_TARGET_TOO="YES"
+                        if [[ "${CHECK_TARGET_TOO}" == "YES" ]] ; then
+                        {
+                            ONE_LINK_LOCATION=$(cut -d'>' -f1 <<< "${ONE_LINK_ORDER}")
+                            ONE_LINK_TARGET=$(cut -d'>' -f2 <<< "${ONE_LINK_ORDER}")
+                        }
+                        fi
+                        # AS a NOTE ~/  <-- will fail always
+                        # SO ~/.pyenv <-- will fail always
+                        # But /home/user/.pyenv  <-- will pass
+                        # OR Users/administrator/.pyenv  in mac <-- will pass
+                        # ONE_LINK_LOCATION="/Users/administrator/.nix-profile"
+                        local TESTING="that softlink ${CYAN}${ONE_LINK_LOCATION}${LIGHTYELLOW} exists"
+                        if [[ -L "${ONE_LINK_LOCATION}" ]] ; then
+                        {
+                            # is a softlink
+                            passed "${TESTING}"
+
+                            # Test pointing
+                            if [[ "${CHECK_TARGET_TOO}" == "YES" && ! -z "${ONE_LINK_TARGET}" ]] ; then
+                            {
+                                TESTING="${PURPLE} +-- and that softlink ${CYAN}${ONE_LINK_LOCATION}${LIGHTYELLOW} points to ${CYAN}${ONE_LINK_TARGET}${GREEN} location \n"
+                                FOUND_LINK_TARGET=$(ls -l ${ONE_LINK_LOCATION} | awk '{print $11}') # Find target symlink
+                                if [[ "${FOUND_LINK_TARGET}" == "${ONE_LINK_TARGET}" ]] ; then
+                                {
+                                    # points to right location
+                                    passed "${TESTING}"
+
+                                    TESTING="that softlink ${CYAN}${ONE_LINK_LOCATION}${LIGHTYELLOW} is not broken"
+                                    local empty_means_not_broken=$(find ${ONE_LINK_LOCATION} -type l ! -exec test -e {} \; -print  2>&1 | xargs -I {} ls -la "{}")
+                                    if [[ -z "${empty_means_not_broken}" ]] ; then
+                                    {
+                                        # points to right location
+                                        TESTING=""
+                                        passed "${TESTING}"
+                                    }
+                                    elif  [[ "${empty_means_not_broken}" == *"No such file or directory"* ]] ; then
+                                    {
+                                        TESTING="but softlink ${CYAN}${ONE_LINK_LOCATION}${LIGHTYELLOW} is was not created"
+                                        failed "${TESTING}"
+                                    }
+                                    elif  [[ "${empty_means_not_broken}" == *"Permission denied"* ]] ; then
+                                    {
+                                        TESTING="but softlink ${CYAN}${ONE_LINK_LOCATION}${LIGHTYELLOW}. Permission denied. Check Target -> ${ONE_LINK_TARGET} is accesible."
+                                        failed "${TESTING}"
+                                    } else {
+                                        failed "${TESTING}"
+                                    }
+                                    fi
+                                }
+                                else
+                                {
+                                    TESTING+="${GREEN}     +++ expected${LIGHTYELLOW}:${CYAN}${ONE_LINK_TARGET}${LIGHTYELLOW}:${RED} --- actual${LIGHTYELLOW}:${RED}${FOUND_LINK_TARGET}${LIGHTYELLOW}:"
+                                    failed "${TESTING}"
+                                }
+                                fi
+                            }
+                            fi # TACHECK_TARGET_TOO is correct
+
+                        }
+                        else
+                        {
+                            failed "${TESTING}"
+                        }
+                        fi # ONE_LINK_LOCATION Exists
+                    }
+                    fi # not empty one link
+
+            }
+            fi # not empty links
+        } # end softlink_exists_with_spaces
+
 
         function check_equality(){
             # Sample usage
