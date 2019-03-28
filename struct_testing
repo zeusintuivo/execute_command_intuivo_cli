@@ -448,10 +448,12 @@ CERO="\033[01;0m"
                     if [[ -d "${_ONE_DIR}" && ! -L "${_ONE_DIR}" ]] ; then
                     {
                         passed "${_TESTING}"
+                        return 0
                     }
                     else
                     {
                         failed "${_TESTING}"
+                        return 1
                     }
                     fi
                 }
@@ -553,7 +555,7 @@ CERO="\033[01;0m"
             #          if  ! it_exists "/home/vagrant/.zshrc" ; then    is like is NOT installed
             #          if  it_exists "/root/.zshrc ; then      it makes more sense to make it this way
             #
-            FILES="${@}"
+            local ONE_FILE FILES="${@}"
             if [ ! -z "${FILES-x}" ] ; then # if its set and not empty
             {
                 FILES=$(switch_spaces_to_newlines <<< "${@}")
@@ -572,7 +574,7 @@ CERO="\033[01;0m"
                     fi
                 fi
                 done <<< "${FILES}"
-                return 1 # it doest not exists
+                return 1 # it does not exists
             }
             fi
         } # end it_exists
@@ -584,7 +586,7 @@ CERO="\033[01;0m"
             #     file_exists "/root/.zshrc
             #     /home/vagrant/.pyenzshrcv"
             #
-            FILES="${@}"
+            local ONE_FILE FILES="${@}"
             if [ ! -z "${FILES-x}" ] ; then # if its set and not empty
             {
                 FILES=$(switch_spaces_to_newlines <<< "${@}")
@@ -701,6 +703,16 @@ CERO="\033[01;0m"
             fi # not empty links
         } # end softlink_exists
 
+        function ensure_unlink(){
+            if [ -s """${*}""" ] ; then 
+             unlink """${*}"""
+            fi 
+        }
+        function ensure_rmdir(){
+            if [ -d """${*}""" ] ; then 
+                rm -rf """${*}"""
+            fi
+        }
         function softlink_exists_with_spaces(){
             # Sample usage
             #
@@ -726,6 +738,7 @@ CERO="\033[01;0m"
                             ONE_LINK_TARGET=$(cut -d'>' -f2 <<< "${ONE_LINK_ORDER}")
                         }
                         fi
+                        say "${ONE_LINK_ORDER}"
                         # AS a NOTE ~/  <-- will fail always
                         # SO ~/.pyenv <-- will fail always
                         # But /home/user/.pyenv  <-- will pass
@@ -741,7 +754,7 @@ CERO="\033[01;0m"
                             if [[ "${CHECK_TARGET_TOO}" == "YES" && ! -z "${ONE_LINK_TARGET}" ]] ; then
                             {
                                 TESTING="${PURPLE} +-- and that softlink ${CYAN}${ONE_LINK_LOCATION}${LIGHTYELLOW} points to ${CYAN}${ONE_LINK_TARGET}${GREEN} location \n"
-                                FOUND_LINK_TARGET=$(ls -l ${ONE_LINK_LOCATION} | awk '{print $11}') # Find target symlink
+                                FOUND_LINK_TARGET=$(ls -l ${ONE_LINK_LOCATION} | cut -d'>' -f2 | trim) # Find target symlink
                                 if [[ "${FOUND_LINK_TARGET}" == "${ONE_LINK_TARGET}" ]] ; then
                                 {
                                     # points to right location
@@ -759,20 +772,24 @@ CERO="\033[01;0m"
                                     {
                                         TESTING="but softlink ${CYAN}${ONE_LINK_LOCATION}${LIGHTYELLOW} is was not created"
                                         failed "${TESTING}"
+                                        return 1
                                     }
                                     elif  [[ "${empty_means_not_broken}" == *"Permission denied"* ]] ; then
                                     {
                                         TESTING="but softlink ${CYAN}${ONE_LINK_LOCATION}${LIGHTYELLOW}. Permission denied. Check Target -> ${ONE_LINK_TARGET} is accesible."
                                         failed "${TESTING}"
+                                        return 1
                                     } else {
                                         failed "${TESTING}"
+                                        return 1
                                     }
                                     fi
                                 }
                                 else
                                 {
-                                    TESTING+="${GREEN}     +++ expected${LIGHTYELLOW}:${CYAN}${ONE_LINK_TARGET}${LIGHTYELLOW}:${RED} --- actual${LIGHTYELLOW}:${RED}${FOUND_LINK_TARGET}${LIGHTYELLOW}:"
+                                    TESTING+="${GREEN}     +++ expected${LIGHTYELLOW}:${CYAN}${ONE_LINK_TARGET}${LIGHTYELLOW}:${RED}${RESET} --- actual:${FOUND_LINK_TARGET}:"
                                     failed "${TESTING}"
+                                    return 1
                                 }
                                 fi
                             }
@@ -782,6 +799,7 @@ CERO="\033[01;0m"
                         else
                         {
                             failed "${TESTING}"
+                            return 1
                         }
                         fi # ONE_LINK_LOCATION Exists
                     }
@@ -789,6 +807,7 @@ CERO="\033[01;0m"
 
             }
             fi # not empty links
+            return 0
         } # end softlink_exists_with_spaces
 
 
@@ -1632,6 +1651,9 @@ EOF
         # C H E C K   H O W   C O M P U T E R   H A N D L E S   E R R O R S   --End
         #
 
+        function escape_spaces() {
+            sed "s/ /\\\ /g"
+        }
         function escape_single_quotes() {
             sed "s/'/\\\'/g"
         }
@@ -1898,8 +1920,11 @@ complete -o nospace -F _wp_complete wp
 
         function switch_spaces_to_newlines() {
             sed 's/ /\n/g'
-        }
-        # end switch_spaces_to_newlines
+        } # end switch_spaces_to_newlines
+        function switch_spaces_to_underscores() {
+            sed 's/ /_/g'
+        } # end switch_spaces_to_underscores
+        
         function make_itarable() {
             sed 's/ /\n/g' | trim | enter_encode | sed 's/0N33NT3R/ \r\n/g'
         }
