@@ -608,6 +608,33 @@ CERO="\033[01;0m"
             fi
         } # end file_exists
 
+        function file_exists_with_spaces(){
+            # Sample usage
+            #
+            #     file_exists_with_spaces "/home/vagrant/.zshrc"
+            #     file_exists_with_spaces "/root/.zshrc
+            #     /home/vagrant/.pyenzshrcv"
+            #
+            local ONE_FILE FILES="${*}"
+            if [ ! -z "${FILES-x}" ] ; then # if its set and not empty
+            {
+                while read -r ONE_FILE; do
+                if [ ! -z "${ONE_FILE}" ] ; then # if not empty
+                    TESTING="that file ${CYAN}${ONE_FILE}${LIGHTYELLOW} exists"
+                    if it_exists "${ONE_FILE}" ; then
+                    {
+                        passed "${TESTING}"
+                    }
+                    else
+                    {
+                        failed "${TESTING}"
+                    }
+                    fi
+                fi
+                done <<< "${FILES}"
+            }
+            fi
+        } # end file_exists_with_spaces
 
         function softlink_exists(){
             # Sample usage
