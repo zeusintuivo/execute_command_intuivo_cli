@@ -579,6 +579,36 @@ CERO="\033[01;0m"
             fi
         } # end it_exists
 
+        function it_exists_with_spaces(){
+            # Sample usage
+            #
+            #          if  ! it_exists_with_spaces "/home/vagrant/.zshrc" ; then    is like is NOT installed
+            #          if  it_exists_with_spaces "/root/.zshrc ; then      it makes more sense to make it this way
+            #
+            local ONE_FILE FILES="${@}"
+            if [ ! -z "${FILES-x}" ] ; then # if its set and not empty
+            {
+                while read -r ONE_FILE; do
+                # if not empty
+                # DEBUG echo -e "${BASH_SOURCE[0]} ->\n  .. ${FUNCNAME[0]}():${ONE_FILE}" 
+                if [ ! -z "${ONE_FILE}" ] ; then
+                    # AS a NOTE ~/  <-- will fail always
+                    # SO ~/.zshrc <-- will fail always
+                    # But /home/user/.zshrc  <-- will pass
+                    # OR Users/administrator/.zshrc  in mac <-- will pass
+                    # ONE_FILE="/Users/administrator/.zshrc"
+                    if [[ -e "${ONE_FILE}" ]] ; then
+                    {
+                        return 0 # it exists
+                    }
+                    fi
+                fi
+                done <<< "${FILES}"
+                return 1 # it does not exists
+            }
+            fi
+        } # end it_exists_with_spaces
+
         function file_exists(){
             # Sample usage
             #
@@ -616,12 +646,14 @@ CERO="\033[01;0m"
             #     /home/vagrant/.pyenzshrcv"
             #
             local ONE_FILE FILES="${*}"
+            # DEBUG echo -e "${BASH_SOURCE[0]} ->\n  .. ${FUNCNAME[0]}():$FILES"
             if [ ! -z "${FILES-x}" ] ; then # if its set and not empty
             {
                 while read -r ONE_FILE; do
                 if [ ! -z "${ONE_FILE}" ] ; then # if not empty
                     TESTING="that file ${CYAN}${ONE_FILE}${LIGHTYELLOW} exists"
-                    if it_exists "${ONE_FILE}" ; then
+                    # DEBUG echo -e "${BASH_SOURCE[0]} ->\n  .. ${FUNCNAME[0]}():$ONE_FILE"
+                    if it_exists_with_spaces "${ONE_FILE}" ; then
                     {
                         passed "${TESTING}"
                     }
