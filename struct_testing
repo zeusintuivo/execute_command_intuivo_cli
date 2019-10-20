@@ -86,7 +86,7 @@ function HOW_TO_LOAD_SEVERAL_FILES() {
 
     load_execute_commands_wget(){
         local URL=""
-        local cached_directory="$HOME/_/clis/execute_command_intuivo_cli/"
+        local cached_directory="$HOME$HOME/_/clis/execute_command_intuivo_cli/"
         local EXECOMCLI=""
         local provider=""
         [   -d "${cached_directory}" ] &&  provider="file://${cached_directory}"
@@ -121,7 +121,7 @@ function HOW_TO_LOAD_SEVERAL_FILES() {
     load_execute_commands_curl(){
         local URL=""
         local EXECOMCLI=""
-        local cached_directory="$HOME/_/clis/execute_command_intuivo_cli/"
+        local cached_directory="$HOME$HOME/_/clis/execute_command_intuivo_cli/"
         local provider=""
         [   -d "${cached_directory}" ] &&  provider="file://${cached_directory}"
         [ ! -d "${cached_directory}" ] &&  provider="https://raw.githubusercontent.com/zeusintuivo/execute_command_intuivo_cli/master/"
@@ -158,8 +158,8 @@ function HOW_TO_LOAD_JUST_ONE_SCRIPT_LOCAL_AND_ONLINE_EXECUTE_COMMAND() {
 
     #Sample short call for loading execute command
     load_execute_command_curl(){
-        local provider="file://$HOME/_/clis/execute_command_intuivo_cli/execute_command"
-        [ ! -d "$HOME/_/clis/execute_command_intuivo_cli/" ] && provider="https://raw.githubusercontent.com/zeusintuivo/execute_command_intuivo_cli/master/execute_command"
+        local provider="file://$HOME$HOME/_/clis/execute_command_intuivo_cli/execute_command"
+        [ ! -d "$HOME$HOME/_/clis/execute_command_intuivo_cli/" ] && provider="https://raw.githubusercontent.com/zeusintuivo/execute_command_intuivo_cli/master/execute_command"
         local EXECOMCLI=$(curl $provider  2>/dev/null )   # suppress only curl download messages, but keep curl output for variable
         eval """${EXECOMCLI}"""
         ( ( ! command -v type passed >/dev/null 2>&1; ) && echo -e "\n \n  ERROR! Loading execute_command \n \n " && exit 69; )
@@ -173,8 +173,8 @@ function HOW_TO_LOAD_JUST_ONE_SCRIPT_LOCAL_AND_ONLINE_STRUCT_USING_CURL() {
 
     #Sample short call for loading struct_testing
     load_struct_testing_curl(){
-        local provider="file://$HOME/_/clis/execute_command_intuivo_cli/struct_testing"
-        [ ! -d "$HOME/_/clis/execute_command_intuivo_cli/" ] && provider="https://raw.githubusercontent.com/zeusintuivo/execute_command_intuivo_cli/master/struct_testing"
+        local provider="file://$HOME$HOME/_/clis/execute_command_intuivo_cli/struct_testing"
+        [ ! -d "$HOME$HOME/_/clis/execute_command_intuivo_cli/" ] && provider="https://raw.githubusercontent.com/zeusintuivo/execute_command_intuivo_cli/master/struct_testing"
         local EXECOMCLI=$(curl $provider  2>/dev/null )   # suppress only curl download messages, but keep curl output for variable
         eval """${EXECOMCLI}"""
         ( ( ! command -v type passed >/dev/null 2>&1; ) && echo -e "\n \n  ERROR! Loading struct_testing \n \n " && exit 69; )
@@ -189,7 +189,7 @@ function HOW_TO_LOAD_JUST_ONE_SCRIPT_LOCAL_AND_ONLINE_STRUCT_USING_WGET() {
 
     #Sample short call for loading struct_testing
     load_struct_testing_wget(){
-        local provider="$HOME/_/clis/execute_command_intuivo_cli/struct_testing"
+        local provider="$HOME$HOME/_/clis/execute_command_intuivo_cli/struct_testing"
         [   -e "${provider}"  ] && source "${provider}"
         [ ! -e "${provider}"  ] && eval """$(wget --quiet --no-check-certificate  https://raw.githubusercontent.com/zeusintuivo/execute_command_intuivo_cli/master/struct_testing -O -  2>/dev/null )"""   # suppress only wget download messages, but keep wget output for variable
         ( ( ! command -v type passed >/dev/null 2>&1; ) && echo -e "\n \n  ERROR! Loading struct_testing \n \n " && exit 69; )
