@@ -86,7 +86,7 @@ function HOW_TO_LOAD_SEVERAL_FILES() {
 
     load_execute_commands_wget(){
         local URL=""
-        local cached_directory="/_/clis/execute_command_intuivo_cli/"
+        local cached_directory="$HOME$HOME/_/clis/execute_command_intuivo_cli/"
         local EXECOMCLI=""
         local provider=""
         [   -d "${cached_directory}" ] &&  provider="file://${cached_directory}"
@@ -121,7 +121,7 @@ function HOW_TO_LOAD_SEVERAL_FILES() {
     load_execute_commands_curl(){
         local URL=""
         local EXECOMCLI=""
-        local cached_directory="/_/clis/execute_command_intuivo_cli/"
+        local cached_directory="$HOME$HOME/_/clis/execute_command_intuivo_cli/"
         local provider=""
         [   -d "${cached_directory}" ] &&  provider="file://${cached_directory}"
         [ ! -d "${cached_directory}" ] &&  provider="https://raw.githubusercontent.com/zeusintuivo/execute_command_intuivo_cli/master/"
@@ -158,8 +158,8 @@ function HOW_TO_LOAD_JUST_ONE_SCRIPT_LOCAL_AND_ONLINE_EXECUTE_COMMAND() {
 
     #Sample short call for loading execute command
     load_execute_command_curl(){
-        local provider="file:///_/clis/execute_command_intuivo_cli/execute_command"
-        [ ! -d "/_/clis/execute_command_intuivo_cli/" ] && provider="https://raw.githubusercontent.com/zeusintuivo/execute_command_intuivo_cli/master/execute_command"
+        local provider="file://$HOME$HOME/_/clis/execute_command_intuivo_cli/execute_command"
+        [ ! -d "$HOME$HOME/_/clis/execute_command_intuivo_cli/" ] && provider="https://raw.githubusercontent.com/zeusintuivo/execute_command_intuivo_cli/master/execute_command"
         local EXECOMCLI=$(curl $provider  2>/dev/null )   # suppress only curl download messages, but keep curl output for variable
         eval """${EXECOMCLI}"""
         ( ( ! command -v type passed >/dev/null 2>&1; ) && echo -e "\n \n  ERROR! Loading execute_command \n \n " && exit 69; )
@@ -173,8 +173,8 @@ function HOW_TO_LOAD_JUST_ONE_SCRIPT_LOCAL_AND_ONLINE_STRUCT_USING_CURL() {
 
     #Sample short call for loading struct_testing
     load_struct_testing_curl(){
-        local provider="file:///_/clis/execute_command_intuivo_cli/struct_testing"
-        [ ! -d "/_/clis/execute_command_intuivo_cli/" ] && provider="https://raw.githubusercontent.com/zeusintuivo/execute_command_intuivo_cli/master/struct_testing"
+        local provider="file://$HOME$HOME/_/clis/execute_command_intuivo_cli/struct_testing"
+        [ ! -d "$HOME$HOME/_/clis/execute_command_intuivo_cli/" ] && provider="https://raw.githubusercontent.com/zeusintuivo/execute_command_intuivo_cli/master/struct_testing"
         local EXECOMCLI=$(curl $provider  2>/dev/null )   # suppress only curl download messages, but keep curl output for variable
         eval """${EXECOMCLI}"""
         ( ( ! command -v type passed >/dev/null 2>&1; ) && echo -e "\n \n  ERROR! Loading struct_testing \n \n " && exit 69; )
@@ -189,7 +189,7 @@ function HOW_TO_LOAD_JUST_ONE_SCRIPT_LOCAL_AND_ONLINE_STRUCT_USING_WGET() {
 
     #Sample short call for loading struct_testing
     load_struct_testing_wget(){
-        local provider="/_/clis/execute_command_intuivo_cli/struct_testing"
+        local provider="$HOME$HOME/_/clis/execute_command_intuivo_cli/struct_testing"
         [   -e "${provider}"  ] && source "${provider}"
         [ ! -e "${provider}"  ] && eval """$(wget --quiet --no-check-certificate  https://raw.githubusercontent.com/zeusintuivo/execute_command_intuivo_cli/master/struct_testing -O -  2>/dev/null )"""   # suppress only wget download messages, but keep wget output for variable
         ( ( ! command -v type passed >/dev/null 2>&1; ) && echo -e "\n \n  ERROR! Loading struct_testing \n \n " && exit 69; )
@@ -313,7 +313,7 @@ CERO="\033[01;0m"
             #     assert not empty "${SUBLIMEDEVLASTESTBUILD}"
             #     /home/vagrant/.pyenv"
             #
-                0     1    2    3
+            #    0     1    2    3
             # assert not empty $VALUE
             if [  -z "${1+x}" ] || [ -z "${2+x}" ] || [ -z "${3+x}" ] ; then # check if all parameters are set and not empty
             {
@@ -323,7 +323,7 @@ CERO="\033[01;0m"
             local not="${1}"
             local empty="${2}"
             local value="${2}"
-            TESTING="that value ${CYAN}${value}${LIGHTYELLOW} is not empty"
+            TESTING="${FUNCNAME[0]} that value ${CYAN}${value}${LIGHTYELLOW} is not empty"
             if [[ ! -z "${value+x}" ]] ; then
             {
                 passed "${TESTING}"
@@ -336,6 +336,11 @@ CERO="\033[01;0m"
 
         }
         # end assert
+
+        testself_assert() {
+            assert not empty "hola"
+        }
+        #testself_assert  >/dev/null 2>&1 # suppress stdln and errln output
 
         function ensure() {
             # Sample usage:
@@ -386,41 +391,78 @@ CERO="\033[01;0m"
             fi
         }
 
-        function directory_exists(){
+        function directory_exists() {
             # Sample usage
             #
             #     directory_exists "/home/vagrant/.pyenv"
             #     directory_exists "/root/.pyenv
             #     /home/vagrant/.pyenv"
             #
-            DIRS="${@}"
+            local _TESTING _ONE_DIR _DIRS="${@}"
             if [ ! -z "${DIRS-x}" ] ; then # if its set and not empty
             {
-                DIRS=$(switch_spaces_to_newlines <<< "${@}")
-                while read -r ONE_DIR; do
+                _DIRS=$(switch_spaces_to_newlines <<< "${@}")
+                while read -r _ONE_DIR; do
                 # if not empty
-                if [ ! -z "${ONE_DIR}" ] ; then
+                if [ ! -z "${_ONE_DIR}" ] ; then
                     # AS a NOTE ~/  <-- will fail always
                     # SO ~/.pyenv <-- will fail always
                     # But /home/user/.pyenv  <-- will pass
                     # OR Users/administrator/.pyenv  in mac <-- will pass
-                    # ONE_DIR="/Users/administrator/.pyenv"
-                    TESTING="that directory ${CYAN}${ONE_DIR}${LIGHTYELLOW} exists"
-                    if [[ -d "${ONE_DIR}" && ! -L "${ONE_DIR}" ]] ; then
+                    # _ONE_DIR="/Users/administrator/.pyenv"
+                    _TESTING="that directory ${CYAN}${_ONE_DIR}${LIGHTYELLOW} exists"
+                    if [[ -d "${_ONE_DIR}" && ! -L "${_ONE_DIR}" ]] ; then
                     {
-                        passed "${TESTING}"
+                        passed "${_TESTING}"
                     }
                     else
                     {
-                        failed "${TESTING}"
+                        failed "${_TESTING}"
                     }
                     fi
                 fi
-                done <<< "${DIRS}"
+                done <<< "${_DIRS}"
             }
             fi
-
         }
+
+
+        function directory_exists_with_spaces() {
+            # Sample usage
+            #
+            #     directory_exists_with_spaces "/Applications/Google Chrome.app/"
+            #     directory_exists_with_spaces "/Applications/Google\ Chrome.app/"
+            #
+            local _TESTING _ONE_DIR="${*}"
+            if [ ! -z "${_ONE_DIR-x}" ] ; then # if its set and not empty
+            {
+                # if not empty
+                if [ ! -z "${_ONE_DIR}" ] ; then
+                {
+                    # AS a NOTE ~/  <-- will fail always
+                    # SO ~/.pyenv <-- will fail always
+                    # But /home/user/.pyenv  <-- will pass
+                    # OR Users/administrator/.pyenv  in mac <-- will pass
+                    # _ONE_DIR="/Users/administrator/.pyenv"
+                    _TESTING="that directory ${CYAN}${_ONE_DIR}${LIGHTYELLOW} exists"
+                    if [[ -d "${_ONE_DIR}" && ! -L "${_ONE_DIR}" ]] ; then
+                    {
+                        passed "${_TESTING}"
+                        return 0
+                    }
+                    else
+                    {
+                        failed "${_TESTING}"
+                        return 1
+                    }
+                    fi
+                }
+                fi
+
+            }
+            fi
+        }
+
 
         function does_not_exist(){
             # Sample usage
@@ -429,36 +471,74 @@ CERO="\033[01;0m"
             #     does_not_exist "/root/.pyenv
             #     /home/vagrant/.pyenv"
             #
-            DIRS="${@}"
-            if [ ! -z "${DIRS-x}" ] ; then # if its set and not empty
+            local _TESTING _ONE_DIR  _DIRS="${@}"
+            if [ ! -z "${_DIRS-x}" ] ; then # if its set and not empty
             {
-                DIRS=$(switch_spaces_to_newlines <<< "${@}")
-                while read -r ONE_DIR; do
+                _DIRS=$(switch_spaces_to_newlines <<< "${@}")
+                while read -r _ONE_DIR; do
                 # if not empty
-                if [ ! -z "${ONE_DIR}" ] ; then
+                if [ ! -z "${_ONE_DIR}" ] ; then
+                {
                     # AS a NOTE ~/  <-- will fail always
                     # SO ~/.pyenv <-- will fail always
                     # But /home/user/.pyenv  <-- will pass
                     # OR Users/administrator/.pyenv  in mac <-- will pass
-                    # ONE_DIR="/Users/administrator/.pyenv"
-                    TESTING="that ${CYAN}${ONE_DIR}${LIGHTYELLOW} does not exist"
-                    if [[ ! -e "${ONE_DIR}" ]] ; then
+                    # _ONE_DIR="/Users/administrator/.pyenv"
+                    _TESTING="that ${CYAN}${_ONE_DIR}${LIGHTYELLOW} does not exist"
+                    if [[ ! -e "${_ONE_DIR}" ]] ; then
                     {
-                        passed "${TESTING}"
+                        passed "${_TESTING}"
                     }
                     else
                     {
-                        failed "${TESTING}"
+                        failed "${_TESTING}"
                     }
                     fi
+                }
                 fi
-                done <<< "${DIRS}"
+                done <<< "${_DIRS}"
+            }
+            fi
+        }
+        function does_not_exist_with_spaces(){
+            # Sample usage
+            #
+            #     does_not_exist_with_spaces "/Applications/Google\ Chrome.app/"
+            #     does_not_exist_with_spaces "/Applications/Google Chrome.app/"
+            #
+            local _TESTING _ONE_DIR="${*}"
+            if [ ! -z "${_ONE_DIR-x}" ] ; then # if its set and not empty
+            {
+                # if not empty
+                if [ ! -z "${_ONE_DIR}" ] ; then
+                {
+                    # AS a NOTE ~/  <-- will fail always
+                    # SO ~/.pyenv <-- will fail always
+                    # But /home/user/.pyenv  <-- will pass
+                    # OR Users/administrator/.pyenv  in mac <-- will pass
+                    # _ONE_DIR="/Users/administrator/.pyenv"
+                    _TESTING="that ${CYAN}${_ONE_DIR}${LIGHTYELLOW} does not exist"
+                    if [[ ! -e "${_ONE_DIR}" ]] ; then
+                    {
+                        passed "${_TESTING}"
+                    }
+                    else
+                    {
+                        failed "${_TESTING}"
+                    }
+                    fi
+                }
+                fi
             }
             fi
         }
 
         function directory_does_not_exist() {
             does_not_exist $@
+        }
+
+        function directory_does_not_exist_with_spaces() {
+            does_not_exist_with_spaces "${*}"
         }
 
         function file_does_not_exists() {
@@ -475,7 +555,7 @@ CERO="\033[01;0m"
             #          if  ! it_exists "/home/vagrant/.zshrc" ; then    is like is NOT installed
             #          if  it_exists "/root/.zshrc ; then      it makes more sense to make it this way
             #
-            FILES="${@}"
+            local ONE_FILE FILES="${@}"
             if [ ! -z "${FILES-x}" ] ; then # if its set and not empty
             {
                 FILES=$(switch_spaces_to_newlines <<< "${@}")
@@ -494,10 +574,40 @@ CERO="\033[01;0m"
                     fi
                 fi
                 done <<< "${FILES}"
-                return 1 # it doest not exists
+                return 1 # it does not exists
             }
             fi
         } # end it_exists
+
+        function it_exists_with_spaces(){
+            # Sample usage
+            #
+            #          if  ! it_exists_with_spaces "/home/vagrant/.zshrc" ; then    is like is NOT installed
+            #          if  it_exists_with_spaces "/root/.zshrc ; then      it makes more sense to make it this way
+            #
+            local ONE_FILE FILES="${@}"
+            if [ ! -z "${FILES-x}" ] ; then # if its set and not empty
+            {
+                while read -r ONE_FILE; do
+                # if not empty
+                # DEBUG echo -e "${BASH_SOURCE[0]} ->\n  .. ${FUNCNAME[0]}():${ONE_FILE}"
+                if [ ! -z "${ONE_FILE}" ] ; then
+                    # AS a NOTE ~/  <-- will fail always
+                    # SO ~/.zshrc <-- will fail always
+                    # But /home/user/.zshrc  <-- will pass
+                    # OR Users/administrator/.zshrc  in mac <-- will pass
+                    # ONE_FILE="/Users/administrator/.zshrc"
+                    if [[ -e "${ONE_FILE}" ]] ; then
+                    {
+                        return 0 # it exists
+                    }
+                    fi
+                fi
+                done <<< "${FILES}"
+                return 1 # it does not exists
+            }
+            fi
+        } # end it_exists_with_spaces
 
         function file_exists(){
             # Sample usage
@@ -506,7 +616,7 @@ CERO="\033[01;0m"
             #     file_exists "/root/.zshrc
             #     /home/vagrant/.pyenzshrcv"
             #
-            FILES="${@}"
+            local ONE_FILE FILES="${@}"
             if [ ! -z "${FILES-x}" ] ; then # if its set and not empty
             {
                 FILES=$(switch_spaces_to_newlines <<< "${@}")
@@ -528,6 +638,35 @@ CERO="\033[01;0m"
             fi
         } # end file_exists
 
+        function file_exists_with_spaces(){
+            # Sample usage
+            #
+            #     file_exists_with_spaces "/home/vagrant/.zshrc"
+            #     file_exists_with_spaces "/root/.zshrc
+            #     /home/vagrant/.pyenzshrcv"
+            #
+            local ONE_FILE FILES="${*}"
+            # DEBUG echo -e "${BASH_SOURCE[0]} ->\n  .. ${FUNCNAME[0]}():$FILES"
+            if [ ! -z "${FILES-x}" ] ; then # if its set and not empty
+            {
+                while read -r ONE_FILE; do
+                if [ ! -z "${ONE_FILE}" ] ; then # if not empty
+                    TESTING="that file ${CYAN}${ONE_FILE}${LIGHTYELLOW} exists"
+                    # DEBUG echo -e "${BASH_SOURCE[0]} ->\n  .. ${FUNCNAME[0]}():$ONE_FILE"
+                    if it_exists_with_spaces "${ONE_FILE}" ; then
+                    {
+                        passed "${TESTING}"
+                    }
+                    else
+                    {
+                        failed "${TESTING}"
+                    }
+                    fi
+                fi
+                done <<< "${FILES}"
+            }
+            fi
+        } # end file_exists_with_spaces
 
         function softlink_exists(){
             # Sample usage
@@ -539,10 +678,10 @@ CERO="\033[01;0m"
             #     softlink_exists "/root/.pyenv
             #     /root/.pyenv>/home/vagrant/.pyenv"
             #
-            local LINKS="${@}"
-            if [ ! -z "${LINKS-x}" ] ; then # if its set and not empty
+            local FOUND_LINK_TARGET ONE_LINK_ORDER _LINKS="${@}"
+            if [ ! -z "${_LINKS-x}" ] ; then # if its set and not empty
             {
-                LINKS=$(switch_spaces_to_newlines <<< "${@}")
+                _LINKS=$(switch_spaces_to_newlines <<< "${@}")
                 while read -r ONE_LINK_ORDER; do
                     # if not empty
                     if [ ! -z "${ONE_LINK_ORDER}" ] ; then
@@ -618,10 +757,118 @@ CERO="\033[01;0m"
                         fi # ONE_LINK_LOCATION Exists
                     }
                     fi # not empty one link
-                done <<< "${LINKS}"
+                done <<< "${_LINKS}"
             }
             fi # not empty links
         } # end softlink_exists
+
+        function ensure_unlink(){
+            if [ -s """${*}""" ] ; then
+             unlink """${*}"""
+            fi
+        }
+        function ensure_rmdir(){
+            if [ -d """${*}""" ] ; then
+                rm -rf """${*}"""
+            fi
+        }
+        function softlink_exists_with_spaces(){
+            # Sample usage
+            #
+            #     softlink_exists_with_spaces "/Applications/Google\ Chrome.app/Contents/Profile/NativeMessagingHosts"
+            #     softlink_exists_with_spaces "~/Library/Application\ Support/Google/Chrome/NativeMessagingHosts"
+            #
+            local FOUND_LINK_TARGET ONE_LINK_ORDER _LINKS="${*}"
+            if [ ! -z "${_LINKS-x}" ] ; then # if its set and not empty
+            {
+                ONE_LINK_ORDER="${_LINKS}"
+
+                    # if not empty
+                    if [ ! -z "${ONE_LINK_ORDER}" ] ; then
+                    {
+                        local CHECK_TARGET_TOO="NO"
+                        local ONE_LINK_LOCATION="${ONE_LINK_ORDER}"
+                        local ONE_LINK_TARGET=""
+
+                        [[ "${ONE_LINK_ORDER}" == *">"* ]] && CHECK_TARGET_TOO="YES"
+                        if [[ "${CHECK_TARGET_TOO}" == "YES" ]] ; then
+                        {
+                            ONE_LINK_LOCATION=$(cut -d'>' -f1 <<< "${ONE_LINK_ORDER}")
+                            ONE_LINK_TARGET=$(cut -d'>' -f2 <<< "${ONE_LINK_ORDER}")
+                        }
+                        fi
+                        say "${ONE_LINK_ORDER}"
+                        # AS a NOTE ~/  <-- will fail always
+                        # SO ~/.pyenv <-- will fail always
+                        # But /home/user/.pyenv  <-- will pass
+                        # OR Users/administrator/.pyenv  in mac <-- will pass
+                        # ONE_LINK_LOCATION="/Users/administrator/.nix-profile"
+                        local TESTING="that softlink ${CYAN}${ONE_LINK_LOCATION}${LIGHTYELLOW} exists"
+                        if [[ -L "${ONE_LINK_LOCATION}" ]] ; then
+                        {
+                            # is a softlink
+                            passed "${TESTING}"
+
+                            # Test pointing
+                            if [[ "${CHECK_TARGET_TOO}" == "YES" && ! -z "${ONE_LINK_TARGET}" ]] ; then
+                            {
+                                TESTING="${PURPLE} +-- and that softlink ${CYAN}${ONE_LINK_LOCATION}${LIGHTYELLOW} points to ${CYAN}${ONE_LINK_TARGET}${GREEN} location \n"
+                                FOUND_LINK_TARGET=$(ls -l ${ONE_LINK_LOCATION} | cut -d'>' -f2 | trim) # Find target symlink
+                                if [[ "${FOUND_LINK_TARGET}" == "${ONE_LINK_TARGET}" ]] ; then
+                                {
+                                    # points to right location
+                                    passed "${TESTING}"
+
+                                    TESTING="that softlink ${CYAN}${ONE_LINK_LOCATION}${LIGHTYELLOW} is not broken"
+                                    local empty_means_not_broken=$(find ${ONE_LINK_LOCATION} -type l ! -exec test -e {} \; -print  2>&1 | xargs -I {} ls -la "{}")
+                                    if [[ -z "${empty_means_not_broken}" ]] ; then
+                                    {
+                                        # points to right location
+                                        TESTING=""
+                                        passed "${TESTING}"
+                                    }
+                                    elif  [[ "${empty_means_not_broken}" == *"No such file or directory"* ]] ; then
+                                    {
+                                        TESTING="but softlink ${CYAN}${ONE_LINK_LOCATION}${LIGHTYELLOW} is was not created"
+                                        failed "${TESTING}"
+                                        return 1
+                                    }
+                                    elif  [[ "${empty_means_not_broken}" == *"Permission denied"* ]] ; then
+                                    {
+                                        TESTING="but softlink ${CYAN}${ONE_LINK_LOCATION}${LIGHTYELLOW}. Permission denied. Check Target -> ${ONE_LINK_TARGET} is accesible."
+                                        failed "${TESTING}"
+                                        return 1
+                                    } else {
+                                        failed "${TESTING}"
+                                        return 1
+                                    }
+                                    fi
+                                }
+                                else
+                                {
+                                    TESTING+="${GREEN}     +++ expected${LIGHTYELLOW}:${CYAN}${ONE_LINK_TARGET}${LIGHTYELLOW}:${RED}${RESET} --- actual:${FOUND_LINK_TARGET}:"
+                                    failed "${TESTING}"
+                                    return 1
+                                }
+                                fi
+                            }
+                            fi # TACHECK_TARGET_TOO is correct
+
+                        }
+                        else
+                        {
+                            failed "${TESTING}"
+                            return 1
+                        }
+                        fi # ONE_LINK_LOCATION Exists
+                    }
+                    fi # not empty one link
+
+            }
+            fi # not empty links
+            return 0
+        } # end softlink_exists_with_spaces
+
 
         function check_equality(){
             # Sample usage
@@ -678,6 +925,257 @@ CERO="\033[01;0m"
         # end function check_equality
         alias verify_equality=check_equality
         alias ensure_equality=check_equality
+
+        # REPEATED in execute_command
+
+        trim_start_space() {
+            sed -e 's/^[[:space:]]*//' | sed 's/^\ //g' | sed 's/^\t//g'
+        }
+        trim_end_space() {
+            sed -e 's/[[:space:]]*$//' | sed 's/\ $//g' | sed 's/\t$//g'
+        }
+        trim() {
+            trim_start_space | trim_end_space
+        }
+        convert_null() {
+            if [ -z "${@}" ] ; then
+            {
+                echo "n8u8l"
+            }
+            else
+            {
+                echo """${@}"""
+            }
+            fi
+        }
+        convert_expects_internals() {
+            if [[ "${@}" == '=' ]] ||  [[ "${@}" == '!' ]] ; then
+            {
+                echo "n8u8l"
+            }
+            else
+            {
+                echo """${@}"""
+            }
+            fi
+        }
+        function expect(){
+            # Sample usage
+            #
+            #     expect $(echo "hola") to be equal to "hola"
+            #     expect $(echo "hola") to be equal "hola"
+            #     expect $(echo "hola") to equal to "hola"
+            #     expect $(echo "hola") to equal "hola"
+            #     expect $(echo "hola") be equal to "hola"
+            #     expect $(echo "hola") be equal "hola"
+            #     expect $(echo "hola") to be "hola"
+            #     expect $(echo "hola") be "hola"
+            #     expect $(echo "hola") = "hola"
+            #      0        1           2  3   4
+            #
+            #     expect $(echo "hola") not to be equal to "hello"
+            #     expect $(echo "hola") to not be equal to "hello"
+            #     expect $(echo "hola") to be not equal to "hello"
+            #     expect $(echo "hola") to be equal not to "hello"
+            #     expect $(echo "hola") not to be equal "hello"
+            #     expect $(echo "hola") to not be equal "hello"
+            #     expect $(echo "hola") to be not equal "hello"
+            #     expect $(echo "hola") not to equal "hello"
+            #     expect $(echo "hola") to not equal "hello"
+            #     expect $(echo "hola") to equal not "hello"
+            #     expect $(echo "hola") to be "hello"
+            #     expect $(echo "hola") not to be "hello"
+            #     expect $(echo "hola") to not be "hello"
+            #     expect $(echo "hola") to be not "hello"
+            #     expect $(echo "hola") not be "hello"
+            #     expect $(echo "hola") be not "hello"
+            #     expect $(echo "hola") not "hello"
+            #     expect $(echo "hola") ≠ "hello"
+            #       0       1            2  3   4     5
+            local statement=$(echo """${@}""")
+                #| sed 's/'"="'/3QU4L51GN/g' \
+                #| sed 's/'"!"'/3XCL4M4T10N/g' \
+            local inputo=$(echo """${@}""" \
+                | sed 's/'"not to be equal to"'/!/g' \
+                | sed 's/'"to not be equal to"'/!/g' \
+                | sed 's/'"to be not equal to"'/!/g' \
+                | sed 's/'"to be equal not to"'/!/g' \
+                | sed 's/'"not to be equal"'/!/g' \
+                | sed 's/'"to not be equal"'/!/g' \
+                | sed 's/'"to be not equal"'/!/g' \
+                | sed 's/'"not to equal"'/!/g' \
+                | sed 's/'"to not equal"'/!/g' \
+                | sed 's/'"to equal not"'/!/g' \
+                | sed 's/'"not to be"'/!/g' \
+                | sed 's/'"to not be"'/!/g' \
+                | sed 's/'"to be not"'/!/g' \
+                | sed 's/'"not be"'/!/g' \
+                | sed 's/'"be not"'/!/g' \
+                | sed 's/'"not"'/!/g' \
+                | sed 's/'"≠"'/!/g' \
+                | sed 's/'"!!"'/!/g' \
+                | sed 's/'"!!"'/!/g' \
+                | sed 's/'"!!"'/!/g' \
+                | sed 's/'"to be equal to"'/=/g' \
+                | sed 's/'"to be equal"'/=/g' \
+                | sed 's/'"to equal to"'/=/g' \
+                | sed 's/'"to equal"'/=/g' \
+                | sed 's/'"be equal to"'/=/g' \
+                | sed 's/'"be equal"'/=/g' \
+                | sed 's/'"to be"'/=/g' \
+                | sed 's/'"be"'/=/g' \
+                | sed 's/'"=="'/=/g' \
+                | sed 's/'"=="'/=/g' \
+                | sed 's/'"=="'/=/g' \
+            )
+            # echo $inputo
+            # return 0
+            #    0     1    2   3
+            # expect $value = $VALUE
+            if [  -z "${1+x}" ] || [ -z "${2+x}" ] || [ -z "${3+x}" ] ; then # check if all parameters are set and not empty
+            {
+                failed ${FUNCNAME[1]} requires to have 3 parameters :: ${FUNCNAME[1]} [not] to be equal to \$VALUE ::
+            }
+            fi
+            local value_one="${1}"
+            local equality="${2}"
+            local value_two="${3}"
+            IFS=\  read value_one equality value_two<<EOF
+                ${inputo}
+EOF
+            value_one=$(convert_expects_internals $(convert_null "${value_one}"))
+            # DEBUG echo "0.value_one:,,$value_one''"
+            value_two=$(convert_null "${value_two}")
+            # DEBUG echo "0.value_two:,,$value_two''"
+
+            # TESTING=$(echo "${FUNCNAME[0]} that value ${statement}" | ag "${value_one}" | ag "${value_two}")
+            TESTING=$(echo "${FUNCNAME[0]} that value ${statement}")
+            # DEBUG echo "${FUNCNAME[0]} that value ${statement}"
+            # DEBUG echo "//"
+            # DEBUG echo "${FUNCNAME[0]} that value ${statement}"
+            # DEBUG echo "TESTING:${TESTING}"
+            # DEBUG echo "inputo:,,$inputo''"
+            if [[ "${inputo}" == *"="* ]] ; then
+            {
+                if [[ "${inputo}" == "=" ]] ; then
+                {
+                    passed "${TESTING}"
+                    return 0
+                }
+                fi
+                value_one=$(echo "${inputo}" | cut -d= -f1 | trim)
+                # DEBUG echo "value_one:,,$value_one''"
+                value_two=$(echo "${inputo}" | cut -d= -f2 | trim)
+                # DEBUG echo "value_two:,,$value_two''"
+                value_one=$(convert_null "${value_one}")
+                # DEBUG echo "value_one:,,$value_one''"
+                value_two=$(convert_null "${value_two}")
+                # DEBUG echo "value_two:,,$value_two''"
+                if [[ "${value_one}" == "${value_two}" ]] ; then
+                {
+                    passed "${TESTING}"
+                    return 0
+                }
+                else
+                {
+                    failed "${TESTING}"
+                    return 1
+                }
+                fi
+            }
+            else
+            {
+                if [[ "${inputo}" == "!" ]] ; then
+                {
+                    failed "${TESTING}"
+                    return 1
+                }
+                fi
+                value_one=$(echo "${inputo}" | cut -d! -f1 | trim)
+                # DEBUG echo "value_one:,,$value_one''"
+                value_two=$(echo "${inputo}" | cut -d! -f2 | trim)
+                # DEBUG echo "value_two:,,$value_two''"
+                value_one=$(convert_null "${value_one}")
+                # DEBUG echo "value_one:,,$value_one''"
+                value_two=$(convert_null "${value_two}")
+                # DEBUG echo "value_two:,,$value_two''"
+                if [[ "${value_one}" != "${value_two}" ]] ; then
+                {
+                    passed "${TESTING}"
+                    return 0
+                }
+                else
+                {
+                    failed "${TESTING}"
+                    return 1
+                }
+                fi
+            }
+            fi
+
+        }
+#expect "hola" = "hello"
+#expect "hola" = "hola"
+
+        testself_expect(){
+            local -a caso
+            local -a exito
+            local COUNTER=0
+            local res
+            local nada=""
+            caso[0]="hola"
+            exito[0]="hola"
+            caso[0]="hola el mundo"
+            exito[0]="hola el mundo"
+            for caso in "${caso[@]}"; do
+            {
+                test_case="Error: Self test failed: ${FUNCNAME[0]} ... expected <${caso}> to be equal to <${exito[$COUNTER]}>"
+                pass_case="Passed: Self test: ${FUNCNAME[0]} ... expected <${caso}> to be equal to <${exito[$COUNTER]}>"
+                # DEPRECATED if/pass/fail idea if ( expect "a{caso}" "not to be equal to" "${exito[$COUNTER]}" ) ; then passed "$pass_case"; else failed  "$test_case"; exit 69; fi
+
+                expect "${nada}" "not to be equal to" "${exito[$COUNTER]}"
+                expect "a{caso}" "not to be equal to" "${exito[$COUNTER]}"
+                expect "a{caso}" not to be equal to "${exito[$COUNTER]}"
+                expect "${nada}" "to be equal to" "${nada}"
+                expect "${caso}" "to be equal to" "${exito[$COUNTER]}"
+                expect "${caso}" "not to be equal to" "${nada}"
+                expect "${nada}" "not to be equal to" "${exito[$COUNTER]}"
+                expect "${caso}" to be equal to "${exito[$COUNTER]}"
+
+                expect $(echo "${caso}") to be equal "${exito[$COUNTER]}"
+                expect $(echo "${caso}") to equal to "${exito[$COUNTER]}"
+                expect $(echo "${caso}") to equal "${exito[$COUNTER]}"
+                expect $(echo "${caso}") be equal to "${exito[$COUNTER]}"
+                expect $(echo "${caso}") be equal "${exito[$COUNTER]}"
+                expect $(echo "${caso}") to be "${exito[$COUNTER]}"
+                expect $(echo "${caso}") be "${exito[$COUNTER]}"
+                expect $(echo "${caso}") = "${exito[$COUNTER]}"
+
+                expect $(echo "${caso}") not to be equal to "hello"
+                expect $(echo "${caso}") to not be equal to "hello"
+                expect $(echo "${caso}") to be not equal to "hello"
+                expect $(echo "${caso}") to be equal not to "hello"
+                expect $(echo "${caso}") not to be equal "hello"
+                expect $(echo "${caso}") to not be equal "hello"
+                expect $(echo "${caso}") to be not equal "hello"
+                expect $(echo "${caso}") not to equal "hello"
+                expect $(echo "${caso}") to not equal "hello"
+                expect $(echo "${caso}") to equal not "hello"
+                expect $(echo "${caso}") not to be "hello"
+                expect $(echo "${caso}") to not be "hello"
+                expect $(echo "${caso}") to be not "hello"
+                expect $(echo "${caso}") not be "hello"
+                expect $(echo "${caso}") be not "hello"
+                expect $(echo "${caso}") not "hello"
+                expect $(echo "${caso}") ≠ "hello"
+                (( COUNTER++ )) # if (( $COUNTER > 37 )) ; then
+            }
+            done
+
+        }
+        #testself_expect #&> /dev/null # stdln to hide command output in bash
+        testself_expect 2>&1 >/dev/null #  capture onlly sterr error output
+
 
         function check_to_be_installed(){
             # Sample usage
@@ -968,15 +1466,101 @@ CERO="\033[01;0m"
 
         }
         # end handle_error
+        function extract_version(){
+            # Bash extract version from a string REF:  https://superuser.com/questions/363865/how-to-extract-a-version-number-using-sed
+            # sample usage
+            # BASH_VERSION=$(extract_version  <<< $(/usr/bin/env bash --version) | head -1)
+            # echo "bash version", $BASH_VERSION
+            sed -nre 's/^[^0-9]*(([0-9]+\.)*[0-9]+).*/\1/p'
+        }
+        function vercomp () {
+            # REF: https://stackoverflow.com/questions/4023830/how-to-compare-two-strings-in-dot-separated-version-format-in-bash
+            if [[ $1 == $2 ]]
+            then
+                return 0
+            fi
+            local IFS=.
+            local i ver1=($1) ver2=($2)
+            # fill empty fields in ver1 with zeros
+            for ((i=${#ver1[@]}; i<${#ver2[@]}; i++))
+            do
+                ver1[i]=0
+            done
+            for ((i=0; i<${#ver1[@]}; i++))
+            do
+                if [[ -z ${ver2[i]} ]]
+                then
+                    # fill empty fields in ver2 with zeros
+                    ver2[i]=0
+                fi
+                if ((10#${ver1[i]} > 10#${ver2[i]}))
+                then
+                    return 1
+                fi
+                if ((10#${ver1[i]} < 10#${ver2[i]}))
+                then
+                    return 2
+                fi
+            done
+            return 0
+        }
+        function testvercomp () {
+            vercomp $1 $2
+            case $? in
+                0) op='=';;
+                1) op='>';;
+                2) op='<';;
+            esac
+            if [[ $op != $3 ]]
+            then
+                echo "FAIL: Expected '$3', Actual '$op', Arg1 '$1', Arg2 '$2'"
+            else
+                echo "Pass: '$1 $op $2'"
+            fi
+            # Tests
+            # # Run tests
+            # # argument table format:
+            # # testarg1   testarg2     expected_relationship
+            # echo "The following tests should pass"
+            # while read -r test
+            # do
+            #     testvercomp $test
+            # done << EOF
+            # 1            1            =
+            # 2.1          2.2          <
+            # 3.0.4.10     3.0.4.2      >
+            # 4.08         4.08.01      <
+            # 3.2.1.9.8144 3.2          >
+            # 3.2          3.2.1.9.8144 <
+            # 1.2          2.1          <
+            # 2.1          1.2          >
+            # 5.6.7        5.6.7        =
+            # 1.01.1       1.1.1        =
+            # 1.1.1        1.01.1       =
+            # 1            1.0          =
+            # 1.0          1            =
+            # 1.0.2.0      1.0.2        =
+            # 1..0         1.0          =
+            # 1.0          1..0         =
+            # EOF
 
+            # echo "The following test should fail (test the tester)"
+            # testvercomp 1 1 '>'
+        }
         function to_lowercase(){
-            [ -z "${1}" ] && return 1  # No is not included, failed because no list to find
-            if [ $BASH_VERSION -qt 3 ] ; then
+            # local env_bash_version=$(extract_version  <<< $(/usr/bin/env bash --version) | head -1)
+            local env_bash_version=$(extract_version  <<< $(echo $BASH_VERSION) | head -1)
+            [ -z "${BASH_VERSION}" ] && env_bash_version=$(extract_version  <<< $(/usr/bin/env bash --version) | head -1)
+            echo "bash version", $env_bash_version
+            [ -z "${1}" ] && return 1  # no argument passed
+            if ( testvercomp $env_bash_version 3 ">" ) ; then
             {
+                # greater than version 3
                 echo "${1,,}"         # bash Convert string to lowercase Bash 4 REF: https://stackoverflow.com/questions/2264428/converting-string-to-lower-case-in-bash-shell-scripting
             }
             else
             {
+                # less than version 3
                 echo "${1}" | sed 'y/ABCDEFGHIJKLMNOPQRSTUVWXYZ/abcdefghijklmnopqrstuvwxyz/'         # bash Convert string to lowercase Bash 4 REF: https://stackoverflow.com/questions/2264428/converting-string-to-lower-case-in-bash-shell-scripting
             }
             fi
@@ -1009,29 +1593,72 @@ CERO="\033[01;0m"
             #        missing="${missing} ${one_required}"
             #    }
             #    fi
-            [ -z "${1}" ] && return 1  # No is not included, failed because word is empty
-            local seoking=$(trim <<< "${1}")
-            [ -z "${seoking}" ] && return 1  # No is not included, failed because word is empty after trimming
-            [ -z "${2}" ] && return 1  # No is not included, failed because no list to find
-            local seeking=$(to_lowercase "${seoking}")
+            # echo "all:", $*
+            # echo "1:", $1
+            # echo "2:", $2
+            [ -z "${*}" ] && return 1  # Nothing was passed
+            # echo "hola"
+            local all=$(switch_spaces_to_newlines <<< "${*}")
+            # echo "all:", "$all"
+            # local seoking="" # $(trim <<< "${1}")
+            local seeking="" # $(to_lowercase "${seoking}")
+            # echo $seoking
+            # echo $seeking
             local one_item one_hay
+            local COUNTER=0
             while read -r one_item; do
             {
                 if [ ! -z "${one_item}" ] ; then  # if not empty
                 {
-                        one_hay=$(trim <<< "${one_item}")
-                        one_hay=$(to_lowercase "${one_hay}")
+                    (( COUNTER++ ))
+                    # echo "--circle", $one_item, $COUNTER
+                    if (( $COUNTER == 1 )) ; then
+                    {
+                        # echo "in"
+                        # seoking=$(trim <<< "${one_item}")
+                        # seeking=$(to_lowercase <<< "${seoking}")
+                        # echo $seoking
+                        # echo $seeking
+                        seeking="${one_item}"
+                    }
+                    else
+                    {
+                        # echo "else"
+                        # one_hay=$(trim <<< "${one_item}")
+                        # one_hay=$(to_lowercase "${one_hay}")
+                        one_hay="${one_item}"
                         if [[ "${one_hay}" == "${seeking}" ]] ; then
                         {
+                            # echo "found return 0"
                             return 0  # yes it is included
                         }
                         fi
+                    }
+                    fi
                 }
                 fi
             }
-            done <<< "${2}"
+            done <<< "${all}"
             return 1  # No is not included
         } # end is_included
+
+        function is_not_included() {
+            # Sample use
+            #
+            #    if is_not_included fedora "imagemagick imagemagick-common" ; then
+            #
+            if ! is_included "${*}"; then
+            {
+                #passed "${TESTING}"
+                return 0
+            }
+            else
+            {
+                #failed "${TESTING}"
+                return 1
+            }
+            fi
+        }
 
         function install_apt_get_requirements(){
             # Sample use
@@ -1212,6 +1839,9 @@ CERO="\033[01;0m"
         # C H E C K   H O W   C O M P U T E R   H A N D L E S   E R R O R S   --End
         #
 
+        function escape_spaces() {
+            sed "s/ /\\\ /g"
+        }
         function escape_single_quotes() {
             sed "s/'/\\\'/g"
         }
@@ -1238,12 +1868,6 @@ CERO="\033[01;0m"
             escape_less_than | escape_more_than | \
             escape_slashes  | escape_single_quotes | \
             escape_bangs | escape_dots
-        }
-
-
-        # Bash extract version from a string REF:  https://superuser.com/questions/363865/how-to-extract-a-version-number-using-sed
-        function extract_version(){
-          sed -nre 's/^[^0-9]*(([0-9]+\.)*[0-9]+).*/\1/p'
         }
         function remove_letters() {
           sed 's/[a-z-]\|[A-Z-]\|[ -]\|[(-)-]\|[, -]\|86_64//g'
@@ -1378,8 +2002,8 @@ x, PHP 5 Xdebug     , php5.6     ,  php5.6 --version | grep Xdebug
 x, PHP 5 FPM        , php-fpm5.6 ,
 x, PHP 5 FPM Xdebug , php-fpm5.6 ,  php-fpm5.6 --version | grep Xdebug
 x, WP CLI           , wp         ,
-x, FRENO            , freno         ,
-x, sent            , sentimineo         ,
+x, FRENO            , freno      ,
+x, sent             , sentimineo ,
 "
             local IFS
             local FILTER_THIS
@@ -1478,8 +2102,11 @@ complete -o nospace -F _wp_complete wp
 
         function switch_spaces_to_newlines() {
             sed 's/ /\n/g'
-        }
-        # end switch_spaces_to_newlines
+        } # end switch_spaces_to_newlines
+        function switch_spaces_to_underscores() {
+            sed 's/ /_/g'
+        } # end switch_spaces_to_underscores
+
         function make_itarable() {
             sed 's/ /\n/g' | trim | enter_encode | sed 's/0N33NT3R/ \r\n/g'
         }
