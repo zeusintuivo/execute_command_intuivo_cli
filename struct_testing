@@ -463,7 +463,6 @@ CERO="\033[01;0m"
             fi
         }
 
-
         function does_not_exist(){
             # Sample usage
             #
@@ -782,7 +781,6 @@ CERO="\033[01;0m"
             if [ ! -z "${_LINKS-x}" ] ; then # if its set and not empty
             {
                 ONE_LINK_ORDER="${_LINKS}"
-
                     # if not empty
                     if [ ! -z "${ONE_LINK_ORDER}" ] ; then
                     {
@@ -2106,7 +2104,6 @@ complete -o nospace -F _wp_complete wp
         function switch_spaces_to_underscores() {
             sed 's/ /_/g'
         } # end switch_spaces_to_underscores
-
         function make_itarable() {
             sed 's/ /\n/g' | trim | enter_encode | sed 's/0N33NT3R/ \r\n/g'
         }
