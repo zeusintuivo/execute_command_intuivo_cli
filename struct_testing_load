@@ -1,0 +1,74 @@
+#!/usr/bin/env bash
+#
+# @author Zeus Intuivo <zeus@intuivo.com>
+#
+#
+HOME_SAVED=$(echo $HOME)
+THISSCRIPTNAME=`basename "$0"`
+
+# SUDO_USER only exists during execution of sudo
+# REF: https://stackoverflow.com/questions/7358611/get-users-home-directory-when-they-run-a-script-as-root
+# Global:
+execute_as_sudo(){
+  if [ -z $SUDO_USER ] ; then
+    sudo $THISSCRIPTNAME
+    wait
+    exit 0
+  fi
+  # REF: http://superuser.com/questions/93385/run-part-of-a-bash-script-as-a-different-user
+  # REF: http://superuser.com/questions/195781/sudo-is-there-a-command-to-check-if-i-have-sudo-and-or-how-much-time-is-left
+  local CAN_I_RUN_SUDO=$(sudo -n uptime 2>&1|grep "load"|wc -l)
+  if [ ${CAN_I_RUN_SUDO} -gt 0 ]; then
+    passed "\e[7m*** Installing as sudo...\e[0m"
+  else
+    failed "Needs to run as sudo ... ${0}"
+  fi
+}
+execute_as_sudo
+
+if [ -z $SUDO_USER ] ; then
+  echo "Needs to be sudo to continue"
+  exit 1
+fi
+
+USER_HOME=$(getent passwd $SUDO_USER | cut -d: -f6)
+
+
+load_execute_command(){
+    # : Execute "${@}"
+    #
+    # !!! ¡ ☠ Say error "${@}" and exit
+    #
+    # - Anounce "${@}"
+    # · • Say "${@}"
+    # “ Comment "${@}"
+    #
+    local URL=""
+    local EXECOMCLI=""
+    local provider=""
+    [ -d "${USER_HOME}/_/clis/execute_command_intuivo_cli/" ] &&  provider="file:///_/clis/execute_command_intuivo_cli/"
+    [ ! -d "${USER_HOME}/_/clis/execute_command_intuivo_cli/" ] && provider="https://raw.githubusercontent.com/zeusintuivo/execute_command_intuivo_cli/master/"
+    local BASH_SCRIPTS="
+execute_command
+struct_testing
+"
+    while read -r ONE_SCRIPT; do
+        # if not empty
+        if [ ! -z "${ONE_SCRIPT}" ] ; then
+            URL="${provider}${ONE_SCRIPT}"
+            EXECOMCLI=$(curl $URL  2>/dev/null )   # suppress only curl download messages, but keep curl output for variable
+            eval """${EXECOMCLI}"""
+            anounce $URL Loaded
+        fi
+    done <<< "${BASH_SCRIPTS}"
+    unset URL
+    unset EXECOMCLI
+    unset ONE_SCRIPT
+    unset BASH_SCRIPTS
+    unset provider
+} # end function load_execute_command
+load_execute_command
+
+passed Caller user identified:$USER_HOME
+
+THISSCRIPTNAME=`basename "$0"`
