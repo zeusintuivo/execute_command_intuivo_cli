@@ -2203,22 +2203,42 @@ complete -o nospace -F _wp_complete wp
             .each  "${actions}"   "${paths}"
         } # end remove_it
 
+        function _term() {
+            # Sample usage
+            # REF: http://man7.org/linux/man-pages/man7/signal.7.html
+            # REF: https://unix.stackexchange.com/questions/146756/forward-sigterm-to-child-in-bash
+            #        trap _term SIGTERM
+
+            #         echo "Doing some initial work...";
+            #         /bin/start/main/server --nodaemon &
+
+            #         child=$!
+            #         wait "$child"
+            echo "Caught SIGTERM signal!"
+            kill -TERM "$child" 2>/dev/null
+        } # end _term
+
         function .each() {
             # Sample use
+            #           Prepare .each
             #           ITEMS=$(find . -maxdepth 0 -type d | egrep -v "\.git")
+            #           Each ITEM will be executed in {#} \/ ----------\/
             #           ACTIONS="echo \"Showing list for {#}\"  ls -la {#} "
             #
             #                    Perform all actions in
-            #                           LIST1
-            #                             for each element in
-            #                                              LIST2
+            #                           ACTIONS
+            #                             for each ITEM in       as {#}
+            #                                              ITEMS
+            #           Note ESCape all !, ", $ with \ like \!, \", \$
+            #           Call .each
             #           .each  "${ACTIONS}"   "${ITEMS}"
             local local_actions="${1}"
             local local_items="${2}"
             local one_item
             local one_action
             local action
-
+            local child
+            local ret
             while read -r one_item; do
             {
                 if [ ! -z "${one_item}" ] ; then  # if not empty
@@ -2228,13 +2248,17 @@ complete -o nospace -F _wp_complete wp
                             if [ ! -z "${one_action}" ] ; then  # if not empty
                             {
                                   # replace value inside string substitution expresion bash
+                                  trap _term SIGTERM
                                   action="${one_action/\{\#\}/${one_item}}"
                                   action="${action/\{\#\}/${one_item}}"
                                   action="${action/\{\#\}/${one_item}}"
                                   eval """${action}"""
-                                  if [ $? -gt 0 ] ; then
+                                  ret=$?
+                                  if [ $ret -gt 0 ] ; then
                                   {
-                                    echo "Error executing: ${action}"
+                                    child=$!
+                                    wait $child
+                                    warning "${YELLOW}Error SIGNAL_RETURN(${RED}${ret}${YELLOW}) executing: \n${action}"
                                   }
                                   fi
                             }
@@ -2249,14 +2273,22 @@ complete -o nospace -F _wp_complete wp
 
         function .mix_with() {
             # Sample use
-            #           ITEMS=$(find . -maxdepth 0 -type d | egrep -v "\.git")
-            #           ACTIONS="echo \"Showing list for {#}\"  ls -la {#} "
+            #           ITEMS="1
+            #                  2
+            #                  3
+            #                  4
+            #                  5
+            #                  "
+            #           Each ITEM will be executed in {#} \/ ----------\/
+            #           LIST2="echo \"Showing list for {#}\"  ls -la {#} "
             #
-            #                    Perform all actions in
-            #                           LIST1
+            #          Mixes as items in
+            #                           ITEMS
             #                             for each element in
-            #                                              LIST2
-            #           .mix  "${ACTIONS}"   "${ITEMS}"
+            #                                              ELEMENTS
+            #           Note ESCape all ", $ with \ like \", \$
+            #           Call .mix_with
+            #           .mix_with "\\n"  "${ELEMENTS}"   "${ITEMS}"
             local glue="${1}"
             local local_actions="${2}"
             local local_items="${3}"

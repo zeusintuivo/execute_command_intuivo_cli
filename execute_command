@@ -744,6 +744,10 @@ anounce() {
     _anounce_worker ${@}
 }
 
+announce() {
+    _anounce_worker ${@}
+}
+
 _say_worker() {
     echo -e "${lightpurple} +-- ${lightblue} ${@} ${reset}";
 
