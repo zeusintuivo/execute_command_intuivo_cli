@@ -4,7 +4,7 @@
 #
 
 
-                          function load_bash_crm_cli(){
+                          function load_bash_crm_cli() {
                             if [ ! -z ${BASHCRMCLI+x} ]; then   # check if a variable is set and not empty
                               {
                                 . "$BASHCRMCLI/execute_command.sh" && THIS_SCRIPT_NAME=`basename "$0"`
@@ -13,7 +13,7 @@
                             fi
                           }
 load_bash_crm_cli
-                          function test_execute_command_mv(){
+                          function test_execute_command_mv() {
                             execute_command mv ~/.pearrc ~/.pearrc_deleted
                             
                           }

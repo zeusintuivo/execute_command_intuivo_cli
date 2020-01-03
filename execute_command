@@ -752,7 +752,7 @@ _say_worker() {
     echo -e "${lightpurple} +-- ${lightblue} ${@} ${reset}";
 
 }
-speak(){
+speak() {
     say /usr/bin/say -v "${1}" $(echo "${@}" | sed 's'"${1}"'g') &
     /usr/bin/say -v "${1}" $(echo "${@}" | sed 's'"${1}"'g') &
     wait

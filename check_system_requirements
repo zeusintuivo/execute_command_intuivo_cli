@@ -52,7 +52,7 @@ _load_colorful_messenger_FUNCTIONs() {
         _say_worker() {
             echo -e "${lightpurple} +-- ${lightblue} ${@} ${reset}";
         }
-        • () {
+        •() {
             _say_worker "${@}"
         }
         ·() {

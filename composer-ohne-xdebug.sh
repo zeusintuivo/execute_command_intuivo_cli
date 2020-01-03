@@ -12,19 +12,19 @@
                     echo -e "\\033[0m "
                     exit 69;
                   }
-                          function !!!(){
+                          function !!!() {
                             _say_error_and_exit_worker "${@}"
                           }
-                  function _anounce_worker(){
+                  function _anounce_worker() {
                     echo -e "\\033[38;5;93m"
                     echo "${@}"
                     echo -e "\\033[0m "
                   }
-                          function -(){
+                          function -() {
                             _anounce_worker ${@}
                           }
 # Init
-                  function check_php(){
+                  function check_php() {
                     if command -v php >/dev/null 2>&1; then #Command Exists
                       {
                         - "PHP ..ok"
@@ -37,7 +37,7 @@
                   }
 check_php
 
-                  function check_composer_json_existance(){
+                  function check_composer_json_existance() {
                     if [ ! -f "$PWD/composer.json" ] ; then  # file not exists
                         {
                           !!! There is no composer.json File
@@ -76,7 +76,7 @@ find_xdebug
                     #OPTIONS=$(ls -1 "${XDEBUG_FOLDER}" |  grep -v xdebug |   grep --invert-match opcache |  sed --expression 's/\(.*\)/ --define extension=\1/'|   tr --delete '\n' )
                   }
 get_options
-                  function composer_install(){
+                  function composer_install() {
                       - "php --no-php-ini " ${OPTIONS} ${COMPOSER_EXECUTABLE_FULL_PATH}  "$1"
                       php --no-php-ini ${OPTIONS} ${COMPOSER_EXECUTABLE_FULL_PATH} "$1"
                   }

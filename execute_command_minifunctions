@@ -52,9 +52,9 @@
 {
     _anounce_worker "${@}"
 }
-• (){
+•() {
     _say_worker "${@}"
 }
-·(){
+·() {
     _say_worker "${@}"
 }

@@ -18,7 +18,7 @@ fi
 
 
                                       # Duplicated from check_system_requirements.sh
-                                       function current_os_system(){
+                                       function current_os_system() {
                                         
                                             local local_current_system=$(uname -a) 
                                             if [[ "$(uname)" == "Darwin" ]] ; then 

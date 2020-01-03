@@ -6,7 +6,7 @@
 #
 #
 
-                  function load_bash_crm_cli(){
+                  function load_bash_crm_cli() {
                     if [ ! -z ${BASHCRMCLI+x} ]; then   # check if a variable is set and not empty
                       {
                         . "$BASHCRMCLI/execute_command.sh" && THIS_SCRIPT_NAME=`basename "$0"`
@@ -27,26 +27,26 @@
                     fi
                     exit 69;
                   }
-                  function _anounce_worker(){
+                  function _anounce_worker() {
                     echo `tput setaf 23` "${@}" `tput sgr0` ;
                   }
-                                    function -(){
+                                    function -() {
                                       _anounce_worker ${@}
                                     }
-                                    function anounce(){
+                                    function anounce() {
                                        _anounce_worker ${@}
                                     }
 
                   function _say_worker() {
                     echo `tput setaf 1` "$@" `tput sgr0`
                   }
-                                    function say(){
+                                    function say() {
                                       _say_worker ${@}
                                     }
-                                    function •(){
+                                    function •() {
                                       _say_worker ${@}
                                     }
-                  function check_php(){
+                  function check_php() {
                     if command -v php >/dev/null 2>&1; then #Command Exists
                       {
                           echo "PHP ..ok"
@@ -59,7 +59,7 @@
                   }
 check_php
 load_bash_crm_cli
-                  function check_composer_json_existance(){
+                  function check_composer_json_existance() {
                     if [ ! -f "$PWD/composer.json" ] ; then  # file not exists
                         {
                           say_error_and_exit There is no composer.json File !!!
@@ -121,7 +121,7 @@ find_xdebug
                                         # php --no-php-ini $options ~/bin/composer $*
                                         #php --no-php-ini ${OPTIONS}  -dmemory_limit=9G ${COMPOSER_EXECUTABLE_FULL_PATH} "$1"
                   }
-                  function composer_install(){
+                  function composer_install() {
                     # check operation systems
                     (
                     if [[ "$(uname)" == "Darwin" ]] ; then
@@ -150,10 +150,10 @@ find_xdebug
                   }
 
                   #@override
-                  function show_help(){
+                  function show_help() {
                     if [ -z ${BASHCRMCLI+x} ]; then   # check if a variable is set and not empty
                       {
-                        function provide_description(){
+                        function provide_description() {
 
                             heading Run Composer on its own original folder . First run is to make sure we have all the folders
 
@@ -173,7 +173,7 @@ find_xdebug
 
                             THIS_SCRIPT_NAME=`basename "$0"`
                             WHERE_IS_THIS=$(which ${THIS_SCRIPT_NAME})
-                            AVAILABLE_COMMANDS=$(cat ${WHERE_IS_THIS}| grep "function " | cüt "function " | cüt "() {" | cüt "(){" | sed '/AVAILABLE_COMMANDS/d' | sort )
+                            AVAILABLE_COMMANDS=$(cat ${WHERE_IS_THIS}| grep "function " | cüt "function " | cüt "() {" | cüt "() {" | sed '/AVAILABLE_COMMANDS/d' | sort )
                             echo """$AVAILABLE_COMMANDS"""
                             exit 0;
                           }

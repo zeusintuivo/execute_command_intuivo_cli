@@ -84,7 +84,7 @@ function sample_use_verify_mongo() {
 
 function HOW_TO_LOAD_SEVERAL_FILES() {
 
-    load_execute_commands_wget(){
+    load_execute_commands_wget() {
         local URL=""
         local cached_directory="$HOME$HOME/_/clis/execute_command_intuivo_cli/"
         local EXECOMCLI=""
@@ -118,7 +118,7 @@ function HOW_TO_LOAD_SEVERAL_FILES() {
     # end load_execute_commands_wget
     load_execute_commands_wget
 
-    load_execute_commands_curl(){
+    load_execute_commands_curl() {
         local URL=""
         local EXECOMCLI=""
         local cached_directory="$HOME$HOME/_/clis/execute_command_intuivo_cli/"
@@ -157,7 +157,7 @@ function HOW_TO_LOAD_SEVERAL_FILES() {
 function HOW_TO_LOAD_JUST_ONE_SCRIPT_LOCAL_AND_ONLINE_EXECUTE_COMMAND() {
 
     #Sample short call for loading execute command
-    load_execute_command_curl(){
+    load_execute_command_curl() {
         local provider="file://$HOME$HOME/_/clis/execute_command_intuivo_cli/execute_command"
         [ ! -d "$HOME$HOME/_/clis/execute_command_intuivo_cli/" ] && provider="https://raw.githubusercontent.com/zeusintuivo/execute_command_intuivo_cli/master/execute_command"
         local EXECOMCLI=$(curl $provider  2>/dev/null )   # suppress only curl download messages, but keep curl output for variable
@@ -172,7 +172,7 @@ function HOW_TO_LOAD_JUST_ONE_SCRIPT_LOCAL_AND_ONLINE_EXECUTE_COMMAND() {
 function HOW_TO_LOAD_JUST_ONE_SCRIPT_LOCAL_AND_ONLINE_STRUCT_USING_CURL() {
 
     #Sample short call for loading struct_testing
-    load_struct_testing_curl(){
+    load_struct_testing_curl() {
         local provider="file://$HOME$HOME/_/clis/execute_command_intuivo_cli/struct_testing"
         [ ! -d "$HOME$HOME/_/clis/execute_command_intuivo_cli/" ] && provider="https://raw.githubusercontent.com/zeusintuivo/execute_command_intuivo_cli/master/struct_testing"
         local EXECOMCLI=$(curl $provider  2>/dev/null )   # suppress only curl download messages, but keep curl output for variable
@@ -188,7 +188,7 @@ function HOW_TO_LOAD_JUST_ONE_SCRIPT_LOCAL_AND_ONLINE_STRUCT_USING_CURL() {
 function HOW_TO_LOAD_JUST_ONE_SCRIPT_LOCAL_AND_ONLINE_STRUCT_USING_WGET() {
 
     #Sample short call for loading struct_testing
-    load_struct_testing_wget(){
+    load_struct_testing_wget() {
         local provider="$HOME$HOME/_/clis/execute_command_intuivo_cli/struct_testing"
         [   -e "${provider}"  ] && source "${provider}"
         [ ! -e "${provider}"  ] && eval """$(wget --quiet --no-check-certificate  https://raw.githubusercontent.com/zeusintuivo/execute_command_intuivo_cli/master/struct_testing -O -  2>/dev/null )"""   # suppress only wget download messages, but keep wget output for variable
@@ -202,7 +202,7 @@ function HOW_TO_LOAD_JUST_ONE_SCRIPT_LOCAL_AND_ONLINE_STRUCT_USING_WGET() {
 
 function HOW_TO_LOAD_JUST_ONE_SCRIPT_ONLINE_ALWAYS_STRUCT_USING_WGET() {
 
-    load_struct_testing_wget(){
+    load_struct_testing_wget() {
         # HOW TO LOAD JUST ONE SCRIPT
         EXECOMCLI=$(wget --quiet --no-check-certificate https://raw.githubusercontent.com/zeusintuivo/execute_command_intuivo_cli/master/struct_testing -O -  2>/dev/null )   # suppress only curl download messages, but keep curl output for variable
         eval """${EXECOMCLI}"""
@@ -306,7 +306,7 @@ CERO="\033[01;0m"
             kill_execution
         }
 
-        function assert(){
+        function assert() {
             # Sample usage
             #
             #     assert not empty "${SUBLIMEDEVLASTESTBUILD}"
@@ -342,20 +342,9 @@ CERO="\033[01;0m"
         }
         #testself_assert  >/dev/null 2>&1 # suppress stdln and errln output
 
-        function ensure() {
-            # Sample usage:
-            # assuming mongo bin is in your path
-            #            ensure mongo or " Cancel export"
-            #            ensure mongoexport or " Cancel export"
-            #            ensure bsondump or " Cancel export"
-            #
-            if ! command -v "${1}" >/dev/null 2>&1; then # Command Does not-exist
-                echo " "
-                echo "Error! '${1}' is not in your PATH environment or cannot be reached.!"
-                return 1
-            else
+	function enhance_message() {
                 local msg=""
-                [[ ! -z "${3+x}"  ]] &&     msg="${3}"  ;  # check if a variable is set and not empty and reassign value
+                [[ ! -z "${1+x}"  ]] && msg="${1}"  ;  # check if a variable is set and not empty and reassign value
                 msg=$(echo "${msg}" | sed  -e 's/ancel /anceling /g')
                 msg=$(echo "${msg}" | sed  -e 's/uit /uiting /g')
                 msg=$(echo "${msg}" | sed  -e 's/xit /xiting /g')
@@ -363,25 +352,52 @@ CERO="\033[01;0m"
                 [[ "${msg}" == *"anceling "* ]] && exit 69
                 [[ "${msg}" == *"uiting "* ]] && exit 69
                 [[ "${msg}" == *"xiting "* ]] && exit 69
-                return 1
-            fi
-        }
+	} # end enhance_message
+
+	function ensure() {
+            # Sample usage:
+            # assuming mongo bin is in your path
+            #            ensure mongo or " Cancel export"
+            #            ensure mongoexport or " Cancel export"
+            #            ensure bsondump or " Cancel export"
+            #
+	    TESTING="that command ${CYAN}${1}${LIGHTYELLOW} exists in the path or can be reached from command line."
+            if ! command -v type "${1}" >/dev/null 2>&1;  then # Command Does not-exist
+            {
+		failed "${TESTING}"
+                [[ ! -z "${3+x}"  ]] && enhance_message "${3}"
+		return 1
+	   }	
+           else
+	   {	   
+		passed "${TESTING}"
+		return 0
+	   }
+           fi
+        } # end ensure
 
         function Installing() {
             echo -e "${GREEN} Installing ${RED}${1}${GREEN}, ${RED}${2} ${GREEN}${3} ${CYAN}${4}, ${RED}${5} ${GREEN}${6} ${CYAN}${7} ${GREEN}.${RESET}"
-        }
+        } # end Installing
+
         alias installing=Installing
+
         function Configuring() {
             echo -e "${GREEN} Configuring ${RED}${1}${GREEN}, ${RED}${2} ${GREEN}${3} ${CYAN}${4}, ${RED}${5} ${GREEN}${6} ${CYAN}${7} ${GREEN}.${RESET}"
-        }
+        } # end Configuring
+
         alias configuring=Configuring
+
         function Setting() {
             echo -e "${GREEN} Setting ${RED}${1}${GREEN}, ${RED}${2} ${GREEN}${3} ${CYAN}${4}, ${RED}${5} ${GREEN}${6} ${CYAN}${7} ${GREEN}.${RESET}"
-        }
+        } # end Setting
+
         alias setting=Setting
+
         function Final() {
             echo -e "${GREEN} Setting ${RED}${1}${GREEN}, ${RED}${2} ${GREEN}${3} ${CYAN}${4}, ${RED}${5} ${GREEN}${6} ${CYAN}${7} ${GREEN}.${RESET}"
-        }
+        } # end Final
+
         alias final=Final
 
         function not() {
@@ -389,7 +405,7 @@ CERO="\033[01;0m"
             if [[ ! -z "${1+x}"  ]] ; then  # check if a variable is set and not empty
                 NODE_VERSION="${1}"
             fi
-        }
+        } # end not
 
         function directory_exists() {
             # Sample usage
@@ -424,8 +440,7 @@ CERO="\033[01;0m"
                 done <<< "${_DIRS}"
             }
             fi
-        }
-
+        } # end directory_exists
 
         function directory_exists_with_spaces() {
             # Sample usage
@@ -461,9 +476,9 @@ CERO="\033[01;0m"
 
             }
             fi
-        }
+        } # end directory_exists_with_spaces
 
-        function does_not_exist(){
+        function does_not_exist() {
             # Sample usage
             #
             #     does_not_exist "/home/vagrant/.pyenv"
@@ -498,8 +513,9 @@ CERO="\033[01;0m"
                 done <<< "${_DIRS}"
             }
             fi
-        }
-        function does_not_exist_with_spaces(){
+        } # end does_not_exist
+
+        function does_not_exist_with_spaces() {
             # Sample usage
             #
             #     does_not_exist_with_spaces "/Applications/Google\ Chrome.app/"
@@ -530,25 +546,30 @@ CERO="\033[01;0m"
                 fi
             }
             fi
-        }
+        } # end does_not_exist_with_spaces
 
         function directory_does_not_exist() {
             does_not_exist $@
-        }
+        } # end directory_does_not_exist
 
         function directory_does_not_exist_with_spaces() {
             does_not_exist_with_spaces "${*}"
-        }
+        } # end directory_does_not_exist_with_spaces
 
         function file_does_not_exists() {
             does_not_exist $@
-        }
+        } # end file_does_not_exists
 
         function file_does_not_exist() {
             does_not_exist $@
-        }
+        } # end file_does_not_exist
 
-        function it_exists(){
+        function file_does_not_exist_with_spaces() {
+            does_not_exist_with_spaces "${*}"
+        } # end file_does_not_exist_with_spaces
+
+
+        function it_exists() {
             # Sample usage
             #
             #          if  ! it_exists "/home/vagrant/.zshrc" ; then    is like is NOT installed
@@ -556,10 +577,15 @@ CERO="\033[01;0m"
             #
             local ONE_FILE FILES="${@}"
             if [ ! -z "${FILES-x}" ] ; then # if its set and not empty
-            {
+	    {
                 FILES=$(switch_spaces_to_newlines <<< "${@}")
-                while read -r ONE_FILE; do
+                echo testing $FILES
+		while read -r ONE_FILE; do
                 # if not empty
+		echo testing $ONE_FILE
+		echo $ONE_FILE | hexdump -c
+		ONE_FILE=$(trim_end_newlines <<< $ONE_FILE)
+			echo $ONE_FILE | hexdump -c	
                 if [ ! -z "${ONE_FILE}" ] ; then
                     # AS a NOTE ~/  <-- will fail always
                     # SO ~/.zshrc <-- will fail always
@@ -568,17 +594,24 @@ CERO="\033[01;0m"
                     # ONE_FILE="/Users/administrator/.zshrc"
                     if [[ -s "${ONE_FILE}" && ! -L "${ONE_FILE}" ]] ; then
                     {
-                        return 0 # it exists
+		      unset FILES
+		      unset ONE_FILE
+                      return 0 # it exists
                     }
                     fi
                 fi
                 done <<< "${FILES}"
+		unset FILES
+		unset ONE_FILE
                 return 1 # it does not exists
             }
             fi
+	    unset FILES
+	    unset ONE_FILE
+	   
         } # end it_exists
 
-        function it_exists_with_spaces(){
+        function it_exists_with_spaces() {
             # Sample usage
             #
             #          if  ! it_exists_with_spaces "/home/vagrant/.zshrc" ; then    is like is NOT installed
@@ -608,20 +641,21 @@ CERO="\033[01;0m"
             fi
         } # end it_exists_with_spaces
 
-        function file_exists(){
+        function file_exists() {
             # Sample usage
             #
             #     file_exists "/home/vagrant/.zshrc"
             #     file_exists "/root/.zshrc
             #     /home/vagrant/.pyenzshrcv"
             #
-            local ONE_FILE FILES="${@}"
+            local TESTING ONE_FILE FILES="${@}"
             if [ ! -z "${FILES-x}" ] ; then # if its set and not empty
             {
                 FILES=$(switch_spaces_to_newlines <<< "${@}")
                 while read -r ONE_FILE; do
                 if [ ! -z "${ONE_FILE}" ] ; then # if not empty
                     TESTING="that file ${CYAN}${ONE_FILE}${LIGHTYELLOW} exists"
+		    echo -e $TESTING
                     if it_exists "${ONE_FILE}" ; then
                     {
                         passed "${TESTING}"
@@ -635,9 +669,12 @@ CERO="\033[01;0m"
                 done <<< "${FILES}"
             }
             fi
+	    unset ONE_FILE
+	    unset FILES
+	    unset TESTING
         } # end file_exists
 
-        function file_exists_with_spaces(){
+        function file_exists_with_spaces() {
             # Sample usage
             #
             #     file_exists_with_spaces "/home/vagrant/.zshrc"
@@ -667,7 +704,7 @@ CERO="\033[01;0m"
             fi
         } # end file_exists_with_spaces
 
-        function softlink_exists(){
+        function softlink_exists() {
             # Sample usage
             #
             #     softlink_exists "/root/.pyenv>/home/vagrant/.pyenv"
@@ -761,17 +798,19 @@ CERO="\033[01;0m"
             fi # not empty links
         } # end softlink_exists
 
-        function ensure_unlink(){
+        function ensure_unlink() {
             if [ -s """${*}""" ] ; then
              unlink """${*}"""
             fi
-        }
-        function ensure_rmdir(){
+        } # end ensure_unlink
+
+        function ensure_rmdir() {
             if [ -d """${*}""" ] ; then
                 rm -rf """${*}"""
             fi
-        }
-        function softlink_exists_with_spaces(){
+        } # end ensure_rmdir
+
+        function softlink_exists_with_spaces() {
             # Sample usage
             #
             #     softlink_exists_with_spaces "/Applications/Google\ Chrome.app/Contents/Profile/NativeMessagingHosts"
@@ -867,12 +906,12 @@ CERO="\033[01;0m"
             return 0
         } # end softlink_exists_with_spaces
 
-
-        function check_equality(){
+        function check_equality() {
             # Sample usage
             #
+	    #     check_equality "1=1"
             #     check_equality "$(cat /home/vagrant/.pyenv/version)=${PYTHON_VERSION}
-            #     $(cat /home/vagrant/.pyenv/version)=2.7.11"
+            #                     $(cat /home/vagrant/.pyenv/version)=2.7.11"
             #
             #     check_equality $(cat ~/.pyenv/version)="2.7.11"
             #
@@ -919,8 +958,8 @@ CERO="\033[01;0m"
                 done <<< "${ARGS}"
             }
             fi
-        }
-        # end function check_equality
+        } # end function check_equality
+        
         alias verify_equality=check_equality
         alias ensure_equality=check_equality
 
@@ -957,7 +996,7 @@ CERO="\033[01;0m"
             }
             fi
         }
-        function expect(){
+        function expect() {
             # Sample usage
             #
             #     expect $(echo "hola") to be equal to "hola"
@@ -1038,6 +1077,7 @@ CERO="\033[01;0m"
             local value_one="${1}"
             local equality="${2}"
             local value_two="${3}"
+	    local TESTING IFS
             IFS=\  read value_one equality value_two<<EOF
                 ${inputo}
 EOF
@@ -1115,7 +1155,7 @@ EOF
 #expect "hola" = "hello"
 #expect "hola" = "hola"
 
-        testself_expect(){
+        testself_expect() {
             local -a caso
             local -a exito
             local COUNTER=0
@@ -1174,8 +1214,7 @@ EOF
         #testself_expect #&> /dev/null # stdln to hide command output in bash
         testself_expect 2>&1 >/dev/null #  capture onlly sterr error output
 
-
-        function check_to_be_installed(){
+        function check_to_be_installed() {
             # Sample usage
             #
             # ...  you want to APT-GET install  ... sysfsutils
@@ -1192,8 +1231,7 @@ EOF
                 echo -e "${YELLOW} Installing ${message}   ${CERO}"
                 sudo apt install "${package}" -y
             fi
-        }
-
+        } # end check_to_be_installed
 
         function is_service_reponse_not_this_fail() {
             #Sample use
@@ -1217,7 +1255,7 @@ EOF
                 passed "${TESTING}"
             }
             fi
-        }
+        } # end is_service_reponse_not_this_fail
 
         function is_service_running() {
             #Sample use
@@ -1243,7 +1281,7 @@ EOF
                 failed "${TESTING}"
             }
             fi
-        }
+        } # end is_service_running
 
         type_function_exists() {
           type "$1" > /dev/null 2>&1
@@ -1268,7 +1306,7 @@ EOF
                 return 0
             }
             fi
-        }
+        } # end is_installed
 
         function is_not_installed() {
             # Sample use
@@ -1288,7 +1326,7 @@ EOF
                 return 1
             }
             fi
-        }
+        } # end is_not_installed
 
         function verify_is_installed() {
             # Sample use
@@ -1306,7 +1344,7 @@ EOF
                 passed "${TESTING}"
             }
             fi
-        }
+        } # end verify_is_installed
 
         function version_installed_is() {
             # Sample use
@@ -1326,7 +1364,8 @@ EOF
                 return 1  #passed  "${TESTING}"
             }
             fi
-        }
+        } # end version_installed_is
+
         alias is_version_installed=version_installed_is
         alias is_installed_version=version_installed_is
         alias is_version=version_installed_is
@@ -1352,7 +1391,7 @@ EOF
                 passed "${TESTING}"
             }
             fi
-        }
+        } # end verify_installed_version
 
         function verify_installed_version_old() {
             # Sample use
@@ -1375,9 +1414,9 @@ EOF
                 failed "${TESTING}"
             }
             fi
-        }
+        } # end verify_installed_version_old
 
-        function if_user_exists(){
+        function if_user_exists() {
             # Sample use
             #
             #            ( ! if_user_exists "postgres"  ) && failed "${TESTING}"
@@ -1391,8 +1430,9 @@ EOF
             # Alternative to check getent passwd mongodb  > /dev/null
             [ -z "${USERID}" ] &&  return 1 #failed
             return 0 #found
-        }
-        function check_if_user_exists(){
+        } # end if_user_exists
+
+        function check_if_user_exists() {
             # Sample use
             #
             #            check_if_user_exists "postgres"
@@ -1401,7 +1441,7 @@ EOF
             local TESTING="checking that user ${TARGET_USER} is ${CYAN}exists${GREEN}"
             ( ! if_user_exists "${TARGET_USER}"  ) && failed "${TESTING}"
             passed "${TESTING}"
-        }
+        } # end check_if_user_exists
 
         function has_error_keyword() {
             # Sample use
@@ -1437,8 +1477,7 @@ EOF
             }
             fi
 
-        }
-        # end has_error_keyword
+        } # end has_error_keyword
 
         function handle_error() {
             # Sample use
@@ -1462,16 +1501,17 @@ EOF
             }
             fi
 
-        }
-        # end handle_error
-        function extract_version(){
+        } # end handle_error
+        
+        function extract_version() {
             # Bash extract version from a string REF:  https://superuser.com/questions/363865/how-to-extract-a-version-number-using-sed
             # sample usage
             # BASH_VERSION=$(extract_version  <<< $(/usr/bin/env bash --version) | head -1)
             # echo "bash version", $BASH_VERSION
             sed -nre 's/^[^0-9]*(([0-9]+\.)*[0-9]+).*/\1/p'
-        }
-        function vercomp () {
+        } # end extract_version
+
+        function vercomp() {
             # REF: https://stackoverflow.com/questions/4023830/how-to-compare-two-strings-in-dot-separated-version-format-in-bash
             if [[ $1 == $2 ]]
             then
@@ -1501,8 +1541,9 @@ EOF
                 fi
             done
             return 0
-        }
-        function testvercomp () {
+        } # end vercomp
+
+        function testvercomp() {
             vercomp $1 $2
             case $? in
                 0) op='=';;
@@ -1544,8 +1585,9 @@ EOF
 
             # echo "The following test should fail (test the tester)"
             # testvercomp 1 1 '>'
-        }
-        function to_lowercase(){
+        } # end testvercomp
+
+        function to_lowercase() {
             # local env_bash_version=$(extract_version  <<< $(/usr/bin/env bash --version) | head -1)
             local env_bash_version=$(extract_version  <<< $(echo $BASH_VERSION) | head -1)
             [ -z "${BASH_VERSION}" ] && env_bash_version=$(extract_version  <<< $(/usr/bin/env bash --version) | head -1)
@@ -1562,11 +1604,10 @@ EOF
                 echo "${1}" | sed 'y/ABCDEFGHIJKLMNOPQRSTUVWXYZ/abcdefghijklmnopqrstuvwxyz/'         # bash Convert string to lowercase Bash 4 REF: https://stackoverflow.com/questions/2264428/converting-string-to-lower-case-in-bash-shell-scripting
             }
             fi
-        }
-        # end to_lowercase
+        } # end to_lowercase
         alias downcase=to_lowercase
 
-        function is_included(){
+        function is_included() {
             # Sample use
             #            ( is_included imagemagick "imagemagick imagemagick-common" ) && echo "is included"
             #            packages=$(dpkg -l | egrep "tree" | cut -d' ' -f3 2>&1)
@@ -1658,7 +1699,7 @@ EOF
             fi
         }
 
-        function install_apt_get_requirements(){
+        function install_apt_get_requirements() {
             # Sample use
             #               local OS="${1}"
             #               install_apt_get_requirements "${OS}" "
@@ -1736,7 +1777,7 @@ EOF
         }
         # end install_apt_get_requirements
 
-        function install_apt_get_should_not_be_installed(){
+        function install_apt_get_should_not_be_installed() {
             # Sample use
             #               local OS="${1}"
             #               install_apt_get_should_not_be_installed "${OS}" "
@@ -1786,7 +1827,7 @@ EOF
         #
         # C H E C K   H O W   C O M P U T E R   H A N D L E S   E R R O R S   --Start
         #
-        function test_positives(){
+        function test_positives() {
             # Sample use
             #
             #
@@ -1930,7 +1971,7 @@ EOF
         }
         # end repeat_single_char_spacer
 
-        function add_right_padding(){
+        function add_right_padding() {
           # Sample usage:
           #               add_right_padding "${ONE_VERSION}" ${LONGEST_NAME}  " "
           #
@@ -1944,7 +1985,7 @@ EOF
         }
         # end add_right_padding
 
-        function add_left_padding(){
+        function add_left_padding() {
           # Sample usage:
           #               add_left_padding " " ${LONGEST_NAME}   "${ONE_VERSION}"
           #
@@ -1964,7 +2005,11 @@ EOF
             #                build_table_from_installed_components "${USER}"
             #
             local USER_TO_INSTALL="${1}"
-
+            if [[ -z "${USER_TO_INSTALL}" ]] ; then
+	    {
+              failed to provide USER. Call with build_table_from_installed_components \$USER or build_table_from_installed_components john or some username
+	    }
+	    fi
             local README_TABLE="INSTALLED_MACHINE=\"
  Service/Software | Version                        | Executable
 ------------------|--------------------------------|-------------------------------------------"
@@ -2314,6 +2359,10 @@ complete -o nospace -F _wp_complete wp
             }
             done <<< "${local_items}"
         } # end .mix_with
+enter_last_only_removed() {
+  #sed ':a;N;$!ba;s/\n$//g' # GNU sed
+  sed -e ':a' -e 'N' -e '$!ba' -e 's/\n$//g'  #  cross-platform compatible syntax which works with BSD sed
+}
 
         # enter_last_only_removed() {
         #  sed ':a;N;$!ba;s/\n$//g' # GNU sed
