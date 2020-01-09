@@ -2544,8 +2544,81 @@ function execute_as_sudo(){
   fi
 } # end execute_as_sudo
 
+function _download_win() {
+   curl -O "${*}" 
+} # end _download_win
+
+function progressfilt() {
+    # REF https://stackoverflow.com/questions/4686464/how-to-show-wget-progress-bar-only
+    # Usage Usage:
+    # $ wget --progress=bar:force http://somesite.com/TheFile.jpeg 2>&1 | progressfilt
+    # 100%[======================================>] 15,790      48.8K/s   in 0.3s
+    # 2011-01-13 22:09:59 (48.8 KB/s) - 'TheFile.jpeg' saved [15790/15790]
+    local flag=false c count cr=$'\r' nl=$'\n'
+    while IFS='' read -d '' -rn 1 c; do
+    {
+        if $flag;  then
+        {
+            printf '%s' "$c"
+        } 
+        else
+        {
+            if [[ $c != $cr && $c != $nl ]];   then
+            {
+              count=0
+            }   
+            else
+            {
+                (( count++ ))
+                if (( count > 1 )) ;               then
+                {
+                 flag=true
+                }   
+                fi
+            }
+            fi
+        }
+        fi
+    }
+    done
+} # end progressfilt
+
+function _download_mac() {
+    # -c Resume Downloads  -c option only works with FTP / HTTP servers that support the “range” header
+  if ( command -v type wget >/dev/null 2>&1; ) ; then
+    # REF: https://www.linuxquestions.org/questions/linux-general-1/how-to-create-a-bash-script-to-wait-for-wget-to-finish-and-then-continue-621754/
+    for url in $(echo "${@}"); do
+    {
+        # _try wget -c --directory-prefix=\"${USER_HOME}/Downloads/\"  --quiet --no-check-certificate "${@}" 2>/dev/null   # suppress only wget download messages, but keep wget output for variable
+        echo "wget -c --progress=bar:force h--directory-prefix=\"${USER_HOME}/Downloads/\" --no-check-certificate \"${@}\" 2>&1 | progressfilt"
+        wget -c --progress=bar:force h--directory-prefix="${USER_HOME}/Downloads/" --no-check-certificate "${@}" 2>&1 | progressfilt
+        # wget -c --directory-prefix=\"${USER_HOME}/Downloads/\"  --quiet --no-check-certificate "${@}" 2>/dev/null   # suppress only wget download messages, but keep wget output for variable
+    }
+    done
+  elif ( command -v type curl >/dev/null 2>&1; ); then
+    _try curl -LO "${@}" 2>/dev/null   # suppress only wget download messages, but keep wget output for variable
+    wait
+  else
+    failed "I cannot find wget or curl to download! ${@}"
+  fi
+} # end _download_mac
+
 function _download() {
-  #  url  https://www.scootersoftware.com/master-pdf-editor-3133_amd64.deb
+    # check operation systems
+    if [[ "$(uname)" == "Darwin" ]] ; then
+    # Do something under Mac OS X platform
+      _download_mac "${@}"
+    elif [[ "$(expr substr $(uname -s) 1 5)" == "Linux" ]] ; then
+    # Do something under GNU/Linux platform
+      _download_linux "${@}"
+    elif [[ "$(expr substr $(uname -s) 1 10)" == "MINGW32_NT" ]] ; then
+    # Do something under Windows NT platform
+      _download_win "${*}"
+    # nothing here
+    fi
+} # end _download
+
+function _download_linux() {
   _trap_try_start
   local target_url="${1}"
   if [ -z "${target_url}" ] ; then  # if empty
@@ -2584,7 +2657,7 @@ function _download() {
   else
     failed "I cannot find wget or curl programs to perform a download action! ${target_url}"
   fi
-}
+} # end _download_linux
 
 
 function _assure_success() {
