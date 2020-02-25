@@ -367,9 +367,9 @@ CERO="\033[01;0m"
               failed "${TESTING}"
               [[ ! -z "${3+x}"  ]] && enhance_message "${3}"
               return 1
-            }	
+            }
             else
-            {	   
+            {
               passed "${TESTING}"
               return 0
             }
@@ -585,7 +585,7 @@ CERO="\033[01;0m"
 		echo testing $ONE_FILE
 		echo $ONE_FILE | hexdump -c
 		ONE_FILE=$(trim_end_newlines <<< $ONE_FILE)
-			echo $ONE_FILE | hexdump -c	
+			echo $ONE_FILE | hexdump -c
                 if [ ! -z "${ONE_FILE}" ] ; then
                     # AS a NOTE ~/  <-- will fail always
                     # SO ~/.zshrc <-- will fail always
@@ -608,7 +608,7 @@ CERO="\033[01;0m"
             fi
 	    unset FILES
 	    unset ONE_FILE
-	   
+
         } # end it_exists
 
         function it_exists_with_spaces() {
@@ -959,7 +959,7 @@ CERO="\033[01;0m"
             }
             fi
         } # end function check_equality
-        
+
         alias verify_equality=check_equality
         alias ensure_equality=check_equality
 
@@ -1502,7 +1502,7 @@ EOF
             fi
 
         } # end handle_error
-        
+
         function extract_version() {
             # Bash extract version from a string REF:  https://superuser.com/questions/363865/how-to-extract-a-version-number-using-sed
             # sample usage
@@ -2478,18 +2478,18 @@ enter_last_only_removed() {
         }
         alias move_file_out_root_to_user_and_link_it_back=move_to_user_file_and_soft_link_root_to_it
 
-##############           ##############             ####      ####           ##############               ############             ##############             ####      ####          
-##############           ##############             ####      ####           ##############               ############             ##############             ####      ####          
-    ######               ####        ####             ####  ####             ####        ####           ####        ####           ####        ####             ####  ####            
-    ######               ####        ####             ####  ####             ####        ####           ####        ####           ####        ####             ####  ####            
-    ######               ####        ####               ######               ##############             ####        ####           ####        ####               ######              
-    ######               ####        ####               ######               ##############             ####        ####           ####        ####               ######              
-    ######               ##############                 ######               ####        ####           ####        ####           ####        ####               ######              
-    ######               ##############                 ######               ####        ####           ####        ####           ####        ####               ######              
-    ######               ####      ####                 ######               ####        ####           ####        ####           ####        ####               ######              
-    ######               ####      ####                 ######               ####        ####           ####        ####           ####        ####               ######              
-    ######               ####        ####               ######               ##############               ############             ##############                 ######              
-    ######               ####        ####               ######               ##############               ############             ##############                 ######         
+##############           ##############             ####      ####           ##############               ############             ##############             ####      ####
+##############           ##############             ####      ####           ##############               ############             ##############             ####      ####
+    ######               ####        ####             ####  ####             ####        ####           ####        ####           ####        ####             ####  ####
+    ######               ####        ####             ####  ####             ####        ####           ####        ####           ####        ####             ####  ####
+    ######               ####        ####               ######               ##############             ####        ####           ####        ####               ######
+    ######               ####        ####               ######               ##############             ####        ####           ####        ####               ######
+    ######               ##############                 ######               ####        ####           ####        ####           ####        ####               ######
+    ######               ##############                 ######               ####        ####           ####        ####           ####        ####               ######
+    ######               ####      ####                 ######               ####        ####           ####        ####           ####        ####               ######
+    ######               ####      ####                 ######               ####        ####           ####        ####           ####        ####               ######
+    ######               ####        ####               ######               ##############               ############             ##############                 ######
+    ######               ####        ####               ######               ##############               ############             ##############                 ######
 
 
 # SUDO_USER only exists during execution of sudo
@@ -2499,23 +2499,23 @@ enter_last_only_removed() {
 
 function execute_as_sudo(){
     # Sample use:
-    # being of script add 
+    # being of script add
     # THISSCRIPTNAME=`basename "$0"`
     # ...
     # execute_as_sudo
     # USER_HOME=$(getent passwd $SUDO_USER | cut -d: -f6)
     # passed Caller user identified:$USER_HOME
-    # 
+    #
   if [ -z $SUDO_USER ] ; then
     if [[ -z "$THISSCRIPTNAME" ]] ; then
     {
-        echo "error You need to add THISSCRIPTNAME vairable like this:" 
+        echo "error You need to add THISSCRIPTNAME vairable like this:"
         echo "     THISSCRIPTNAME=\`basename \"\$0\"\`"
     }
-    else 
+    else
     {
         if [ -e "./$THISSCRIPTNAME" ] ; then
-        {       
+        {
         sudo "./$THISSCRIPTNAME"
         }
         elif ( command -v type "$THISSCRIPTNAME" >/dev/null 2>&1 );  then
@@ -2545,7 +2545,7 @@ function execute_as_sudo(){
 } # end execute_as_sudo
 
 function _download_win() {
-   curl -O "${*}" 
+   curl -O "${*}"
 } # end _download_win
 
 function progressfilt() {
@@ -2560,20 +2560,20 @@ function progressfilt() {
         if $flag;  then
         {
             printf '%s' "$c"
-        } 
+        }
         else
         {
             if [[ $c != $cr && $c != $nl ]];   then
             {
               count=0
-            }   
+            }
             else
             {
                 (( count++ ))
                 if (( count > 1 )) ;               then
                 {
                  flag=true
-                }   
+                }
                 fi
             }
             fi
@@ -2687,7 +2687,7 @@ function _trap_catch_check() {
 }
 
 function _action_runner() {
-  local action	
+  local action
   while read -r action ; do
   {
     if [[ ! -z "${action}" ]] ; then # if not empty
@@ -2799,10 +2799,10 @@ function function_is_defined_with_spaces() {
 } # end function_is_defined_with_spaces
 
 function function_is_defined() {
-	    # Sample usage
-	    #
-	    #          if  ! function_is_defined determine_os_and_fire_action ; then    is like is NOT installed
-	    #          if  function_is_defined "$FUNCTION_TO_CALL" ; then      it makes more sense to make it this way
+            # Sample usage
+            #
+            #          if  ! function_is_defined determine_os_and_fire_action ; then    is like is NOT installed
+            #          if  function_is_defined "$FUNCTION_TO_CALL" ; then      it makes more sense to make it this way
             #
             local ONE_FUNCTION FUNCTIONS="${@}"
             if [ ! -z "${FILES-x}" ] ; then # if its set and not empty
@@ -2811,7 +2811,7 @@ function function_is_defined() {
                 while read -r ONE_FUNCTION; do
                 # if not empty
                 if [ ! -z "${ONE_FUNCTION}" ] ; then
-	            if [ -n "$(LC_ALL=C type -t "${ONE_FUNCTION}")" ] && [ "$(LC_ALL=C type -t "${ONE_FUNCTION}")" = function ]; then 
+	            if [ -n "$(LC_ALL=C type -t "${ONE_FUNCTION}")" ] && [ "$(LC_ALL=C type -t "${ONE_FUNCTION}")" = function ]; then
                     {
                         return 0 # function exists
                     }
@@ -2821,7 +2821,7 @@ function function_is_defined() {
                 return 1 # function does not exists
             }
             fi
-            unset ONE_FUNCTION 
+            unset ONE_FUNCTION
             unset FUNCTIONS
             unset TESTING
 
@@ -2833,8 +2833,8 @@ function function_exists() {
             #     function_exists determine_os_and_fire_action
             #     function_exists  "$FUNCTION_TO_CALL"
             #     function_exists "Function1
-	    #                      Function2
-            #                      Function2"	    
+	        #                      Function2
+            #                      Function2"
             #
             local TESTING ONE_FUNCTION FUNCTIONS="${@}"
             if [ ! -z "${FUNTIONS-x}" ] ; then # if its set and not empty
@@ -2856,7 +2856,7 @@ function function_exists() {
                 done <<< "${FUNCTIONS}"
             }
             fi
-	    unset ONE_FUNCTION 
+	    unset ONE_FUNCTION
 	    unset FUNCTIONS
 	    unset TESTING
 
@@ -2871,9 +2871,9 @@ function function_exists_with_spaces() {
             #
             #     function_exists_with_spaces determine_os_and_fire_action
             #     function_exists_with_spaces  "$FUNCTION_TO_CALL"
-	    #     function_exists_with_spaces "Function1
+	        #     function_exists_with_spaces "Function1
             #                      Function2
-            #                      Function2"       
+            #                      Function2"
             #
             local TESTING ONE_FUNCTION FUNCTIONS="${@}"
             if [ ! -z "${FUNTIONS-x}" ] ; then # if its set and not empty
@@ -2894,7 +2894,7 @@ function function_exists_with_spaces() {
 			done <<< "${FUNCTIONS}"
             }
             fi
-            unset ONE_FUNCTION 
+            unset ONE_FUNCTION
             unset FUNCTIONS
             unset TESTING
 } # end function_exists_with_spaces
@@ -2902,16 +2902,16 @@ function function_exists_with_spaces() {
 function determine_os_and_fire_action() {
   # Interface
   local FUNCTION_TO_CALL=""
-  local PARAMETERS=""  
+  local PARAMETERS=""
   # Check operating systems
   if [[ "$(uname)" == "Darwin" ]] ; then
       # Do something under Mac OS X platform
       if [[ "$(uname -m)" == "x86_64" ]] ; then
-      { 
+      {
 	     FUNCTION_TO_CALL='_darwin__64'
 	     PARAMETERS="$@"
       }
-      elif [[ "$(uname -m)" == "i686"   ]] ; then 
+      elif [[ "$(uname -m)" == "i686"   ]] ; then
       {
 	     FUNCTION_TO_CALL='_darwin__32'
 	     PARAMETERS="$@"
@@ -2985,13 +2985,13 @@ function determine_os_and_fire_action() {
     elif [[ "$DISTRO" == *"untu"* ]]; then
     {
         # ubuntu lsb_release -i | sed 's/Distributor\ ID://g' = \tUbuntu\n
-        if [[ "$(uname -i)" == "x86_64" ]] ; then 
-	{ 
+        if [[ "$(uname -i)" == "x86_64" ]] ; then
+	{
 	  FUNCTION_TO_CALL='_ubuntu__64'
 	  PARAMETERS="$@"
 	}
-        elif [[ "$(uname -i)" == "i686"   ]] ; then 
-	{ 
+        elif [[ "$(uname -i)" == "i686"   ]] ; then
+	{
 	  FUNCTION_TO_CALL='_ubuntu__32'
 	  PARAMETERS="$@"
 	}
@@ -3006,18 +3006,18 @@ function determine_os_and_fire_action() {
   elif [[ "$(expr substr $(uname -s) 1 10)" == "MINGW32_NT" ]] ; then
     # Do something under Windows NT platform
     if [[ "$(uname -i)" == "x86_64" ]] ; then
-    { 
+    {
       FUNCTION_TO_CALL='_mingw__64'
       PARAMETERS="$*"
     }
     elif [[ "$(uname -i)" == "i686"   ]] ; then
-    { 
+    {
       FUNCTION_TO_CALL='_mingw__32'
       PARAMETERS="$*"
     }
     fi
     # nothing here
-  else 
+  else
     failed system not recognized
   fi
   if [[ -z "$FUNCTION_TO_CALL" ]]; then  # if empty
