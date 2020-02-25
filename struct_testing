@@ -322,7 +322,7 @@ CERO="\033[01;0m"
             fi
             local not="${1}"
             local empty="${2}"
-            local value="${2}"
+            local value="${3}"
             TESTING="${FUNCNAME[0]} that value ${CYAN}${value}${LIGHTYELLOW} is not empty"
             if [[ ! -z "${value+x}" ]] ; then
             {
@@ -398,7 +398,12 @@ CERO="\033[01;0m"
             echo -e "${GREEN} Setting ${RED}${1}${GREEN}, ${RED}${2} ${GREEN}${3} ${CYAN}${4}, ${RED}${5} ${GREEN}${6} ${CYAN}${7} ${GREEN}.${RESET}"
         } # end Final
 
-        alias final=Final
+        function Showing() {
+            echo -e "${ORANGE} ø  ${PURPLE}${1}${ORANGE} ${CYAN}${2} ${DARKBLUE}${3} ${PURPLE_BLUE}${4} ${BRIGHT_BLUE87}${5} ${GREEN}${6} ${RED}${7} ${GREEN}.${RESET}"
+            "${@}"
+        } # end Showing
+
+        alias showing=Showing
 
         function not() {
             local order="empty"  # Tasjgjgggg
@@ -2590,8 +2595,8 @@ function _download_mac() {
     for url in $(echo "${@}"); do
     {
         # _try wget -c --directory-prefix=\"${USER_HOME}/Downloads/\"  --quiet --no-check-certificate "${@}" 2>/dev/null   # suppress only wget download messages, but keep wget output for variable
-        echo "wget -c --progress=bar:force h--directory-prefix=\"${USER_HOME}/Downloads/\" --no-check-certificate \"${@}\" 2>&1 | progressfilt"
-        wget -c --progress=bar:force h--directory-prefix="${USER_HOME}/Downloads/" --no-check-certificate "${@}" 2>&1 | progressfilt
+        echo "wget -c --progress=bar:force --directory-prefix=\"${USER_HOME}/Downloads/\" --no-check-certificate \"${@}\" 2>&1 | progressfilt"
+        wget -c --progress=bar:force --directory-prefix="${USER_HOME}/Downloads/" --no-check-certificate "${@}" 2>&1 | progressfilt
         # wget -c --directory-prefix=\"${USER_HOME}/Downloads/\"  --quiet --no-check-certificate "${@}" 2>/dev/null   # suppress only wget download messages, but keep wget output for variable
     }
     done
@@ -2621,6 +2626,8 @@ function _download() {
 function _download_linux() {
   _trap_try_start
   local target_url="${1}"
+  local download_folder="--directory-prefix=${2} " || ""
+  local download_file="-O${3}" || ""
   if [ -z "${target_url}" ] ; then  # if empty
   {
     failed Could not load target_url string or it was empty. Expected one Parameter URL
@@ -2632,24 +2639,33 @@ function _download_linux() {
   if ( command -v type wget >/dev/null 2>&1; ) ; then
     # # REF: about :> http://unix.stackexchange.com/questions/37507/what-does-do-here
     _trap_try_start
-    :> wgetrc   # here :> equals to Equivalent to the following: cat /dev/null > wgetrc which Nulls out the file called "wgetrc" in the current directory. As in creates an empty file "wgetrc" if one doesn't exist or overwrites one with nothing if it does.
+    :> /tmp/wgetrc   # here :> equals to Equivalent to the following: cat /dev/null > wgetrc which Nulls out the file called "wgetrc" in the current directory. As in creates an empty file "wgetrc" if one doesn't exist or overwrites one with nothing if it does.
     _trap_catch_check
-    file_exists_with_spaces wgetrc
+    file_exists_with_spaces /tmp/wgetrc
     _trap_try_start
-    echo "noclobber=off" >> wgetrc
+    echo "noclobber=off" >> /tmp/wgetrc
     _trap_catch_check
-    echo "dir_prefix=." >> wgetrc
-    echo "dirstruct=off" >> wgetrc
-    echo "verbose=off" >> wgetrc    # NOTE Can't be verbose and quiet at the same time.--quiet
-    echo "progress=bar:default" >> wgetrc
-    echo "tries=3" >> wgetrc
+    echo "dir_prefix=." >> /tmp/wgetrc
+    echo "dirstruct=off" >> /tmp/wgetrc
+    # echo "verbose=off" >> /tmp/wgetrc    # NOTE Can't be verbose and quiet at the same time.--quiet
+    echo "verbose=on" >> /tmp/wgetrc    # NOTE Can't be verbose and quiet at the same time.--quiet
+    echo "progress=bar:default" >> /tmp/wgetrc
+    echo "tries=3" >> /tmp/wgetrc
+    echo "max-redirect=10" >> /tmp/wgetrc
     # _trap_try_start # _trap_catch_check
     # WGETRC=wgetrc wget --directory-prefix="${USER_HOME}/Downloads/" --quiet --no-check-certificate "${target_url}" 2>/dev/null
     #  _trap_catch_check
-    # WGETRC=wgetrc wget --quiet --no-check-certificate "${target_url}" 2>/dev/null   # suppress only wget download messages, but keep wget output for variable
-    _try "WGETRC=wgetrc wget --directory-prefix=\"${USER_HOME}/Downloads/\" --quiet --no-check-certificate \"${target_url}\"" # 2>/dev/null"
+    # WGETRC=/tmp/wgetrc wget --quiet --no-check-certificate "${target_url}" 2>/dev/null   # suppress only wget download messages, but keep wget output for variable
+    # _try "WGETRC=/tmp/wgetrc wget --mirror --directory-prefix=\"${download_folder}\" --quiet --no-check-certificate \"${target_url}\"" # 2>/dev/null"
+    _trap_try_start # _trap_catch_check
+    # WGETRC=/tmp/wgetrc wget --max-redirect=10 --mirror --directory-prefix="${download_folder}" -O "${download_file}" --no-check-certificate "${target_url}" # 2>/dev/null"
+    # WGETRC=/tmp/wgetrc wget --max-redirect=10 --mirror --directory-prefix="${download_folder}" --no-check-certificate "${target_url}" # 2>/dev/null"
+    WGETRC=/tmp/wgetrc wget --mirror --content-disposition "${download_folder}" "${download_file}" --no-check-certificate "${target_url}" # 2>/dev/null"
+    _trap_catch_check
+    _assure_success
+    echo "${msg}"
     echo -e "\033[7m*** Download Wget executed completed.\033[0m"
-    rm -f wgetrc
+    rm -f /tmp/wgetrc
     file_does_not_exist_with_spaces wgetrc
   elif ( command -v type curl >/dev/null 2>&1; ); then
     curl -O "${target_url}" 2>/dev/null   # suppress only wget download messages, but keep wget output for variable
