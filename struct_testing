@@ -405,6 +405,11 @@ CERO="\033[01;0m"
 
         alias showing=Showing
 
+        function Message() {
+        puts " ${PURPLE}${PURPLE}+---${LIGHTYELLOW} ${LIGHTYELLOW} ${msg1} ${CYAN} ${msg2} ${RESET}"
+        }
+        alias message=Message
+
         function not() {
             local order="empty"  # Tasjgjgggg
             if [[ ! -z "${1+x}"  ]] ; then  # check if a variable is set and not empty
@@ -2719,7 +2724,7 @@ function _action_runner() {
 } # end _action_runner
 
 function _try_runner() {
-  local body=$(_function_body "#{1}")
+  local body=$(_function_body "${1}")
   function_exists "${1}"
   while read -r action ; do
   {
