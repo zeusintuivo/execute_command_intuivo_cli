@@ -407,7 +407,7 @@ CERO="\033[01;0m"
 
         function Message() {
             local msg1="$1"
-            local msg2=$(echo "$*" | cuet "$1")
+            local msg2=$(echo "$*" | cüt "$1")
             echo  -e "${PURPLE}${PURPLE}+---${LIGHTYELLOW} ${LIGHTYELLOW} ${msg1} ${CYAN} ${msg2} ${RESET}"
         }
         alias message=Message
@@ -2755,7 +2755,7 @@ function _function_body() {
   # ensure wc or Cancel. Missing declare command
   local functioncomplete=$(declare -f "${functionname}")
   # echo complete:"${functioncomplete}"
-  local functionbody=$(echo "${functioncomplete}" | cuet "${functionname} ()")
+  local functionbody=$(echo "${functioncomplete}" | cüt "${functionname} ()")
   # echo body:"${functionbody}"
   local functionlength=$(echo "${functionbody}" | wc -l)
   # echo length:${functionlength}
