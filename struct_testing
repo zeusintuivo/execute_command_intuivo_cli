@@ -2631,19 +2631,41 @@ function _download() {
 } # end _download
 
 function _download_linux() {
+  local thisscriptname=$(dirname "struct_testing")
   _trap_try_start
   local target_url="${1}"
-  local download_folder="--directory-prefix=${2} " || ""
-  local download_file="-O${3}" || ""
-  if [ -z "${target_url}" ] ; then  # if empty
-  {
-    failed Could not load target_url string or it was empty. Expected one Parameter URL
-  }
+  local download_folder=""
+  if [ -n "${2}" ] ; then # if not empty
+    {
+        download_folder="${2} "
+    }
   fi
+  echo "1:${1} "
+  [ -z "${1}" ] && echo "empty"
+  echo "2:${2} "
+  [ -z "${2}" ] && echo "empty"
+  echo "3:${3} "
+    #   [ -z "${3}" ] && echo "empty"
+    #   echo
+    # echo "# arguments called with ---->  ${@}     "
+    # echo "# \$1 ---------------------->  $1       "
+    # echo "# \$2 ---------------------->  $2       "
+    # echo "# path to me --------------->  ${0}     "
+    # echo "# parent path -------------->  ${0%/*}  "
+    # printf '$0 is: %s\n$BASH_SOURCE is: %s\n' "$0" "$BASH_SOURCE"
+    # echo "# my name ------------------>  ${0##*/} "
+    # echo
+  [ -z "${1}" ] && failed \\n${BASH_SOURCE}:${BASH_LINENO[-0]} ${FUNCNAME[-0]}\(\) \\n$0:${BASH_LINENO[1]} ${FUNCNAME[1]}\(\) \\nCould not load 1.target_url string or it was empty. Expected one Parameter URL
+  [ -z "${2}" ] && failed \\n${BASH_SOURCE}:${BASH_LINENO[-0]} ${FUNCNAME[-0]}\(\) \\n$0:${BASH_LINENO[1]} ${FUNCNAME[1]}\(\) \\nCould not load 2.download_folder string or it was empty. Expected one Parameter URL
+  [ -z "${3}" ] && failed \\n${BASH_SOURCE}:${BASH_LINENO[-0]} ${FUNCNAME[-0]}\(\) \\n$0:${BASH_LINENO[1]} ${FUNCNAME[1]}\(\) \\nCould not load 3.download_file string or it was empty. Expected one Parameter URL
+  local download_file="${3}" || ""
+
   _trap_catch_check
   # wget --directory-prefix="${USER_HOME}/Downloads/" --quiet --no-check-certificate "${target_url}" 2>/dev/null
   echo -e "\033[01;7m*** Downloading file to temp location...\033[0m"
+
   if ( command -v type wget >/dev/null 2>&1; ) ; then
+    ensure wget or "Wget is required"
     # # REF: about :> http://unix.stackexchange.com/questions/37507/what-does-do-here
     _trap_try_start
     :> /tmp/wgetrc   # here :> equals to Equivalent to the following: cat /dev/null > wgetrc which Nulls out the file called "wgetrc" in the current directory. As in creates an empty file "wgetrc" if one doesn't exist or overwrites one with nothing if it does.
@@ -2652,7 +2674,6 @@ function _download_linux() {
     _trap_try_start
     echo "noclobber=off" >> /tmp/wgetrc
     _trap_catch_check
-    echo "dir_prefix=." >> /tmp/wgetrc
     echo "dirstruct=off" >> /tmp/wgetrc
     # echo "verbose=off" >> /tmp/wgetrc    # NOTE Can't be verbose and quiet at the same time.--quiet
     echo "verbose=on" >> /tmp/wgetrc    # NOTE Can't be verbose and quiet at the same time.--quiet
@@ -2662,22 +2683,27 @@ function _download_linux() {
     echo "check_certificate=off" >> /tmp/wgetrc
     echo "mirror=on" >> /tmp/wgetrc
     echo "content_disposition=on" >> /tmp/wgetrc
+    echo "dir_prefix=." >> /tmp/wgetrc
+    # echo "dir_prefix=${download_folder}" >> /tmp/wgetrc
+    # echo "output_document=${download_file}" >> /tmp/wgetrc   # Set the output filename--the same as '-O FILE'.
+    # echo "input=${target_url}" >> /tmp/wgetrc   #  Read the URLs from STRING, like '-i FILE'.
     # _trap_try_start # _trap_catch_check
     # WGETRC=wgetrc wget --directory-prefix="${USER_HOME}/Downloads/" --quiet --no-check-certificate "${target_url}" 2>/dev/null
     #  _trap_catch_check
     # WGETRC=/tmp/wgetrc wget --quiet --no-check-certificate "${target_url}" 2>/dev/null   # suppress only wget download messages, but keep wget output for variable
     # _try "WGETRC=/tmp/wgetrc wget --mirror --directory-prefix=\"${download_folder}\" --quiet --no-check-certificate \"${target_url}\"" # 2>/dev/null"
     _trap_try_start # _trap_catch_check
-    # WGETRC=/tmp/wgetrc wget --max-redirect=10 --mirror --directory-prefix="${download_folder}" -O "${download_file}" --no-check-certificate "${target_url}" # 2>/dev/null"
+    WGETRC=/tmp/wgetrc
     # WGETRC=/tmp/wgetrc wget --max-redirect=10 --mirror --directory-prefix="${download_folder}" --no-check-certificate "${target_url}" # 2>/dev/null"
     # WGETRC=/tmp/wgetrc wget --mirror --content-disposition "${download_folder}" "${download_file}" --no-check-certificate "${target_url}" # 2>/dev/null"
-    local WGETCOMMAND='wget "${download_folder}" "${download_file}"  "${target_url}"'
-    anounce "WGET:"
-    anounce "OPTIONS WGETRC:"
-    anounce</tmp/wgetrc
-    anounce "COMMAND WGET:"
-    anounce "WGETRC=/tmp/wgetrc ${WGETCOMMAND}"
-    WGETRC=/tmp/wgetrc "${WGETCOMMAND}" # 2>/dev/null"
+    local WGETCOMMAND=""
+    echo "WGET:"
+    echo "OPTIONS WGETRC:"
+    cat -n /tmp/wgetrc
+    echo "COMMAND WGET:"
+    passed "WGETRC=/tmp/wgetrc wget --max-redirect=10 --mirror --directory-prefix="${download_folder}" -O "${download_file}" --no-check-certificate "${target_url}""
+    wget --max-redirect=10 --mirror --directory-prefix="${download_folder}" -O "${download_file}" --no-check-certificate "${target_url}" # 2>/dev/null"
+    # WGETRC=/tmp/wgetrc wget "${WGETCOMMAND}" # 2>/dev/null"
     _trap_catch_check
     _assure_success
     echo "${msg}"
@@ -2685,10 +2711,11 @@ function _download_linux() {
     rm -f /tmp/wgetrc
     file_does_not_exist_with_spaces wgetrc
   elif ( command -v type curl >/dev/null 2>&1; ); then
+    ensure curl or "curl is required"
     curl -O "${target_url}" 2>/dev/null   # suppress only wget download messages, but keep wget output for variable
     _assure_success
   else
-    failed "I cannot find wget or curl programs to perform a download action! ${target_url}"
+    failed \\n${BASH_SOURCE}:${BASH_LINENO[-0]} ${FUNCNAME[-0]}\(\) \\n$0:${BASH_LINENO[1]} ${FUNCNAME[1]}\(\) \\n"I cannot find wget or curl programs to perform a download action! ${target_url}"
   fi
 } # end _download_linux
 
