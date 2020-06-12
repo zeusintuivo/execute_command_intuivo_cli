@@ -2659,6 +2659,9 @@ function _download_linux() {
     echo "progress=bar:default" >> /tmp/wgetrc
     echo "tries=3" >> /tmp/wgetrc
     echo "max-redirect=10" >> /tmp/wgetrc
+    echo "check_certificate=off" >> /tmp/wgetrc
+    echo "mirror=on" >> /tmp/wgetrc
+    echo "content_disposition=on" >> /tmp/wgetrc
     # _trap_try_start # _trap_catch_check
     # WGETRC=wgetrc wget --directory-prefix="${USER_HOME}/Downloads/" --quiet --no-check-certificate "${target_url}" 2>/dev/null
     #  _trap_catch_check
@@ -2667,7 +2670,8 @@ function _download_linux() {
     _trap_try_start # _trap_catch_check
     # WGETRC=/tmp/wgetrc wget --max-redirect=10 --mirror --directory-prefix="${download_folder}" -O "${download_file}" --no-check-certificate "${target_url}" # 2>/dev/null"
     # WGETRC=/tmp/wgetrc wget --max-redirect=10 --mirror --directory-prefix="${download_folder}" --no-check-certificate "${target_url}" # 2>/dev/null"
-    WGETRC=/tmp/wgetrc wget --mirror --content-disposition "${download_folder}" "${download_file}" --no-check-certificate "${target_url}" # 2>/dev/null"
+    # WGETRC=/tmp/wgetrc wget --mirror --content-disposition "${download_folder}" "${download_file}" --no-check-certificate "${target_url}" # 2>/dev/null"
+    WGETRC=/tmp/wgetrc wget "${download_folder}" "${download_file}"  "${target_url}" # 2>/dev/null"
     _trap_catch_check
     _assure_success
     echo "${msg}"
