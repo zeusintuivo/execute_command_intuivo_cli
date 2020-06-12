@@ -2671,7 +2671,13 @@ function _download_linux() {
     # WGETRC=/tmp/wgetrc wget --max-redirect=10 --mirror --directory-prefix="${download_folder}" -O "${download_file}" --no-check-certificate "${target_url}" # 2>/dev/null"
     # WGETRC=/tmp/wgetrc wget --max-redirect=10 --mirror --directory-prefix="${download_folder}" --no-check-certificate "${target_url}" # 2>/dev/null"
     # WGETRC=/tmp/wgetrc wget --mirror --content-disposition "${download_folder}" "${download_file}" --no-check-certificate "${target_url}" # 2>/dev/null"
-    WGETRC=/tmp/wgetrc wget "${download_folder}" "${download_file}"  "${target_url}" # 2>/dev/null"
+    local WGETCOMMAND='wget "${download_folder}" "${download_file}"  "${target_url}"'
+    anounce "WGET:"
+    anounce "OPTIONS WGETRC:"
+    anounce</tmp/wgetrc
+    anounce "COMMAND WGET:"
+    anounce "WGETRC=/tmp/wgetrc ${WGETCOMMAND}"
+    WGETRC=/tmp/wgetrc "${WGETCOMMAND}" # 2>/dev/null"
     _trap_catch_check
     _assure_success
     echo "${msg}"
