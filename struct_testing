@@ -296,6 +296,15 @@ CERO="\033[01;0m"
             ARGS="${@}"
             if [[ ! -z "${ARGS-x}" ]] ; then # if its set and not empty
             {
+                # echo -e "${BRIGHT_BLUE87} ${BASH_SOURCE}:${BASH_LINENO[0]} ${FUNCNAME[0]}()"
+                # echo -e "${BRIGHT_BLUE87} ${BASH_SOURCE}:${BASH_LINENO[-1]} ${FUNCNAME[-1]}()"
+                echo -e "${BRIGHT_BLUE87} ${BASH_SOURCE}:${BASH_LINENO[-2]} ${FUNCNAME[-2]}()"
+                echo -e "${BRIGHT_BLUE87} ${BASH_SOURCE}:${BASH_LINENO[-3]} ${FUNCNAME[-3]}()"
+                echo -e "${BRIGHT_BLUE87} ${BASH_SOURCE}:${BASH_LINENO[-4]} ${FUNCNAME[-4]}()"
+                echo -e "${BRIGHT_BLUE87} ${BASH_SOURCE}:${BASH_LINENO[-5]} ${FUNCNAME[-5]}()"
+                echo -e "${BRIGHT_BLUE87} ${BASH_SOURCE}:${BASH_LINENO[-6]} ${FUNCNAME[-6]}()"
+                # echo -e "${BRIGHT_BLUE87} ${BASH_SOURCE}:${BASH_LINENO[-7]} ${FUNCNAME[-7]}()"
+                echo -e "$0:${BASH_LINENO[1]} ${FUNCNAME[1]}()"
                 echo -e "${RED} 𝞦 ${LIGHTYELLOW} ${ARGS} ${RESET}"
             }
             fi
@@ -846,7 +855,7 @@ CERO="\033[01;0m"
                             ONE_LINK_TARGET=$(cut -d'>' -f2 <<< "${ONE_LINK_ORDER}")
                         }
                         fi
-                        say "${ONE_LINK_ORDER}"
+                        passed "${ONE_LINK_ORDER}"
                         # AS a NOTE ~/  <-- will fail always
                         # SO ~/.pyenv <-- will fail always
                         # But /home/user/.pyenv  <-- will pass
@@ -2640,11 +2649,11 @@ function _download_linux() {
         download_folder="${2} "
     }
   fi
-  echo "1:${1} "
+  echo "     target url 1:${1} "
   [ -z "${1}" ] && echo "empty"
-  echo "2:${2} "
+  echo "download folder 2:${2} "
   [ -z "${2}" ] && echo "empty"
-  echo "3:${3} "
+  echo "  download file 3:${3} "
     #   [ -z "${3}" ] && echo "empty"
     #   echo
     # echo "# arguments called with ---->  ${@}     "
