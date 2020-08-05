@@ -298,12 +298,10 @@ CERO="\033[01;0m"
             {
                 # echo -e "${BRIGHT_BLUE87} ${BASH_SOURCE}:${BASH_LINENO[0]} ${FUNCNAME[0]}()"
                 # echo -e "${BRIGHT_BLUE87} ${BASH_SOURCE}:${BASH_LINENO[-1]} ${FUNCNAME[-1]}()"
-                echo -e "${BRIGHT_BLUE87} ${BASH_SOURCE}:${BASH_LINENO[-2]} ${FUNCNAME[-2]}()"
-                echo -e "${BRIGHT_BLUE87} ${BASH_SOURCE}:${BASH_LINENO[-3]} ${FUNCNAME[-3]}()"
-                echo -e "${BRIGHT_BLUE87} ${BASH_SOURCE}:${BASH_LINENO[-4]} ${FUNCNAME[-4]}()"
-                echo -e "${BRIGHT_BLUE87} ${BASH_SOURCE}:${BASH_LINENO[-5]} ${FUNCNAME[-5]}()"
-                echo -e "${BRIGHT_BLUE87} ${BASH_SOURCE}:${BASH_LINENO[-6]} ${FUNCNAME[-6]}()"
-                # echo -e "${BRIGHT_BLUE87} ${BASH_SOURCE}:${BASH_LINENO[-7]} ${FUNCNAME[-7]}()"
+                local len="${#BASH_LINENO[@]}"
+                for (( i=0; i<$len; i++ )); do
+                    echo -e "${BRIGHT_BLUE87} ${BASH_SOURCE}:${BASH_LINENO[$i]} ${FUNCNAME[$i]}()"
+                done
                 echo -e "$0:${BASH_LINENO[1]} ${FUNCNAME[1]}()"
                 echo -e "${RED} 𝞦 ${LIGHTYELLOW} ${ARGS} ${RESET}"
             }
