@@ -2752,7 +2752,7 @@ function _download_linux() {
 
 function _assure_success() {
   if [ $? != 0 ] ; then
-    echo -e "\033[38;5;1m Something went wrong \033[0m"
+    failed -e "\033[38;5;1m Something went wrong \033[0m"
     exit 1
   fi
   wait
@@ -3002,12 +3002,14 @@ function determine_os_and_fire_action() {
   #              _darwin__64(){ }
   #              _darwin__32(){ }
   # Then call this function
-  #              determine_os_and_fire_action
+  #              determine_os_and_fire_action  """${*}"""
+  # remember to pass the  """${*}""" for the parameters to pass
   # If will fail is the function has not been implemented with Error message
   # of the function that is missing like _archlinux__64
   local FUNCTION_TO_CALL=""
   local PARAMETERS=""
   # Check operating systems
+  echo  ${@}
   if [[ "$(uname)" == "Darwin" ]] ; then
       # Do something under Mac OS X platform
       if [[ "$(uname -m)" == "x86_64" ]] ; then
@@ -3076,30 +3078,30 @@ function determine_os_and_fire_action() {
     {
         if [[ "$(uname -i)" == "x86_64" ]] ; then
         {
-	  FUNCTION_TO_CALL='_fedora__64'
-	  PARAMETERS="$@"
+	        FUNCTION_TO_CALL='_fedora__64'
+	        PARAMETERS="$@"
         }
         elif [[ "$(uname -i)" == "i686"   ]] ; then
-	{
-	  FUNCTION_TO_CALL='_fedora__32'
-          PARAMETERS="$@"
+	    {
+	        FUNCTION_TO_CALL='_fedora__32'
+            PARAMETERS="$@"
         }
-	fi
+	    fi
     }
     elif [[ "$DISTRO" == *"untu"* ]]; then
     {
         # ubuntu lsb_release -i | sed 's/Distributor\ ID://g' = \tUbuntu\n
         if [[ "$(uname -i)" == "x86_64" ]] ; then
-	{
-	  FUNCTION_TO_CALL='_ubuntu__64'
-	  PARAMETERS="$@"
-	}
+        {
+           FUNCTION_TO_CALL='_ubuntu__64'
+           PARAMETERS="$@"
+        }
         elif [[ "$(uname -i)" == "i686"   ]] ; then
-	{
-	  FUNCTION_TO_CALL='_ubuntu__32'
-	  PARAMETERS="$@"
-	}
-	fi
+        {
+	       FUNCTION_TO_CALL='_ubuntu__32'
+	       PARAMETERS="$@"
+	    }
+	    fi
     }
     fi
     # For everything else (or if above failed), just use generic identifier
@@ -3133,7 +3135,7 @@ function determine_os_and_fire_action() {
         if function_is_defined "${FUNCTION_TO_CALL}" ; then
         {
            "${FUNCTION_TO_CALL}"
-	       _assure_success
+	        _assure_success
         }
         else
         {
