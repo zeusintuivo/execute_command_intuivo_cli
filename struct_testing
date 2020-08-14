@@ -2638,6 +2638,29 @@ function _download() {
 } # end _download
 
 function _download_linux() {
+
+
+# You're close. The correct way to approach this is using the HEAD method.
+
+# With cURL:
+
+# if curl --head --silent --fail ftp://ftp.somewhere.com/bigfile.gz 2> /dev/null;
+#  then
+#   echo "This page exists."
+#  else
+#   echo "This page does not exist."
+# fi
+
+# or using wget:
+
+# if wget -q --method=HEAD ftp://ftp.somewhere.com/bigfile.gz;
+#  then
+#   echo "This page exists."
+#  else
+#   echo "This page does not exist."
+# fi
+
+
   local thisscriptname=$(dirname "struct_testing")
   _trap_try_start
   local target_url="${1}"
@@ -2968,6 +2991,20 @@ function function_exists_with_spaces() {
 
 function determine_os_and_fire_action() {
   # Interface
+  # How to use
+  # First implement the target functions
+  #              _fedora__64(){ }
+  #              _fedora__32(){ }
+  #              _ubuntu__64(){ }
+  #              _ubuntu__32(){ }
+  #              _mingw__64(){ }
+  #              _mingw__32(){ }
+  #              _darwin__64(){ }
+  #              _darwin__32(){ }
+  # Then call this function
+  #              determine_os_and_fire_action
+  # If will fail is the function has not been implemented with Error message
+  # of the function that is missing like _archlinux__64
   local FUNCTION_TO_CALL=""
   local PARAMETERS=""
   # Check operating systems
@@ -3096,12 +3133,12 @@ function determine_os_and_fire_action() {
         if function_is_defined "${FUNCTION_TO_CALL}" ; then
         {
            "${FUNCTION_TO_CALL}"
-	   _assure_success
+	       _assure_success
         }
         else
         {
-	   failed to find function for this OS or DISTRO:  "${FUNCTION_TO_CALL}"
-	   _assure_success
+	       failed to find function for this OS or DISTRO:  "${FUNCTION_TO_CALL}"
+	       _assure_success
         }
 	fi
 
