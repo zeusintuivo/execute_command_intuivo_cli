@@ -3009,7 +3009,7 @@ function determine_os_and_fire_action() {
   local FUNCTION_TO_CALL=""
   local PARAMETERS=""
   # Check operating systems
-  echo  ${@}
+  # echo  ${@}
   if [[ "$(uname)" == "Darwin" ]] ; then
       # Do something under Mac OS X platform
       if [[ "$(uname -m)" == "x86_64" ]] ; then
@@ -3134,12 +3134,12 @@ function determine_os_and_fire_action() {
   {
         if function_is_defined "${FUNCTION_TO_CALL}" ; then
         {
-           "${FUNCTION_TO_CALL}"
+           "${FUNCTION_TO_CALL}""${PARAMETERS}"
 	        _assure_success
         }
         else
         {
-	       failed to find function for this OS or DISTRO:  "${FUNCTION_TO_CALL}"
+	       failed to find function for this OS or DISTRO:  "${FUNCTION_TO_CALL}" "${PARAMETERS}"
 	       _assure_success
         }
 	fi
