@@ -3134,7 +3134,7 @@ function determine_os_and_fire_action() {
   {
         if function_is_defined "${FUNCTION_TO_CALL}" ; then
         {
-           "${FUNCTION_TO_CALL}""${PARAMETERS}"
+           "${FUNCTION_TO_CALL}" "${PARAMETERS}"
 	        _assure_success
         }
         else
