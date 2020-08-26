@@ -300,7 +300,7 @@ CERO="\033[01;0m"
                 # echo -e "${BRIGHT_BLUE87} ${BASH_SOURCE}:${BASH_LINENO[-1]} ${FUNCNAME[-1]}()"
                 local len="${#BASH_LINENO[@]}"
                 for (( i=0; i<$len; i++ )); do
-                    echo -e "${BRIGHT_BLUE87} ${BASH_SOURCE}:${BASH_LINENO[$i]} ${FUNCNAME[$i]}()"
+                    echo -e "${BRIGHT_BLUE87} ${BASH_SOURCE[$i]}:${BASH_LINENO[$i]} ${FUNCNAME[$i]}()"
                 done
                 echo -e "$0:${BASH_LINENO[1]} ${FUNCNAME[1]}()"
                 echo -e "${RED} 𝞦 ${LIGHTYELLOW} ${ARGS} ${RESET}"
