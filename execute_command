@@ -247,7 +247,7 @@ list_contains_list() {
     {
         while read -r local_smallword; do
         {
-            if [ ! -z "${local_smallword}" ] ; then   # Not empty
+            if [ -n "${local_smallword}" ] ; then   # Not empty
             {
                 if [[ "x${local_smallword}" == "x${local_bigword}" ]] ; then
                 {

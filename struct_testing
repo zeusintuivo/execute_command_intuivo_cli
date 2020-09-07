@@ -98,7 +98,7 @@ function HOW_TO_LOAD_SEVERAL_FILES() {
     #execute_command
         while read -r ONE_SCRIPT; do
         {
-            if [ ! -z "${ONE_SCRIPT}" ] ; then         # if not empty
+            if [ -n "${ONE_SCRIPT}" ] ; then         # if not empty
             {
                 URL="${provider}${ONE_SCRIPT}"
                 [   -d "${cached_directory}" ] && source "$URL"
