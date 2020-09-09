@@ -1331,7 +1331,7 @@ EOF
         } # end is_service_running
 
         type_function_exists() {
-          type "$1" > /dev/null 2>&1
+          type "${*}" > /dev/null 2>&1
         } # type_function_exists
 
 
@@ -1341,7 +1341,7 @@ EOF
             #          if  ! is_installed wget ; then    is like is NOT installed
             #          if  is_installed wget ; then      it makes more sense to make it this way
             #
-            local SERVICE_NAME="${1}"
+            local SERVICE_NAME="${*}"
             if ! type_function_exists "${SERVICE_NAME}"; then
             {
                 #failed "${TESTING}"
@@ -1361,7 +1361,7 @@ EOF
             #          if  ! is_not_installed wget ; then # you can, but not recommended, because it is confusing to read
             #          if  is_not_installed wget ; then
             #
-            local SERVICE_NAME="${1}"
+            local SERVICE_NAME="${*}"
             if ! type_function_exists "${SERVICE_NAME}"; then
             {
                 #passed "${TESTING}"
