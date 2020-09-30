@@ -2563,17 +2563,17 @@ function execute_as_sudo(){
     {
         if [ -e "./$THISSCRIPTNAME" ] ; then
         {
-        sudo "./$THISSCRIPTNAME"
+          sudo "./$THISSCRIPTNAME"
         }
         elif ( command -v type "$THISSCRIPTNAME" >/dev/null 2>&1 );  then
         {
-        echo "sudo sudo sudo "
-        sudo "$THISSCRIPTNAME"
+          echo "sudo sudo sudo "
+          sudo "$THISSCRIPTNAME"
         }
         else
         {
-        echo -e "\033[05;7m*** Failed to find script to recall it as sudo ...\033[0m"
-        exit 1
+          echo -e "\033[05;7m*** Failed to find script to recall it as sudo ...\033[0m"
+          exit 1
         }
         fi
     }
