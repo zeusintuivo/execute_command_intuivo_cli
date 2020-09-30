@@ -384,29 +384,35 @@ CERO="\033[01;0m"
         } # end ensure
 
         function Installing() {
-            echo -e "${GREEN} Installing ${RED}${1}${GREEN}, ${RED}${2} ${GREEN}${3} ${CYAN}${4}, ${RED}${5} ${GREEN}${6} ${CYAN}${7} ${GREEN}.${RESET}"
+            echo -e "${GREEN} Installing ${RED}${1}${GREEN}, ${RED}${2} ${GREEN}${3} ${CYAN}${4}, ${RED}${5} ${GREEN}${6} ${CYAN}${*:7} ${GREEN}.${RESET}"
         } # end Installing
-
         alias installing=Installing
 
+
+        function Testing() {
+            echo -e "${GRAY} Testing ${PURPLE}${1}${GREEN}, ${RED}${2} ${GREEN}${3} ${CYAN}${4}, ${RED}${5} ${GREEN}${6} ${CYAN}${*:7} ${GREEN}.${RESET}"
+        } # end Testing
+        alias testing=Testing
+
+
         function Configuring() {
-            echo -e "${GREEN} Configuring ${RED}${1}${GREEN}, ${RED}${2} ${GREEN}${3} ${CYAN}${4}, ${RED}${5} ${GREEN}${6} ${CYAN}${7} ${GREEN}.${RESET}"
+            echo -e "${GREEN} Configuring ${RED}${1}${GREEN}, ${RED}${2} ${GREEN}${3} ${CYAN}${4}, ${RED}${5} ${GREEN}${6} ${CYAN}${*:7} ${GREEN}.${RESET}"
         } # end Configuring
 
         alias configuring=Configuring
 
         function Setting() {
-            echo -e "${GREEN} Setting ${RED}${1}${GREEN}, ${RED}${2} ${GREEN}${3} ${CYAN}${4}, ${RED}${5} ${GREEN}${6} ${CYAN}${7} ${GREEN}.${RESET}"
+            echo -e "${GREEN} Setting ${RED}${1}${GREEN}, ${RED}${2} ${GREEN}${3} ${CYAN}${4}, ${RED}${5} ${GREEN}${6} ${CYAN}${*:7} ${GREEN}.${RESET}"
         } # end Setting
 
         alias setting=Setting
 
         function Final() {
-            echo -e "${GREEN} Setting ${RED}${1}${GREEN}, ${RED}${2} ${GREEN}${3} ${CYAN}${4}, ${RED}${5} ${GREEN}${6} ${CYAN}${7} ${GREEN}.${RESET}"
+            echo -e "${GREEN} Setting ${RED}${1}${GREEN}, ${RED}${2} ${GREEN}${3} ${CYAN}${4}, ${RED}${5} ${GREEN}${6} ${CYAN}${*:7} ${GREEN}.${RESET}"
         } # end Final
 
         function Showing() {
-            echo -e "${ORANGE} ø  ${PURPLE}${1}${ORANGE} ${CYAN}${2} ${DARKBLUE}${3} ${PURPLE_BLUE}${4} ${BRIGHT_BLUE87}${5} ${GREEN}${6} ${RED}${7} ${GREEN}.${RESET}"
+            echo -e "${ORANGE} ø  ${PURPLE}${1}${ORANGE} ${CYAN}${2} ${DARKBLUE}${3} ${PURPLE_BLUE}${4} ${BRIGHT_BLUE87}${5} ${GREEN}${6} ${RED}${*:7} ${GREEN}.${RESET}"
             "${@}"
         } # end Showing
 
@@ -602,9 +608,9 @@ CERO="\033[01;0m"
 		while read -r ONE_FILE; do
                 # if not empty
 		echo testing $ONE_FILE
-		echo $ONE_FILE | hexdump -c
+		# echo $ONE_FILE | hexdump -c
 		ONE_FILE=$(trim_end_newlines <<< $ONE_FILE)
-			echo $ONE_FILE | hexdump -c
+			# echo $ONE_FILE | hexdump -c
                 if [ ! -z "${ONE_FILE}" ] ; then
                     # AS a NOTE ~/  <-- will fail always
                     # SO ~/.zshrc <-- will fail always
@@ -1205,7 +1211,8 @@ EOF
         testself_expect() {
             local -a caso
             local -a exito
-            local COUNTER=0
+            local -i COUNTER
+            COUNTER=0
             local res
             local nada=""
             caso[0]="hola"
@@ -1256,10 +1263,10 @@ EOF
                 (( COUNTER++ )) # if (( $COUNTER > 37 )) ; then
             }
             done
-
+            exit 0
         }
         #testself_expect #&> /dev/null # stdln to hide command output in bash
-        testself_expect 2>&1 >/dev/null #  capture onlly sterr error output
+        # testself_expect 2>&1 >/dev/null #  capture onlly sterr error output
 
         function check_to_be_installed() {
             # Sample usage
@@ -1401,7 +1408,10 @@ EOF
             #
             local give_me_something=$(eval """${1}""" 2>&1 | extract_version | head -1)
             local expected="${2}"
-
+            local TESTING="that installed version for ${give_me_something} is ${CYAN}${expected}${GREEN}"
+            # passed "${give_me_something}" passed "${expected}" failed  "${TESTING}" 
+            # ( declare -p "${give_me_something}"  &>/dev/null ) &&  failed "${left value empty}" && return 0 
+            # ( declare -p "${expected}"  &>/dev/null ) &&  failed "${right value empty}" && return 0 
             if [[ "${give_me_something}" == *"${expected}"* ]] || [[ "${give_me_something}" == "${expected}" ]]; then
             {
                 return 0  #failed  "${TESTING}"
@@ -1425,19 +1435,24 @@ EOF
             #            verify_installed_version "phantomjs --version"  "${phantomjs_version}"
             #            verify_installed_version "casperjs --version"  "${casper_version}"
             #
-            local COMMAND_TO_EVAL="${1}"
-            local VERSION_EXPECTED="${2}"
-
-            local TESTING="that installed version for ${COMMAND_TO_EVAL} is ${CYAN}${VERSION_EXPECTED}${GREEN}"
-            if ! version_installed_is "${COMMAND_TO_EVAL}" "${SERVICE_NAME}"; then
+            local COMMAND_TO_EVAL=$(eval """${1}""" 2>&1 | extract_version | head -1)
+            local VERSION_EXPECTED=$(eval """${2}""" 2>&1 | extract_version | head -1)
+            # passed "${COMMAND_TO_EVAL}" passed "${VERSION_EXPECTED}" 
+            local TESTING="that installed version for <${COMMAND_TO_EVAL}> is ${CYAN}<${VERSION_EXPECTED}>${GREEN} "
+            ( declare -p "${COMMAND_TO_EVAL}"  &>/dev/null ) &&  failed "${TESTING} -- left value empty" && return 1
+            ( declare -p "${VERSION_EXPECTED}"  &>/dev/null ) &&  failed "${TESTING} -- right value empty" && return 1
+            if [[ "${COMMAND_TO_EVAL}" == *"${VERSION_EXPECTED}"* ]] || [[ "${COMMAND_TO_EVAL}" == "${VERSION_EXPECTED}" ]]; then
             {
                 failed "${TESTING}"
+                return 1
             }
             else
             {
                 passed "${TESTING}"
+                return 0
             }
             fi
+            return 0
         } # end verify_installed_version
 
         function verify_installed_version_old() {
@@ -1908,14 +1923,14 @@ EOF
             #    fi
 
             KIND=""
-            ls werwerwerwerwerwerwerwerwerwerwerr >/dev/null 2>&1;
-            if (( $? == 0 )) ;  then  # Intel processor
+            # ls werwerwerwerwerwerwerwerwerwerwerr >/dev/null 2>&1;
+            # if (( $? == 0 )) ;  then  # Intel processor
                 KIND="INTEL"
-            fi
-            if [ $? == 0 ]; then   # Mac Intel processor
-                KIND="${KIND}MAC"
-            fi
-            echo "clear_error_output" >/dev/null 2>&1;
+            # fi
+            # if [ $? == 0 ]; then   # Mac Intel processor
+            #     KIND="${KIND}MAC"
+            # fi
+            # echo "clear_error_output" >/dev/null 2>&1;
             echo "${KIND}"
         }
         PROCESSOR_ERROR=$(test_positives)
