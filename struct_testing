@@ -113,7 +113,7 @@ function HOW_TO_LOAD_SEVERAL_FILES() {
         unset ONE_SCRIPT
         unset BASH_SCRIPTS
         unset provider
-        ( ( ! command -v type passed >/dev/null 2>&1;) && echo -e "\n \n  ERROR! Loading struct_testing \n \n " && exit 69; )
+        ( ( ! command -v passed >/dev/null 2>&1;) && echo -e "\n \n  ERROR! Loading struct_testing \n \n " && exit 69; )
     }
     # end load_execute_commands_wget
     load_execute_commands_wget
@@ -146,7 +146,7 @@ function HOW_TO_LOAD_SEVERAL_FILES() {
         unset ONE_SCRIPT
         unset BASH_SCRIPTS
         unset provider
-        ( ( ! command -v type passed >/dev/null 2>&1;) && echo -e "\n \n  ERROR! Loading struct_testing \n \n " && exit 69; )
+        ( ( ! command -v passed >/dev/null 2>&1;) && echo -e "\n \n  ERROR! Loading struct_testing \n \n " && exit 69; )
     }
     # end load_execute_commands_curl
     load_execute_commands_curl
@@ -162,7 +162,7 @@ function HOW_TO_LOAD_JUST_ONE_SCRIPT_LOCAL_AND_ONLINE_EXECUTE_COMMAND() {
         [ ! -d "$HOME$HOME/_/clis/execute_command_intuivo_cli/" ] && provider="https://raw.githubusercontent.com/zeusintuivo/execute_command_intuivo_cli/master/execute_command"
         local EXECOMCLI=$(curl $provider  2>/dev/null )   # suppress only curl download messages, but keep curl output for variable
         eval """${EXECOMCLI}"""
-        ( ( ! command -v type passed >/dev/null 2>&1; ) && echo -e "\n \n  ERROR! Loading execute_command \n \n " && exit 69; )
+        ( ( ! command -v passed >/dev/null 2>&1; ) && echo -e "\n \n  ERROR! Loading execute_command \n \n " && exit 69; )
     }
     # end load_struct_testing_curl
     load_struct_testing_curl
@@ -177,7 +177,7 @@ function HOW_TO_LOAD_JUST_ONE_SCRIPT_LOCAL_AND_ONLINE_STRUCT_USING_CURL() {
         [ ! -d "$HOME$HOME/_/clis/execute_command_intuivo_cli/" ] && provider="https://raw.githubusercontent.com/zeusintuivo/execute_command_intuivo_cli/master/struct_testing"
         local EXECOMCLI=$(curl $provider  2>/dev/null )   # suppress only curl download messages, but keep curl output for variable
         eval """${EXECOMCLI}"""
-        ( ( ! command -v type passed >/dev/null 2>&1; ) && echo -e "\n \n  ERROR! Loading struct_testing \n \n " && exit 69; )
+        ( ( ! command -v passed >/dev/null 2>&1; ) && echo -e "\n \n  ERROR! Loading struct_testing \n \n " && exit 69; )
     }
     # end load_struct_testing_curl
     load_struct_testing_curl
@@ -192,7 +192,7 @@ function HOW_TO_LOAD_JUST_ONE_SCRIPT_LOCAL_AND_ONLINE_STRUCT_USING_WGET() {
         local provider="$HOME$HOME/_/clis/execute_command_intuivo_cli/struct_testing"
         [   -e "${provider}"  ] && source "${provider}"
         [ ! -e "${provider}"  ] && eval """$(wget --quiet --no-check-certificate  https://raw.githubusercontent.com/zeusintuivo/execute_command_intuivo_cli/master/struct_testing -O -  2>/dev/null )"""   # suppress only wget download messages, but keep wget output for variable
-        ( ( ! command -v type passed >/dev/null 2>&1; ) && echo -e "\n \n  ERROR! Loading struct_testing \n \n " && exit 69; )
+        ( ( ! command -v passed >/dev/null 2>&1; ) && echo -e "\n \n  ERROR! Loading struct_testing \n \n " && exit 69; )
     }
     # end load_struct_testing_wget
     load_struct_testing_wget
@@ -206,7 +206,7 @@ function HOW_TO_LOAD_JUST_ONE_SCRIPT_ONLINE_ALWAYS_STRUCT_USING_WGET() {
         # HOW TO LOAD JUST ONE SCRIPT
         EXECOMCLI=$(wget --quiet --no-check-certificate https://raw.githubusercontent.com/zeusintuivo/execute_command_intuivo_cli/master/struct_testing -O -  2>/dev/null )   # suppress only curl download messages, but keep curl output for variable
         eval """${EXECOMCLI}"""
-        ( ( ! command -v type passed >/dev/null 2>&1;) && echo -e "\n \n  ERROR! Loading struct_testing \n \n " && exit 69; )
+        ( ( ! command -v passed >/dev/null 2>&1;) && echo -e "\n \n  ERROR! Loading struct_testing \n \n " && exit 69; )
     }
     # end load_struct_testing_wget
     load_struct_testing_wget
@@ -2580,7 +2580,7 @@ function execute_as_sudo(){
         {
           sudo "./$THISSCRIPTNAME"
         }
-        elif ( command -v type "$THISSCRIPTNAME" >/dev/null 2>&1 );  then
+        elif ( command -v "$THISSCRIPTNAME" >/dev/null 2>&1 );  then
         {
           echo "sudo sudo sudo "
           sudo "$THISSCRIPTNAME"
@@ -2647,7 +2647,7 @@ function progressfilt() {
 
 function _download_mac() {
     # -c Resume Downloads  -c option only works with FTP / HTTP servers that support the “range” header
-  if ( command -v type wget >/dev/null 2>&1; ) ; then
+  if ( command -v wget >/dev/null 2>&1; ) ; then
     # REF: https://www.linuxquestions.org/questions/linux-general-1/how-to-create-a-bash-script-to-wait-for-wget-to-finish-and-then-continue-621754/
     for url in $(echo "${@}"); do
     {
@@ -2657,7 +2657,7 @@ function _download_mac() {
         # wget -c --directory-prefix=\"${USER_HOME}/Downloads/\"  --quiet --no-check-certificate "${@}" 2>/dev/null   # suppress only wget download messages, but keep wget output for variable
     }
     done
-  elif ( command -v type curl >/dev/null 2>&1; ); then
+  elif ( command -v curl >/dev/null 2>&1; ); then
     _try curl -LO "${@}" 2>/dev/null   # suppress only wget download messages, but keep wget output for variable
     wait
   else
@@ -2737,7 +2737,7 @@ function _download_linux() {
   # wget --directory-prefix="${USER_HOME}/Downloads/" --quiet --no-check-certificate "${target_url}" 2>/dev/null
   echo -e "\033[01;7m*** Downloading file to temp location...\033[0m"
 
-  if ( command -v type wget >/dev/null 2>&1; ) ; then
+  if ( command -v wget >/dev/null 2>&1; ) ; then
     ensure wget or "Wget is required"
     # # REF: about :> http://unix.stackexchange.com/questions/37507/what-does-do-here
     _trap_try_start
@@ -2783,7 +2783,7 @@ function _download_linux() {
     echo -e "\033[7m*** Download Wget executed completed.\033[0m"
     rm -f /tmp/wgetrc
     file_does_not_exist_with_spaces wgetrc
-  elif ( command -v type curl >/dev/null 2>&1; ); then
+  elif ( command -v curl >/dev/null 2>&1; ); then
     ensure curl or "curl is required"
     curl -O "${target_url}" 2>/dev/null   # suppress only wget download messages, but keep wget output for variable
     _assure_success
@@ -3077,7 +3077,7 @@ function determine_os_and_fire_action() {
     if [ "$UNAME" == "linux" ]; then
         # If available, use LSB to identify distribution
         if [ -f /etc/lsb-release -o -d /etc/lsb-release.d ]; then
-	    if ( command -v type lsb_release >/dev/null 2>&1; ); then
+	    if ( command -v lsb_release >/dev/null 2>&1; ); then
             {
               DISTRO=$(lsb_release -i | cut -d: -f2 | sed s/'^\t'//)
             }
