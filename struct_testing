@@ -1409,9 +1409,9 @@ EOF
             local give_me_something=$(eval """${1}""" 2>&1 | extract_version | head -1)
             local expected="${2}"
             local TESTING="that installed version for ${give_me_something} is ${CYAN}${expected}${GREEN}"
-            # passed "${give_me_something}" passed "${expected}" failed  "${TESTING}" 
-            # ( declare -p "${give_me_something}"  &>/dev/null ) &&  failed "${left value empty}" && return 0 
-            # ( declare -p "${expected}"  &>/dev/null ) &&  failed "${right value empty}" && return 0 
+            # passed "${give_me_something}" passed "${expected}" failed  "${TESTING}"
+            # ( declare -p "${give_me_something}"  &>/dev/null ) &&  failed "${left value empty}" && return 0
+            # ( declare -p "${expected}"  &>/dev/null ) &&  failed "${right value empty}" && return 0
             if [[ "${give_me_something}" == *"${expected}"* ]] || [[ "${give_me_something}" == "${expected}" ]]; then
             {
                 return 0  #failed  "${TESTING}"
@@ -1437,7 +1437,7 @@ EOF
             #
             local COMMAND_TO_EVAL=$(eval """${1}""" 2>&1 | extract_version | head -1)
             local VERSION_EXPECTED=$(eval """${2}""" 2>&1 | extract_version | head -1)
-            # passed "${COMMAND_TO_EVAL}" passed "${VERSION_EXPECTED}" 
+            # passed "${COMMAND_TO_EVAL}" passed "${VERSION_EXPECTED}"
             local TESTING="that installed version for <${COMMAND_TO_EVAL}> is ${CYAN}<${VERSION_EXPECTED}>${GREEN} "
             ( declare -p "${COMMAND_TO_EVAL}"  &>/dev/null ) &&  failed "${TESTING} -- left value empty" && return 1
             ( declare -p "${VERSION_EXPECTED}"  &>/dev/null ) &&  failed "${TESTING} -- right value empty" && return 1
@@ -2559,52 +2559,52 @@ enter_last_only_removed() {
 # Global:
 # THISSCRIPTNAME=`basename "$0"`
 
-function execute_as_sudo(){
-    # Sample use:
-    # being of script add
-    # THISSCRIPTNAME=`basename "$0"`
-    # ...
-    # execute_as_sudo
-    # USER_HOME=$(getent passwd $SUDO_USER | cut -d: -f6)
-    # passed Caller user identified:$USER_HOME
-    #
-  if [ -z $SUDO_USER ] ; then
-    if [[ -z "$THISSCRIPTNAME" ]] ; then
-    {
-        echo "error You need to add THISSCRIPTNAME variable like this:"
-        echo "     THISSCRIPTNAME=\`basename \"\$0\"\`"
-    }
-    else
-    {
-        if [ -e "./$THISSCRIPTNAME" ] ; then
-        {
-          sudo "./$THISSCRIPTNAME"
-        }
-        elif ( command -v "$THISSCRIPTNAME" >/dev/null 2>&1 );  then
-        {
-          echo "sudo sudo sudo "
-          sudo "$THISSCRIPTNAME"
-        }
-        else
-        {
-          echo -e "\033[05;7m*** Failed to find script to recall it as sudo ...\033[0m"
-          exit 1
-        }
-        fi
-    }
-    fi
-    wait
-    exit 0
-  fi
-  # REF: http://superuser.com/questions/93385/run-part-of-a-bash-script-as-a-different-user
-  # REF: http://superuser.com/questions/195781/sudo-is-there-a-command-to-check-if-i-have-sudo-and-or-how-much-time-is-left
-  local CAN_I_RUN_SUDO=$(sudo -n uptime 2>&1|grep "load"|wc -l)
-  if [ ${CAN_I_RUN_SUDO} -gt 0 ]; then
-    echo -e "\033[01;7m*** Installing as sudo...\033[0m"
-  else
-    echo "Needs to run as sudo ... ${0}"
-  fi
-} # end execute_as_sudo
+# function execute_as_sudo(){
+#     # Sample use:
+#     # being of script add
+#     # THISSCRIPTNAME=`basename "$0"`
+#     # ...
+#     # execute_as_sudo
+#     # USER_HOME=$(getent passwd $SUDO_USER | cut -d: -f6)
+#     # passed Caller user identified:$USER_HOME
+#     #
+#   if [ -z $SUDO_USER ] ; then
+#     if [[ -z "$THISSCRIPTNAME" ]] ; then
+#     {
+#         echo "error You need to add THISSCRIPTNAME variable like this:"
+#         echo "     THISSCRIPTNAME=\`basename \"\$0\"\`"
+#     }
+#     else
+#     {
+#         if [ -e "./$THISSCRIPTNAME" ] ; then
+#         {
+#           sudo "./$THISSCRIPTNAME"
+#         }
+#         elif ( command -v "$THISSCRIPTNAME" >/dev/null 2>&1 );  then
+#         {
+#           echo "sudo sudo sudo "
+#           sudo "$THISSCRIPTNAME"
+#         }
+#         else
+#         {
+#           echo -e "\033[05;7m*** Failed to find script to recall it as sudo ...\033[0m"
+#           exit 1
+#         }
+#         fi
+#     }
+#     fi
+#     wait
+#     exit 0
+#   fi
+#   # REF: http://superuser.com/questions/93385/run-part-of-a-bash-script-as-a-different-user
+#   # REF: http://superuser.com/questions/195781/sudo-is-there-a-command-to-check-if-i-have-sudo-and-or-how-much-time-is-left
+#   local CAN_I_RUN_SUDO=$(sudo -n uptime 2>&1|grep "load"|wc -l)
+#   if [ ${CAN_I_RUN_SUDO} -gt 0 ]; then
+#     echo -e "\033[01;7m*** Installing as sudo...\033[0m"
+#   else
+#     echo "Needs to run as sudo ... ${0}"
+#   fi
+# } # end execute_as_sudo
 
 function _download_win() {
    curl -O "${*}"
