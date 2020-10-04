@@ -298,9 +298,20 @@ CERO="\033[01;0m"
             {
                 # echo -e "${BRIGHT_BLUE87} ${BASH_SOURCE}:${BASH_LINENO[0]} ${FUNCNAME[0]}()"
                 # echo -e "${BRIGHT_BLUE87} ${BASH_SOURCE}:${BASH_LINENO[-1]} ${FUNCNAME[-1]}()"
-                local len="${#BASH_LINENO[@]}"
-                for (( i=0; i<$len; i++ )); do
-                    echo -e "${BRIGHT_BLUE87} ${BASH_SOURCE[$i]}:${BASH_LINENO[$i]} ${FUNCNAME[$i]}()"
+                local __caller=$(caller)
+                local -i __caller_line=$(echo "${__caller}" | cut -d' ' -f1)
+                local __caller_script_name=$(echo "${__caller}" | cut -d' ' -f2)
+
+                local __bash_source=""
+                local -i _error_count=${#BASH_LINENO[@]}
+                (( _error_count-- ))
+                local -i _counter=0
+                local -i _counter_offset=0
+                echo -e " ☠ ${LIGHTPINK} ERROR STACK TRACE: ${len}  ${RESET}"  >&2
+                echo -e "${BRIGHT_BLUE87} ${__caller_script_name}:${__caller_line} \t\t  ${FUNCNAME[1]}() ${RESET}"  >&2
+                for (( _counter=1; _counter<${_error_count}; _counter++ )); do
+                    (( _counter_offset=_counter + 1 ))
+                    echo -e "${BRIGHT_BLUE87} ${BASH_SOURCE[$_counter_offset]}:${BASH_LINENO[$_counter]} \t\t ${FUNCNAME[$_counter_offset]}() ${RESET}"  >&2
                 done
                 echo -e "$0:${BASH_LINENO[1]} ${FUNCNAME[1]}()"
                 echo -e "${RED} 𝞦 ${LIGHTYELLOW} ${ARGS} ${RESET}"
@@ -2713,11 +2724,12 @@ function _download_linux() {
         download_folder="${2} "
     }
   fi
-  echo "     target url 1:${1} "
+  echo "     target url 1:<${1}>"
   [ -z "${1}" ] && echo "empty"
-  echo "download folder 2:${2} "
+  echo "download folder 2:<${2}>"
   [ -z "${2}" ] && echo "empty"
-  echo "  download file 3:${3} "
+  echo "  download file 3:<${3}>"
+  directory_exists_with_spaces $USER_HOME/Downloads
     #   [ -z "${3}" ] && echo "empty"
     #   echo
     # echo "# arguments called with ---->  ${@}     "
@@ -2758,7 +2770,8 @@ function _download_linux() {
     echo "content_disposition=on" >> /tmp/wgetrc
     echo "dir_prefix=." >> /tmp/wgetrc
     # echo "dir_prefix=${download_folder}" >> /tmp/wgetrc
-    # echo "output_document=${download_file}" >> /tmp/wgetrc   # Set the output filename--the same as '-O FILE'.
+    echo "directory-prefix=${download_folder}" >> /tmp/wgetrc
+    # echo "output-document=${download_file}" >> /tmp/wgetrc   # Set the output filename--the same as '-O FILE'.
     # echo "input=${target_url}" >> /tmp/wgetrc   #  Read the URLs from STRING, like '-i FILE'.
     # _trap_try_start # _trap_catch_check
     # WGETRC=wgetrc wget --directory-prefix="${USER_HOME}/Downloads/" --quiet --no-check-certificate "${target_url}" 2>/dev/null
@@ -2775,7 +2788,16 @@ function _download_linux() {
     cat -n /tmp/wgetrc
     echo "COMMAND WGET:"
     passed "WGETRC=/tmp/wgetrc wget --max-redirect=10 --mirror --directory-prefix="${download_folder}" -O "${download_file}" --no-check-certificate "${target_url}""
-    wget --max-redirect=10 --mirror --directory-prefix="${download_folder}" -O "${download_file}" --no-check-certificate "${target_url}" # 2>/dev/null"
+    cd ${download_folder}
+    pwd
+    # if not defined and not empty try code normal
+    ( typeset -p "SUDO_USER"  &>/dev/null ) ||  wget --max-redirect=10 --mirror --directory-prefix="${download_folder}" -O "${download_file}" --no-check-certificate "${target_url}" # 2>/dev/null"
+    # ( typeset -p "SUDO_USER"  &>/dev/null ) ||  wget --max-redirect=10 --mirror  --no-check-certificate "${target_url}" # 2>/dev/null"
+    # if defined and not empty
+    # ( typeset -p "SUDO_USER"  &>/dev/null ) && echo "sudo user " >&2
+    ( typeset -p "SUDO_USER"  &>/dev/null ) &&  su - $SUDO_USER -c 'cd ${download_folder} && wget --max-redirect=10 --mirror --directory-prefix='"${download_folder}"' -O '"${download_file}"' --no-check-certificate '"${target_url}"' && pwd ' # 2>/dev/null"
+    # ( typeset -p "SUDO_USER"  &>/dev/null ) &&  su - $SUDO_USER -c 'wget --max-redirect=10 --mirror  --no-check-certificate '"${target_url}"' ' # 2>/dev/null"
+
     # WGETRC=/tmp/wgetrc wget "${WGETCOMMAND}" # 2>/dev/null"
     _trap_catch_check
     _assure_success
@@ -2783,9 +2805,15 @@ function _download_linux() {
     echo -e "\033[7m*** Download Wget executed completed.\033[0m"
     rm -f /tmp/wgetrc
     file_does_not_exist_with_spaces wgetrc
+    # file_exists_with_spaces "${download_folder}/${download_file}"
   elif ( command -v curl >/dev/null 2>&1; ); then
     ensure curl or "curl is required"
-    curl -O "${target_url}" 2>/dev/null   # suppress only wget download messages, but keep wget output for variable
+   # if not defined and not empty try code normal
+    ( typeset -p "SUDO_USER"  &>/dev/null ) ||  curl -O "${target_url}" 2>/dev/null   # suppress only wget download messages, but keep wget output for variable
+    # if defined and not empty
+    # ( typeset -p "SUDO_USER"  &>/dev/null ) && echo "sudo user " >&2
+    ( typeset -p "SUDO_USER"  &>/dev/null ) &&  su - $SUDO_USER -c 'curl -O '"${target_url}"' 2>/dev/null'   # suppress only wget download messages, but keep wget output for variable
+
     _assure_success
   else
     failed \\n${BASH_SOURCE}:${BASH_LINENO[-0]} ${FUNCNAME[-0]}\(\) \\n$0:${BASH_LINENO[1]} ${FUNCNAME[1]}\(\) \\n"I cannot find wget or curl programs to perform a download action! ${target_url}"
