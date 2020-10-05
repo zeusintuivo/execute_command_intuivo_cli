@@ -26,7 +26,7 @@
 #     # echo "${provider}  ?"
 #     [   -e "${provider}"  ] && source "${provider}"
 #     [ ! -e "${provider}"  ] && eval """$(wget --quiet --no-check-certificate  https://raw.githubusercontent.com/zeusintuivo/execute_command_intuivo_cli/master/execute_boot_basic.sh -O -  2>/dev/null )"""   # suppress only wget download messages, but keep wget output for variable
-#     ( ( ! command -v execute_as_sudo >/dev/null 2>&1; ) && echo -e "\n \n  ERROR! Loading execute_boot_basic.sh \n \n " && exit 69; )
+#     ( ( ! command -v failed >/dev/null 2>&1; ) && echo -e "\n \n  ERROR! Loading execute_boot_basic.sh \n \n " && exit 69; )
 # } # end execute_as_sudo
 # load_execute_boot_basic
 
@@ -34,38 +34,48 @@
 
  (( DEBUG )) &&  ( typeset -p "THISSCRIPTNAME"  &>/dev/null ) && typeset -gr THISSCRIPTNAME="$(pwd)/$(basename "$0")"
 load_execute_as_sudo(){
+    # DEBUG=1
     # Test home value part 1
-    # echo "${USER_HOME}  ? 1"
-    # echo "${HOME}  ? 1"
-
-    if ( typeset -p "SUDO_USER"  &>/dev/null ) ; then
-      typeset -rg USER_HOME=$(getent passwd $SUDO_USER | cut -d: -f6)
-    else
-      local USER_HOME=$HOME
+    (( DEBUG )) && echo "USER_HOME:${USER_HOME}  ? 1"
+    (( DEBUG )) && echo "-----HOME:${HOME}  ? 1"
+    # if ( typeset -p "SUDO_USER"  &>/dev/null ) &&  [ -n "${2+x}" ] ; then
+      # exit 0
+      # typeset -rg USER_HOME=$(getent passwd "${SUDO_USER}" | cut -d: -f6)
+    # else
+    if ( ! typeset -p "SUDO_USER"  &>/dev/null ) ; then
+      typeset -rg USER_HOME=$HOME
     fi
+    (( DEBUG )) && echo "USER_HOME:${USER_HOME}  ? 1"
+    (( DEBUG )) && echo "-----HOME:${HOME}  ? 1"
+    # DEBUG=0
+
     # Test home value part 2
     # echo "${USER_HOME}  ? 2"
     # echo "${HOME}  ? 2"
-    local provider="$USER_HOME/_/clis/task_intuivo_cli/execute_as_sudo.sh"
+    typeset -r provider="$USER_HOME/_/clis/task_intuivo_cli/execute_as_sudo.sh"
     # Test provider
     # echo "${provider}  ?"
     [   -e "${provider}"  ] && source "${provider}"
     [ ! -e "${provider}"  ] && eval """$(wget --quiet --no-check-certificate  https://raw.githubusercontent.com/zeusintuivo/task_intuivo_cli/master/execute_as_sudo.sh -O -  2>/dev/null )"""   # suppress only wget download messages, but keep wget output for variable
     ( ( ! command -v execute_as_sudo >/dev/null 2>&1; ) && echo -e "\n \n  ERROR! Loading execute_as_sudo \n \n " && exit 69; )
+    echo $provider Loaded Now checking..
 } # end execute_as_sudo
 load_execute_as_sudo
 
 execute_as_sudo
 
 # USER_HOME=$(getent passwd $SUDO_USER | cut -d: -f6)
-ensure_is_defined_and_not_empty HOME
-ensure_is_defined_and_not_empty SUDO_USER
-ensure_is_defined_and_not_empty SUDO_GID
-ensure_is_defined_and_not_empty SUDO_COMMAND
+enforce_variable_with_value HOME $HOME
+enforce_variable_with_value SUDO_USER $SUDO_USER
+enforce_variable_with_value SUDO_GID $SUDO_GID
+enforce_variable_with_value SUDO_COMMAND $SUDO_COMMAND
 # declare -rg USER_HOME=$(getent passwd $SUDO_USER | cut -d: -f6)
-ensure_is_defined_and_not_empty USER_HOME
+enforce_variable_with_value USER_HOME $USER_HOME
 (( DEBUG )) &&  echo $SUDO_USER
 (( DEBUG )) &&  env | grep SUDO
+echo " \__________Sudoed Correctly"
+echo $provider Loaded 
+
 
 # exit 0
 # . ./execute_as_sudo.sh
@@ -104,8 +114,8 @@ boostrap_intuivo_bash_app(){
     local _function_test=""
     # Project  /  script / test function test if loaded should exist
     local -ra _scripts=$(grep -v "^#" <<<"
-# task_intuivo_cli/execute_as_sudo.sh:sudo_check
-task_intuivo_cli/add_error_trap.sh:on_error
+# task_intuivo_cli/execute_as_sudo.sh:execute_as_sudo
+task_intuivo_cli/add_error_trap.sh:_trap_on_error
 execute_command_intuivo_cli/execute_command:_execute_command_worker
 execute_command_intuivo_cli/struct_testing:passed
 " )
@@ -165,24 +175,8 @@ execute_command_intuivo_cli/struct_testing:passed
           exit 1
         }
         fi
-        # Eval
-        # +  just evals
-        # _msg=$(eval """${_execoncli}""" 2>&1 )
-        # err=$?
-        # if [ $err -ne 0 ] ;  then
-        # {
-        #   _msg=$(eval """${_execoncli}""" 2>&1 )
-        #   echo -e "\nERROR with ${_one}\n_url: ${_url} \neval: ${_execoncli} \nresult: \n${_msg} \n\n"
-        #   exit 1
-        # }
-        # fi
-
-        # Source
-        #  + writes to tmp and sources
-        #  ++ writes to tmp
         _msg=$(echo "${_execoncli}" > "${_tmp_file}" 2>&1 )
         err=$?
-        # (( DEBUG )) && echo "---- write tmp err: $_err"
         if [ $err -ne 0 ] ;  then
         {
           echo -e "\nERROR trying to write \n_tmpfile=${_tmp_file} \n_script: ${_one} \n_msg: ${_msg} \n_err: ${_err}  \n\n"
@@ -249,59 +243,5 @@ execute_command_intuivo_cli/struct_testing:passed
 } # end function boostrap_intuivo_bash_app
 boostrap_intuivo_bash_app
 
-# echo hei
-# function sudo_check(){
-#   typeset -gr AMISUDO=$(sudo -n uptime 2>&1|grep "load"|wc -l)
-#   if [ ${AMISUDO} -gt 0 ]; then
-#     echo -e "\033[01;7m * * * Executing as sudo * * * \033[0m"
-#     return 0
-#   else
-#     echo "Needs to run as sudo ... ${0}"
-#     execute_as_sudo
-#     return 0
-#   fi
-# }
-# DEBUG=1
-  # set -xE -o functrace   # Strict and Report Errors
-# function ensure_is_defined_and_not_empty(){
-#     # Sample use
-#     #  ( declare -p "USER_HOME"  &>/dev/null )    @ Is USER_HOME declared and not empty?
-#     #  [ -n "${USER_HOME+x}" ] && echo "USER_HOME 1"   @ Is USER_HOME declared and not empty?
-#     #  ensure_is_defined_and_not_empty USER_HOME  && echo "USER_HOME ensure_is_defined_and_not_empty 1"
-#     ( declare -p "${1}"  &>/dev/null ) ||  ( echo ""${1}" ensure_is_defined_and_not_empty failed " ; exit 1 ; return 1);
-#   }
-# sudo_check
-# declare -rg USER_HOME=$(getent passwd $SUDO_USER | cut -d: -f6)
-# ensure_is_defined_and_not_empty HOME
-
-# ensure_is_defined_and_not_empty SUDO_USER
 (( DEBUG )) && echo $SUDO_USER
 (( DEBUG )) && env | grep SUDO
-# declare -rg USER_HOME=$(getent passwd $SUDO_USER | cut -d: -f6)
-# ensure_is_defined_and_not_empty USER_HOME
-
-
-# ensure_is_defined_and_not_empty HOME  || echo "HOME ensure_is_defined_and_not_empty 1" && exit 1
-# ensure_is_defined_and_not_empty USER_HOME  || echo "USER_HOME ensure_is_defined_and_not_empty 1"  && exit 1
-# ensure_is_defined_and_not_empty SUDO_USER  || echo "SUDO_USER ensure_is_defined_and_not_empty 1"  && exit 1
-
-# exit 0
-
-# exit 0
-
-
-
-# function kill(){
-#   echo -e "\033[01;7m*** $THISSCRIPTNAME Exit ...\033[0m"
-#   ls -lad /opt/sublime_text/Packages/Package\ Control.sublime-package
-#   tree /opt/sublime_text/Packages/Package\ Control.sublime-package
-#   ls -lad /home/zeus/.config/sublime-text-3/Installed\ Packages/Package\ Control.sublime-package
-#   tree /home/zeus/.config/sublime-text-3/Installed\ Packages/Package\ Control.sublime-package
-# }
-# #trap kill ERR
-# trap kill EXIT
-# #trap kill INT
-
-# passed Home identified:$USER_HOME
-# passed Caller user identified:$SUDO_USER
-# file_exists_with_spaces $USER_HOME

@@ -280,7 +280,7 @@ RESET="\033[0m"
 CERO="\033[01;0m"
 
         function passed() {
-            ARGS="${@}"
+            typeset -a ARGS="${@}"
             if [ ! -z "${ARGS-x}" ] ; then # if its set and not empty
             {
                 echo -e "${LIGHTGREEN} ✔ ${LIGHTYELLOW} ${ARGS}  ${RESET}"
@@ -293,7 +293,7 @@ CERO="\033[01;0m"
         }
 
         function warning() {
-            ARGS="${@}"
+            typeset -a ARGS="${@}"
             if [[ ! -z "${ARGS-x}" ]] ; then # if its set and not empty
             {
                 # echo -e "${BRIGHT_BLUE87} ${BASH_SOURCE}:${BASH_LINENO[0]} ${FUNCNAME[0]}()"
@@ -613,38 +613,42 @@ CERO="\033[01;0m"
             #
             local ONE_FILE FILES="${@}"
             if [ ! -z "${FILES-x}" ] ; then # if its set and not empty
-	    {
+	        {
                 FILES=$(switch_spaces_to_newlines <<< "${@}")
-                echo testing $FILES
-		while read -r ONE_FILE; do
-                # if not empty
-		echo testing $ONE_FILE
-		# echo $ONE_FILE | hexdump -c
-		ONE_FILE=$(trim_end_newlines <<< $ONE_FILE)
-			# echo $ONE_FILE | hexdump -c
-                if [ ! -z "${ONE_FILE}" ] ; then
-                    # AS a NOTE ~/  <-- will fail always
-                    # SO ~/.zshrc <-- will fail always
-                    # But /home/user/.zshrc  <-- will pass
-                    # OR Users/administrator/.zshrc  in mac <-- will pass
-                    # ONE_FILE="/Users/administrator/.zshrc"
-                    if [[ -s "${ONE_FILE}" && ! -L "${ONE_FILE}" ]] ; then
+                # echo testing $FILES
+		        while read -r ONE_FILE; do
+                {
+                    # if not empty
+                    # echo testing $ONE_FILE
+                    # echo $ONE_FILE | hexdump -c
+                    ONE_FILE=$(trim_end_newlines <<< $ONE_FILE)
+                    # echo $ONE_FILE | hexdump -c
+                    if [ ! -z "${ONE_FILE}" ] ; then
                     {
-		      unset FILES
-		      unset ONE_FILE
-                      return 0 # it exists
+                        # AS a NOTE ~/  <-- will fail always
+                        # SO ~/.zshrc <-- will fail always
+                        # But /home/user/.zshrc  <-- will pass
+                        # OR Users/administrator/.zshrc  in mac <-- will pass
+                        # ONE_FILE="/Users/administrator/.zshrc"
+                        if [[ -s "${ONE_FILE}" && ! -L "${ONE_FILE}" ]] ; then
+                        {
+                            unset FILES
+                            unset ONE_FILE
+                            return 0 # it exists
+                        }
+                        fi
                     }
                     fi
-                fi
+                }
                 done <<< "${FILES}"
-		unset FILES
-		unset ONE_FILE
+                unset FILES
+                unset ONE_FILE
                 return 1 # it does not exists
             }
             fi
-	    unset FILES
-	    unset ONE_FILE
-
+            unset FILES
+            unset ONE_FILE
+            return 0
         } # end it_exists
 
         function it_exists_with_spaces() {
@@ -660,6 +664,7 @@ CERO="\033[01;0m"
                 # if not empty
                 # DEBUG echo -e "${BASH_SOURCE[0]} ->\n  .. ${FUNCNAME[0]}():${ONE_FILE}"
                 if [ ! -z "${ONE_FILE}" ] ; then
+                {
                     # AS a NOTE ~/  <-- will fail always
                     # SO ~/.zshrc <-- will fail always
                     # But /home/user/.zshrc  <-- will pass
@@ -670,11 +675,13 @@ CERO="\033[01;0m"
                         return 0 # it exists
                     }
                     fi
+                }
                 fi
                 done <<< "${FILES}"
                 return 1 # it does not exists
             }
             fi
+            return 0
         } # end it_exists_with_spaces
         function it_does_not_exist_with_spaces() {
             # Sample usage
@@ -719,7 +726,7 @@ CERO="\033[01;0m"
                 while read -r ONE_FILE; do
                 if [ ! -z "${ONE_FILE}" ] ; then # if not empty
                     TESTING="that file ${CYAN}${ONE_FILE}${LIGHTYELLOW} exists"
-		    echo -e $TESTING
+		    # echo -e $TESTING
                     if it_exists "${ONE_FILE}" ; then
                     {
                         passed "${TESTING}"
@@ -973,12 +980,13 @@ CERO="\033[01;0m"
         function check_equality() {
             # Sample usage
             #
-	    #     check_equality "1=1"
+	        #     check_equality "1=1"
             #     check_equality "$(cat /home/vagrant/.pyenv/version)=${PYTHON_VERSION}
             #                     $(cat /home/vagrant/.pyenv/version)=2.7.11"
             #
             #     check_equality $(cat ~/.pyenv/version)="2.7.11"
             #
+            (( DEBUG )) && echo "FUNCNAME[0]: <${FUNCNAME[0]}>"
             local ARGS="${@}"
             local LEFT_VALUE=""
             local RIGHT_VALUE=""
@@ -991,7 +999,9 @@ CERO="\033[01;0m"
                     if [ ! -z "${ONE_EQUALITY_ORDER}" ] ; then
                     {
                         LEFT_VALUE=$(echo """${ONE_EQUALITY_ORDER}""" | cut -d'=' -f1 | trim)
+                        (( DEBUG )) && echo "-left: <$LEFT_VALUE>"
                         RIGHT_VALUE=$(echo """${ONE_EQUALITY_ORDER}""" | cut -d'=' -f2 | trim)
+                        (( DEBUG )) && echo "right: <$RIGHT_VALUE>"
 
                         local TESTING="that value left value: ${CYAN}${LEFT_VALUE}${LIGHTYELLOW} exists"
                         if [[ -z "${LEFT_VALUE-x}" ]] ; then
@@ -1026,6 +1036,55 @@ CERO="\033[01;0m"
 
         alias verify_equality=check_equality
         alias ensure_equality=check_equality
+
+        function ensure_is_defined_and_not_empty(){
+        # Sample use
+        # ensure_is_defined_and_not_empty HOME $HOME
+        # ensure_is_defined_and_not_empty USER_HOME $USER_HOME
+        # ensure_is_defined_and_not_empty SUDO_USER $SUDO_USER
+        # ensure_is_defined_and_not_empty HOME $HOME && echo "HOME ensure_is_defined_and_not_empty 1"
+        # Tests for the function
+        # declare -rg USER_HOME=$(getent passwd $SUDO_USER | cut -d: -f6)
+        #  ( typeset -p "HOME"  &>/dev/null )    @ Is HOME declared listed in declarations ?
+        #  ( declare -p "HOME"  &>/dev/null )    @ Is HOME declared listed in declarations ?
+        #  [ -n "${HOME+x}" ] && echo "HOME 1"   @ Is HOME declared and not empty?
+        #  [ -z "${HOME+x}" ] && echo "HOME 1"   @ Is HOME declared and empty?
+        # [ -n "${HOME+x}" ] && echo "HOME 1"
+        # [ -n "${HOME+x}" ] && echo "HOME 12"
+        # [ -n "${CAN_I_RUN_SUDO2+x}" ] && echo "CAN_I_RUN_SUDO2 null"
+        # [ -n "${CAN_I_RUN_SUDO+x}" ] && echo "CAN_I_RUN_SUDO 12"
+        # [ -n "${SUDO_USER+x}" ] && echo "SUDO_USER 111"
+        # ( declare -p "HOME" ) && echo "HOME 2"
+        TESTING="that variable is defined and: ${CYAN}${1}${LIGHTYELLOW} not empty: ${YELLOW_OVER_DARKBLUE}${2}${RESET}"
+        if ( typeset -p "${1}"  &>/dev/null ) &&  [ -n "${2+x}" ] ; then
+        {
+            passed "${TESTING}"
+            return 0
+        } else {
+            failed "${TESTING}"
+            return 1
+        }
+        fi
+        return 0
+        } # end ensure_is_defined_and_not_empty
+
+        function ensure_is_defined_and_empty(){
+        # Sample use
+        # ensure_is_defined_and_empty HOME $HOME
+        # ensure_is_defined_and_empty USER_HOME $USER_HOME
+        # ensure_is_defined_and_empty SUDO_USER $SUDO_USER
+        TESTING="that variable is defined and: ${CYAN}${1}${LIGHTYELLOW} is YES empty: ${YELLOW_OVER_DARKBLUE}${2}${RESET}"
+        if ( typeset -p "${1}"  &>/dev/null ) &&  [ -z "${2+x}" ] ; then
+        {
+            passed "${TESTING}"
+            return 0
+        } else {
+            failed "${TESTING}"
+            return 1
+        }
+        fi
+        return 0
+        } # end ensure_is_defined_and_empty
 
         # REPEATED in execute_command
 
@@ -1141,9 +1200,9 @@ CERO="\033[01;0m"
             local value_one="${1}"
             local equality="${2}"
             local value_two="${3}"
-	    local TESTING IFS
-            IFS=\  read value_one equality value_two<<EOF
-                ${inputo}
+	        local TESTING IFS
+IFS=\  read value_one equality value_two<<EOF
+${inputo}
 EOF
             value_one=$(convert_expects_internals $(convert_null "${value_one}"))
             # DEBUG echo "0.value_one:,,$value_one''"
@@ -1161,7 +1220,7 @@ EOF
             {
                 if [[ "${inputo}" == "=" ]] ; then
                 {
-                    passed "${TESTING}"
+                    # passed "${TESTING}"
                     return 0
                 }
                 fi
@@ -1175,12 +1234,12 @@ EOF
                 # DEBUG echo "value_two:,,$value_two''"
                 if [[ "${value_one}" == "${value_two}" ]] ; then
                 {
-                    passed "${TESTING}"
+                    # passed "${TESTING}"
                     return 0
                 }
                 else
                 {
-                    failed "${TESTING}"
+                    # failed "${TESTING}"
                     return 1
                 }
                 fi
@@ -1189,7 +1248,7 @@ EOF
             {
                 if [[ "${inputo}" == "!" ]] ; then
                 {
-                    failed "${TESTING}"
+                    # failed "${TESTING}"
                     return 1
                 }
                 fi
@@ -1203,12 +1262,12 @@ EOF
                 # DEBUG echo "value_two:,,$value_two''"
                 if [[ "${value_one}" != "${value_two}" ]] ; then
                 {
-                    passed "${TESTING}"
+                    # passed "${TESTING}"
                     return 0
                 }
                 else
                 {
-                    failed "${TESTING}"
+                    # failed "${TESTING}"
                     return 1
                 }
                 fi
