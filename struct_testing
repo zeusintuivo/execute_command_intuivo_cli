@@ -558,7 +558,7 @@ CERO="\033[01;0m"
             #     does_not_exist_with_spaces "/Applications/Google Chrome.app/"
             #
             local _TESTING _ONE_DIR="${*}"
-            if [ ! -z "${_ONE_DIR-x}" ] ; then # if its set and not empty
+            if [ -n "${_ONE_DIR-x}" ] ; then # if its set and not empty
             {
                 # if not empty
                 if [ ! -z "${_ONE_DIR}" ] ; then
@@ -572,6 +572,7 @@ CERO="\033[01;0m"
                     if [[ ! -e "${_ONE_DIR}" ]] ; then
                     {
                         passed "${_TESTING}"
+                        return 0
                     }
                     else
                     {
@@ -585,7 +586,7 @@ CERO="\033[01;0m"
         } # end does_not_exist_with_spaces
 
         function directory_does_not_exist() {
-            does_not_exist $@
+            does_not_exist "$@"
         } # end directory_does_not_exist
 
         function directory_does_not_exist_with_spaces() {
@@ -593,11 +594,11 @@ CERO="\033[01;0m"
         } # end directory_does_not_exist_with_spaces
 
         function file_does_not_exists() {
-            does_not_exist $@
+            does_not_exist "$@"
         } # end file_does_not_exists
 
         function file_does_not_exist() {
-            does_not_exist $@
+            does_not_exist "$@"
         } # end file_does_not_exist
 
         function file_does_not_exist_with_spaces() {
@@ -613,17 +614,17 @@ CERO="\033[01;0m"
             #
             local ONE_FILE FILES="${@}"
             if [ ! -z "${FILES-x}" ] ; then # if its set and not empty
-	        {
+            {
                 FILES=$(switch_spaces_to_newlines <<< "${@}")
                 # echo testing $FILES
-		        while read -r ONE_FILE; do
+                while read -r ONE_FILE; do
                 {
                     # if not empty
                     # echo testing $ONE_FILE
                     # echo $ONE_FILE | hexdump -c
-                    ONE_FILE=$(trim_end_newlines <<< $ONE_FILE)
+                    ONE_FILE=$(trim_end_newlines <<< "$ONE_FILE")
                     # echo $ONE_FILE | hexdump -c
-                    if [ ! -z "${ONE_FILE}" ] ; then
+                    if [ -n "${ONE_FILE}" ] ; then
                     {
                         # AS a NOTE ~/  <-- will fail always
                         # SO ~/.zshrc <-- will fail always
@@ -657,13 +658,14 @@ CERO="\033[01;0m"
             #          if  ! it_exists_with_spaces "/home/vagrant/.zshrc" ; then    is like is NOT installed
             #          if  it_exists_with_spaces "/root/.zshrc ; then      it makes more sense to make it this way
             #
-            local ONE_FILE FILES="${@}"
-            if [ ! -z "${FILES-x}" ] ; then # if its set and not empty
+            local ONE_FILE 
+            local FILES="${*}"
+            if [ -n "${FILES-x}" ] ; then # if its set and not empty
             {
                 while read -r ONE_FILE; do
                 # if not empty
                 # DEBUG echo -e "${BASH_SOURCE[0]} ->\n  .. ${FUNCNAME[0]}():${ONE_FILE}"
-                if [ ! -z "${ONE_FILE}" ] ; then
+                if [ -n "${ONE_FILE}" ] ; then
                 {
                     # AS a NOTE ~/  <-- will fail always
                     # SO ~/.zshrc <-- will fail always
@@ -678,10 +680,9 @@ CERO="\033[01;0m"
                 }
                 fi
                 done <<< "${FILES}"
-                return 1 # it does not exists
             }
             fi
-            return 0
+            return 1 # it does not exists
         } # end it_exists_with_spaces
         function it_does_not_exist_with_spaces() {
             # Sample usage
@@ -689,13 +690,14 @@ CERO="\033[01;0m"
             #          if  ! it_exists_with_spaces "/home/vagrant/.zshrc" ; then    is like is NOT installed
             #          if  it_exists_with_spaces "/root/.zshrc ; then      it makes more sense to make it this way
             #
-            local ONE_FILE FILES="${@}"
-            if [ ! -z "${FILES-x}" ] ; then # if its set and not empty
+            local ONE_FILE 
+            local FILES="${*}"
+            if [ -n "${FILES-x}" ] ; then # if its set and not empty
             {
                 while read -r ONE_FILE; do
                 # if not empty
                 # DEBUG echo -e "${BASH_SOURCE[0]} ->\n  .. ${FUNCNAME[0]}():${ONE_FILE}"
-                if [ ! -z "${ONE_FILE}" ] ; then
+                if [ -n "${ONE_FILE}" ] ; then
                     # AS a NOTE ~/  <-- will fail always
                     # SO ~/.zshrc <-- will fail always
                     # But /home/user/.zshrc  <-- will pass
@@ -703,14 +705,14 @@ CERO="\033[01;0m"
                     # ONE_FILE="/Users/administrator/.zshrc"
                     if [[ -e "${ONE_FILE}" ]] ; then
                     {
-                        return 1 # it exists
+                        return 0 # it does not exists
                     }
                     fi
                 fi
                 done <<< "${FILES}"
-                return 0 # it does not exists
             }
             fi
+            return 1 # it exists
         } # end it_exists_with_spaces
         function file_exists() {
             # Sample usage
@@ -719,17 +721,20 @@ CERO="\033[01;0m"
             #     file_exists "/root/.zshrc
             #     /home/vagrant/.pyenzshrcv"
             #
-            local TESTING ONE_FILE FILES="${@}"
-            if [ ! -z "${FILES-x}" ] ; then # if its set and not empty
+            local TESTING="" 
+            local ONE_FILE=""
+            local -a FILES="${@}"
+            if [ -n "${FILES-x}" ] ; then # if its set and not empty
             {
                 FILES=$(switch_spaces_to_newlines <<< "${@}")
                 while read -r ONE_FILE; do
                 if [ ! -z "${ONE_FILE}" ] ; then # if not empty
                     TESTING="that file ${CYAN}${ONE_FILE}${LIGHTYELLOW} exists"
-		    # echo -e $TESTING
+            # echo -e $TESTING
                     if it_exists "${ONE_FILE}" ; then
                     {
                         passed "${TESTING}"
+                        return 0
                     }
                     else
                     {
@@ -740,9 +745,10 @@ CERO="\033[01;0m"
                 done <<< "${FILES}"
             }
             fi
-	    unset ONE_FILE
-	    unset FILES
-	    unset TESTING
+            unset ONE_FILE
+            unset FILES
+            unset TESTING
+            return 1
         } # end file_exists
 
         function file_exists_with_spaces() {
@@ -752,12 +758,14 @@ CERO="\033[01;0m"
             #     file_exists_with_spaces "/root/.zshrc
             #     /home/vagrant/.pyenzshrcv"
             #
-            local ONE_FILE FILES="${*}"
+            local ONE_FILE=""
+            local TESTING=""
+            local FILES="${*}"
             # DEBUG echo -e "${BASH_SOURCE[0]} ->\n  .. ${FUNCNAME[0]}():$FILES"
-            if [ ! -z "${FILES-x}" ] ; then # if its set and not empty
+            if [ -n "${FILES-x}" ] ; then # if its set and not empty
             {
                 while read -r ONE_FILE; do
-                if [ ! -z "${ONE_FILE}" ] ; then # if not empty
+                if [ -n "${ONE_FILE}" ] ; then # if not empty
                     TESTING="that file ${CYAN}${ONE_FILE}${LIGHTYELLOW} exists"
                     # DEBUG echo -e "${BASH_SOURCE[0]} ->\n  .. ${FUNCNAME[0]}():$ONE_FILE"
                     if it_exists_with_spaces "${ONE_FILE}" ; then
@@ -785,13 +793,15 @@ CERO="\033[01;0m"
             #     softlink_exists "/root/.pyenv
             #     /root/.pyenv>/home/vagrant/.pyenv"
             #
-            local FOUND_LINK_TARGET ONE_LINK_ORDER _LINKS="${@}"
-            if [ ! -z "${_LINKS-x}" ] ; then # if its set and not empty
+            local FOUND_LINK_TARGET="" 
+            local ONE_LINK_ORDER="" 
+            local -a _LINKS="${@}"
+            if [ -n "${_LINKS-x}" ] ; then # if its set and not empty
             {
                 _LINKS=$(switch_spaces_to_newlines <<< "${@}")
                 while read -r ONE_LINK_ORDER; do
                     # if not empty
-                    if [ ! -z "${ONE_LINK_ORDER}" ] ; then
+                    if [ -n "${ONE_LINK_ORDER}" ] ; then
                     {
                         local CHECK_TARGET_TOO="NO"
                         local ONE_LINK_LOCATION="${ONE_LINK_ORDER}"
@@ -826,24 +836,29 @@ CERO="\033[01;0m"
                                     passed "${TESTING}"
 
                                     TESTING="that softlink ${CYAN}${ONE_LINK_LOCATION}${LIGHTYELLOW} is not broken"
-                                    local empty_means_not_broken=$(find ${ONE_LINK_LOCATION} -type l ! -exec test -e {} \; -print  2>&1 | xargs -I {} ls -la "{}")
+                                    local empty_means_not_broken=""
+                                    empty_means_not_broken="$(find "${ONE_LINK_LOCATION}" -type l ! -exec test -e {} \; -print  2>&1 | xargs -I {} ls -la "{}")"
                                     if [[ -z "${empty_means_not_broken}" ]] ; then
                                     {
                                         # points to right location
                                         TESTING=""
                                         passed "${TESTING}"
+                                        return 0
                                     }
                                     elif  [[ "${empty_means_not_broken}" == *"No such file or directory"* ]] ; then
                                     {
                                         TESTING="but softlink ${CYAN}${ONE_LINK_LOCATION}${LIGHTYELLOW} is was not created"
                                         failed "${TESTING}"
+                                        return 1
                                     }
                                     elif  [[ "${empty_means_not_broken}" == *"Permission denied"* ]] ; then
                                     {
                                         TESTING="but softlink ${CYAN}${ONE_LINK_LOCATION}${LIGHTYELLOW}. Permission denied. Check Target -> ${ONE_LINK_TARGET} is accesible."
                                         failed "${TESTING}"
+                                        return 1
                                     } else {
                                         failed "${TESTING}"
+                                        return 1
                                     }
                                     fi
                                 }
@@ -851,6 +866,7 @@ CERO="\033[01;0m"
                                 {
                                     TESTING+="${GREEN}     +++ expected${LIGHTYELLOW}:${CYAN}${ONE_LINK_TARGET}${LIGHTYELLOW}:${RED} --- actual${LIGHTYELLOW}:${RED}${FOUND_LINK_TARGET}${LIGHTYELLOW}:"
                                     failed "${TESTING}"
+                                    return 1
                                 }
                                 fi
                             }
@@ -860,6 +876,7 @@ CERO="\033[01;0m"
                         else
                         {
                             failed "${TESTING}"
+                            return 1
                         }
                         fi # ONE_LINK_LOCATION Exists
                     }
@@ -867,6 +884,7 @@ CERO="\033[01;0m"
                 done <<< "${_LINKS}"
             }
             fi # not empty links
+            return 1
         } # end softlink_exists
 
         function ensure_unlink() {
@@ -887,12 +905,14 @@ CERO="\033[01;0m"
             #     softlink_exists_with_spaces "/Applications/Google\ Chrome.app/Contents/Profile/NativeMessagingHosts"
             #     softlink_exists_with_spaces "~/Library/Application\ Support/Google/Chrome/NativeMessagingHosts"
             #
-            local FOUND_LINK_TARGET ONE_LINK_ORDER _LINKS="${*}"
-            if [ ! -z "${_LINKS-x}" ] ; then # if its set and not empty
+            local FOUND_LINK_TARGET 
+            local ONE_LINK_ORDER 
+            local _LINKS="${*}"
+            if [ -n "${_LINKS-x}" ] ; then # if its set and not empty
             {
                 ONE_LINK_ORDER="${_LINKS}"
                     # if not empty
-                    if [ ! -z "${ONE_LINK_ORDER}" ] ; then
+                    if [ -n "${ONE_LINK_ORDER}" ] ; then
                     {
                         local CHECK_TARGET_TOO="NO"
                         local ONE_LINK_LOCATION="${ONE_LINK_ORDER}"
@@ -934,6 +954,7 @@ CERO="\033[01;0m"
                                         # points to right location
                                         TESTING=""
                                         passed "${TESTING}"
+                                        return 0
                                     }
                                     elif  [[ "${empty_means_not_broken}" == *"No such file or directory"* ]] ; then
                                     {
@@ -974,29 +995,29 @@ CERO="\033[01;0m"
 
             }
             fi # not empty links
-            return 0
+            return 1
         } # end softlink_exists_with_spaces
 
         function check_equality() {
             # Sample usage
             #
-	        #     check_equality "1=1"
+            #     check_equality "1=1"
             #     check_equality "$(cat /home/vagrant/.pyenv/version)=${PYTHON_VERSION}
             #                     $(cat /home/vagrant/.pyenv/version)=2.7.11"
             #
             #     check_equality $(cat ~/.pyenv/version)="2.7.11"
             #
             (( DEBUG )) && echo "FUNCNAME[0]: <${FUNCNAME[0]}>"
-            local ARGS="${@}"
+            local -a ARGS="${@}"
             local LEFT_VALUE=""
             local RIGHT_VALUE=""
             local ONE_EQUALITY_ORDER=""
-            if [ ! -z "${ARGS-x}" ] ; then # if its set and not empty
+            if [ -n "${ARGS-x}" ] ; then # if its set and not empty
             {
                 #ARGS=$(switch_spaces_to_newlines <<< "${@}")
                 while read -r ONE_EQUALITY_ORDER; do
                     # if not empty
-                    if [ ! -z "${ONE_EQUALITY_ORDER}" ] ; then
+                    if [ -n "${ONE_EQUALITY_ORDER}" ] ; then
                     {
                         LEFT_VALUE=$(echo """${ONE_EQUALITY_ORDER}""" | cut -d'=' -f1 | trim)
                         (( DEBUG )) && echo "-left: <$LEFT_VALUE>"
@@ -1007,6 +1028,7 @@ CERO="\033[01;0m"
                         if [[ -z "${LEFT_VALUE-x}" ]] ; then
                         {
                             failed "${TESTING}"
+                            return 1
                         }
                         fi
 
@@ -1014,6 +1036,7 @@ CERO="\033[01;0m"
                         if [[ -z "${RIGHT_VALUE-x}" ]] ; then
                         {
                             failed "${TESTING}"
+                            return 1
                         }
                         fi
 
@@ -1021,10 +1044,12 @@ CERO="\033[01;0m"
                         if [[ "${LEFT_VALUE}" ==  "${RIGHT_VALUE}" ]] ; then
                         {
                             passed "${TESTING}"
+                            return 0
                         }
                         else
                         {
                             failed "${TESTING}"
+                            return 1
                         }
                         fi
                     }
@@ -1032,58 +1057,84 @@ CERO="\033[01;0m"
                 done <<< "${ARGS}"
             }
             fi
+            return 1
         } # end function check_equality
 
         alias verify_equality=check_equality
         alias ensure_equality=check_equality
 
+
+        function is_defined_and_not_empty(){
+            # Sample use
+            # is_defined_and_not_empty HOME $HOME
+            # is_defined_and_not_empty USER_HOME $USER_HOME
+            # is_defined_and_not_empty SUDO_USER $SUDO_USER
+            # is_defined_and_not_empty HOME $HOME && echo "HOME is_defined_and_not_empty 1"
+            # Tests for the function
+            # declare -rg USER_HOME=$(getent passwd $SUDO_USER | cut -d: -f6)
+            #  ( typeset -p "HOME"  &>/dev/null )    @ Is HOME declared listed in declarations ?
+            #  ( declare -p "HOME"  &>/dev/null )    @ Is HOME declared listed in declarations ?
+            #  [ -n "${HOME+x}" ] && echo "HOME 1"   @ Is HOME declared and not empty?
+            #  [ -z "${HOME+x}" ] && echo "HOME 1"   @ Is HOME declared and empty?
+            # [ -n "${HOME+x}" ] && echo "HOME 1"
+            # [ -n "${HOME+x}" ] && echo "HOME 12"
+            # [ -n "${CAN_I_RUN_SUDO2+x}" ] && echo "CAN_I_RUN_SUDO2 null"
+            # [ -n "${CAN_I_RUN_SUDO+x}" ] && echo "CAN_I_RUN_SUDO 12"
+            # [ -n "${SUDO_USER+x}" ] && echo "SUDO_USER 111"
+            # ( declare -p "HOME" ) && echo "HOME 2"
+            if ( typeset -p "${1}"  &>/dev/null ) &&  [ -n "${2+x}" ] ; then
+            {
+                return 0
+            }
+            fi
+            return 1   # implied else
+        } # end is_defined_and_not_empty
+
+
         function ensure_is_defined_and_not_empty(){
-        # Sample use
-        # ensure_is_defined_and_not_empty HOME $HOME
-        # ensure_is_defined_and_not_empty USER_HOME $USER_HOME
-        # ensure_is_defined_and_not_empty SUDO_USER $SUDO_USER
-        # ensure_is_defined_and_not_empty HOME $HOME && echo "HOME ensure_is_defined_and_not_empty 1"
-        # Tests for the function
-        # declare -rg USER_HOME=$(getent passwd $SUDO_USER | cut -d: -f6)
-        #  ( typeset -p "HOME"  &>/dev/null )    @ Is HOME declared listed in declarations ?
-        #  ( declare -p "HOME"  &>/dev/null )    @ Is HOME declared listed in declarations ?
-        #  [ -n "${HOME+x}" ] && echo "HOME 1"   @ Is HOME declared and not empty?
-        #  [ -z "${HOME+x}" ] && echo "HOME 1"   @ Is HOME declared and empty?
-        # [ -n "${HOME+x}" ] && echo "HOME 1"
-        # [ -n "${HOME+x}" ] && echo "HOME 12"
-        # [ -n "${CAN_I_RUN_SUDO2+x}" ] && echo "CAN_I_RUN_SUDO2 null"
-        # [ -n "${CAN_I_RUN_SUDO+x}" ] && echo "CAN_I_RUN_SUDO 12"
-        # [ -n "${SUDO_USER+x}" ] && echo "SUDO_USER 111"
-        # ( declare -p "HOME" ) && echo "HOME 2"
-        TESTING="that variable is defined and: ${CYAN}${1}${LIGHTYELLOW} not empty: ${YELLOW_OVER_DARKBLUE}${2}${RESET}"
-        if ( typeset -p "${1}"  &>/dev/null ) &&  [ -n "${2+x}" ] ; then
-        {
-            passed "${TESTING}"
-            return 0
-        } else {
+            # Sample use
+            # ensure_is_defined_and_not_empty HOME $HOME
+            # ensure_is_defined_and_not_empty USER_HOME $USER_HOME
+            # ensure_is_defined_and_not_empty SUDO_USER $SUDO_USER
+            # ensure_is_defined_and_not_empty HOME $HOME && echo "HOME ensure_is_defined_and_not_empty 1"
+            local TESTING="that variable is defined and: ${CYAN}${1}${LIGHTYELLOW} not empty: ${YELLOW_OVER_DARKBLUE}${2}${RESET}"
+            if is_defined_and_not_empty "${1}" "${2}" ; then
+            {
+                passed "${TESTING}"
+                return 0
+            }
+            fi
             failed "${TESTING}"
             return 1
-        }
-        fi
-        return 0
         } # end ensure_is_defined_and_not_empty
 
+        function is_defined_and_empty(){
+            # Sample use
+            # is_defined_and_empty HOME $HOME
+            # is_defined_and_empty USER_HOME $USER_HOME
+            # is_defined_and_empty SUDO_USER $SUDO_USER
+            if ( typeset -p "${1}"  &>/dev/null ) &&  [ -z "${2+x}" ] ; then
+            {
+                return 0
+            }
+            fi
+            return 1
+        } # end is_defined_and_empty
+
         function ensure_is_defined_and_empty(){
-        # Sample use
-        # ensure_is_defined_and_empty HOME $HOME
-        # ensure_is_defined_and_empty USER_HOME $USER_HOME
-        # ensure_is_defined_and_empty SUDO_USER $SUDO_USER
-        TESTING="that variable is defined and: ${CYAN}${1}${LIGHTYELLOW} is YES empty: ${YELLOW_OVER_DARKBLUE}${2}${RESET}"
-        if ( typeset -p "${1}"  &>/dev/null ) &&  [ -z "${2+x}" ] ; then
-        {
-            passed "${TESTING}"
-            return 0
-        } else {
+            # Sample use
+            # ensure_is_defined_and_empty HOME $HOME
+            # ensure_is_defined_and_empty USER_HOME $USER_HOME
+            # ensure_is_defined_and_empty SUDO_USER $SUDO_USER
+            local TESTING="that variable is defined and: ${CYAN}${1}${LIGHTYELLOW} is YES empty: ${YELLOW_OVER_DARKBLUE}${2}${RESET}"
+            if is_defined_and_empty "${1}" "${2}" ; then
+            {
+                passed "${TESTING}"
+                return 0
+            }
+            fi
             failed "${TESTING}"
             return 1
-        }
-        fi
-        return 0
         } # end ensure_is_defined_and_empty
 
         # REPEATED in execute_command
@@ -1098,7 +1149,7 @@ CERO="\033[01;0m"
             trim_start_space | trim_end_space
         }
         convert_null() {
-            if [ -z "${@}" ] ; then
+            if [ -z "${*}" ] ; then
             {
                 echo "n8u8l"
             }
@@ -1109,7 +1160,7 @@ CERO="\033[01;0m"
             fi
         }
         convert_expects_internals() {
-            if [[ "${@}" == '=' ]] ||  [[ "${@}" == '!' ]] ; then
+            if [[ "${*}" == '=' ]] ||  [[ "${*}" == '!' ]] ; then
             {
                 echo "n8u8l"
             }
@@ -1194,52 +1245,52 @@ CERO="\033[01;0m"
             # expect $value = $VALUE
             if [  -z "${1+x}" ] || [ -z "${2+x}" ] || [ -z "${3+x}" ] ; then # check if all parameters are set and not empty
             {
-                failed ${FUNCNAME[1]} requires to have 3 parameters :: ${FUNCNAME[1]} [not] to be equal to \$VALUE ::
+                >&2 failed ${FUNCNAME[1]} requires to have 3 parameters :: ${FUNCNAME[1]} [not] to be equal to \$VALUE ::
             }
             fi
             local value_one="${1}"
             local equality="${2}"
             local value_two="${3}"
-	        local TESTING IFS
+            local TESTING IFS
 IFS=\  read value_one equality value_two<<EOF
 ${inputo}
 EOF
-            value_one=$(convert_expects_internals $(convert_null "${value_one}"))
-            # DEBUG echo "0.value_one:,,$value_one''"
+            value_one=$(convert_expects_internals "$(convert_null "${value_one}")")
+            (( DEBUG )) && echo "0.value_one:,,$value_one''"
             value_two=$(convert_null "${value_two}")
-            # DEBUG echo "0.value_two:,,$value_two''"
+            (( DEBUG )) && echo "0.value_two:,,$value_two''"
 
             # TESTING=$(echo "${FUNCNAME[0]} that value ${statement}" | ag "${value_one}" | ag "${value_two}")
-            TESTING=$(echo "${FUNCNAME[0]} that value ${statement}")
-            # DEBUG echo "${FUNCNAME[0]} that value ${statement}"
-            # DEBUG echo "//"
-            # DEBUG echo "${FUNCNAME[0]} that value ${statement}"
-            # DEBUG echo "TESTING:${TESTING}"
-            # DEBUG echo "inputo:,,$inputo''"
+            TESTING="${FUNCNAME[0]} that value ${statement}"
+            (( DEBUG )) && echo "${FUNCNAME[0]} that value ${statement}"
+            (( DEBUG )) && echo "//"
+            (( DEBUG )) && echo "${FUNCNAME[0]} that value ${statement}"
+            (( DEBUG )) && echo "TESTING:${TESTING}"
+            (( DEBUG )) && echo "inputo:,,$inputo''"
             if [[ "${inputo}" == *"="* ]] ; then
             {
                 if [[ "${inputo}" == "=" ]] ; then
                 {
-                    # passed "${TESTING}"
+                    passed "${TESTING}"
                     return 0
                 }
                 fi
                 value_one=$(echo "${inputo}" | cut -d= -f1 | trim)
-                # DEBUG echo "value_one:,,$value_one''"
+                (( DEBUG )) && echo "value_one:,,$value_one''"
                 value_two=$(echo "${inputo}" | cut -d= -f2 | trim)
-                # DEBUG echo "value_two:,,$value_two''"
+                (( DEBUG )) && echo "value_two:,,$value_two''"
                 value_one=$(convert_null "${value_one}")
-                # DEBUG echo "value_one:,,$value_one''"
+                (( DEBUG )) && echo "value_one:,,$value_one''"
                 value_two=$(convert_null "${value_two}")
-                # DEBUG echo "value_two:,,$value_two''"
+                (( DEBUG )) && echo "value_two:,,$value_two''"
                 if [[ "${value_one}" == "${value_two}" ]] ; then
                 {
-                    # passed "${TESTING}"
+                    passed "${TESTING}"
                     return 0
                 }
                 else
                 {
-                    # failed "${TESTING}"
+                    >&2 echo -e "${RED} ✘ failed ${LIGHTYELLOW}${TESTING}${CYAN}"
                     return 1
                 }
                 fi
@@ -1248,33 +1299,65 @@ EOF
             {
                 if [[ "${inputo}" == "!" ]] ; then
                 {
-                    # failed "${TESTING}"
+                    >&2 echo -e "${RED} ✘ failed ${LIGHTYELLOW}${TESTING}${CYAN}"
                     return 1
                 }
                 fi
                 value_one=$(echo "${inputo}" | cut -d! -f1 | trim)
-                # DEBUG echo "value_one:,,$value_one''"
+                (( DEBUG )) && echo "value_one:,,$value_one''"
                 value_two=$(echo "${inputo}" | cut -d! -f2 | trim)
-                # DEBUG echo "value_two:,,$value_two''"
+                (( DEBUG )) && echo "value_two:,,$value_two''"
                 value_one=$(convert_null "${value_one}")
-                # DEBUG echo "value_one:,,$value_one''"
+                (( DEBUG )) && echo "value_one:,,$value_one''"
                 value_two=$(convert_null "${value_two}")
-                # DEBUG echo "value_two:,,$value_two''"
+                (( DEBUG )) && echo "value_two:,,$value_two''"
                 if [[ "${value_one}" != "${value_two}" ]] ; then
                 {
-                    # passed "${TESTING}"
+                    passed "${TESTING}"
                     return 0
                 }
                 else
                 {
-                    # failed "${TESTING}"
+                    >&2 echo -e "${RED} ✘ failed ${LIGHTYELLOW}${TESTING}${CYAN}"
                     return 1
                 }
                 fi
             }
             fi
+            return 1
+        } # end expect
 
-        }
+        function enforce(){
+            # Sample use
+            #     if enforce 14.2.0 to be 12.18.3  ; then 
+            #     if enforce $__node_required to be $_node_version ; then 
+            local _msg=""
+            _msg="$(expect "${@}" 2>&1)"
+            local -i _err=$?
+            if [ $_err -ne 0 ] ;  then
+            {
+                >&2 failed "$_msg"
+                return $_err
+            }
+            fi
+            >&1 passed "$_msg"
+            return 0  # implied else 
+         } # end enforce
+
+        function version_not_the_same(){
+            # Sample use
+            #     if version_not_the_same 14.2.0 to be 12.18.3  ; then 
+            #     if version_not_the_same $__node_required to be $_node_version ; then 
+            local _msg="$(expect "${@}" 2>&1)"
+            local -i _err=$?
+            if [ $_err -ne 0 ] ;  then
+            {
+                # >&2 echo -e "$_msg"
+                return $_err
+            }
+            fi
+            return 0  # implied else 
+         } # end version_not_the_same
 #expect "hola" = "hello"
 #expect "hola" = "hola"
 
@@ -1373,12 +1456,11 @@ EOF
             {
                 echo "${SERVICE_STATUS}"
                 failed "${TESTING}"
-            }
-            else
-            {
-                passed "${TESTING}"
+                return 0 
             }
             fi
+            passed "${TESTING}"
+            return 1
         } # end is_service_reponse_not_this_fail
 
         function is_service_running() {
@@ -1398,17 +1480,37 @@ EOF
             if [[ "${SERVICE_STATUS}" == *"${EXPECTED_RESPONSE}"* ]] ; then
             {
                 passed "${TESTING}"
-            }
-            else
-            {
-                echo "${SERVICE_STATUS}"
-                failed "${TESTING}"
+                return 0 
             }
             fi
+            echo "${SERVICE_STATUS}"
+            failed "${TESTING}"
+            return 1
         } # end is_service_running
 
-        type_function_exists() {
-          type "${*}" > /dev/null 2>&1
+        function type_function_exists() {
+          if ( is_defined_and_not_empty SUDO_USER "${SUDO_USER}" ) ; then
+          {
+              (( DEBUG )) && echo "type_function_exists:SUDO DEFINED"
+              if ( su - $SUDO_USER -c 'type '"${*}"' >/dev/null 2>&1' ) ; then 
+              {
+                (( DEBUG )) && echo "type_function_exists:TYPE is installed ${*} "
+                return 0
+              }
+              fi
+              (( DEBUG )) && echo "type_function_exists:TYPE is not installed ${*} "
+              return 1
+          }
+          fi
+          (( DEBUG )) && echo "type_function_exists:SUDO NOT DEFINED"
+          if ( type "${*}" > /dev/null 2>&1 ) ; then 
+          {
+            (( DEBUG )) && echo "type_function_exists:TYPE is installed ${*} "
+            return 0
+          }
+          fi
+          (( DEBUG )) && echo "type_function_exists:TYPE is not installed ${*} "
+          return 1
         } # type_function_exists
 
 
@@ -1424,12 +1526,9 @@ EOF
                 #failed "${TESTING}"
                 return 1
             }
-            else
-            {
-                #passed "${TESTING}"
-                return 0
-            }
             fi
+            #passed "${TESTING}"  # assumed else
+            return 0
         } # end is_installed
 
         function is_not_installed() {
@@ -1444,12 +1543,9 @@ EOF
                 #passed "${TESTING}"
                 return 0
             }
-            else
-            {
-                #failed "${TESTING}"
-                return 1
-            }
             fi
+            #failed "${TESTING}"  # assumed else
+            return 1
         } # end is_not_installed
 
         function verify_is_installed() {
@@ -1459,15 +1555,14 @@ EOF
             #
             local SERVICE_NAME="${1}"
             TESTING="that: ${CYAN}${SERVICE_NAME}${GREEN} is installed"
-            if ! is_installed "${SERVICE_NAME}"; then
+            if is_installed "${SERVICE_NAME}"; then
             {
-                failed "${TESTING}"
-            }
-            else
-            {
-                passed "${TESTING}"
+                 passed "${TESTING}"
+                 return 0
             }
             fi
+            failed "${TESTING}" # assumed else
+            return 1
         } # end verify_is_installed
 
         function version_installed_is() {
@@ -2138,10 +2233,10 @@ EOF
             #
             local USER_TO_INSTALL="${1}"
             if [[ -z "${USER_TO_INSTALL}" ]] ; then
-	    {
+        {
               failed to provide USER. Call with build_table_from_installed_components \$USER or build_table_from_installed_components john or some username
-	    }
-	    fi
+        }
+        fi
             local README_TABLE="INSTALLED_MACHINE=\"
  Service/Software | Version                        | Executable
 ------------------|--------------------------------|-------------------------------------------"
@@ -2992,11 +3087,11 @@ function _try() {
 
 
 function function_is_defined_with_spaces() {
-		    # Sample usage
-		    #
-		    #          if  ! function_is_defined_with_spaces "/home/vagrant/.zshrc" ; then    is like is NOT installed
-		    #          if  function_is_defined_with_spaces "/root/.zshrc ; then      it makes more sense to make it this way
-		    #
+            # Sample usage
+            #
+            #          if  ! function_is_defined_with_spaces "/home/vagrant/.zshrc" ; then    is like is NOT installed
+            #          if  function_is_defined_with_spaces "/root/.zshrc ; then      it makes more sense to make it this way
+            #
             local ONE_FUNCTION FUNCTIONS="${@}"
             if [ ! -z "${FILES-x}" ] ; then # if its set and not empty
             {
@@ -3031,7 +3126,7 @@ function function_is_defined() {
                 while read -r ONE_FUNCTION; do
                 # if not empty
                 if [ ! -z "${ONE_FUNCTION}" ] ; then
-	            if [ -n "$(LC_ALL=C type -t "${ONE_FUNCTION}")" ] && [ "$(LC_ALL=C type -t "${ONE_FUNCTION}")" = function ]; then
+                if [ -n "$(LC_ALL=C type -t "${ONE_FUNCTION}")" ] && [ "$(LC_ALL=C type -t "${ONE_FUNCTION}")" = function ]; then
                     {
                         return 0 # function exists
                     }
@@ -3053,7 +3148,7 @@ function function_exists() {
             #     function_exists determine_os_and_fire_action
             #     function_exists  "$FUNCTION_TO_CALL"
             #     function_exists "Function1
-	        #                      Function2
+            #                      Function2
             #                      Function2"
             #
             local TESTING ONE_FUNCTION FUNCTIONS="${@}"
@@ -3076,9 +3171,9 @@ function function_exists() {
                 done <<< "${FUNCTIONS}"
             }
             fi
-	    unset ONE_FUNCTION
-	    unset FUNCTIONS
-	    unset TESTING
+        unset ONE_FUNCTION
+        unset FUNCTIONS
+        unset TESTING
 
 } # end function_exists
 
@@ -3091,7 +3186,7 @@ function function_exists_with_spaces() {
             #
             #     function_exists_with_spaces determine_os_and_fire_action
             #     function_exists_with_spaces  "$FUNCTION_TO_CALL"
-	        #     function_exists_with_spaces "Function1
+            #     function_exists_with_spaces "Function1
             #                      Function2
             #                      Function2"
             #
@@ -3111,7 +3206,7 @@ function function_exists_with_spaces() {
                     }
                     fi
                 fi
-			done <<< "${FUNCTIONS}"
+            done <<< "${FUNCTIONS}"
             }
             fi
             unset ONE_FUNCTION
@@ -3144,13 +3239,13 @@ function determine_os_and_fire_action() {
       # Do something under Mac OS X platform
       if [[ "$(uname -m)" == "x86_64" ]] ; then
       {
-	     FUNCTION_TO_CALL='_darwin__64'
-	     PARAMETERS="$@"
+         FUNCTION_TO_CALL='_darwin__64'
+         PARAMETERS="$@"
       }
       elif [[ "$(uname -m)" == "i686"   ]] ; then
       {
-	     FUNCTION_TO_CALL='_darwin__32'
-	     PARAMETERS="$@"
+         FUNCTION_TO_CALL='_darwin__32'
+         PARAMETERS="$@"
       }
       fi
   elif [[ "$(expr substr $(uname -s) 1 5)" == "Linux" ]] ; then
@@ -3164,14 +3259,14 @@ function determine_os_and_fire_action() {
     if [ "$UNAME" == "linux" ]; then
         # If available, use LSB to identify distribution
         if [ -f /etc/lsb-release -o -d /etc/lsb-release.d ]; then
-	    if ( command -v lsb_release >/dev/null 2>&1; ); then
+        if ( command -v lsb_release >/dev/null 2>&1; ); then
             {
               DISTRO=$(lsb_release -i | cut -d: -f2 | sed s/'^\t'//)
             }
             else
             {
               DISTRO=$(ls -d /etc/[A-Za-z]*[_-][rv]e[lr]* | grep -v "lsb" | cut -d'/' -f3 | cut -d'-' -f1 | cut -d'_' -f1)
-	    }
+        }
             fi
         # Otherwise, use release info file
         else
@@ -3183,7 +3278,7 @@ function determine_os_and_fire_action() {
       # If available, use /etc/os-release to identify distribution
         if [ -f /etc/os-release ]; then
         {
-		source /etc/os-release
+        source /etc/os-release
                 # file_exists "/etc/os-release"
                 _assure_success
                 # source /etc/os-release
@@ -3194,7 +3289,7 @@ function determine_os_and_fire_action() {
                 # $ echo $VERSION
                 # 17 (Beefy Miracle)
                 DISTRO=$ID
-	}
+    }
         fi
     }
     fi
@@ -3208,15 +3303,15 @@ function determine_os_and_fire_action() {
     {
         if [[ "$(uname -i)" == "x86_64" ]] ; then
         {
-	        FUNCTION_TO_CALL='_fedora__64'
-	        PARAMETERS="$@"
-        }
-        elif [[ "$(uname -i)" == "i686"   ]] ; then
-	    {
-	        FUNCTION_TO_CALL='_fedora__32'
+            FUNCTION_TO_CALL='_fedora__64'
             PARAMETERS="$@"
         }
-	    fi
+        elif [[ "$(uname -i)" == "i686"   ]] ; then
+        {
+            FUNCTION_TO_CALL='_fedora__32'
+            PARAMETERS="$@"
+        }
+        fi
     }
     elif [[ "$DISTRO" == *"untu"* ]]; then
     {
@@ -3228,10 +3323,10 @@ function determine_os_and_fire_action() {
         }
         elif [[ "$(uname -i)" == "i686"   ]] ; then
         {
-	       FUNCTION_TO_CALL='_ubuntu__32'
-	       PARAMETERS="$@"
-	    }
-	    fi
+           FUNCTION_TO_CALL='_ubuntu__32'
+           PARAMETERS="$@"
+        }
+        fi
     }
     fi
     # For everything else (or if above failed), just use generic identifier
@@ -3265,14 +3360,14 @@ function determine_os_and_fire_action() {
         if function_is_defined "${FUNCTION_TO_CALL}" ; then
         {
            "${FUNCTION_TO_CALL}" "${PARAMETERS}"
-	        _assure_success
+            _assure_success
         }
         else
         {
-	       failed to find function for this OS or DISTRO:  "${FUNCTION_TO_CALL}" "${PARAMETERS}"
-	       _assure_success
+           failed to find function for this OS or DISTRO:  "${FUNCTION_TO_CALL}" "${PARAMETERS}"
+           _assure_success
         }
-	fi
+    fi
 
   }
   fi

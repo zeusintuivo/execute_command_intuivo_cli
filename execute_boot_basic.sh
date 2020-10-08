@@ -3,36 +3,82 @@
 # @author Zeus Intuivo <zeus@intuivo.com>
 #
 #
-# How to use:
+# How to use: start
 
 # Include this at the beginning of the script
-
-# typeset -gr THISSCRIPTNAME="$(pwd)/$(basename "$0")"
-# load_execute_boot_basic(){
-#     # Test home value part 1
-#     # echo "${USER_HOME}  ? 1"
-#     # echo "${HOME}  ? 1"
-
+# typeset -gr THISSCRIPTNAME="$(pwd)/$(basename "$0")"  # § This goes in the FATHER-MOTHER script
+# typeset -i _err=0
+# load_execute_boot_basic_with_sudo(){
 #     if ( typeset -p "SUDO_USER"  &>/dev/null ) ; then
 #       typeset -rg USER_HOME=$(getent passwd $SUDO_USER | cut -d: -f6)
 #     else
 #       local USER_HOME=$HOME
 #     fi
-#     # Test home value part 2
-#     # echo "${USER_HOME}  ? 2"
-#     # echo "${HOME}  ? 2"
-#     local provider="$USER_HOME/_/clis/execute_command_intuivo_cli/execute_boot_basic.sh"
-#     # Test provider
-#     # echo "${provider}  ?"
+#     local -r provider="$USER_HOME/_/clis/execute_command_intuivo_cli/execute_boot_basic.sh"
+#     echo source "${provider}"
 #     [   -e "${provider}"  ] && source "${provider}"
 #     [ ! -e "${provider}"  ] && eval """$(wget --quiet --no-check-certificate  https://raw.githubusercontent.com/zeusintuivo/execute_command_intuivo_cli/master/execute_boot_basic.sh -O -  2>/dev/null )"""   # suppress only wget download messages, but keep wget output for variable
-#     ( ( ! command -v failed >/dev/null 2>&1; ) && echo -e "\n \n  ERROR! Loading execute_boot_basic.sh \n \n " && exit 69; )
-# } # end execute_as_sudo
-# load_execute_boot_basic
+#     if ( command -v failed >/dev/null 2>&1; ) ; then
+#     {
+#       return 0
+#     }
+#     else
+#     {
+#       echo -e "\n \n  ERROR! Loading execute_boot_basic.sh \n \n "
+#       exit 1;
+#     }
+#     fi
+#     return 0
+# } # end load_execute_boot_basic_with_sudo
+
+# load_execute_boot_basic_with_sudo
+# _err=$?
+# if [ $_err -ne 0 ] ;  then
+# {
+#   >&2 echo -e "ERROR There was an error loading load_execute_boot_basic_with_sudo Err:$_err "
+#   exit $_err
+# }
+# fi
 
 
+# function check_system_requirements(){
+#   # This funciton check_system_requirements is sample of what to do next to keep testing
+#   # or executiong like checking for requirements
 
- (( DEBUG )) &&  ( typeset -p "THISSCRIPTNAME"  &>/dev/null ) && typeset -gr THISSCRIPTNAME="$(pwd)/$(basename "$0")"
+#   verify_is_installed git
+#   verify_is_installed awk
+#   verify_is_installed date
+#   # verify_is_installed nvm
+#   verify_is_installed node
+#   verify_is_installed npm
+#   local -i _err=0
+#   local _node_version=''
+#   _node_version=$(node --version 2>&1 | cüt "v")  # stout and stderr both get
+#   _err=$?
+#   (( DEBUG )) && echo "_node_version: $_node_version --- _err: $_err"
+#   if [ $_err -ne 0 ] ;  then
+#   {
+#     >&2 echo -e "ERROR There was an reading version of node  Err:$_err Output: $_node_version"
+#     exit $_err
+#   }
+#   fi
+#   enforce_variable_with_value _node_version  $_node_version
+#   file_exists .nvmrc
+#   # ...
+#   # ... etc ... etc .. check check ... do do ...
+#   # ...
+#   return 0 # remember to always return 0 to good, 1 or not/0 for fail
+# } # end check_system_requirements
+# check_system_requirements
+
+# How to use: // end
+
+
+typeset -i _err=0
+CYAN="\033[01;36m"
+BRIGHT_BLUE87="\033[38;5;87m"
+echo -e "${CYAN}"
+(( DEBUG )) &&  ( typeset -p "THISSCRIPTNAME"  &>/dev/null ) && typeset -gr THISSCRIPTNAME="$(pwd)/$(basename "$0")"
 load_execute_as_sudo(){
     # DEBUG=1
     # Test home value part 1
@@ -57,12 +103,30 @@ load_execute_as_sudo(){
     # echo "${provider}  ?"
     [   -e "${provider}"  ] && source "${provider}"
     [ ! -e "${provider}"  ] && eval """$(wget --quiet --no-check-certificate  https://raw.githubusercontent.com/zeusintuivo/task_intuivo_cli/master/execute_as_sudo.sh -O -  2>/dev/null )"""   # suppress only wget download messages, but keep wget output for variable
-    ( ( ! command -v execute_as_sudo >/dev/null 2>&1; ) && echo -e "\n \n  ERROR! Loading execute_as_sudo \n \n " && exit 69; )
+    if ( command -v execute_as_sudo >/dev/null 2>&1; ) ; then
+    {
+      echo $provider Loaded Now checking..
+      return 0
+    }
+    else
+    {
+      echo -e "\n \n  ERROR! Loading execute_as_sudo.sh \n \n "
+      exit 1;
+    }
+    fi
     echo $provider Loaded Now checking..
+    return 0
 } # end execute_as_sudo
 load_execute_as_sudo
 
 execute_as_sudo
+_err=$?
+if [ $_err -ne 0 ] ;  then
+{
+  >&2 echo -e "ERROR There was an error loading load_execute_as_sudo  execute_as_sudo Err:$_err "
+  exit $_err
+}
+fi
 
 # USER_HOME=$(getent passwd $SUDO_USER | cut -d: -f6)
 enforce_variable_with_value HOME $HOME
@@ -73,8 +137,8 @@ enforce_variable_with_value SUDO_COMMAND $SUDO_COMMAND
 enforce_variable_with_value USER_HOME $USER_HOME
 (( DEBUG )) &&  echo $SUDO_USER
 (( DEBUG )) &&  env | grep SUDO
-echo " \__________Sudoed Correctly"
-echo $provider Loaded 
+echo -e "${CYAN} \__________Sudoed Correctly ${BRIGHT_BLUE87}✔️${CYAN}"
+echo -e "${provider} Loaded ${BRIGHT_BLUE87}✔️${CYAN}"
 
 
 # exit 0
@@ -224,7 +288,7 @@ execute_command_intuivo_cli/struct_testing:passed
       }
       else
       {
-        echo $_url Loaded Correclty
+        echo -e "${_url} Loaded Correclty ${BRIGHT_BLUE87}✔️${CYAN}"
       }
       fi
     }
