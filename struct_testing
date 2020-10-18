@@ -1305,8 +1305,11 @@ CERO="\033[01;0m"
                 (( DEBUG )) && echo -e "=value_two:${RED},,${YELLOW_OVER_GRAY241}$value_two${RED}''${RESET}"
                 TESTING="${RESET}${FUNCNAME[0]} that value ${YELLOW_OVER_DARKBLUE}${value_one}${RESET}${CYAN} same as ${YELLOW_OVER_GRAY241}${value_two}${RESET}"
                 if [[ "${value_one}" == "${value_two}" ]] ; then
-                {
-                    passed "${TESTING}"
+                {                    
+                    local F="${FUNCNAME[1]/test_/}" # replace one occurence from test_ to  
+                    passed "${F//_/ }s" # replace all occurences from _ to  
+                    # passed "${FUNCNAME[1]/_/ }" 
+                    # passed "${TESTING}"
                     return 0
                 }
                 else
@@ -1336,7 +1339,11 @@ CERO="\033[01;0m"
                 TESTING="${FUNCNAME[0]} that value ${YELLOW_OVER_DARKBLUE}${value_one}${RESET}${CYAN} not equal ${YELLOW_OVER_GRAY241}${value_two}${RESET}"
                 if [[ "${value_one}" != "${value_two}" ]] ; then
                 {
-                    passed "${TESTING}"
+                    local F="${FUNCNAME[1]/test_/}" # replace one occurence from test_ to  
+                    passed "${F//_/ }s" # replace all occurences from _ to  
+                    # passed "${FUNCNAME[1]/_/ }" 
+                    # passed "${FUNCNAME[1]}"
+                    # passed "${TESTING}"
                     return 0
                 }
                 else
@@ -1364,10 +1371,17 @@ CERO="\033[01;0m"
                 value_two=$(convert_null "${value_two}")
                 (( DEBUG )) && echo -e "~value_two:${RED},,${YELLOW_OVER_GRAY241}$value_two${RED}''${RESET}"
 
-                TESTING="${FUNCNAME[0]} that value ${YELLOW_OVER_DARKBLUE}${value_one}${RESET}${CYAN} to contain ${YELLOW_OVER_GRAY241}${value_two}${RESET}"
+                TESTING="${FUNCNAME[1]} that value ${YELLOW_OVER_DARKBLUE}${value_one}${RESET}${CYAN} to contain ${YELLOW_OVER_GRAY241}${value_two}${RESET}"
                 if [[ "${value_one}" == *"${value_two}"* ]] ; then
                 {
-                    passed "${TESTING}"
+                    # (( DEBUG )) && 
+                    # echo -e "~caller:${RED},,${YELLOW_OVER_DARKBLUE}$(caller)${RED}''${RESET}"
+                    # passed "${FUNCNAME[1]}"
+                    local C="${THISSCRIPTNAME}:${BASH_LINENO[0]}"
+                    local F="${FUNCNAME[1]/test_/}" # replace one occurence from test_ to  
+                    F="${F//_/ }s" # replace all occurences from _ to  
+                    passed "${C} ${F}" # replace all occurences from _ to  
+                    # passed "${TESTING}"
                     return 0
                 }
                 else
