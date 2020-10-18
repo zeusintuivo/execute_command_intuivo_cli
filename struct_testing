@@ -1279,23 +1279,10 @@ CERO="\033[01;0m"
                 return 1
             }
             fi
-            local value_one="${1}"
-            local equality="${2}"
-            local value_two="${3}"
-            local TESTING IFS
-IFS=\  read value_one equality value_two<<EOF
-${inputo}
-EOF
-            value_one=$(convert_expects_internals "$(convert_null "${value_one}")")
-            (( DEBUG )) && echo -e "0.value_one:${RED},,${YELLOW_OVER_DARKBLUE2}$value_one${RED}''${RESET}"
-            value_two=$(convert_null "${value_two}")
-            (( DEBUG )) && echo -e "0.value_two:${RED},,${DARK_BLUE_OVER_PEACH}$value_two${RED}''${RESET}"
-            (( DEBUG )) && echo -e "0.equality:${RED},,${YELLOW_OVER_DARKBLUE2}$equality${RED}''${RESET}"
-            # TESTING=$(echo "${FUNCNAME[0]} that value ${statement}" | ag "${value_one}" | ag "${value_two}")
-            TESTING="${FUNCNAME[0]} that value ${statement}"
-            (( DEBUG )) && echo -e "1.${RED}${FUNCNAME[1]} that value ${RED},,${CYAN}${statement}${RED}''${RESET}"
-            (( DEBUG )) && echo -e "1.TESTING:${LIGHTPINK_OVER_DARKBLUE}${TESTING}${RESET}"
-            (( DEBUG )) && echo -e "1.inputo:${RED},,${DARK_BLUE_OVER_PEACH}${inputo}${RED}''${RESET}"
+            local value_one=""
+            local value_two=""
+            local TESTING=""
+            
             if [[ "${inputo}" == *"="* ]] ; then
             {
                 if [[ "${inputo}" == "=" ]] ; then
