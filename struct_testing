@@ -1632,6 +1632,7 @@ CERO="\033[01;0m"
             local TESTING
             if contains_newlines "${@}" ; then
             {
+                SERVICE_NAMES="${@}"
                 while read -r SERVICE_NAME; do
                 {
                     if [[ -n "$SERVICE_NAME" ]] ; then  # is not empty
@@ -2722,9 +2723,13 @@ enter_last_only_removed() {
             #            if contains_newlines "${test2}" ; then
             # ' Here I changed \n to 0N33NT3R' why? - For a weird reasons when assigning a var " " it adds \n to the  end of it so t="a" is actually t="a\n"
         function contains_newlines() {
-            echo "${@}" | enter_encode
+            # echo "${@}" | enter_encode
             local trimmed_testing=$(echo "${@}" | enter_encode)
-            [[ "${trimmed_testing}" == *"0N33NT3R"* ]] && return 0 # true contains enters
+            if [[ "${trimmed_testing}" == *"0N33NT3R"* ]] ; then
+            {
+              return 0 # true contains enters
+            }
+            fi
             return 1 # false no newlines
         }
         # end contains_newlines
