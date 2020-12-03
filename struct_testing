@@ -1627,12 +1627,41 @@ CERO="\033[01;0m"
             #
             #            verify_is_installed wget
             #
-            local SERVICE_NAME="${1}"
-            TESTING="that: ${CYAN}${SERVICE_NAME}${GREEN} is installed"
-            if is_installed "${SERVICE_NAME}"; then
+            local SERVICE_NAME
+            local SERVICE_NAMES
+            local TESTING
+            if has_newlines "${@}" ; then
             {
-                 passed "${TESTING}"
-                 return 0
+                while read -r SERVICE_NAME; do
+                {
+                    if [[ -n "$SERVICE_NAME" ]] ; then  # is not empty
+                    {
+                        TESTING="that: ${CYAN}${SERVICE_NAME}${GREEN} is installed"
+                        if !  is_installed "${SERVICE_NAME}"; then
+                        {
+                            failed "${TESTING}" # assumed else
+                            return 1
+                        }
+                        fi
+                        passed "${TESTING}"
+                    }
+                    fi
+                }
+                done <<< "${SERVICE_NAMES}"
+                return 0
+            }
+            else
+            {
+                SERVICE_NAME="${1}"
+                TESTING="that: ${CYAN}${SERVICE_NAME}${GREEN} is installed"
+                if is_installed "${SERVICE_NAME}"; then
+                {
+                    passed "${TESTING}"
+                    return 0
+                }
+                fi
+                failed "${TESTING}" # assumed else
+                return 1
             }
             fi
             failed "${TESTING}" # assumed else
@@ -2699,6 +2728,7 @@ enter_last_only_removed() {
             return 1 # false no newlines
         }
         # end contains_newlines
+        alias has_newlines=contains_newlines
 
             # Sample use
             #           you have:       /root/.folder
