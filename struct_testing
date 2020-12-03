@@ -662,7 +662,7 @@ CERO="\033[01;0m"
             #          if  ! it_exists_with_spaces "/home/vagrant/.zshrc" ; then    is like is NOT installed
             #          if  it_exists_with_spaces "/root/.zshrc ; then      it makes more sense to make it this way
             #
-            local ONE_FILE 
+            local ONE_FILE
             local FILES="${*}"
             if [ -n "${FILES-x}" ] ; then # if its set and not empty
             {
@@ -694,7 +694,7 @@ CERO="\033[01;0m"
             #          if  ! it_exists_with_spaces "/home/vagrant/.zshrc" ; then    is like is NOT installed
             #          if  it_exists_with_spaces "/root/.zshrc ; then      it makes more sense to make it this way
             #
-            local ONE_FILE 
+            local ONE_FILE
             local FILES="${*}"
             if [ -n "${FILES-x}" ] ; then # if its set and not empty
             {
@@ -709,14 +709,14 @@ CERO="\033[01;0m"
                     # ONE_FILE="/Users/administrator/.zshrc"
                     if [[ -e "${ONE_FILE}" ]] ; then
                     {
-                        return 0 # it does not exists
+                        return 1 # it does not exists
                     }
                     fi
                 fi
                 done <<< "${FILES}"
             }
             fi
-            return 1 # it exists
+            return 0 # it exists
         } # end it_exists_with_spaces
         function file_exists() {
             # Sample usage
@@ -725,7 +725,7 @@ CERO="\033[01;0m"
             #     file_exists "/root/.zshrc
             #     /home/vagrant/.pyenzshrcv"
             #
-            local TESTING="" 
+            local TESTING=""
             local ONE_FILE=""
             local -a FILES="${@}"
             if [ -n "${FILES-x}" ] ; then # if its set and not empty
@@ -797,8 +797,8 @@ CERO="\033[01;0m"
             #     softlink_exists "/root/.pyenv
             #     /root/.pyenv>/home/vagrant/.pyenv"
             #
-            local FOUND_LINK_TARGET="" 
-            local ONE_LINK_ORDER="" 
+            local FOUND_LINK_TARGET=""
+            local ONE_LINK_ORDER=""
             local -a _LINKS="${@}"
             if [ -n "${_LINKS-x}" ] ; then # if its set and not empty
             {
@@ -909,8 +909,8 @@ CERO="\033[01;0m"
             #     softlink_exists_with_spaces "/Applications/Google\ Chrome.app/Contents/Profile/NativeMessagingHosts"
             #     softlink_exists_with_spaces "~/Library/Application\ Support/Google/Chrome/NativeMessagingHosts"
             #
-            local FOUND_LINK_TARGET 
-            local ONE_LINK_ORDER 
+            local FOUND_LINK_TARGET
+            local ONE_LINK_ORDER
             local _LINKS="${*}"
             if [ -n "${_LINKS-x}" ] ; then # if its set and not empty
             {
@@ -1282,7 +1282,7 @@ CERO="\033[01;0m"
             local value_one=""
             local value_two=""
             local TESTING=""
-            
+
             if [[ "${inputo}" == *"="* ]] ; then
             {
                 if [[ "${inputo}" == "=" ]] ; then
@@ -1305,10 +1305,10 @@ CERO="\033[01;0m"
                 (( DEBUG )) && echo -e "=value_two:${RED},,${YELLOW_OVER_GRAY241}$value_two${RED}''${RESET}"
                 TESTING="${RESET}${FUNCNAME[0]} that value ${YELLOW_OVER_DARKBLUE}${value_one}${RESET}${CYAN} same as ${YELLOW_OVER_GRAY241}${value_two}${RESET}"
                 if [[ "${value_one}" == "${value_two}" ]] ; then
-                {                    
-                    local F="${FUNCNAME[1]/test_/}" # replace one occurence from test_ to  
-                    passed "${F//_/ }s" # replace all occurences from _ to  
-                    # passed "${FUNCNAME[1]/_/ }" 
+                {
+                    local F="${FUNCNAME[1]/test_/}" # replace one occurence from test_ to
+                    passed "${F//_/ }s" # replace all occurences from _ to
+                    # passed "${FUNCNAME[1]/_/ }"
                     # passed "${TESTING}"
                     return 0
                 }
@@ -1339,9 +1339,9 @@ CERO="\033[01;0m"
                 TESTING="${FUNCNAME[0]} that value ${YELLOW_OVER_DARKBLUE}${value_one}${RESET}${CYAN} not equal ${YELLOW_OVER_GRAY241}${value_two}${RESET}"
                 if [[ "${value_one}" != "${value_two}" ]] ; then
                 {
-                    local F="${FUNCNAME[1]/test_/}" # replace one occurence from test_ to  
-                    passed "${F//_/ }s" # replace all occurences from _ to  
-                    # passed "${FUNCNAME[1]/_/ }" 
+                    local F="${FUNCNAME[1]/test_/}" # replace one occurence from test_ to
+                    passed "${F//_/ }s" # replace all occurences from _ to
+                    # passed "${FUNCNAME[1]/_/ }"
                     # passed "${FUNCNAME[1]}"
                     # passed "${TESTING}"
                     return 0
@@ -1374,13 +1374,13 @@ CERO="\033[01;0m"
                 TESTING="${FUNCNAME[1]} that value ${YELLOW_OVER_DARKBLUE}${value_one}${RESET}${CYAN} to contain ${YELLOW_OVER_GRAY241}${value_two}${RESET}"
                 if [[ "${value_one}" == *"${value_two}"* ]] ; then
                 {
-                    # (( DEBUG )) && 
+                    # (( DEBUG )) &&
                     # echo -e "~caller:${RED},,${YELLOW_OVER_DARKBLUE}$(caller)${RED}''${RESET}"
                     # passed "${FUNCNAME[1]}"
                     local C="${THISSCRIPTNAME}:${BASH_LINENO[0]}"
-                    local F="${FUNCNAME[1]/test_/}" # replace one occurence from test_ to  
-                    F="${F//_/ }s" # replace all occurences from _ to  
-                    passed "${C} ${F}" # replace all occurences from _ to  
+                    local F="${FUNCNAME[1]/test_/}" # replace one occurence from test_ to
+                    F="${F//_/ }s" # replace all occurences from _ to
+                    passed "${C} ${F}" # replace all occurences from _ to
                     # passed "${TESTING}"
                     return 0
                 }
@@ -1389,9 +1389,9 @@ CERO="\033[01;0m"
                     >&2 echo -e "${RED} ✘ failed ${LIGHTYELLOW}${TESTING}${CYAN}"
                     return 1
                 }
-                fi            
-            } 
-            else 
+                fi
+            }
+            else
             {
                 >&2 echo -e "${RED} ✘ failed. Case 1. Do not know how to do: ${LIGHTYELLOW}${TESTING}${CYAN}"
                 return 1
@@ -1403,8 +1403,8 @@ CERO="\033[01;0m"
 
         function enforce(){
             # Sample use
-            #     if enforce 14.2.0 to be 12.18.3  ; then 
-            #     if enforce $__node_required to be $_node_version ; then 
+            #     if enforce 14.2.0 to be 12.18.3  ; then
+            #     if enforce $__node_required to be $_node_version ; then
             local _msg=""
             _msg="$(expect "${@}" 2>&1)"
             local -i _err=$?
@@ -1415,13 +1415,13 @@ CERO="\033[01;0m"
             }
             fi
             >&1 passed "$_msg"
-            return 0  # implied else 
+            return 0  # implied else
          } # end enforce
 
         function version_not_the_same(){
             # Sample use
-            #     if version_not_the_same 14.2.0 to be 12.18.3  ; then 
-            #     if version_not_the_same $__node_required to be $_node_version ; then 
+            #     if version_not_the_same 14.2.0 to be 12.18.3  ; then
+            #     if version_not_the_same $__node_required to be $_node_version ; then
             local _msg="$(expect "${@}" 2>&1)"
             local -i _err=$?
             if [ $_err -ne 0 ] ;  then
@@ -1430,7 +1430,7 @@ CERO="\033[01;0m"
                 return $_err
             }
             fi
-            return 0  # implied else 
+            return 0  # implied else
          } # end version_not_the_same
 #expect "hola" = "hello"
 #expect "hola" = "hola"
@@ -1530,7 +1530,7 @@ CERO="\033[01;0m"
             {
                 echo "${SERVICE_STATUS}"
                 failed "${TESTING}"
-                return 0 
+                return 0
             }
             fi
             passed "${TESTING}"
@@ -1554,7 +1554,7 @@ CERO="\033[01;0m"
             if [[ "${SERVICE_STATUS}" == *"${EXPECTED_RESPONSE}"* ]] ; then
             {
                 passed "${TESTING}"
-                return 0 
+                return 0
             }
             fi
             echo "${SERVICE_STATUS}"
@@ -1566,7 +1566,7 @@ CERO="\033[01;0m"
           if ( is_defined_and_not_empty SUDO_USER "${SUDO_USER}" ) ; then
           {
               (( DEBUG )) && echo "type_function_exists:SUDO DEFINED"
-              if ( su - $SUDO_USER -c 'type '"${*}"' >/dev/null 2>&1' ) ; then 
+              if ( su - $SUDO_USER -c 'type '"${*}"' >/dev/null 2>&1' ) ; then
               {
                 (( DEBUG )) && echo "type_function_exists:TYPE is installed ${*} "
                 return 0
@@ -1577,7 +1577,7 @@ CERO="\033[01;0m"
           }
           fi
           (( DEBUG )) && echo "type_function_exists:SUDO NOT DEFINED"
-          if ( type "${*}" > /dev/null 2>&1 ) ; then 
+          if ( type "${*}" > /dev/null 2>&1 ) ; then
           {
             (( DEBUG )) && echo "type_function_exists:TYPE is installed ${*} "
             return 0
