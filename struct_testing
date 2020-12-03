@@ -1514,12 +1514,12 @@ CERO="\033[01;0m"
             fi
         } # end check_to_be_installed
 
-        function is_service_reponse_not_this_fail() {
+        function is_service_response_not_this_fail() {
             #Sample use
             # ( command -v nginx >/dev/null 2>&1; ) && sudo service nginx start
             #
-            # is_service_reponse_not_this_fail "nginx" "$(sudo service nginx status)" "not running"
-            # is_service_reponse_not_this_fail "puma" "$(sudo /etc/init.d/pumacontrol.sh status)" "not running"
+            # is_service_response_not_this_fail "nginx" "$(sudo service nginx status)" "not running"
+            # is_service_response_not_this_fail "puma" "$(sudo /etc/init.d/pumacontrol.sh status)" "not running"
             #
             local SERVICE_NAME SERVICE_STATUS SERVICE_FAIL_RESPONSE
             SERVICE_NAME="${1}"
@@ -1535,7 +1535,7 @@ CERO="\033[01;0m"
             fi
             passed "${TESTING}"
             return 1
-        } # end is_service_reponse_not_this_fail
+        } # end is_service_response_not_this_fail
 
         function is_service_running() {
             #Sample use
