@@ -503,12 +503,12 @@ CERO="\033[01;0m"
                     if [[ -d "${_ONE_DIR}" && ! -L "${_ONE_DIR}" ]] ; then
                     {
                         passed "${_TESTING}"
-                        return 0
+                        # return 0
                     }
                     else
                     {
                         failed "${_TESTING}"
-                        return 1
+                        # return 1
                     }
                     fi
                 }
@@ -2943,7 +2943,7 @@ function _download() {
     # check operation systems
     if [[ "$(uname)" == "Darwin" ]] ; then
     # Do something under Mac OS X platform
-      _download_mac "${@}"
+      _download_linux "${@}"
     elif [[ "$(expr substr $(uname -s) 1 5)" == "Linux" ]] ; then
     # Do something under GNU/Linux platform
       _download_linux "${@}"
@@ -2992,7 +2992,8 @@ function _download_linux() {
   echo "download folder 2:<${2}>"
   [ -z "${2}" ] && echo "empty"
   echo "  download file 3:<${3}>"
-  directory_exists_with_spaces $USER_HOME/Downloads
+#   file_exists_with_spaces "${download_folder}"
+  directory_exists_with_spaces "${download_folder}"
     #   [ -z "${3}" ] && echo "empty"
     #   echo
     # echo "# arguments called with ---->  ${@}     "
