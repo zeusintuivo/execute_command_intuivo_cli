@@ -315,6 +315,7 @@ CERO="\033[01;0m"
                 echo -e "${BRIGHT_BLUE87} ${__caller_script_name}:${__caller_line} \t\t  ${FUNCNAME[1]}() ${RESET}"  >&2
                 for (( _counter=1; _counter<${_error_count}; _counter++ )); do
                     (( _counter_offset=_counter + 1 ))
+                    # echo -e "${BASHCOMMAND[$_counter_offset]}"
                     echo -e "${BRIGHT_BLUE87} ${BASH_SOURCE[$_counter_offset]}:${BASH_LINENO[$_counter]} \t\t ${FUNCNAME[$_counter_offset]}() ${RESET}"  >&2
                 done
                 echo -e "$0:${BASH_LINENO[1]} ${FUNCNAME[1]}()"
@@ -346,7 +347,7 @@ CERO="\033[01;0m"
             local empty="${2}"
             local value="${3}"
             TESTING="${FUNCNAME[0]} that value ${CYAN}${value}${LIGHTYELLOW} is not empty"
-            if [[ ! -z "${value+x}" ]] ; then
+            if [  -n "${value}" ] ; then
             {
                 passed "${TESTING}"
             }
@@ -482,41 +483,6 @@ CERO="\033[01;0m"
             fi
         } # end directory_exists
 
-        function directory_exists_with_spaces() {
-            # Sample usage
-            #
-            #     directory_exists_with_spaces "/Applications/Google Chrome.app/"
-            #     directory_exists_with_spaces "/Applications/Google\ Chrome.app/"
-            #
-            local _TESTING _ONE_DIR="${*}"
-            if [ ! -z "${_ONE_DIR-x}" ] ; then # if its set and not empty
-            {
-                # if not empty
-                if [ ! -z "${_ONE_DIR}" ] ; then
-                {
-                    # AS a NOTE ~/  <-- will fail always
-                    # SO ~/.pyenv <-- will fail always
-                    # But /home/user/.pyenv  <-- will pass
-                    # OR Users/administrator/.pyenv  in mac <-- will pass
-                    # _ONE_DIR="/Users/administrator/.pyenv"
-                    _TESTING="that directory ${CYAN}${_ONE_DIR}${LIGHTYELLOW} exists"
-                    if [[ -d "${_ONE_DIR}" && ! -L "${_ONE_DIR}" ]] ; then
-                    {
-                        passed "${_TESTING}"
-                        # return 0
-                    }
-                    else
-                    {
-                        failed "${_TESTING}"
-                        # return 1
-                    }
-                    fi
-                }
-                fi
-
-            }
-            fi
-        } # end directory_exists_with_spaces
 
         function does_not_exist() {
             # Sample usage
@@ -617,7 +583,7 @@ CERO="\033[01;0m"
             #          if  it_exists "/root/.zshrc ; then      it makes more sense to make it this way
             #
             local ONE_FILE FILES="${@}"
-            if [ ! -z "${FILES-x}" ] ; then # if its set and not empty
+            if [ -n "${FILES-x}" ] ; then # if its set and not empty
             {
                 FILES=$(switch_spaces_to_newlines <<< "${@}")
                 # echo testing $FILES
@@ -732,7 +698,7 @@ CERO="\033[01;0m"
             {
                 FILES=$(switch_spaces_to_newlines <<< "${@}")
                 while read -r ONE_FILE; do
-                if [ ! -z "${ONE_FILE}" ] ; then # if not empty
+                if [ -n "${ONE_FILE}" ] ; then # if not empty
                     TESTING="that file ${CYAN}${ONE_FILE}${LIGHTYELLOW} exists"
             # echo -e $TESTING
                     if it_exists "${ONE_FILE}" ; then
@@ -754,7 +720,42 @@ CERO="\033[01;0m"
             unset TESTING
             return 1
         } # end file_exists
+        function directory_exists_with_spaces() {
+            # Sample usage
+            #
+            #     directory_exists_with_spaces "/Applications/Google Chrome.app/"
+            #     directory_exists_with_spaces "$HOME/Downloads/"
+            #     directory_exists_with_spaces "/Applications/Google\ Chrome.app/"
+            #
+            local _TESTING _ONE_DIR="${*}"
+            if [ -n "${_ONE_DIR-x}" ] ; then # if its set and not empty
+            {
+                # if not empty
+                if [  -n "${_ONE_DIR}" ] ; then
+                {
+                    # AS a NOTE ~/  <-- will fail always
+                    # SO ~/.pyenv <-- will fail always
+                    # But /home/user/.pyenv  <-- will pass
+                    # OR Users/administrator/.pyenv  in mac <-- will pass
+                    # _ONE_DIR="/Users/administrator/.pyenv"
+                    _TESTING="that directory ${CYAN}${_ONE_DIR}${LIGHTYELLOW} exists"
+                    if [[ -d "${_ONE_DIR}" && ! -L "${_ONE_DIR}" ]] ; then
+                    # if it_exists_with_spaces "${_ONE_DIR}" ; then
+                    {
+                        passed "${_TESTING}"
+                    }
+                    else
+                    {
+                        failed "${_TESTING}"
+                    }
+                    fi
+                }
+                fi
 
+            }
+            fi
+        } # end directory_exists_with_spaces
+        # directory_exists_with_spaces "$HOME/Downloads/"
         function file_exists_with_spaces() {
             # Sample usage
             #
@@ -2993,7 +2994,7 @@ function _download_linux() {
   [ -z "${2}" ] && echo "empty"
   echo "  download file 3:<${3}>"
 #   file_exists_with_spaces "${download_folder}"
-  directory_exists_with_spaces "${download_folder}"
+  directory_exists "${download_folder}"
     #   [ -z "${3}" ] && echo "empty"
     #   echo
     # echo "# arguments called with ---->  ${@}     "
@@ -3078,7 +3079,7 @@ function _download_linux() {
     # ( typeset -p "SUDO_USER"  &>/dev/null ) && echo "sudo user " >&2
     ( typeset -p "SUDO_USER"  &>/dev/null ) &&  su - $SUDO_USER -c 'curl -O '"${target_url}"' 2>/dev/null'   # suppress only wget download messages, but keep wget output for variable
 
-    _assure_success
+    # _assure_success
   else
     failed \\n${BASH_SOURCE}:${BASH_LINENO[-0]} ${FUNCNAME[-0]}\(\) \\n$0:${BASH_LINENO[1]} ${FUNCNAME[1]}\(\) \\n"I cannot find wget or curl programs to perform a download action! ${target_url}"
   fi
