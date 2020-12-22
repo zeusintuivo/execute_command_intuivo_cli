@@ -2193,13 +2193,21 @@ CERO="\033[01;0m"
             #    fi
 
             KIND=""
-            # ls werwerwerwerwerwerwerwerwerwerwerr >/dev/null 2>&1;
-            # if (( $? == 0 )) ;  then  # Intel processor
+            if ls werwerwerwerwerwerwerwerwerwerwerr >/dev/null 2>&1; then 
+              if (( $? == 0 )) ;  then  # Intel processor
                 KIND="INTEL"
-            # fi
-            # if [ $? == 0 ]; then   # Mac Intel processor
-            #     KIND="${KIND}MAC"
-            # fi
+              fi
+              if [ $? == 0 ]; then   # Mac Intel processor
+                KIND="${KIND}MAC"
+              fi
+            else
+              if (( $? == 0 )) ;  then  # Intel processor
+                KIND="INTEL"
+              fi
+              if [ $? == 0 ]; then   # Mac Intel processor
+                KIND="${KIND}MAC"
+              fi
+            fi
             # echo "clear_error_output" >/dev/null 2>&1;
             echo "${KIND}"
         }
