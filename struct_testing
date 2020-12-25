@@ -86,7 +86,7 @@ function HOW_TO_LOAD_SEVERAL_FILES() {
 
     load_execute_commands_wget() {
         local URL=""
-        local cached_directory="$HOME$HOME/_/clis/execute_command_intuivo_cli/"
+        local cached_directory="$HOME/_/clis/execute_command_intuivo_cli/"
         local EXECOMCLI=""
         local provider=""
         [   -d "${cached_directory}" ] &&  provider="file://${cached_directory}"
@@ -121,7 +121,7 @@ function HOW_TO_LOAD_SEVERAL_FILES() {
     load_execute_commands_curl() {
         local URL=""
         local EXECOMCLI=""
-        local cached_directory="$HOME$HOME/_/clis/execute_command_intuivo_cli/"
+        local cached_directory="$HOME/_/clis/execute_command_intuivo_cli/"
         local provider=""
         [   -d "${cached_directory}" ] &&  provider="file://${cached_directory}"
         [ ! -d "${cached_directory}" ] &&  provider="https://raw.githubusercontent.com/zeusintuivo/execute_command_intuivo_cli/master/"
@@ -158,26 +158,28 @@ function HOW_TO_LOAD_JUST_ONE_SCRIPT_LOCAL_AND_ONLINE_EXECUTE_COMMAND() {
 
     #Sample short call for loading execute command
     load_execute_command_curl() {
-        local provider="file://$HOME$HOME/_/clis/execute_command_intuivo_cli/execute_command"
-        [ ! -d "$HOME$HOME/_/clis/execute_command_intuivo_cli/" ] && provider="https://raw.githubusercontent.com/zeusintuivo/execute_command_intuivo_cli/master/execute_command"
-        local EXECOMCLI=$(curl $provider  2>/dev/null )   # suppress only curl download messages, but keep curl output for variable
-        eval """${EXECOMCLI}"""
-        ( ( ! command -v passed >/dev/null 2>&1; ) && echo -e "\n \n  ERROR! Loading execute_command \n \n " && exit 69; )
+        local provider="$HOME/_/clis/execute_command_intuivo_cli/execute_command"
+        [   -e "${provider}"  ] && source "${provider}" && echo "Loading Struct Testing locally"
+        command -v passed >/dev/null 2>&1 && echo "                              \.. loading succeeded " && return 0
+        ( [ ! -e "${provider}"  ] || ( ! command -v passed >/dev/null 2>&1 ) ) && echo "Loading Struct Testing from the net " && eval """$(curl https://raw.githubusercontent.com/zeusintuivo/execute_command_intuivo_cli/master/execute_command -o -  2>/dev/null )"""   # suppress only curl download messages, but keep curl output for variable
+        ( ( ! command -v passed >/dev/null 2>&1 ) && echo -e "\n \n  ERROR! Loading execute_command \n \n " && return 1 )
+        return 0
     }
-    # end load_struct_testing_curl
-    load_struct_testing_curl
+    # end load_execute_command_curl
+    load_execute_command_curl     
 }
 # end HOW_TO_LOAD_JUST_ONE_SCRIPT_EXECUTE_COMMAND
 
 function HOW_TO_LOAD_JUST_ONE_SCRIPT_LOCAL_AND_ONLINE_STRUCT_USING_CURL() {
 
-    #Sample short call for loading struct_testing
+    # Sample short call for loading struct_testing
     load_struct_testing_curl() {
-        local provider="file://$HOME$HOME/_/clis/execute_command_intuivo_cli/struct_testing"
-        [ ! -d "$HOME$HOME/_/clis/execute_command_intuivo_cli/" ] && provider="https://raw.githubusercontent.com/zeusintuivo/execute_command_intuivo_cli/master/struct_testing"
-        local EXECOMCLI=$(curl $provider  2>/dev/null )   # suppress only curl download messages, but keep curl output for variable
-        eval """${EXECOMCLI}"""
-        ( ( ! command -v passed >/dev/null 2>&1; ) && echo -e "\n \n  ERROR! Loading struct_testing \n \n " && exit 69; )
+        local provider="$HOME/_/clis/execute_command_intuivo_cli/struct_testing"
+        [   -e "${provider}"  ] && source "${provider}" && echo "Loading Struct Testing locally"
+        command -v passed >/dev/null 2>&1 && echo "                              \.. loading succeeded " && return 0
+        ( [ ! -e "${provider}"  ] || ( ! command -v passed >/dev/null 2>&1 ) ) && echo "Loading Struct Testing from the net " && eval """$(curl https://raw.githubusercontent.com/zeusintuivo/execute_command_intuivo_cli/master/struct_testing -o -  2>/dev/null )"""   # suppress only curl download messages, but keep curl output for variable
+        ( ( ! command -v passed >/dev/null 2>&1 ) && echo -e "\n \n  ERROR! Loading struct_testing \n \n " && return 1 )
+        return 0
     }
     # end load_struct_testing_curl
     load_struct_testing_curl
@@ -189,10 +191,12 @@ function HOW_TO_LOAD_JUST_ONE_SCRIPT_LOCAL_AND_ONLINE_STRUCT_USING_WGET() {
 
     #Sample short call for loading struct_testing
     load_struct_testing_wget() {
-        local provider="$HOME$HOME/_/clis/execute_command_intuivo_cli/struct_testing"
-        [   -e "${provider}"  ] && source "${provider}"
-        [ ! -e "${provider}"  ] && eval """$(wget --quiet --no-check-certificate  https://raw.githubusercontent.com/zeusintuivo/execute_command_intuivo_cli/master/struct_testing -O -  2>/dev/null )"""   # suppress only wget download messages, but keep wget output for variable
-        ( ( ! command -v passed >/dev/null 2>&1; ) && echo -e "\n \n  ERROR! Loading struct_testing \n \n " && exit 69; )
+        local provider="$HOME/_/clis/execute_command_intuivo_cli/struct_testing"
+        [   -e "${provider}"  ] && source "${provider}" && echo "Loading Struct Testing locally"
+        command -v passed >/dev/null 2>&1 && echo "                              \.. loading succeeded " && return 0
+        ( [ ! -e "${provider}"  ] || ( ! command -v passed >/dev/null 2>&1 ) ) && echo "Loading Struct Testing from the net " && eval """$(wget --quiet --no-check-certificate  https://raw.githubusercontent.com/zeusintuivo/execute_command_intuivo_cli/master/struct_testing -O -  2>/dev/null )"""   # suppress only wget download messages, but keep wget output for variable
+        ( ( ! command -v passed >/dev/null 2>&1 ) && echo -e "\n \n  ERROR! Loading struct_testing \n \n " && return 1 )
+        return 0
     }
     # end load_struct_testing_wget
     load_struct_testing_wget
@@ -410,18 +414,20 @@ CERO="\033[01;0m"
         } # end Testing
         alias testing=Testing
 
-
         function Configuring() {
             echo -e "${GREEN} Configuring ${RED}${1}${GREEN}, ${RED}${2} ${GREEN}${3} ${CYAN}${4}, ${RED}${5} ${GREEN}${6} ${CYAN}${*:7} ${GREEN}.${RESET}"
         } # end Configuring
-
         alias configuring=Configuring
 
         function Setting() {
             echo -e "${GREEN} Setting ${RED}${1}${GREEN}, ${RED}${2} ${GREEN}${3} ${CYAN}${4}, ${RED}${5} ${GREEN}${6} ${CYAN}${*:7} ${GREEN}.${RESET}"
         } # end Setting
-
         alias setting=Setting
+
+        function Checking() {
+            echo -e "${GREEN} Checking ${RED}${1}${GREEN}, ${RED}${2} ${GREEN}${3} ${CYAN}${4}, ${RED}${5} ${GREEN}${6} ${CYAN}${*:7} ${GREEN}.${RESET}"
+        } # end Checking
+        alias checking=Checking
 
         function Final() {
             echo -e "${GREEN} Setting ${RED}${1}${GREEN}, ${RED}${2} ${GREEN}${3} ${CYAN}${4}, ${RED}${5} ${GREEN}${6} ${CYAN}${*:7} ${GREEN}.${RESET}"
@@ -431,7 +437,6 @@ CERO="\033[01;0m"
             echo -e "${ORANGE} ø  ${PURPLE}${1}${ORANGE} ${CYAN}${2} ${DARKBLUE}${3} ${PURPLE_BLUE}${4} ${BRIGHT_BLUE87}${5} ${GREEN}${6} ${RED}${*:7} ${GREEN}.${RESET}"
             "${@}"
         } # end Showing
-
         alias showing=Showing
 
         function Message() {
@@ -440,6 +445,13 @@ CERO="\033[01;0m"
             echo  -e "${PURPLE}${PURPLE}+---${LIGHTYELLOW} ${LIGHTYELLOW} ${msg1} ${CYAN} ${msg2} ${RESET}"
         }
         alias message=Message
+
+        function Comment() {
+            local msg1="$1"
+            local msg2=$(echo "$*" | cüt "$1")
+            echo  -e "${PURPLE}${CYAN}+---${DARKBLUE} ${LIGHTYELLOW} ${msg1} ${CYAN} ${msg2} ${RESET}"
+        }
+        alias comment=Comment
 
         function not() {
             local order="empty"  # Tasjgjgggg
