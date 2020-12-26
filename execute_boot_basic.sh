@@ -6,7 +6,7 @@
 # How to use: start
 
 # Include this at the beginning of the script
-# typeset -gr THISSCRIPTNAME="$(pwd)/$(basename "$0")"  # § This goes in the FATHER-MOTHER script
+# typeset -gr THISSCRIPTCOMPLETEPATH="$(pwd)/$(basename "$0")"  # § This goes in the FATHER-MOTHER script
 # typeset -i _err=0
 # load_execute_boot_basic_with_sudo(){
 #     if ( typeset -p "SUDO_USER"  &>/dev/null ) ; then
@@ -78,7 +78,7 @@ typeset -i _err=0
 CYAN="\033[01;36m"
 BRIGHT_BLUE87="\033[38;5;87m"
 echo -e "${CYAN}"
-(( DEBUG )) &&  ( typeset -p "THISSCRIPTNAME"  &>/dev/null ) && typeset -gr THISSCRIPTNAME="$(pwd)/$(basename "$0")"
+(( DEBUG )) &&  ( typeset -p "THISSCRIPTCOMPLETEPATH"  &>/dev/null ) && typeset -gr THISSCRIPTCOMPLETEPATH="$(pwd)/$(basename "$0")"
 load_execute_as_sudo(){
     # DEBUG=1
     # Test home value part 1
@@ -138,15 +138,17 @@ enforce_variable_with_value USER_HOME $USER_HOME
 (( DEBUG )) &&  echo $SUDO_USER
 (( DEBUG )) &&  env | grep SUDO
 echo -e "${CYAN} \__________Sudoed Correctly ${BRIGHT_BLUE87}✔️${CYAN}"
+echo -e "${CYAN}                           ${LIGHTPINK} SUDO_USER ️${YELLOW_OVER_DARKBLUE} $SUDO_USER ${BRIGHT_BLUE87}✔️${CYAN}"
+echo -e "${CYAN}                           ${LIGHTPINK} USER_HOME ️${YELLOW_OVER_DARKBLUE} $USER_HOME ${BRIGHT_BLUE87} ✔️${CYAN}"
 echo -e "${provider} Loaded ${BRIGHT_BLUE87}✔️${CYAN}"
 
 
 # exit 0
 # . ./execute_as_sudo.sh
-# THISSCRIPTNAME="$(pwd)/$THISSCRIPTNAME"
-# export THISSCRIPTNAME=`basename "$0"`
+# THISSCRIPTCOMPLETEPATH="$(pwd)/$THISSCRIPTCOMPLETEPATH"
+# export THISSCRIPTCOMPLETEPATH=`basename "$0"`
 # DEBUG=1
- (( DEBUG )) && echo "THISSCRIPTNAME:: $THISSCRIPTNAME"
+ (( DEBUG )) && echo "THISSCRIPTCOMPLETEPATH:: $THISSCRIPTCOMPLETEPATH"
 function on_int() {
     echo -e " ☠ ${LIGHTPINK} KILL EXECUTION SIGNAL SEND ${RESET}"
     echo -e " ☠ ${YELLOW_OVER_DARKBLUE}  ${*} ${RESET}"
@@ -279,7 +281,7 @@ execute_command_intuivo_cli/struct_testing:passed
       fi
       # Test function exitance if loaded propertly
       # type -f on_error
-      (( DEBUG )) &&  echo "-------command:: $(command -v on_error )"
+      # (( DEBUG )) &&  echo "-------command:: $(command -v on_error )"
       #  ( ( ! command -v passed >/dev/null 2>&1; ) && echo -e "\n \n  ERROR! Loading struct_testing \n \n " && exit 69; )
       if ( ( ! command -v "${_function_test}" >/dev/null 2>&1; ) && exit 69; ) ;  then
       {
@@ -304,8 +306,9 @@ execute_command_intuivo_cli/struct_testing:passed
     unset _function_test
     # unset _scripts # unset: _scripts: cannot unset: readonly variable ..is normal behavoir or bash as of now
     # unset _provider  # unset: _scripts: cannot unset: readonly variable ..is normal behavoir or bash as of now
+    return 0
 } # end function boostrap_intuivo_bash_app
 boostrap_intuivo_bash_app
 
-(( DEBUG )) && echo $SUDO_USER
-(( DEBUG )) && env | grep SUDO
+(( DEBUG )) && echo $SUDO_USER || true
+(( DEBUG )) && env | grep SUDO || true

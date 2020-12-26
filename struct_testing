@@ -1576,6 +1576,7 @@ CERO="\033[01;0m"
         } # end is_service_running
 
         function type_function_exists() {
+          # local DEBUG=1
           if ( is_defined_and_not_empty SUDO_USER "${SUDO_USER}" ) ; then
           {
               (( DEBUG )) && echo "type_function_exists:SUDO DEFINED"
@@ -1597,6 +1598,7 @@ CERO="\033[01;0m"
           }
           fi
           (( DEBUG )) && echo "type_function_exists:TYPE is not installed ${*} "
+          (( DEBUG )) && echo "( type nvm > /dev/null 2>&1 )"
           return 1
         } # type_function_exists
 
@@ -1608,14 +1610,14 @@ CERO="\033[01;0m"
             #          if  is_installed wget ; then      it makes more sense to make it this way
             #
             local SERVICE_NAME="${*}"
-            if ! type_function_exists "${SERVICE_NAME}"; then
+            if type_function_exists "${SERVICE_NAME}"; then
             {
                 #failed "${TESTING}"
-                return 1
+                return 0
             }
             fi
             #passed "${TESTING}"  # assumed else
-            return 0
+            return 1
         } # end is_installed
 
         function is_not_installed() {
