@@ -333,6 +333,52 @@ CERO="\033[01;0m"
             kill_execution
         }
 
+        function enforce_variable_with_value(){
+          # Sample use
+          # enforce_variable_with_value HOME $HOME
+          # enforce_variable_with_value USER_HOME $USER_HOME
+          # enforce_variable_with_value SUDO_USER $SUDO_USER
+          # enforce_variable_with_value HOME $HOME && echo "HOME ensure_is_defined_and_not_empty 1"
+          # Tests for the function
+          # declare -rg USER_HOME=$(getent passwd $SUDO_USER | cut -d: -f6)
+          #  ( typeset -p "HOME"  &>/dev/null )    @ Is HOME declared listed in declarations ?
+          #  ( declare -p "HOME"  &>/dev/null )    @ Is HOME declared listed in declarations ?
+          #  [ -n "${HOME+x}" ] && echo "HOME 1"   @ Is HOME declared and not empty?
+          #  [ -z "${HOME+x}" ] && echo "HOME 1"   @ Is HOME declared and empty?
+          # [ -n "${HOME+x}" ] && echo "HOME 1"
+          # [ -n "${HOME+x}" ] && echo "HOME 12"
+          # [ -n "${CAN_I_RUN_SUDO2+x}" ] && echo "CAN_I_RUN_SUDO2 null"
+          # [ -n "${CAN_I_RUN_SUDO+x}" ] && echo "CAN_I_RUN_SUDO 12"
+          # [ -n "${SUDO_USER+x}" ] && echo "SUDO_USER 111"
+          # ( declare -p "HOME" ) && echo "HOME 2"
+          typeset -r TESTING="that variable is listed and: ${CYAN}${1}${LIGHTYELLOW} and has value: ${RESET}<${YELLOW_OVER_DARKBLUE}${2}${RESET}>"
+          (( DEBUG )) && echo -e "${FUNCNAME[0]}"
+          (( DEBUG )) && echo ${@} -assume existing variable for this part
+          (( DEBUG )) && ( typeset -p "${1}"  &>/dev/null  ) && echo "1 defined 1"
+          (( DEBUG )) && [ -n "${2+x}" ]  && echo "1 defined 2"
+          (( DEBUG )) && ( typeset -p "${1}"  &>/dev/null ) &&  [ -n "${2+x}" ]  && echo "1 declared,defined and with value not empty 3"
+          (( DEBUG )) && ( ( typeset -p "${1}"  &>/dev/null  ) || echo "1 not defined 1")
+          (( DEBUG )) && ( ! typeset -p "${1}"  &>/dev/null  ) && echo "1 not defined 2"
+          # echo QWER - assume non existant variable for this part
+          # ( typeset -p "QWER"  &>/dev/null  ) && echo "QWER defined 1"
+          # [ -n "${QWER+x}" ]  && echo "QWER defined 2"
+          # ( typeset -p "QWER"  &>/dev/null ) &&  [ -n "${QWER+x}" ]  && echo "QWER defined 3"
+          # ( typeset -p "QWER"  &>/dev/null  ) || echo "QWER not defined 1"
+          # ( ! typeset -p "QWER"  &>/dev/null  ) && echo "QWER not defined 2"
+          # echo bye
+          # exit 0
+          if ( typeset -p "${1}"  &>/dev/null ) &&  [ -n "${2+x}" ] ; then
+          {
+              (( DEBUG )) && echo -e "${LIGHTGREEN} ✔ ${LIGHTYELLOW} ${TESTING} has passed "
+              return 0
+          } else {
+              echo -e "${RED} 𝞦 ${LIGHTYELLOW} ${TESTING} has failed "
+              exit 1
+          }
+          fi
+          exit 1  # Stop the scripts execution
+        } # end enforce_variable_with_value
+
         function assert() {
             # Sample usage
             #
@@ -1719,24 +1765,93 @@ CERO="\033[01;0m"
             #            verify_installed_version "phantomjs --version"  "${phantomjs_version}"
             #            verify_installed_version "casperjs --version"  "${casper_version}"
             #
-            local COMMAND_TO_EVAL=$(eval """${1}""" 2>&1 | extract_version | head -1)
-            local VERSION_EXPECTED=$(eval """${2}""" 2>&1 | extract_version | head -1)
-            # passed "${COMMAND_TO_EVAL}" passed "${VERSION_EXPECTED}"
-            local TESTING="that installed version for <${COMMAND_TO_EVAL}> is ${CYAN}<${VERSION_EXPECTED}>${GREEN} "
-            ( declare -p "${COMMAND_TO_EVAL}"  &>/dev/null ) &&  failed "${TESTING} -- left value empty" && return 1
-            ( declare -p "${VERSION_EXPECTED}"  &>/dev/null ) &&  failed "${TESTING} -- right value empty" && return 1
-            if [[ "${COMMAND_TO_EVAL}" == *"${VERSION_EXPECTED}"* ]] || [[ "${COMMAND_TO_EVAL}" == "${VERSION_EXPECTED}" ]]; then
+            ( declare -p "${1}"  &>/dev/null ) &&  failed "verify_installed_version -- left value empty" && exit 1
+            ( declare -p "${2}"  &>/dev/null ) &&  failed "verify_installed_version -- right value empty" && exit 1
+            local -i _err=0
+            local evaled=""
+            local COMMAND_TO_EVAL=""
+            if ${1} &>/dev/null ; then 
             {
-                failed "${TESTING}"
-                return 1
+              COMMAND_TO_EVAL=$(echo -n $(eval ${1}))
+              _err=$?
+              # echo "1 $_err  ${COMMAND_TO_EVAL}"
+              evaled=$(echo -n "${COMMAND_TO_EVAL}" | extract_version | head -1)
+              # echo "1 $_err  ${COMMAND_TO_EVAL}"
+              # evaled<<<$($COMMAND_TO_EVAL) 
+              # evaled=$(${COMMAND_TO_EVAL})
             }
-            else
+            else 
+            {
+              _err=$?
+              # echo "4 $_err ${COMMAND_TO_EVAL}"
+              if [ $_err -eq 127 ] ; then 
+              {
+                # echo "5 $_err  ${COMMAND_TO_EVAL}"
+                # failed "1 verify_installed_version 1st argument needs to be an executable command. Command not found: <"""${2}""">"
+                COMMAND_TO_EVAL="""${1}"""
+                evaled="$COMMAND_TO_EVAL" 
+              }
+              else 
+              {
+                # echo "6 $_err  ${COMMAND_TO_EVAL}"
+                # echo "1"
+                COMMAND_TO_EVAL=$(echo -n $(eval ${1}))
+                _err=$?
+                # echo "1 $_err  ${COMMAND_TO_EVAL}"
+                evaled=$(echo -n "${COMMAND_TO_EVAL}" | extract_version | head -1)
+                # echo "1 $_err  ${COMMAND_TO_EVAL}"
+                # evaled<<<$($COMMAND_TO_EVAL) 
+                # evaled=$(${COMMAND_TO_EVAL})
+              }
+              fi 
+            }
+            fi
+            # echo "test:${evaled}"
+            _err=0
+            local expected=""
+            local VERSION_EXPECTED=""
+            if ${2} &>/dev/null; then 
+            {
+              # echo "2 $_err ${2}"
+              VERSION_EXPECTED=$(eval ${2})
+              _err=$?
+              expected=$(echo -n "${VERSION_EXPECTED}" | extract_version | head -1)
+              # expected<<<$($VERSION_EXPECTED) 
+              # expected=$(${VERSION_EXPECTED})
+            }
+            else 
+            {
+              _err=$?
+              # echo "7 $_err ${2}"
+              if [ $_err -eq 127 ] ; then 
+              {
+                # failed "1 verify_installed_version 2nd argument needs to be an executable command. Command not found: <"""${2}""">"
+                VERSION_EXPECTED="""${2}"""
+                expected="$VERSION_EXPECTED" 
+              }
+              else 
+              {
+                # echo "2 $_err ${2}"
+                VERSION_EXPECTED=$(eval ${2})
+                expected=$(echo -n "${VERSION_EXPECTED}" | extract_version | head -1)
+                # expected<<<$($VERSION_EXPECTED) 
+                # expected=$(${VERSION_EXPECTED})
+              }
+              fi 
+            }
+            fi
+            # echo "expected:${expected}"
+            # passed "${COMMAND_TO_EVAL}" passed "${VERSION_EXPECTED}"
+            local TESTING="that installed ${GREEN}${1}${LIGHTYELLOW}: ${RED}<${CYAN}${evaled}${RED}>${LIGHTYELLOW} must equal ${GREEN}${2}${LIGHTYELLOW}: ${RED}<${CYAN}${expected}${RED}>${GREEN} "
+            if [[ "${evaled}"  == *"${expected}"* ]] || [[ "${evaled}" == "${expected}" ]] ; then
             {
                 passed "${TESTING}"
                 return 0
             }
             fi
-            return 0
+            # echo $(${COMMAND_TO_EVAL})
+            failed "${TESTING}"
+            exit 1
         } # end verify_installed_version
 
         function verify_installed_version_old() {
