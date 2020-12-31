@@ -3558,9 +3558,11 @@ function determine_os_and_fire_action() {
   # of the function that is missing like _archlinux__64
   local FUNCTION_TO_CALL=""
   local PARAMETERS=""
+  local -i DEBUG=0
   # Check operating systems
   # echo  ${@}
   if [[ "$(uname)" == "Darwin" ]] ; then
+      (( DEBUG )) && echo "Darwin"
       # Do something under Mac OS X platform
       if [[ "$(uname -m)" == "x86_64" ]] ; then
       {
@@ -3574,32 +3576,44 @@ function determine_os_and_fire_action() {
       }
       fi
   elif [[ "$(expr substr $(uname -s) 1 5)" == "Linux" ]] ; then
+    (( DEBUG )) && echo "Linux"
     # Do something under GNU/Linux platform
     # Determine OS platform
     local UNAME=$(uname | tr "[:upper:]" "[:lower:]")
+    (( DEBUG )) && echo "UNAME: $UNAME"
     local DISTRO=""
     local ID=""
     local VERSION_ID=""
     # If Linux, try to determine specific distribution
-    if [ "$UNAME" == "linux" ]; then
-        # If available, use LSB to identify distribution
-        if [ -f /etc/lsb-release -o -d /etc/lsb-release.d ]; then
+    if [[ "$UNAME" == "linux" ]]; then
+    {
+      # If available, use LSB to identify distribution
+      if [ -f /etc/lsb-release -o -d /etc/lsb-release.d ]; then
+      {
         if ( command -v lsb_release >/dev/null 2>&1; ); then
-            {
-              DISTRO=$(lsb_release -i | cut -d: -f2 | sed s/'^\t'//)
-            }
-            else
-            {
-              DISTRO=$(ls -d /etc/[A-Za-z]*[_-][rv]e[lr]* | grep -v "lsb" | cut -d'/' -f3 | cut -d'-' -f1 | cut -d'_' -f1)
+        {
+          (( DEBUG )) && echo "RELEASE Option: 1"
+          DISTRO=$(lsb_release -i | cut -d: -f2 | sed s/'^\t'// | head -1)
         }
-            fi
-        # Otherwise, use release info file
         else
-            DISTRO=$(ls -d /etc/[A-Za-z]*[_-][rv]e[lr]* | grep -v "lsb" | cut -d'/' -f3 | cut -d'-' -f1 | cut -d'_' -f1)
+        {
+          (( DEBUG )) && echo "RELEASE Option: 2"
+          DISTRO=$(ls -d /etc/[A-Za-z]*[_-][rv]e[lr]* | grep -v "lsb" | cut -d'/' -f3 | cut -d'-' -f1 | cut -d'_' -f1 | head -1)
+        }
         fi
+      }
+      else # Otherwise, use release info file
+      {
+        (( DEBUG )) && echo "RELEASE Option: 3"
+        DISTRO=$(ls -d /etc/[A-Za-z]*[_-][rv]e[lr]* | grep -v "lsb" | cut -d'/' -f3 | cut -d'-' -f1 | cut -d'_' -f1 | head -1)
+      } 
+      fi
+    }
     fi
+    (( DEBUG )) && echo "DISTRO:$DISTRO"
     if [[ -z "$DISTRO" ]]; then  # if empty
     {
+      (( DEBUG )) && echo "DISTRO empty"
       # If available, use /etc/os-release to identify distribution
         if [ -f /etc/os-release ]; then
         {
@@ -3653,7 +3667,24 @@ function determine_os_and_fire_action() {
         }
         fi
     }
+    else
+    {
+      # ubuntu lsb_release -i | sed 's/Distributor\ ID://g' = \tUbuntu\n
+        if [[ "$(uname -i)" == "x86_64" ]] ; then
+        {
+           FUNCTION_TO_CALL="_${DISTRO}__64"
+           PARAMETERS="$@"
+        }
+        elif [[ "$(uname -i)" == "i686"   ]] ; then
+        {
+           FUNCTION_TO_CALL="_${DISTRO}__32"
+           PARAMETERS="$@"
+        }
+        fi
+    }
     fi
+    (( DEBUG )) && echo "FUNCTION_TO_CALL: $FUNCTION_TO_CALL"
+    (( DEBUG )) && echo "uname -i: $(uname -i)"
     # For everything else (or if above failed), just use generic identifier
     unset UNAME
     unset DISTRO
@@ -3700,7 +3731,6 @@ function determine_os_and_fire_action() {
   unset FUNCTION_TO_CALL
   unset PARAMETERS
 } # end determine_os_and_fire_action
-
     #[ ! -z "$0" ] && [ -e "$0" ] && THISSCRIPTNAME=`basename "$0"`
 
     # TRAP
