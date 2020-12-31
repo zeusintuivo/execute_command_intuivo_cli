@@ -18,20 +18,20 @@ function load_colors {
     orange209="\\033[38;5;209m"
     orange208="\\033[38;5;208m"
     white15="\\033[38;5;15"
-    reset=`tput sgr0`
+    reset=$(tput sgr0)
     blue238="\\033[38;5;238m"
     blue23="\\033[38;5;23m"
     blue30="\\033[38;5;30m"
     lightblue="\\033[38;5;123m"
     lightpurple="\\033[38;5;93m"
-    lightpink=$(echo -e "\\033[1;204m")
-    lightyellow=$(echo -e "\\033[38;5;227m")
-    lightgreen=$(echo -e "\\033[38;5;83m")
+    lightpink=$(echo -en "\\033[1;204m")
+    lightyellow=$(echo -en "\\033[38;5;227m")
+    lightgreen=$(echo -en "\\033[38;5;83m")
 }
 load_colors
 msg_red() {
     echo  " "
-    echo  -e "${red} $@"
+    echo  -en "${red} ${*}"
     echo  " "
 }
 BLANK_SPACE="${blue23} • ${green} "
@@ -122,12 +122,12 @@ escape_for_sed_sequence() {
 ask_for_sudo() { # REF : http://unix.stackexchange.com/questions/28791/prompt-for-sudo-password-and-programmatically-elevate-privilege-in-bash-script
     if [ $EUID != 0 ]; then
     {
-        if (($EUID != 0)); then
+        if (( EUID != 0 )); then
             if [[ -t 1 ]]; then
-                sudo "$0" "$@"
-                else
-            exec 1>output_file
-                gksu "$0 $@"
+                sudo "$0" "${*}"
+            else
+                exec 1>output_file
+                gksu "$0 ${*}"
             fi
             exit
         fi
@@ -139,22 +139,22 @@ ask_for_sudo() { # REF : http://unix.stackexchange.com/questions/28791/prompt-fo
 get_current_folder_path_and_name() {
 
     anounce Get current directory path
-    anounce CURRENT_PATH=${PWD}
-    export CURRENT_PATH=${PWD}
-    say $CURRENT_PATH
+    anounce CURRENT_PATH="${PWD}"
+    export CURRENT_PATH="${PWD}"
+    say "${CURRENT_PATH}"
 
     anounce Extract only name without path
     # REF http://stackoverflow.com/questions/1371261/get-current-directory-name-without-full-path-in-bash-script
 
-    anounce CURRENT_FOLDER_NAME_ONLY=${PWD##*/}          # to assign to a variable
-    export CURRENT_FOLDER_NAME_ONLY=${PWD##*/}
-    say $CURRENT_FOLDER_NAME_ONLY
+    anounce CURRENT_FOLDER_NAME_ONLY="${PWD##*/}"          # to assign to a variable
+    export CURRENT_FOLDER_NAME_ONLY="${PWD##*/}"
+    say "${CURRENT_FOLDER_NAME_ONLY}"
 
-    #printf '%s\n' "${PWD##*/}" # to print to stdout
+    #printf '%s\n' ""${PWD##*/}"" # to print to stdout
                                # ...more robust than echo for unusual names
                                #    (consider a directory named -e or -n)
 
-    #printf '%q\n' "${PWD##*/}" # to print to stdout, quoted for use as shell input
+    #printf '%q\n' ""${PWD##*/}"" # to print to stdout, quoted for use as shell input
                                # ...useful to make hidden characters readable.
 
 }
@@ -164,7 +164,7 @@ confirm() {
     read -p "${orange208} • ${yellow214} Are you sure ${reset}(${green}yes\
 ${yellow220}to ${green}confirm${reset}, ${red} enter \
 means no${reset}) ? " -n 1 -r
-    echo  # (optional) move to a new line
+     # (optional) move to a new line
     if [[ $REPLY == "Y" || $REPLY == "y" || \
         $REPLY == "yes" || $REPLY == "YES" || \
         $REPLY == "Yes" || $REPLY == "YEs" || \
@@ -183,23 +183,23 @@ means no${reset}) ? " -n 1 -r
 }
 
 choice() {
-    options=($@)
+    options=("${@}")
     select opt in "${options[@]}" ; do
-        case $opt in
+        case "${opt}" in
             "all")
                 #echo "you chose choice all"
-                echo $opt
+                echo "${opt}"
                 return 2
                 break
             ;;
             "none")
-                echo $opt
+                echo "${opt}"
                 return 1
                 break
                 ;;
-                $opt)
-                #echo "you chose choice $opt"
-                echo $opt
+                "${opt}")
+                #echo "you chose choice "${opt}""
+                echo "${opt}"
                 return 0
                 break
             ;;
@@ -254,10 +254,10 @@ list_contains_list() {
                     if [[ "x${local_TEST}" == "xtest" ]] ; then
                     {
                         local mosagio="DEBUG: HIGHLIGHTER WORD IDENTIFIED"
-                        echo "$mosagio: ${local_bigword}"
+                        echo -n "$mosagio: ${local_bigword}"
                     }
                     fi
-                    echo "${local_smallword}" "found in " "${local_bigword}"
+                    echo -n "${local_smallword}" "found in " "${local_bigword}"
                     # T O D O WHAT ELSE TO DO WHEN WORD MATCHES, breakm continue, return ? right now only print
 
                 }
@@ -304,57 +304,75 @@ highlight_commander() {
     #     subcommand   <- 4 spaces makes it a subcommand.
     # the subcommand should exists as a function, in this case a sed piping function
     # catch pipe
+    local -i DEBUG=1
+    local HERE='echo -en "\n\n${BASH_SOURCE[0]}:${BASH_LINENO[0]} ${FUNCNAME[1]}\n\n"'
+    # Sample use (( DEBUG )) && eval "${HERE}"
+    exit 0
+    function __highlight_commander_on_exit() {
+        echo "${BASH_COMMAND} exits with $?"
+        echo "${BASH_SOURCE[0]}:${BASH_LINENO[0]} ${FUNCNAME[1]} EXIT"
+    }
+    trap __highlight_commander_on_exit INT ERR EXIT
     local local_PIPED=""
     local local_ONEPIPE=""
     local local_COUNTER=0
-    local local_TEST=""
+    local local_TEST="test"  # test or empty
     local local_COMMAND=""
     local local_SUBCOMMAND=""
-    local local_WORDS="$HIGHLIGHT_WORDS"   # Expecting $HIGHLIGHT_WORDS
+    local local_WORDS="$HIGHLIGHT_WORDS"   # Expecting global $HIGHLIGHT_WORDS
     local local_RESULT=""
     local local_command_exists=0
-    if [ ! -z "${1+x}" ] ; then
+
+    (( DEBUG )) && eval ${HERE}
+    exit 0 
+    #  && echo " reads 1 <${1}>"
+    if [[ -n "${1+x}" ]] ; then
     {
         if [[ "x${1}" == "xtest" ]] ; then   # 1st Not empty and says test
         {
+            (( DEBUG )) && echo -e "${HERE} local_TEST 1"
             local_TEST="${1}"
         }
         elif [[ "x${1}" != "xtest" ]] ; then   # 1st Not empty and does not say test
         {
             # Custom List
+            (( DEBUG )) && echo -e "${HERE} local_WORDS"
             local_WORDS="${1}"
         }
         fi
     }
     fi
 
-    if [ ! -z "${2+x}" ] && [[ "x${2}" == "xtest" ]] ; then   # 2nd Not empty and says test
+    (( DEBUG )) && echo -e "${HERE} reads 2 <${2}>"
+    if [[ -n "${2+x}" ]] && [[ "x${2}" == "xtest" ]] ; then   # 2nd Not empty and says test
     {
+        (( DEBUG )) && echo -e "${HERE} local_TEST 2"
         local_TEST="${2}"
     }
     fi
 
-    if [ -z "${local_WORDS}" ] ; then              # If local_WORDS empty ..FAIL!
+    (( DEBUG )) && echo -e "${HERE} test local_WORDS"
+    if [[ -z "${local_WORDS}" ]] ; then              # If local_WORDS empty ..FAIL!
     {
         local mosagio="Expecting Command list. 1st Parameter \
         Missing, Global Var HIGHLIGHT_WORDS missing"
         msg_red "$PWD/$0:${LINENO} ${FUNCNAME[0]}() $mosagio"
+        (( DEBUG )) && echo -e "${HERE} local_WORDS z exit 69"
         exit 69
-        return 2
     }
     fi
-    if [ ! -z "${local_WORDS}" ] ; then
+    if [[ -n "${local_WORDS}" ]] ; then
     {
-        local_WORDS=$( echo  "${local_WORDS}" | delete_empty_lines )
-        local_WORDS=$( echo  "${local_WORDS}" | add_marker_start )
-        local_WORDS=$( echo  "${local_WORDS}" | trim_end_space )
-        local_WORDS=$( echo  "${local_WORDS}" | escape_for_sed_sequence )
+        local_WORDS=$( echo -n  "${local_WORDS}" | delete_empty_lines )
+        local_WORDS=$( echo -n  "${local_WORDS}" | add_marker_start )
+        local_WORDS=$( echo -n  "${local_WORDS}" | trim_end_space )
+        local_WORDS=$( echo -n  "${local_WORDS}" | escape_for_sed_sequence )
     }
     fi
-    #echo "$local_WORDS"
-    #exit 69 ;
+    # echo "$local_WORDS"
+    # exit 69 ;
     # FORCE TEST ? local_TEST="test"
-    if [ -t 0 ]; then
+    if [ -t 0 ]; then  # pipe testing
     {
         local_PIPED=""
     }
@@ -366,7 +384,7 @@ highlight_commander() {
         {
             local_PIPED="${local_PIPED}
 ${local_ONEPIPE}"
-            local_COUNTER=$((local_COUNTER+1))
+            local_COUNTER=$(( local_COUNTER + 1 ))
         }
         done
         if [ $local_COUNTER -eq 0 ] ; then
@@ -387,7 +405,7 @@ $local_PIPED
     local_COMMAND="highlight"
     while read -r WORD; do
     {
-        if [ ! -z "${WORD}" ] ; then   # Not empty
+        if [ -n "${WORD}" ] ; then   # Not empty
         {
             local_SUBCOMMAND=""
             if [[ "x${local_TEST}" == "xtest" ]] ; then
@@ -416,7 +434,7 @@ $local_PIPED
             # Case TRIMMED_WORD:whitetize != CUT_WORD:e --- Trimmed  Does not Match Cut Word
             # &&
             # Case TRIMMED_WORD:whitetize == WORD:whitetize - Word Matches Word
-            if ( [[ ! -z "${CUT_WORD}" ]] && \
+            if ( [[ -n "${CUT_WORD}" ]] && \
                 [[ "x${TRIMMED_WORD}" != "x${CUT_WORD}" ]] && \
                 [[ "x${WORD}" == "x${TRIMMED_WORD}" ]] ) || \
                 ( [[ -z "${CUT_WORD}" ]] && \
@@ -448,8 +466,8 @@ $local_PIPED
             }
             fi
 
-            if [[ ! -z "${local_COMMAND}" ]] && \
-                [[ ! -z "${local_SUBCOMMAND}" ]]  ; then
+            if [[ -n "${local_COMMAND}" ]] && \
+                [[ -n "${local_SUBCOMMAND}" ]]  ; then
                                                   # Is Not empty COMMAND. Command Goes First Then Subcommand
                                                   # command subcommand
             {
@@ -491,36 +509,31 @@ $local_PIPED
     # Return 0
     echo "${local_RESULT}" | delete_empty_lines
     return 0
-}
-
-assert() {        #  If condition false,
-                  #+ exit from script
-                  #+ with appropriate error message.
-    #######################################################################
-    # http://tldp.org/LDP/abs/html/debugging.html
-    # assert.sh
-    E_PARAM_ERR=98
-    E_ASSERT_FAILED=99
-
-
-    if [ -z "$2" ] ; then      #  Not enough parameters passed
-                               #+ to assert() function.
-        return $E_PARAM_ERR    #  No damage done.
-    fi
-
-    lineno=$2
-
-    if [ ! $1 ] ; then
-    echo "Assertion failed:  \"$1\""
-    echo "File \"$0\", line $lineno"    # Give name of file and line number.
-    exit $E_ASSERT_FAILED
-    # else
-    #   return
-    #   and continue executing the script.
-    fi
-    #######################################################################
-    # Insert a similar assert() function into a script you need to debug.
-}
+} # end highlight_commander
+# assert() {        #  If condition false,
+#                   #+ exit from script
+#                   #+ with appropriate error message.
+#     #######################################################################
+#     # http://tldp.org/LDP/abs/html/debugging.html
+#     # assert.sh
+#     E_PARAM_ERR=98
+#     E_ASSERT_FAILED=99
+#     if [ -z "$2" ] ; then      #  Not enough parameters passed
+#                                #+ to assert() function.
+#         return $E_PARAM_ERR    #  No damage done.
+#     fi
+#     lineno=$2
+#     if [ ! $1 ] ; then
+#     echo "Assertion failed:  \"$1\""
+#     echo "File \"$0\", line $lineno"    # Give name of file and line number.
+#     exit $E_ASSERT_FAILED
+#     # else
+#     #   return
+#     #   and continue executing the script.
+#     fi
+#     #######################################################################
+#     # Insert a similar assert() function into a script you need to debug.
+# } # end assert simple
 
 
 
@@ -550,65 +563,88 @@ assert() {        #  If condition false,
 
 
 _execute_command_worker() {
-    #set -eu
-    #set -o pipefail
-    #set -x
-    #eval "$@"
-
-    #exit 0
-    #return
-    #if [[ $@ == *'<<'* ]]; then
+    # set -eu
+    # set -o pipefail
+    # set -x
+    # eval "$@"
+    # exit 0
+    # return
+    # if [[ $@ == *'<<'* ]]; then
     #  {
     #    - contains less thans
     #  }
-    #fi
-    #if [[ $@ == *'>>'* ]]; then
+    # fi
+    # if [[ $@ == *'>>'* ]]; then
     #  {
     #    - contains more thans
     #  }
-    #fi
-
-    #set +x
-    #return
-    LAST_STRING="- ""$@"
-    #LAST_STRING="$@"
+    # fi
+    # set +x
+    # return
+    local -i DEBUG=1
+    local HERE='echo ${BASH_SOURCE[0]}:${LINENO[0]} ${FUNCNAME[1]} '
+    # Sample use (( DEBUG )) && eval "${HERE}"
+    local -i _err=0
+    function ___execute_command_worker_on_exit() {
+        echo "${BASH_COMMAND} exits with $? "
+        echo "${BASH_SOURCE[0]}:${BASH_LINENO[0]} ${FUNCNAME[1]} EXIT"
+    }
+    trap ___execute_command_worker_on_exit INT ERR EXIT
+    local LAST_STRING="- ""${*}"
+    (( DEBUG )) && eval "${HERE} ${*}"
+    (( DEBUG )) && eval "${*}"
+    (( DEBUG )) && echo "${yarn_installed}"
+    # LAST_STRING="$@"
+    (( DEBUG )) && echo "LAST_STRING:${LAST_STRING}"
     LAST_STRING=$(echo "$LAST_STRING" | trim_single_quotes)
+    (( DEBUG )) && echo "LAST_STRING:${LAST_STRING}"
     LAST_STRING=$(echo "$LAST_STRING" | cut -d' ' -f3 )
+    (( DEBUG )) && echo "LAST_STRING:${LAST_STRING}"
     LAST_STRING=$(echo "$LAST_STRING" | escape_for_sed_sequence)
+    (( DEBUG )) && echo "LAST_STRING:${LAST_STRING}"
     # echo "${@}" | trim_single_quotes  | highlight_commander
-    #- ${@}
-    #echo "${LAST_STRING}"
-    #echo "$@"
-    if [ ! -z "${LAST_STRING}" ] ; then   # Not empty
+    # - ${@}
+    # echo "${LAST_STRING}"
+    # echo "$@"
+    # BLANK_SPACE is Global has a color 
+    (( DEBUG )) && eval "${HERE} 1"
+    exit 0
+    if [[ -n "${LAST_STRING}" ]] ; then   # Not empty
     {
-        echo -e "${BLANK_SPACE} ${@} ${reset}" | \
+        (( DEBUG )) && eval "$§                             §                                 §                                                                   §{HERE}" && echo -e "2"
+        echo -en "${BLANK_SPACE} ${@} ${reset}" | \
+        trim_single_quotes | mark "${LAST_STRING}"
+        echo -en "${BLANK_SPACE} ${*} ${reset}" | \
         trim_single_quotes | mark "${LAST_STRING}" | \
         highlight_commander;
     }
     else
     {
-        echo -e "${BLANK_SPACE} ${@} ${reset}" | \
+        (( DEBUG )) && eval "${HERE}" && echo -e "3"
+        echo -en "${BLANK_SPACE} ${*} ${reset}" | \
         trim_single_quotes | highlight_commander;
     }
     fi
+    (( DEBUG )) && eval "${HERE}"
+    exit 0
     # execute_command command
     EXECUTING_STD_OUTPUT=""
-    #set -x
+    # set -x
     if [[ "$@" == *'cd '* ]]; then
     {
         # - contains cd
-        #assert "$@"   $LINENO
-        #assert "$( { $@ > /tmp/execute_command_stderr ; } 2>&1 ) " $LINENO
+        # assert "$@"   $LINENO
+        # assert "$( { $@ > /tmp/execute_command_stderr ; } 2>&1 ) " $LINENO
         "$@" 2> /tmp/execute_command_stderr
         wait
-        #EXECUTING_STD_OUTPUT=$("""$@""") # &>/dev/null
+        # EXECUTING_STD_OUTPUT=$("""$@""") # &>/dev/null
         if [ -f /tmp/execute_command_stderr ] ; then
         {
-            #cat  /tmp/execute_command_stderr
+            # cat  /tmp/execute_command_stderr
             EXECUTING_STD_OUTPUT=$(</tmp/execute_command_stderr)
-            if [ ! -z "${EXECUTING_STD_OUTPUT}" ] ; then   # Not empty
+            if [ -n "${EXECUTING_STD_OUTPUT}" ] ; then   # Not empty
             {
-                EXECUTING_STD_OUTPUT=$( echo "$EXECUTING_STD_OUTPUT" | \
+                EXECUTING_STD_OUTPUT=$( echo -n "$EXECUTING_STD_OUTPUT" | \
                 sed 's@/_/bash_crm_cli/execute_command.sh: line ...: @@g' )
                 EXECUTING_STD_OUTPUT="Error: $EXECUTING_STD_OUTPUT"
             }
@@ -620,15 +656,15 @@ _execute_command_worker() {
     }
     elif [[ "$@" == *'='* ]]; then
     {
-        #- contains =
+        # - contains =
         eval $@ 2> /tmp/execute_command_stderr
         wait
-        #EXECUTING_STD_OUTPUT=$("""$@""") # &>/dev/null
+        # EXECUTING_STD_OUTPUT=$("""$@""") # &>/dev/null
         if [ -f /tmp/execute_command_stderr ] ; then
         {
-            #cat  /tmp/execute_command_stderr
+            # cat  /tmp/execute_command_stderr
             EXECUTING_STD_OUTPUT=$(</tmp/execute_command_stderr)
-            if [ ! -z "${EXECUTING_STD_OUTPUT}" ] ; then   # Not empty
+            if [ -n "${EXECUTING_STD_OUTPUT}" ] ; then   # Not empty
             {
                 EXECUTING_STD_OUTPUT=$(echo "$EXECUTING_STD_OUTPUT" | \
                 sed 's@/_/bash_crm_cli/execute_command.sh: line ...: @@g' )
@@ -643,15 +679,15 @@ _execute_command_worker() {
     }
     else
     {
-        #EXECUTING_STD_OUTPUT=$(eval "$@") # &>/dev/null
+        # EXECUTING_STD_OUTPUT=$(eval "$@") # &>/dev/null
         eval "$@" 2> /tmp/execute_command_stderr
         wait
-        #EXECUTING_STD_OUTPUT=$("""$@""") # &>/dev/null
+        # EXECUTING_STD_OUTPUT=$("""$@""") # &>/dev/null
         if [ -f /tmp/execute_command_stderr ] ; then
         {
-            #cat  /tmp/execute_command_stderr
+            # cat  /tmp/execute_command_stderr
             EXECUTING_STD_OUTPUT=$(</tmp/execute_command_stderr)
-            if [ ! -z "${EXECUTING_STD_OUTPUT}" ] ; then   # Not empty
+            if [ -n "${EXECUTING_STD_OUTPUT}" ] ; then   # Not empty
             {
                 if [[ "${EXECUTING_STD_OUTPUT}" == *"rror"* ]] ; then
                 {
@@ -670,7 +706,7 @@ _execute_command_worker() {
         wait
     }
     fi
-    #set +x
+    # set +x
 
     if [ ! $? -eq 0 ] || \
         [[ $EXECUTING_STD_OUTPUT == *"error"* ]]  || \
@@ -680,7 +716,7 @@ _execute_command_worker() {
         msg_red Command Failed! for -- $@
         LAST_STRING=$(echo $@ | cut -d' ' -f3 | escape_for_sed_sequence)
         echo -e " "
-        if [ ! -z "${LAST_STRING}" ] ; then   # Not empty
+        if [ -n "${LAST_STRING}" ] ; then   # Not empty
         {
             echo -e "${yellow220} ${EXECUTING_STD_OUTPUT} ${reset}" \
             | mark "${LAST_STRING}" | highlight_commander
@@ -697,7 +733,7 @@ _execute_command_worker() {
     }
     else
     {
-        echo """$EXECUTING_STD_OUTPUT""" | highlight_commander
+        echo -n """$EXECUTING_STD_OUTPUT""" | highlight_commander
     }
     fi
 } # end funtion _execute_command_worker
@@ -717,13 +753,22 @@ _execute_command_worker() {
 
 
 
-
-
-anounce_command() {
-    echo -e "${BLANK_SPACE}${@} ${reset}"
+announce_command() {
+    echo -e "${BLANK_SPACE}${*} ${reset}"
     EXECUTING_STD_OUTPUT=$(eval "$@") # &>/dev/null
     wait
-    if [ ! -z "${EXECUTING_STD_OUTPUT}" ] ; then   # Not empty
+    if [ -n "${EXECUTING_STD_OUTPUT}" ] ; then   # Not empty
+    {
+        echo """${EXECUTING_STD_OUTPUT}"""
+    }
+    fi
+}
+
+anounce_command() {
+    echo -e "${BLANK_SPACE}${*} ${reset}"
+    EXECUTING_STD_OUTPUT=$(eval "$@") # &>/dev/null
+    wait
+    if [ -n "${EXECUTING_STD_OUTPUT}" ] ; then   # Not empty
     {
         echo """${EXECUTING_STD_OUTPUT}"""
     }
@@ -733,62 +778,63 @@ mock_command() {
     echo -e "${BLANK_SPACE}${lightpurple}mock: ${lightblue}""""$@""""${reset}"
 }
 _say_error_and_exit_worker() {
-    echo -e "☠"  `tput setaf 1` "$@" "!!!" `tput sgr0`
+    echo -e "☠"  $(tput setaf 1) "$@" "!!!" $(tput sgr0)
     exit 69;
 }
 _anounce_worker() {
-    echo -e "${BLANK_SPACE}${@} ${reset}";
+    echo -e "${BLANK_SPACE}${*} ${reset}";
 }
 
 anounce() {
-    _anounce_worker ${@}
+    _anounce_worker "${*}"
 }
 
 announce() {
-    _anounce_worker ${@}
+    _anounce_worker "${*}"
 }
 
 _say_worker() {
-    echo -e "${lightpurple} +-- ${lightblue} ${@} ${reset}";
+    echo -e "${lightpurple} +-- ${lightblue} ${*} ${reset}";
 
 }
 speak() {
-    say /usr/bin/say -v "${1}" $(echo "${@}" | sed 's'"${1}"'g') &
-    /usr/bin/say -v "${1}" $(echo "${@}" | sed 's'"${1}"'g') &
+  # Say is MAC only
+    say /usr/bin/say -v "${1}" $(echo "${*}" | sed 's'"${1}"'g') &
+    /usr/bin/say -v "${1}" $(echo "${*}" | sed 's'"${1}"'g') &
     wait
 }
 say() {
-    _say_worker ${@}
+    _say_worker "${*}"
 }
 
 _comment_worker() {
-    echo -e "${gray242}  ${@} ${reset}";
+    echo -e "${gray242}  ${*} ${reset}";
 }
 comment() {
-    _comment_worker ${@}
+    _comment_worker "${*}"
 }
 
 debug() {
-    echo -e "${red} +-- ${lightblue} ${@} ${reset}";
+    echo -e "${red} +-- ${lightblue} ${*} ${reset}";
 }
 debug_and_exit() {
     debug "${@}";
     exit 69;
 }
 list() {
-    echo -e "${lightpurple} · ${lightblue} ${@} ${reset}";
+    echo -e "${lightpurple} · ${lightblue} ${*} ${reset}";
 }
 heading() {
     echo " "
-    echo -e "   ${reset} ${@} ${reset}";
+    echo -e "   ${reset} ${*} ${reset}";
     echo " "
 }
 
 warn() {
-    echo -e "${orange208} • ${yellow214} ${@} ${reset}" | emphasis "delete";
+    echo -e "${orange208} • ${yellow214} ${*} ${reset}" | emphasis "delete";
 }
 is_help() {
-    if [ ! -z "${1}" ] && [[ "${1}" == "help" \
+    if [ -n "${1}" ] && [[ "${1}" == "help" \
     ||  "${1}" == "-h" ||  "${1}" == "-help" \
     || "${1}" == "--help" || "${1}" == "\/\?"  ]]; then   # Not empty and help
     {
@@ -805,9 +851,9 @@ provide_help() {
     {
         echo "$DESCRIPTION"
         anounce Available commands
-        THIS_SCRIPT_NAME=`basename "$0"`
-        WHERE_IS_THIS=$(which ${THIS_SCRIPT_NAME})
-        AVAILABLE_COMMANDS=$(cat ${WHERE_IS_THIS}| grep "function " \
+        THIS_SCRIPT_NAME=$(basename "${0}")
+        WHERE_IS_THIS=$(which "${THIS_SCRIPT_NAME}")
+        AVAILABLE_COMMANDS=$(cat "${WHERE_IS_THIS}"| grep "function " \
         | cüt "function " | cüt "() {" | cüt "() {" \
         | sed '/AVAILABLE_COMMANDS/d' | sort )
         echo """$AVAILABLE_COMMANDS"""
@@ -846,7 +892,7 @@ execute_command() {
 #    . "$BASHCRMCLI/execute_command_minifunctions"
 #    #(  . "$BASHCRMCLI/execute_command_minifunctions.sh" >/dev/null 2>&1; ) &&  msg_red "Mini functions Failed to load"#
 #
-#    #[ ! -z ${BASHCRMCLI+x} ]   # set not empty       -IF DEFINED AND HAS SOMETHING GO IN(or TRUE)
+#    #[ -n ${BASHCRMCLI+x} ]   # set not empty       -IF DEFINED AND HAS SOMETHING GO IN(or TRUE)
 #    #[ -z ${BASHCRMCLI+x} ]     # not set and empty   -USE to DEFINE A NON DEFINED#
 #
 #}

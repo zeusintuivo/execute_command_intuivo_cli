@@ -12,7 +12,7 @@ function sample_use_verify_mongo() {
 
 
     MONGO_VERSION="3.0.11"
-    if [ ! -z "${1}" ] ;  then
+    if [[ -n "${1}" ]] ;  then
         MONGO_VERSION="${1}"
     fi
 
@@ -24,7 +24,7 @@ function sample_use_verify_mongo() {
     check_equality "${MONGOD_VERSION}=${MONGO_VERSION}"
 
     TESTING=" verify that MongoDB has started ${CYAN}successfully${LIGHTYELLOW}"
-    if [ ! -z "${MONGO_PID}" ] && [ ! -z "${MONGO_TASKID}" ] && [[ "${MONGO_SERVICE_STATUS}" == *"mongod start/running"* ]] ; then
+    if [[ -n "${MONGO_PID}" ]] && [[ -n "${MONGO_TASKID}" ]] && [[ "${MONGO_SERVICE_STATUS}" == *"mongod start/running"* ]] ; then
     {
 
         echo -e " ${PURPLE}+---- ${LIGHTYELLOW}       Service Status: ${CYAN}${MONGO_SERVICE_STATUS} "
@@ -132,7 +132,7 @@ function HOW_TO_LOAD_SEVERAL_FILES() {
     #execute_command
         while read -r ONE_SCRIPT; do
         {
-            if [ ! -z "${ONE_SCRIPT}" ] ; then         # if not empty
+            if [[ -n "${ONE_SCRIPT}" ]] ; then         # if not empty
             {
                 URL="${provider}${ONE_SCRIPT}"
                 eval """$(curl $URL  2>/dev/null )"""  # suppress only curl download messages, but keep curl output for variable
@@ -289,7 +289,7 @@ CERO="\033[01;0m"
 
         function passed() {
             typeset -a ARGS="${@}"
-            if [ ! -z "${ARGS-x}" ] ; then # if its set and not empty
+            if [[ -n "${ARGS-x}" ]] ; then # if its set and not empty
             {
                 echo -e "${LIGHTGREEN} ✔ ${LIGHTYELLOW} ${ARGS}  ${RESET}"
             }
@@ -302,7 +302,7 @@ CERO="\033[01;0m"
 
         function warning() {
             typeset -a ARGS="${@}"
-            if [[ ! -z "${ARGS-x}" ]] ; then # if its set and not empty
+            if [[ -n "${ARGS-x}" ]] ; then # if its set and not empty
             {
                 # echo -e "${BRIGHT_BLUE87} ${BASH_SOURCE}:${BASH_LINENO[0]} ${FUNCNAME[0]}()"
                 # echo -e "${BRIGHT_BLUE87} ${BASH_SOURCE}:${BASH_LINENO[-1]} ${FUNCNAME[-1]}()"
@@ -417,7 +417,7 @@ CERO="\033[01;0m"
 
         function enhance_message() {
             local msg=""
-            [[ ! -z "${1+x}"  ]] && msg="${1}"  ;  # check if a variable is set and not empty and reassign value
+            [[ -n "${1+x}"  ]] && msg="${1}"  ;  # check if a variable is set and not empty and reassign value
             msg=$(echo "${msg}" | sed  -e 's/ancel /anceling /g')
             msg=$(echo "${msg}" | sed  -e 's/uit /uiting /g')
             msg=$(echo "${msg}" | sed  -e 's/xit /xiting /g')
@@ -438,7 +438,7 @@ CERO="\033[01;0m"
             if ! command -v "${1}" >/dev/null 2>&1;  then # Command Does not-exist
             {
               failed "${TESTING}"
-              [[ ! -z "${3+x}"  ]] && enhance_message "${3}"
+              [[ -n "${3+x}"  ]] && enhance_message "${3}"
               return 1
             }
             else
@@ -501,7 +501,7 @@ CERO="\033[01;0m"
 
         function not() {
             local order="empty"  # Tasjgjgggg
-            if [[ ! -z "${1+x}"  ]] ; then  # check if a variable is set and not empty
+            if [[ -n "${1+x}"  ]] ; then  # check if a variable is set and not empty
                 NODE_VERSION="${1}"
             fi
         } # end not
@@ -1562,14 +1562,38 @@ CERO="\033[01;0m"
             #
             #  check_to_be_installed "sysfsutils" "fix for transparent_hugepage"
             #
-            package="$1"
-            message="$2"
-            CHECK_INSTALLED=$(dpkg -s "${package}")
-            if [[ "${CHECK_INSTALLED}" == *"Package: ${package}"* ]] ; then
+            local package="$1"
+            local message="$2"
+            local CHECK_INSTALLED=""
+            if ( command -v dpkg >/dev/null 2>&1; ) ; then
+            {    
+              CHECK_INSTALLED=$(dpkg -s "${package}")
+              if [[ "${CHECK_INSTALLED}" == *"Package: ${package}"* ]] ; then
+              {
                 echo -e "${GREEN} PACKAGE: ${message}  ${package} is there  ${CERO}"
-            else
+              }
+              else 
+              {
                 echo -e "${YELLOW} Installing ${message}   ${CERO}"
                 sudo apt install "${package}" -y
+              }
+              fi
+            }
+            elif ( command -v rpm >/dev/null 2>&1; ) ; then
+            {
+              CHECK_INSTALLED=$(rpm -qa|grep -i "${package}")
+              if [[ "${CHECK_INSTALLED}" == *"Package: ${package}"* ]] ; then
+              {
+                echo -e "${GREEN} PACKAGE: ${message}  ${package} is there  ${CERO}"
+              }
+              else 
+              {
+                echo -e "${YELLOW} Installing ${message}   ${CERO}"
+                sudo dnf install "${package}" -y
+              }
+              fi
+
+            }
             fi
         } # end check_to_be_installed
 
@@ -2184,11 +2208,15 @@ CERO="\033[01;0m"
             local missing=""
             local one_required=""
             local required=$(grep -vE '^\s+#'<<<"${2}")
+            local packages=""
+            local query=""
             for one_required in ${required}; do
             {
+              if ( command -v dpkg >/dev/null 2>&1; ) ; then
+              {
                 # REF: https://www.cyberciti.biz/faq/find-out-if-package-is-installed-in-linux/
-                local packages=$(dpkg -l | egrep "$one_required" | cut -d' ' -f3 2>&1)
-                local query=$(dpkg-query -W -f='${Status} ${Version}\n' "$one_required"  2>&1)
+                packages=$(dpkg -l | egrep "$one_required" | cut -d' ' -f3 2>&1)
+                query=$(dpkg-query -W -f='${Status} ${Version}\n' "$one_required"  2>&1)
                 #if [[ "${query}" == "install ok"* ]] && ( is_included "$one_required" "${packages}" ); then
                 if [[ "${query}" == "install ok"* ]] ; then
                 {
@@ -2200,6 +2228,24 @@ CERO="\033[01;0m"
                     missing="${missing} ${one_required}"
                 }
                 fi
+              }
+              elif ( command -v rpm >/dev/null 2>&1; ) ; then
+              {
+                packages=$(rpm -qa | egrep "$one_required" | cut -d' ' -f3 2>&1)
+                query=$(rpm-query -W -f='${Status} ${Version}\n' "$one_required"  2>&1)
+                #if [[ "${query}" == "install ok"* ]] && ( is_included "$one_required" "${packages}" ); then
+                if [[ "${query}" == "install ok"* ]] ; then
+                {
+                    passed " ${GREEN} $one_required ${YELLOW} INSTALLED${RESET} ."
+                }
+                else
+                {
+                    echo -e " ${RED}  NEED TO INSTALL ${YELLOW} $one_required${RESET} ${RED}...${query}"
+                    missing="${missing} ${one_required}"
+                }
+                fi
+              }
+              fi
             }
             done
             missing=$(echo ${missing} | sed -e 's/^[[:space:]]*//' | sed 's/^\ //g' | sed 's/^\t//g' ) # trim_start_space
@@ -2264,6 +2310,8 @@ CERO="\033[01;0m"
             local required=$(grep -vE '^\s+#'<<<"${2}")
             for one_required in ${required}; do
             {
+              if ( command -v dpkg >/dev/null 2>&1; ) ; then
+              {
                 dpkg -l | egrep "$one_required" &>/dev/null
                 if [ $? == 0 ]; then
                 {
@@ -2275,14 +2323,43 @@ CERO="\033[01;0m"
                     passed " ${GREEN} $one_required ${YELLOW} NOT PRESENT${RESET} ."
                 }
                 fi
+              }
+              elif ( command -v rpm >/dev/null 2>&1; ) ; then
+              {
+                rpm -qa | egrep "$one_required" &>/dev/null
+                if [ $? == 0 ]; then
+                {
+                    echo -e " ${RED}  NEED TO REMOVE ${YELLOW} $one_required${RESET} ."
+                    removing="${removing} ${one_required}"
+                }
+                else
+                {
+                    passed " ${GREEN} $one_required ${YELLOW} NOT PRESENT${RESET} ."
+                }
+                fi
+              
+              }
+              fi
             }
             done
+
             removing=$(echo ${removing} | sed -e 's/^[[:space:]]*//' | sed 's/^\ //g' | sed 's/^\t//g' ) # trim_start_space
 
-            [[ ! -z "${removing}" ]] && echo -e " ${CYAN} Apt-get removing packages: ${YELLOW} ${removing} ${RESET} ."
-            [[ ! -z "${removing}" ]] && local remove_result=$(sudo apt-get remove ${removing} -yfq   2>&1 && sudo apt-get purge ${removing} -yfq   2>&1 && sudo apt-get autoremove -yfq   2>&1) # capture all input and output
-            local err_buff=$?
-            [[ ! -z "${remove_result}" ]] && handle_error "${err_buff}" "${remove_result}"
+            if ( command -v dpkg >/dev/null 2>&1; ) ; then
+            {            
+              [[ -n "${removing}" ]] && echo -e " ${CYAN} Apt-get removing packages: ${YELLOW} ${removing} ${RESET} ."
+              [[ -n "${removing}" ]] && local remove_result=$(sudo apt-get remove ${removing} -yfq   2>&1 && sudo apt-get purge ${removing} -yfq   2>&1 && sudo apt-get autoremove -yfq   2>&1) # capture all input and output
+              local err_buff=$?
+              [[ -n "${remove_result}" ]] && handle_error "${err_buff}" "${remove_result}"
+            }
+            elif ( command -v rpm >/dev/null 2>&1; ) ; then
+            {
+              [[ -n "${removing}" ]] && echo -e " ${CYAN} Dnf removing packages: ${YELLOW} ${removing} ${RESET} ."
+              [[ -n "${removing}" ]] && local remove_result=$(sudo dnf uninstall ${removing} -y   2>&1 && sudo dnf purge ${removing} -yfq   2>&1 && sudo apt-get autoremove -yfq   2>&1) # capture all input and output
+              local err_buff=$?
+              [[ -n "${remove_result}" ]] && handle_error "${err_buff}" "${remove_result}"
+            }
+            fi
         }
         # end install_apt_get_should_not_be_installed
         #
@@ -2402,7 +2479,7 @@ CERO="\033[01;0m"
           while read -r ONE_CHANGED_FILES_WITH_STATUS; do
           {
             # if not empty
-            if [ ! -z "${ONE_CHANGED_FILES_WITH_STATUS}" ] ; then
+            if [[ -n "${ONE_CHANGED_FILES_WITH_STATUS}" ]] ; then
             {
               FILENAME_LENGTH="${#ONE_CHANGED_FILES_WITH_STATUS}"   # get string length
               (( FILENAME_LENGTH > LONGEST_NAME )) && LONGEST_NAME=$FILENAME_LENGTH
@@ -2537,7 +2614,7 @@ echo -e \"
 "
             while read -r one_line; do
             {
-              if [ ! -z "${one_line}" ]; then
+              if [[ -n "${one_line}" ]] ; then
               {
                 IFS=\, read FILTER_THIS ONE_TITLE ONE_COMMAND ONE_TEST<<EOF
 ${one_line}
@@ -2556,7 +2633,7 @@ EOF
                   README_TABLE="${README_TABLE}
 ${ONE_TITLE}| ${ONE_VERSION} | ${ONE_WHICH}"
 
-                  [ ! -z "${ONE_WHICH}" ] && ONE_WHICH="${GREEN}\t\t:${GRAYEDOUT}${ONE_WHICH}"
+                  [[ -n "${ONE_WHICH}" ]] && ONE_WHICH="${GREEN}\t\t:${GRAYEDOUT}${ONE_WHICH}"
                   VERSION_EXTRACT_COMMAND="${RED}${ONE_TITLE}${GREEN}:${CYAN}${ONE_VERSION}${ONE_WHICH}"
                   GOODIES="${GOODIES}
 ${VERSION_EXTRACT_COMMAND}"
@@ -2634,7 +2711,7 @@ complete -o nospace -F _wp_complete wp
             "
              while read -r one_item; do
             {
-                if [ ! -z "${one_item}" ] ; then  # if not empty
+                if [[ -n "${one_item}" ]] ; then  # if not empty
                 {
                     if [ ! -e "${one_item}" ] ; then
                     {
