@@ -52,8 +52,8 @@
 
 
 # function check_system_requirements(){
-#   # This funciton check_system_requirements is sample of what to do next to keep testing
-#   # or executiong like checking for requirements
+#   # This function check_system_requirements is sample of what to do next to keep testing
+#   # or executing like checking for requirements
 
 #   verify_is_installed git
 #   verify_is_installed awk
@@ -98,6 +98,7 @@ load_execute_as_sudo(){
       # exit 0
       # typeset -rg USER_HOME=$(getent passwd "${SUDO_USER}" | cut -d: -f6)
     # else
+    # shellcheck disable=SC2030
     if ( ! typeset -p "SUDO_USER"  &>/dev/null ) ; then
       typeset -rg USER_HOME=$HOME
     fi
@@ -111,11 +112,12 @@ load_execute_as_sudo(){
     typeset -r provider="$USER_HOME/_/clis/task_intuivo_cli/execute_as_sudo.sh"
     # Test provider
     # echo "${provider}  ?"
+    # shellcheck disable=SC1090
     [   -e "${provider}"  ] && source "${provider}"
     [ ! -e "${provider}"  ] && eval """$(wget --quiet --no-check-certificate  https://raw.githubusercontent.com/zeusintuivo/task_intuivo_cli/master/execute_as_sudo.sh -O -  2>/dev/null )"""   # suppress only wget download messages, but keep wget output for variable
     if ( command -v execute_as_sudo >/dev/null 2>&1; ) ; then
     {
-      echo $provider Loaded Now checking..
+      echo "$provider" Loaded Now checking..
       return 0
     }
     else
@@ -124,7 +126,7 @@ load_execute_as_sudo(){
       exit 1;
     }
     fi
-    echo $provider Loaded Now checking..
+    echo "$provider" Loaded Now checking..
     return 0
 } # end execute_as_sudo
 load_execute_as_sudo
@@ -139,15 +141,18 @@ if [ $_err -ne 0 ] ;  then
 fi
 
 # USER_HOME=$(getent passwd $SUDO_USER | cut -d: -f6)
-enforce_variable_with_value HOME $HOME
-enforce_variable_with_value SUDO_USER $SUDO_USER
-enforce_variable_with_value SUDO_GID $SUDO_GID
-enforce_variable_with_value SUDO_COMMAND $SUDO_COMMAND
+enforce_variable_with_value HOME "$HOME"
+# shellcheck disable=SC2031
+enforce_variable_with_value SUDO_USER "$SUDO_USER"
+enforce_variable_with_value SUDO_GID "$SUDO_GID"
+enforce_variable_with_value SUDO_COMMAND "$SUDO_COMMAND"
 # declare -rg USER_HOME=$(getent passwd $SUDO_USER | cut -d: -f6)
-enforce_variable_with_value USER_HOME $USER_HOME
-(( DEBUG )) &&  echo $SUDO_USER
+enforce_variable_with_value USER_HOME "$USER_HOME"
+# shellcheck disable=SC2031
+(( DEBUG )) &&  echo "$SUDO_USER"
 (( DEBUG )) &&  env | grep SUDO
 echo -e "${CYAN} \__________Sudoed Correctly ${BRIGHT_BLUE87}✔️${CYAN}"
+# shellcheck disable=SC2031
 echo -e "${CYAN}                           ${LIGHTPINK} SUDO_USER ️${YELLOW_OVER_DARKBLUE} $SUDO_USER ${BRIGHT_BLUE87}✔️${CYAN}"
 echo -e "${CYAN}                           ${LIGHTPINK} USER_HOME ️${YELLOW_OVER_DARKBLUE} $USER_HOME ${BRIGHT_BLUE87} ✔️${CYAN}"
 echo -e "${provider} Loaded ${BRIGHT_BLUE87}✔️${CYAN}"
@@ -170,7 +175,7 @@ boostrap_intuivo_bash_app(){
     #
     # !!! ¡ ☠ Say error "${@}" and exit
     #
-    # - Anounce "${@}"
+    # - Announce "${@}"
     # · • Say "${@}"
     # “ Comment "${@}"
     #
@@ -235,14 +240,14 @@ execute_command_intuivo_cli/struct_testing:passed
       fi
       _tmp_file="/tmp/${_script}"
       (( DEBUG )) && echo "-----_tmp_file:: $_tmp_file"
-      (( DEBUG )) && echo _function_test:: $_function_test
+      (( DEBUG )) && echo _function_test:: "$_function_test"
       (( DEBUG )) && echo "----------_url:: $_url"
 
       # Second part distributed values downloads
       if [[ "${_provider}" == *"https://"*  ]] ; then
       {
         (( DEBUG )) && echo "is https://"
-        _execoncli=$(wget --quiet --no-check-certificate  ${_url} -O -  2>/dev/null )   # suppress only c_url download messages, but keep c_url output for variable
+        _execoncli=$(wget --quiet --no-check-certificate  "${_url}" -O -  2>/dev/null )   # suppress only c_url download messages, but keep c_url output for variable
         err=$?
         if [ $err -ne 0 ] ;  then
         {
@@ -251,7 +256,7 @@ execute_command_intuivo_cli/struct_testing:passed
           exit 1
         }
         fi
-        _msg=$(echo "${_execoncli}" > "${_tmp_file}" 2>&1 )
+        _msg=$( "${_execoncli}" > "${_tmp_file}" 2>&1 )
         err=$?
         if [ $err -ne 0 ] ;  then
         {
@@ -261,10 +266,12 @@ execute_command_intuivo_cli/struct_testing:passed
         fi
         #  ++ sources
         [[ ! -e "${_tmp_file}" ]]  && echo -e "\nERROR Local tmp File does not exists or cannot be accessed: \n${_tmp_file}" && exit 1
+        # shellcheck disable=SC1090
         . "${_tmp_file}"
         err=$?
         if [ $err -ne 0 ] ;  then
         {
+          # shellcheck disable=SC1090
           _msg=$(. "${_tmp_file}" 2>&1 )
           echo -e "\nERROR sourcing from file \n_tmpfile=${_tmp_file} \n_script: ${_one} \n_msg: ${_msg} \n_err: ${_err}  \n\n"
           exit 1
@@ -276,12 +283,14 @@ execute_command_intuivo_cli/struct_testing:passed
         (( DEBUG )) && echo "-----is a file:: $_url "
         [[ ! -e "$_url" ]]  && echo -e "\nERROR Local File does not exists  or cannot be accessed: \n ${_url}" && exit 1
         (( DEBUG )) && echo "----file exits:: $_url"
+        # shellcheck disable=SC1090
         . "${_url}"
         # . /USER_HOME/zeus/_/clis/task_intuivo_cli/add_error_trap.sh
         err=$?
         # (( DEBUG )) && echo "---- source err: $_err"
         if [ $err -ne 0 ] ;  then
         {
+          # shellcheck disable=SC1090
           _msg=$(. "${_url}" 2>&1 )
           echo -e "\nERROR sourcing from file \n_url=${_url} \n_script: ${_one} \n_msg: ${_msg} \n_err: ${_err}  \n\n"
           exit 1
@@ -300,7 +309,7 @@ execute_command_intuivo_cli/struct_testing:passed
       }
       else
       {
-        echo -e "${_url} Loaded Correclty ${BRIGHT_BLUE87}✔️${CYAN}"
+        echo -e "${_url} Loaded Correctly ${BRIGHT_BLUE87}✔️${CYAN}"
       }
       fi
     }
@@ -320,5 +329,6 @@ execute_command_intuivo_cli/struct_testing:passed
 } # end function boostrap_intuivo_bash_app
 boostrap_intuivo_bash_app
 
-(( DEBUG )) && echo $SUDO_USER || true
+# shellcheck disable=SC2031
+(( DEBUG )) && echo "$SUDO_USER" || true
 (( DEBUG )) && env | grep SUDO || true
