@@ -166,7 +166,7 @@ function HOW_TO_LOAD_JUST_ONE_SCRIPT_LOCAL_AND_ONLINE_EXECUTE_COMMAND() {
         return 0
     }
     # end load_execute_command_curl
-    load_execute_command_curl     
+    load_execute_command_curl
 }
 # end HOW_TO_LOAD_JUST_ONE_SCRIPT_EXECUTE_COMMAND
 
@@ -1200,6 +1200,58 @@ CERO="\033[01;0m"
             return 1
         } # end ensure_is_defined_and_empty
 
+function _run_command(){
+  # Sample usage:
+  #
+  #    if is_not_installed nest ; then
+  #    {
+  #        _run_command "npm i -g @nestjs/cli"
+  #    }
+  #    fi
+  #    verify_is_installed "
+  #    nest
+  #    "
+  #   verify_installed_version "node --version"  "cat .nvmrc"
+  #   verify_installed_version "node --version"  "14.12"
+  #
+  # Pending Considering use of local trap:
+  #    function __run_command_on_exit() {
+  #      echo "${BASH_COMMAND}"
+  #      echo "${BASH_SOURCE[0]}:${BASH_LINENO[1]} ${FUNCNAME[1]} EXIT"
+  #      exec 1>&3  #    How to redirect output  REF: https://stackoverflow.com/questions/314675/how-to-redirect-output-of-an-entire-shell-script-within-the-script-itself
+  #      cat "logs/__run_command.log"
+  #    }
+  #    trap __run_command_on_exit INT ERR EXIT
+  #    local changelogfile="logs/__run_command.log"
+  #    echo "$(date +%Y%m%d%H%M)">"${changelogfile}"
+  #     exec 3>&1 1>>${changelogfile} 2>&1  # How to write output to both console and file REF: https://stackoverflow.com/questions/18460186/writing-outputs-to-log-file-and-console
+
+  local _node_run_command=''
+  echo -e "${PURPLE} ❓ ${CYAN}${*}"
+  # shellcheck disable=SC2031
+  if ( is_defined_and_not_empty SUDO_USER "${SUDO_USER}" ) ; then
+  {
+    _node_run_command="$(su - "${SUDO_USER}" -c 'cd '"${CALLERPWD}"' ; '"${*}"'' 2>&1)"  # stout and stderr both get
+    _err=$?
+  } else {
+    _node_run_command="$(cd "${CALLERPWD}" || true ; "${*}" 2>&1)"  # stout and stderr both get
+    _err=$?
+  }
+  fi
+  (( DEBUG )) && echo "__run_command: ${_node_run_command} --- _err: ${_err}"
+  if [ $_err -ne 0 ] ;  then
+  {
+    >&2 echo -e "${RED} ✘ ${YELLOW_OVER_DARKBLUE}${*}${RESET} Err:$_err Output: $_node_run_command"
+  }
+  fi
+  _err=$?
+  enforce_variable_with_value _node_run_command ${_node_run_command}
+  [ $_err -eq 0 ] && passed "${_node_run_command}"
+  [ $_err -ne 0 ] && >&2 echo -e "${RED} ✘ ${RESET}${_node_run_command} __run_command returns"
+  return $_err
+} # end __run_command
+
+
         # REPEATED in execute_command
 
         trim_start_space() {
@@ -1566,13 +1618,13 @@ CERO="\033[01;0m"
             local message="$2"
             local CHECK_INSTALLED=""
             if ( command -v dpkg >/dev/null 2>&1; ) ; then
-            {    
+            {
               CHECK_INSTALLED=$(dpkg -s "${package}")
               if [[ "${CHECK_INSTALLED}" == *"Package: ${package}"* ]] ; then
               {
                 echo -e "${GREEN} PACKAGE: ${message}  ${package} is there  ${CERO}"
               }
-              else 
+              else
               {
                 echo -e "${YELLOW} Installing ${message}   ${CERO}"
                 sudo apt install "${package}" -y
@@ -1586,7 +1638,7 @@ CERO="\033[01;0m"
               {
                 echo -e "${GREEN} PACKAGE: ${message}  ${package} is there  ${CERO}"
               }
-              else 
+              else
               {
                 echo -e "${YELLOW} Installing ${message}   ${CERO}"
                 sudo dnf install "${package}" -y
@@ -1794,28 +1846,28 @@ CERO="\033[01;0m"
             local -i _err=0
             local evaled=""
             local COMMAND_TO_EVAL=""
-            if ${1} &>/dev/null ; then 
+            if ${1} &>/dev/null ; then
             {
               COMMAND_TO_EVAL=$(echo -n $(eval ${1}))
               _err=$?
               # echo "1 $_err  ${COMMAND_TO_EVAL}"
               evaled=$(echo -n "${COMMAND_TO_EVAL}" | extract_version | head -1)
               # echo "1 $_err  ${COMMAND_TO_EVAL}"
-              # evaled<<<$($COMMAND_TO_EVAL) 
+              # evaled<<<$($COMMAND_TO_EVAL)
               # evaled=$(${COMMAND_TO_EVAL})
             }
-            else 
+            else
             {
               _err=$?
               # echo "4 $_err ${COMMAND_TO_EVAL}"
-              if [ $_err -eq 127 ] ; then 
+              if [ $_err -eq 127 ] ; then
               {
                 # echo "5 $_err  ${COMMAND_TO_EVAL}"
                 # failed "1 verify_installed_version 1st argument needs to be an executable command. Command not found: <"""${2}""">"
                 COMMAND_TO_EVAL="""${1}"""
-                evaled="$COMMAND_TO_EVAL" 
+                evaled="$COMMAND_TO_EVAL"
               }
-              else 
+              else
               {
                 # echo "6 $_err  ${COMMAND_TO_EVAL}"
                 # echo "1"
@@ -1824,44 +1876,44 @@ CERO="\033[01;0m"
                 # echo "1 $_err  ${COMMAND_TO_EVAL}"
                 evaled=$(echo -n "${COMMAND_TO_EVAL}" | extract_version | head -1)
                 # echo "1 $_err  ${COMMAND_TO_EVAL}"
-                # evaled<<<$($COMMAND_TO_EVAL) 
+                # evaled<<<$($COMMAND_TO_EVAL)
                 # evaled=$(${COMMAND_TO_EVAL})
               }
-              fi 
+              fi
             }
             fi
             # echo "test:${evaled}"
             _err=0
             local expected=""
             local VERSION_EXPECTED=""
-            if ${2} &>/dev/null; then 
+            if ${2} &>/dev/null; then
             {
               # echo "2 $_err ${2}"
               VERSION_EXPECTED=$(eval ${2})
               _err=$?
               expected=$(echo -n "${VERSION_EXPECTED}" | extract_version | head -1)
-              # expected<<<$($VERSION_EXPECTED) 
+              # expected<<<$($VERSION_EXPECTED)
               # expected=$(${VERSION_EXPECTED})
             }
-            else 
+            else
             {
               _err=$?
               # echo "7 $_err ${2}"
-              if [ $_err -eq 127 ] ; then 
+              if [ $_err -eq 127 ] ; then
               {
                 # failed "1 verify_installed_version 2nd argument needs to be an executable command. Command not found: <"""${2}""">"
                 VERSION_EXPECTED="""${2}"""
-                expected="$VERSION_EXPECTED" 
+                expected="$VERSION_EXPECTED"
               }
-              else 
+              else
               {
                 # echo "2 $_err ${2}"
                 VERSION_EXPECTED=$(eval ${2})
                 expected=$(echo -n "${VERSION_EXPECTED}" | extract_version | head -1)
-                # expected<<<$($VERSION_EXPECTED) 
+                # expected<<<$($VERSION_EXPECTED)
                 # expected=$(${VERSION_EXPECTED})
               }
-              fi 
+              fi
             }
             fi
             # echo "expected:${expected}"
@@ -2337,7 +2389,7 @@ CERO="\033[01;0m"
                     passed " ${GREEN} $one_required ${YELLOW} NOT PRESENT${RESET} ."
                 }
                 fi
-              
+
               }
               fi
             }
@@ -2346,7 +2398,7 @@ CERO="\033[01;0m"
             removing=$(echo ${removing} | sed -e 's/^[[:space:]]*//' | sed 's/^\ //g' | sed 's/^\t//g' ) # trim_start_space
 
             if ( command -v dpkg >/dev/null 2>&1; ) ; then
-            {            
+            {
               [[ -n "${removing}" ]] && echo -e " ${CYAN} Apt-get removing packages: ${YELLOW} ${removing} ${RESET} ."
               [[ -n "${removing}" ]] && local remove_result=$(sudo apt-get remove ${removing} -yfq   2>&1 && sudo apt-get purge ${removing} -yfq   2>&1 && sudo apt-get autoremove -yfq   2>&1) # capture all input and output
               local err_buff=$?
@@ -2399,7 +2451,7 @@ CERO="\033[01;0m"
             #    fi
 
             KIND=""
-            if ls werwerwerwerwerwerwerwerwerwerwerr >/dev/null 2>&1; then 
+            if ls werwerwerwerwerwerwerwerwerwerwerr >/dev/null 2>&1; then
               if (( $? == 0 )) ;  then  # Intel processor
                 KIND="INTEL"
               fi
@@ -3606,7 +3658,7 @@ function determine_os_and_fire_action() {
       {
         (( DEBUG )) && echo "RELEASE Option: 3"
         DISTRO=$(ls -d /etc/[A-Za-z]*[_-][rv]e[lr]* | grep -v "lsb" | cut -d'/' -f3 | cut -d'-' -f1 | cut -d'_' -f1 | head -1)
-      } 
+      }
       fi
     }
     fi
