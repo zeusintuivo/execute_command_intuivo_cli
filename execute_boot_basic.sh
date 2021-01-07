@@ -9,13 +9,23 @@
 # typeset -gr THISSCRIPTCOMPLETEPATH="$(pwd)/$(basename "$0")"  # § This goes in the FATHER-MOTHER script
 # typeset -i _err=0
 # load_execute_boot_basic_with_sudo(){
+#     # shellcheck disable=SC2030
 #     if ( typeset -p "SUDO_USER"  &>/dev/null ) ; then
-#       typeset -rg USER_HOME=$(getent passwd $SUDO_USER | cut -d: -f6)
+#     {
+#       export USER_HOME
+#       # typeset -rg USER_HOME=$(getent passwd $SUDO_USER | cut -d: -f6)  # Get the caller's of sudo home dir Just Linux
+#       # shellcheck disable=SC2046
+#       # shellcheck disable=SC2031
+#       typeset -rg USER_HOME="$(echo -n $(bash -c "cd ~${SUDO_USER} && pwd"))"  # Get the caller's of sudo home dir LINUX and MAC
+#     }
 #     else
+#     {
 #       local USER_HOME=$HOME
+#     }
 #     fi
 #     local -r provider="$USER_HOME/_/clis/execute_command_intuivo_cli/execute_boot_basic.sh"
 #     echo source "${provider}"
+#     # shellcheck disable=SC1090
 #     [   -e "${provider}"  ] && source "${provider}"
 #     [ ! -e "${provider}"  ] && eval """$(wget --quiet --no-check-certificate  https://raw.githubusercontent.com/zeusintuivo/execute_command_intuivo_cli/master/execute_boot_basic.sh -O -  2>/dev/null )"""   # suppress only wget download messages, but keep wget output for variable
 #     if ( command -v failed >/dev/null 2>&1; ) ; then
