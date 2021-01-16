@@ -6,17 +6,19 @@
 # How to use: start
 
 # Include this at the beginning of the script
-# typeset -gr THISSCRIPTCOMPLETEPATH="$(pwd)/$(basename "$0")"  # § This goes in the FATHER-MOTHER script
+# export THISSCRIPTCOMPLETEPATH
+# typeset -r THISSCRIPTCOMPLETEPATH="$(pwd)/$(basename "$0")"  # § This goes in the FATHER-MOTHER script
 # typeset -i _err=0
 # load_execute_boot_basic_with_sudo(){
 #     # shellcheck disable=SC2030
 #     if ( typeset -p "SUDO_USER"  &>/dev/null ) ; then
 #     {
-#       export USER_HOME
-#       # typeset -rg USER_HOME=$(getent passwd $SUDO_USER | cut -d: -f6)  # Get the caller's of sudo home dir Just Linux
+#       # export USER_HOME
+#       # typeset -r USER_HOME=$(getent passwd $SUDO_USER | cut -d: -f6)  # Get the caller's of sudo home dir Just Linux
 #       # shellcheck disable=SC2046
 #       # shellcheck disable=SC2031
-#       typeset -rg USER_HOME="$(echo -n $(bash -c "cd ~${SUDO_USER} && pwd"))"  # Get the caller's of sudo home dir LINUX and MAC
+#       export USER_HOME
+#       typeset -r USER_HOME="$(echo -n $(bash -c "cd ~${SUDO_USER} && pwd"))"  # Get the caller's of sudo home dir LINUX and MAC
 #     }
 #     else
 #     {
@@ -88,7 +90,13 @@ typeset -i _err=0
 CYAN="\033[01;36m"
 BRIGHT_BLUE87="\033[38;5;87m"
 echo -e "${CYAN}"
-(( DEBUG )) &&  ( typeset -p "THISSCRIPTCOMPLETEPATH"  &>/dev/null ) && typeset -gr THISSCRIPTCOMPLETEPATH="$(pwd)/$(basename "$0")"
+if (( DEBUG )) &&  ( typeset -p "THISSCRIPTCOMPLETEPATH"  &>/dev/null ) ; then
+{
+  export THISSCRIPTCOMPLETEPATH
+  typeset -r THISSCRIPTCOMPLETEPATH="$(pwd)/$(basename "$0")" 
+}
+fi
+
 load_execute_as_sudo(){
     # DEBUG=1
     # Test home value part 1
