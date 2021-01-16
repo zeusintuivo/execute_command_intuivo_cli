@@ -302,7 +302,7 @@ execute_command_intuivo_cli/struct_testing:passed
         #  exit 1
         # }
         # fi
-        _msg=$(echo -n "${_execoncli}" > "${_tmp_file}" 2>&1 )
+        _msg=$(echo -n """${_execoncli}""" > "${_tmp_file}" 2>&1 )
         err=$?
         if [ $err -ne 0 ] ;  then
         {
