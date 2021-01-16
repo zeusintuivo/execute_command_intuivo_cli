@@ -104,11 +104,13 @@ load_execute_as_sudo(){
     (( DEBUG )) && echo "-----HOME:${HOME}  ? 1"
     # if ( typeset -p "SUDO_USER"  &>/dev/null ) &&  [ -n "${2+x}" ] ; then
       # exit 0
-      # typeset -rg USER_HOME=$(getent passwd "${SUDO_USER}" | cut -d: -f6)
+      # export USER_HOME
+      # typeset -r USER_HOME=$(getent passwd "${SUDO_USER}" | cut -d: -f6)
     # else
     # shellcheck disable=SC2030
     if ( ! typeset -p "SUDO_USER"  &>/dev/null ) ; then
-      typeset -rg USER_HOME=$HOME
+      export USER_HOME
+      typeset -r USER_HOME=$HOME
     fi
     (( DEBUG )) && echo "USER_HOME:${USER_HOME}  ? 1"
     (( DEBUG )) && echo "-----HOME:${HOME}  ? 1"
@@ -117,12 +119,31 @@ load_execute_as_sudo(){
     # Test home value part 2
     # echo "${USER_HOME}  ? 2"
     # echo "${HOME}  ? 2"
-    typeset -r provider="$USER_HOME/_/clis/task_intuivo_cli/execute_as_sudo.sh"
+    typeset provider="$USER_HOME/_/clis/task_intuivo_cli/execute_as_sudo.sh"
     # Test provider
+    # wget --quiet --no-check-certificate  https://raw.githubusercontent.com/zeusintuivo/task_intuivo_cli/master/execute_as_sudo.sh -O - 
+    # curl https://raw.githubusercontent.com/zeusintuivo/task_intuivo_cli/master/execute_as_sudo.sh  -o -
     # echo "${provider}  ?"
     # shellcheck disable=SC1090
-    [   -e "${provider}"  ] && source "${provider}"
-    [ ! -e "${provider}"  ] && eval """$(wget --quiet --no-check-certificate  https://raw.githubusercontent.com/zeusintuivo/task_intuivo_cli/master/execute_as_sudo.sh -O -  2>/dev/null )"""   # suppress only wget download messages, but keep wget output for variable
+    if [   -e "${provider}"  ] ; then 
+    {
+      source "${provider}"
+    }
+    else
+    {
+      provider="https://raw.githubusercontent.com/zeusintuivo/task_intuivo_cli/master/execute_as_sudo.sh"
+      if ( command -v wget >/dev/null 2>&1; ) ; then
+        echo "   wget --quiet --no-check-certificate "${provider}" -O -"
+        eval """$(wget --quiet --no-check-certificate "${provider}" -O -  2>/dev/null )"""   # suppress only wget download mess$
+      elif ( command -v curl >/dev/null 2>&1; ); then
+        echo "   curl "${provider}" -o -"
+        eval """$(curl "${provider}" -o -  2>/dev/null )"""   # suppress only curl download messages, but keep curl output for $
+      else
+        echo -e "\n \n  ERROR! Could not download execute_boot_basic.sh. There is no wget or curl installed or reacheable \n \n "
+        exit 1;
+      fi    
+    }
+    fi
     if ( command -v execute_as_sudo >/dev/null 2>&1; ) ; then
     {
       echo "$provider" Loaded Now checking..
@@ -255,11 +276,26 @@ execute_command_intuivo_cli/struct_testing:passed
       if [[ "${_provider}" == *"https://"*  ]] ; then
       {
         (( DEBUG )) && echo "is https://"
-        _execoncli=$(wget --quiet --no-check-certificate  "${_url}" -O -  2>/dev/null )   # suppress only c_url download messages, but keep c_url output for variable
-        err=$?
+        if ( command -v wget >/dev/null 2>&1; ) ; then
+        {
+          echo -e "try:    wget --quiet --no-check-certificate "${_url}" -O -"
+          _execoncli=$(wget --quiet --no-check-certificate  "${_url}" -O -  2>/dev/null )   # suppress only wget download messages, but keep wget output for variable
+          err=$?
+        }
+        elif ( command -v curl >/dev/null 2>&1; ); then
+        {
+          echo -e "try:    curl "${_url}" -o -"
+          _execoncli=$(curl "${_url}" -o - 2>/dev/null )   # suppress only curl download messages, but keep curl output for variable
+          err=$?
+        }
+        else
+        {
+          echo -e "\n \n  ERROR! Could not download ${_script}. There is no wget or curl installed or reacheable \n \n "
+          exit 1;
+        }
+        fi    
         if [ $err -ne 0 ] ;  then
         {
-          echo -e "tried: _execoncli=\$(wget --quiet --no-check-certificate  ${_url} -O -  2>&1 )"
           echo -e "\nERROR downloading ${_script}\n_url: ${_url} \n_execoncli: ${_execoncli}  \n_err: ${_err} \n\n"
           exit 1
         }
