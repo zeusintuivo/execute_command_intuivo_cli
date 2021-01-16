@@ -279,13 +279,13 @@ execute_command_intuivo_cli/struct_testing:passed
         if ( command -v wget >/dev/null 2>&1; ) ; then
         {
           echo -e "try:    wget --quiet --no-check-certificate "${_url}" -O -"
-          _execoncli="$(wget --quiet --no-check-certificate  "${_url}" -O -  2>/dev/null )"   # suppress only wget download messages, but keep wget output for variable
+          _execoncli="""$(wget --quiet --no-check-certificate  "${_url}" -O -  2>/dev/null )"""   # suppress only wget download messages, but keep wget output for variable
           err=$?
         }
         elif ( command -v curl >/dev/null 2>&1; ); then
         {
           echo -e "try:    curl "${_url}" -o -"
-          _execoncli="$(curl "${_url}" -o - 2>/dev/null )"   # suppress only curl download messages, but keep curl output for variable
+          _execoncli="""$(curl "${_url}" -o - 2>/dev/null )"""   # suppress only curl download messages, but keep curl output for variable
           err=$?
         }
         else
