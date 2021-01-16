@@ -279,13 +279,13 @@ execute_command_intuivo_cli/struct_testing:passed
         if ( command -v wget >/dev/null 2>&1; ) ; then
         {
           echo -e "try:    wget --quiet --no-check-certificate "${_url}" -O -"
-          _execoncli=$(wget --quiet --no-check-certificate  "${_url}" -O -  2>/dev/null )   # suppress only wget download messages, but keep wget output for variable
+          _execoncli="$(wget --quiet --no-check-certificate  "${_url}" -O -  2>/dev/null )"   # suppress only wget download messages, but keep wget output for variable
           err=$?
         }
         elif ( command -v curl >/dev/null 2>&1; ); then
         {
           echo -e "try:    curl "${_url}" -o -"
-          _execoncli=$(curl "${_url}" -o - 2>/dev/null )   # suppress only curl download messages, but keep curl output for variable
+          _execoncli="$(curl "${_url}" -o - 2>/dev/null )"   # suppress only curl download messages, but keep curl output for variable
           err=$?
         }
         else
@@ -294,13 +294,15 @@ execute_command_intuivo_cli/struct_testing:passed
           exit 1;
         }
         fi
+        _msg=$("${_execoncli}")
+        err=$?
         if [ $err -ne 0 ] ;  then
         {
-          echo -e "\nERROR downloading ${_script}\n_url: ${_url} \n_execoncli: ${_execoncli}  \n_err: ${_err} \n\n"
+          echo -e "\nERROR downloading ${_script}\n_url: ${_url}  \n_msg: ${_msg} \n_execoncli: ${_execoncli}  \n_err: ${_err} \n\n"
           exit 1
         }
         fi
-        _msg=$( "${_execoncli}" > "${_tmp_file}" 2>&1 )
+        _msg=$(echo -n "${_execoncli}" > "${_tmp_file}" 2>&1 )
         err=$?
         if [ $err -ne 0 ] ;  then
         {
