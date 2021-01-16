@@ -93,7 +93,7 @@ echo -e "${CYAN}"
 if (( DEBUG )) &&  ( typeset -p "THISSCRIPTCOMPLETEPATH"  &>/dev/null ) ; then
 {
   export THISSCRIPTCOMPLETEPATH
-  typeset -r THISSCRIPTCOMPLETEPATH="$(pwd)/$(basename "$0")" 
+  typeset -r THISSCRIPTCOMPLETEPATH="$(pwd)/$(basename "$0")"
 }
 fi
 
@@ -121,11 +121,11 @@ load_execute_as_sudo(){
     # echo "${HOME}  ? 2"
     typeset provider="$USER_HOME/_/clis/task_intuivo_cli/execute_as_sudo.sh"
     # Test provider
-    # wget --quiet --no-check-certificate  https://raw.githubusercontent.com/zeusintuivo/task_intuivo_cli/master/execute_as_sudo.sh -O - 
+    # wget --quiet --no-check-certificate  https://raw.githubusercontent.com/zeusintuivo/task_intuivo_cli/master/execute_as_sudo.sh -O -
     # curl https://raw.githubusercontent.com/zeusintuivo/task_intuivo_cli/master/execute_as_sudo.sh  -o -
     # echo "${provider}  ?"
     # shellcheck disable=SC1090
-    if [   -e "${provider}"  ] ; then 
+    if [   -e "${provider}"  ] ; then
     {
       source "${provider}"
     }
@@ -141,7 +141,7 @@ load_execute_as_sudo(){
       else
         echo -e "\n \n  ERROR! Could not download execute_boot_basic.sh. There is no wget or curl installed or reacheable \n \n "
         exit 1;
-      fi    
+      fi
     }
     fi
     if ( command -v execute_as_sudo >/dev/null 2>&1; ) ; then
@@ -223,7 +223,7 @@ boostrap_intuivo_bash_app(){
     local _tmp_file=""
     local _function_test=""
     # Project  /  script / test function test if loaded should exist
-    local -ra _scripts=$(grep -v "^#" <<<"
+    local -r _scripts=$(grep -v "^#" <<<"
 # task_intuivo_cli/execute_as_sudo.sh:execute_as_sudo
 task_intuivo_cli/add_error_trap.sh:_trap_on_error
 execute_command_intuivo_cli/execute_command:_execute_command_worker
@@ -293,7 +293,7 @@ execute_command_intuivo_cli/struct_testing:passed
           echo -e "\n \n  ERROR! Could not download ${_script}. There is no wget or curl installed or reacheable \n \n "
           exit 1;
         }
-        fi    
+        fi
         if [ $err -ne 0 ] ;  then
         {
           echo -e "\nERROR downloading ${_script}\n_url: ${_url} \n_execoncli: ${_execoncli}  \n_err: ${_err} \n\n"
