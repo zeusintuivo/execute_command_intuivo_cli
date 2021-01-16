@@ -294,14 +294,14 @@ execute_command_intuivo_cli/struct_testing:passed
           exit 1;
         }
         fi
-        _msg=$("${_execoncli}")
-        err=$?
-        if [ $err -ne 0 ] ;  then
-        {
-          echo -e "\nERROR downloading ${_script}\n_url: ${_url}  \n_msg: ${_msg} \n_execoncli: ${_execoncli}  \n_err: ${_err} \n\n"
-          exit 1
-        }
-        fi
+        # _msg=$("${_execoncli}")
+        # err=$?
+        # if [ $err -ne 0 ] ;  then
+        # {
+        #  echo -e "\nERROR downloading ${_script}\n_url: ${_url}  \n_msg: ${_msg} \n_execoncli: ${_execoncli}  \n_err: ${_err} \n\n"
+        #  exit 1
+        # }
+        # fi
         _msg=$(echo -n "${_execoncli}" > "${_tmp_file}" 2>&1 )
         err=$?
         if [ $err -ne 0 ] ;  then
