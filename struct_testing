@@ -1953,6 +1953,52 @@ function _run_command(){
             fi
         } # end verify_installed_version_old
 
+        function _if_not_is_installed(){
+            local -i ret
+            local msg
+            ret=0
+            if ( command -v dpkg >/dev/null 2>&1; ) ; then
+            {
+                msg="$(apt info $1  >/dev/null 2>&1)"
+            }
+            elif ( command -v rpm >/dev/null 2>&1; ) ; then
+            {
+                msg="$(dnf info $1  >/dev/null 2>&1)"
+            }
+            elif ( command -v brew >/dev/null 2>&1; ) ; then
+            {
+                msg="$(su - "${SUDO_USER}" -c "brew info $1  >/dev/null 2>&1")"
+            }
+            fi
+            ret=$?
+            [ $ret -gt 0 ] && return 1
+            [[ "$msg" == *"No such"* ]] && return 1
+            [[ "$msg" == *"nicht gefunden"* ]] && return 1
+            [[ "$msg" == *"Error"*   ]] && return 1
+            return 0
+        } # end _if_not_is_installed
+
+        function _if_not_contains(){
+            local -i ret
+            local msg
+            ret=0
+            [ ! -e "$1" ] && return 1
+            msg=$(cat -n "$1" >/dev/null 2>&1)
+            ret=$?
+            [ $ret -gt 0 ] && return 1
+            [[ "$msg" == *"No such"* ]] && return 1
+            [[ "$msg" == *"nicht gefunden"* ]] && return 1
+            [[ "$msg" == *"Permission denied"* ]] && return 1
+            ret=0
+            msg=$(echo "$msg" | grep "$2" >/dev/null 2>&1)
+            ret=$?
+            [ $ret -gt 0 ] && return 1
+            [[ "$msg" == *"No such"* ]] && return 1
+            [[ "$msg" == *"nicht gefunden"* ]] && return 1
+            [[ "$msg" == *"Permission denied"* ]] && return 1
+            return 0
+        } # end _if_not_contains
+
         function if_user_exists() {
             # Sample use
             #
@@ -2234,7 +2280,202 @@ function _run_command(){
                 return 1
             }
             fi
+        } # end is_not_included
+
+        function install_requirements() {
+            # Sample use
+            #               local OS="${1}"
+            #
+            #               install_requirements "darwin" "
+            #               node
+            #               # instead of nvm 
+            #               nodenv
+            #               rbenv
+            #               ag@the_silver_searcher
+            #               ack
+            #               "
+            #               install_requirements "${OS}" "
+            #                        build-essential
+            #                        # Ubuntu only
+            #                        ag@silversearcher-ag
+            #                        libreadline-dev
+            #                        zlib1g-dev
+            #                        flex
+            #                        bison
+            #                        libxml2-dev
+            #                        libxslt-dev
+            #                        libssl-dev
+            #
+            #                        libreadline6-dev
+            #                        libossp-uuid-dev
+            #                        uuid"
+            #
+            #
+
+            # room for detecting Linux and OS systems
+            local OS="${1}"
+            local missing=""
+            local one_required=""
+            local install_this=""
+            local required=$(grep -vE '^\s+#'<<<"${2}")
+            local packages=""
+            local query=""
+            local install_result=""
+            local err_buff=0
+
+            if ( command -v brew >/dev/null 2>&1; ) ; then
+            {
+                # query=$(brew list --formula 2>&1)
+                query=$(su - "${SUDO_USER}" -c "brew list --formula" 2>&1)
+                # query=$(_run_command "brew list --formula"  2>&1)
+            }
+            fi
+            for one_required in ${required}; do
+            {
+              if [[ -z "${one_required}" ]] ; then
+              {
+                continue
+              }
+              fi
+              if ( echo "${one_required}" | grep -q "^[[:space:]]*#" ) ; then
+              {
+                continue
+              }
+              fi
+              if ( echo "${one_required}" | grep -q "@" ) ; then
+              {
+                install_this="$( echo "${one_required}" | cut -d@ -f2- )"
+                one_required="$( echo "${one_required}" | cut -d@ -f1 )"
+              } else {
+                install_this="${one_required}"
+              }
+              fi
+
+              if [[ -z "${one_required}" ]] ; then
+              {
+                continue
+              } else {
+                one_required=$(echo -n ${one_required} | sed -e 's/^[[:space:]]*//' ) # trim_start_space
+              }
+              fi
+              if [[ -z "${install_this}" ]] ; then
+              {
+                install_this=$(echo -n ${one_required} | sed -e 's/^[[:space:]]*//' ) # trim_spaces
+              } else {
+                install_this=$(echo -n ${install_this} | sed -e 's/^[[:space:]]*//' ) # trim_spaces
+              }
+              fi
+              if ( command -v dpkg >/dev/null 2>&1; ) ; then
+              {
+                # REF: https://www.cyberciti.biz/faq/find-out-if-package-is-installed-in-linux/
+                packages=$(dpkg -l | egrep "$one_required" | cut -d' ' -f3 2>&1)
+                query=$(dpkg-query -W -f='${Status} ${Version}\n' "$one_required"  2>&1)
+                #if [[ "${query}" == "install ok"* ]] && ( is_included "$one_required" "${packages}" ); then
+                if [[ "${query}" == "install ok"* ]] ; then
+                {
+                    passed " ${GREEN} $one_required ${YELLOW} INSTALLED${RESET} ."
+                }
+                else
+                {
+                    echo -e " ${RED}  NEED TO INSTALL ${YELLOW} $one_required${RESET} ${RED}...${query}"
+                    missing="${missing} ${install_this}"
+                    echo  "${install_this}"
+                }
+                fi
+              }
+              elif ( command -v rpm >/dev/null 2>&1; ) ; then
+              {
+                packages=$(rpm -qa | egrep "$one_required" | cut -d' ' -f3 2>&1)
+                query=$(rpm-query -W -f='${Status} ${Version}\n' "$one_required"  2>&1)
+                #if [[ "${query}" == "install ok"* ]] && ( is_included "$one_required" "${packages}" ); then
+                if [[ "${query}" == "install ok"* ]] ; then
+                {
+                    passed " ${GREEN} $one_required ${YELLOW} INSTALLED${RESET} ."
+                }
+                else
+                {
+                    echo -e " ${RED}  NEED TO INSTALL ${YELLOW} $one_required${RESET} ${RED}...${query}"
+                    missing="${missing} ${install_this}"
+                    echo  "${install_this}"
+                }
+                fi
+              }
+              elif ( command -v brew >/dev/null 2>&1; ) ; then
+              {
+                # CHECK_INSTALLED=$(brew ls --versions "${one_required}")
+                # query=$(brew list --formula 2>&1)
+                # one_required="nano"
+                # query=$(su - "${SUDO_USER}" -c "brew list --formula" 2>&1)
+                # query=$(_run_command "brew list --formula"  2>&1)
+                # ( echo "${query}" | grep -q  "^zsh$" )  && echo "installed"
+                # [[ "$( echo "${query}" | grep   "^unar$" )" == "unar" ]] && echo "installed"
+                # ( echo "${query}" | grep -q  "^${one_required}$" ) && echo "installed"
+                if  ( echo "${query}" | grep -q  "^${one_required}$" ) ; then
+                {
+                    passed " ${GREEN} $one_required ${YELLOW} INSTALLED${RESET} ."
+                }
+                else
+                {
+                    echo -e " ${RED}  NEED TO INSTALL ${YELLOW} $one_required${RESET} ${RED}..."
+                    # echo -e "${YELLOW} Installing ${one_required}  ${CERO}"
+                    missing="${missing} ${install_this}"
+                    # su - "${SUDO_USER}" -c "brew install \"${install_this}\" "
+                    # _run_command "brew install \"${install_this}\" "
+                }
+                fi
+              }
+              fi
+            }
+            done
+
+
+            # Check Requirements OS Ubuntu 14.04 REF: https://wiki.postgresql.org/wiki/Compile_and_Install_from_source_code#Ubuntu
+            if [[ -n "${missing}" ]] ; then
+            {
+              missing=$(echo -n ${missing} | sed -e 's/^[[:space:]]*//' ) # trim_start_space
+              echo -e " ${CYAN} Installing missing packages: ${YELLOW} ${missing} ${RESET} ."
+              if ( command -v dpkg >/dev/null 2>&1; ) ; then
+              {
+                install_result=$(sudo apt install ${missing} -yfq   2>&1) # capture all input and output
+                err_buff=$?
+              }
+              elif ( command -v rpm >/dev/null 2>&1; ) ; then
+              {
+                install_result=$(sudo dnf install ${missing} -yfq   2>&1) # capture all input and output
+                err_buff=$?
+              }
+              elif ( command -v brew >/dev/null 2>&1; ) ; then
+              {
+                # _run_command brew install ${missing}
+                su - "${SUDO_USER}" -c "brew install ${missing} "
+                err_buff=$?
+              }
+              fi
+            }
+            fi
+            # echo $install_result;
+            if [[ ! -z "${install_result}" ]] ; then #  && handle_error "${install_result}"
+            {
+                local error_happened=""
+                [[ "${PROCESSOR_ERROR}" == *"MAC"* ]] && [ $err_buff != 0 ] && error_happened="1"
+                [[ "${PROCESSOR_ERROR}" == *"INTEL"* ]] && (( $err_buff != 0 )) && error_happened="1"
+                if [ "${error_happened}" ]  ||  ( has_error_keyword "${install_result}" ) ; then
+                {
+                  echo -e "${PURPLE_BLUE} action ${RED}failed ${YELLOW226}!!!  ${RESET}"
+                  [[ "${install_result}" == *"Could not resolve"* ]] && echo -e "${BRIGHT_BLUE87} It appears YOU HAVE ${YELLOW226}NO INTERNET CONNECTION \o_0/ ${RESET}"
+                  [[ "${install_result}" == *"Repository not found"* ]] && echo -e "${BRIGHT_BLUE87} It appears YOU HAVE ${YELLOW226}NO ACCESS TO THIS FOR YOU ${RED} ${GIT_USER_NAME} ${RESET}"
+                  [[ "${install_result}" == *"Could not read from"* ]] && echo -e "${BRIGHT_BLUE87} It appears it exists but you are ${RED}NOT ${YELLOW226} ALLOWED ${RED} ${GIT_USER_NAME} ${YELLOW226}!!! ${RESET}"
+                  RED="\\033[01;31m"
+                  CYAN="\\033[01;36m"
+                  local display_install_result=$(echo "${install_result}" | sed "s/\(FAILED\|failed\|Failed\|ERROR\|Error\|error\|cannot\|continue\|logged\|inspection\|not\|exit\|more\|details\)/${RED}\1${CYAN}/g")
+                  failed "${RESET} \n .... \n ... ${display_install_result} \n ... \n ..."
+                }
+                fi
+
+            }
+            fi
         }
+        # end install_requirements
 
         function install_apt_get_requirements() {
             # Sample use
@@ -2264,8 +2505,6 @@ function _run_command(){
             local query=""
             for one_required in ${required}; do
             {
-              if ( command -v dpkg >/dev/null 2>&1; ) ; then
-              {
                 # REF: https://www.cyberciti.biz/faq/find-out-if-package-is-installed-in-linux/
                 packages=$(dpkg -l | egrep "$one_required" | cut -d' ' -f3 2>&1)
                 query=$(dpkg-query -W -f='${Status} ${Version}\n' "$one_required"  2>&1)
@@ -2280,24 +2519,6 @@ function _run_command(){
                     missing="${missing} ${one_required}"
                 }
                 fi
-              }
-              elif ( command -v rpm >/dev/null 2>&1; ) ; then
-              {
-                packages=$(rpm -qa | egrep "$one_required" | cut -d' ' -f3 2>&1)
-                query=$(rpm-query -W -f='${Status} ${Version}\n' "$one_required"  2>&1)
-                #if [[ "${query}" == "install ok"* ]] && ( is_included "$one_required" "${packages}" ); then
-                if [[ "${query}" == "install ok"* ]] ; then
-                {
-                    passed " ${GREEN} $one_required ${YELLOW} INSTALLED${RESET} ."
-                }
-                else
-                {
-                    echo -e " ${RED}  NEED TO INSTALL ${YELLOW} $one_required${RESET} ${RED}...${query}"
-                    missing="${missing} ${one_required}"
-                }
-                fi
-              }
-              fi
             }
             done
             missing=$(echo ${missing} | sed -e 's/^[[:space:]]*//' | sed 's/^\ //g' | sed 's/^\t//g' ) # trim_start_space
