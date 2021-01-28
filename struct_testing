@@ -2288,7 +2288,7 @@ function _run_command(){
             #
             #               install_requirements "darwin" "
             #               node
-            #               # instead of nvm 
+            #               # instead of nvm
             #               nodenv
             #               rbenv
             #               ag@the_silver_searcher
@@ -2329,6 +2329,10 @@ function _run_command(){
                 query=$(su - "${SUDO_USER}" -c "brew list --formula" 2>&1)
                 # query=$(_run_command "brew list --formula"  2>&1)
             }
+            elif ( command -v dnf >/dev/null 2>&1; ) ; then
+            {
+                packages=$(rpm -qa)
+            }
             fi
             for one_required in ${required}; do
             {
@@ -2365,7 +2369,7 @@ function _run_command(){
                 install_this=$(echo -n ${install_this} | sed -e 's/^[[:space:]]*//' ) # trim_spaces
               }
               fi
-              if ( command -v dpkg >/dev/null 2>&1; ) ; then
+              if ( command -v apt >/dev/null 2>&1; ) ; then
               {
                 # REF: https://www.cyberciti.biz/faq/find-out-if-package-is-installed-in-linux/
                 packages=$(dpkg -l | egrep "$one_required" | cut -d' ' -f3 2>&1)
@@ -2383,12 +2387,9 @@ function _run_command(){
                 }
                 fi
               }
-              elif ( command -v rpm >/dev/null 2>&1; ) ; then
+              elif ( command -v dnf >/dev/null 2>&1; ) ; then
               {
-                packages=$(rpm -qa | egrep "$one_required" | cut -d' ' -f3 2>&1)
-                query=$(rpm-query -W -f='${Status} ${Version}\n' "$one_required"  2>&1)
-                #if [[ "${query}" == "install ok"* ]] && ( is_included "$one_required" "${packages}" ); then
-                if [[ "${query}" == "install ok"* ]] ; then
+                if ( echo "${packages}" | egrep "$one_required"| grep "^$one_required" | cut -d'-' -f1  >/dev/null 2>&1;) ; then
                 {
                     passed " ${GREEN} $one_required ${YELLOW} INSTALLED${RESET} ."
                 }
@@ -2434,12 +2435,12 @@ function _run_command(){
             {
               missing=$(echo -n ${missing} | sed -e 's/^[[:space:]]*//' ) # trim_start_space
               echo -e " ${CYAN} Installing missing packages: ${YELLOW} ${missing} ${RESET} ."
-              if ( command -v dpkg >/dev/null 2>&1; ) ; then
+              if ( command -v apt >/dev/null 2>&1; ) ; then
               {
                 install_result=$(sudo apt install ${missing} -yfq   2>&1) # capture all input and output
                 err_buff=$?
               }
-              elif ( command -v rpm >/dev/null 2>&1; ) ; then
+              elif ( command -v dnf >/dev/null 2>&1; ) ; then
               {
                 install_result=$(sudo dnf install ${missing} -yfq   2>&1) # capture all input and output
                 err_buff=$?
@@ -2467,7 +2468,7 @@ function _run_command(){
                   [[ "${install_result}" == *"Could not read from"* ]] && echo -e "${BRIGHT_BLUE87} It appears it exists but you are ${RED}NOT ${YELLOW226} ALLOWED ${RED} ${GIT_USER_NAME} ${YELLOW226}!!! ${RESET}"
                   RED="\\033[01;31m"
                   CYAN="\\033[01;36m"
-                  local display_install_result=$(echo "${install_result}" | sed "s/\(FAILED\|failed\|Failed\|ERROR\|Error\|error\|cannot\|continue\|logged\|inspection\|not\|exit\|more\|details\)/${RED}\1${CYAN}/g")
+                  local display_install_result=$(echo -e "${install_result}" | sed "s/\(FAILED\|failed\|Failed\|ERROR\|Error\|error\|cannot\|continue\|logged\|inspection\|not\|exit\|more\|details\)/${RED}\1${CYAN}/g")
                   failed "${RESET} \n .... \n ... ${display_install_result} \n ... \n ..."
                 }
                 fi
