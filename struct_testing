@@ -633,6 +633,9 @@ CERO="\033[01;0m"
             does_not_exist_with_spaces "${*}"
         } # end file_does_not_exist_with_spaces
 
+        function it_does_not_exist(){
+            return ! it_exists $@
+        } # end it_does_not_exist
 
         function it_exists() {
             # Sample usage
