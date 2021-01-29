@@ -1978,26 +1978,72 @@ function _run_command(){
             return 0
         } # end _if_not_is_installed
 
+
         function _if_not_contains(){
-            local -i ret
-            local msg
-            ret=0
-            [ ! -e "$1" ] && return 1
-            msg=$(cat -n "$1" >/dev/null 2>&1)
-            ret=$?
-            [ $ret -gt 0 ] && return 1
-            [[ "$msg" == *"No such"* ]] && return 1
-            [[ "$msg" == *"nicht gefunden"* ]] && return 1
-            [[ "$msg" == *"Permission denied"* ]] && return 1
-            ret=0
-            msg=$(echo "$msg" | grep "$2" >/dev/null 2>&1)
-            ret=$?
-            [ $ret -gt 0 ] && return 1
-            [[ "$msg" == *"No such"* ]] && return 1
-            [[ "$msg" == *"nicht gefunden"* ]] && return 1
-            [[ "$msg" == *"Permission denied"* ]] && return 1
-            return 0
+                    # Sample use:
+                    #       _if_not_contains  || run_this
+                    #
+                    # discouraged use ---confusing using && and
+                    #    _if_not_contains  && run_this
+                    #
+                    # echo "${policies}" > temp.xml
+                    # if ! _if_not_contains temp.xml "{1,}" ; then
+                    # {
+                    #   run this
+                    # } else {
+                    #   passed "passwords policy already set to {1,}"
+                    # }
+                    # fi
+                    local -i ret
+                    local msg
+                    ret=0
+                    (( DEBUG )) && echo "1if"
+                    [ ! -e "$1" ] && return 1
+                    (( DEBUG )) && (cat -n "$1" )
+                    msg=$(cat "$1" 2>&1)
+                    ret=$?
+                    (( DEBUG )) && echo "2if"
+                    (( DEBUG )) && echo "${msg}"
+                    [ $ret -gt 0 ] && return 1
+                    (( DEBUG )) && echo "3if"
+                    [[ "$msg" == *"No such"* ]] && return 1
+                    (( DEBUG )) && echo "4if"
+                    [[ "$msg" == *"nicht gefunden"* ]] && return 1
+                    (( DEBUG )) && echo "5if"
+                    [[ "$msg" == *"Permission denied"* ]] && return 1
+                    (( DEBUG )) && echo "6if"
+                    ret=0
+                    (( DEBUG )) && echo 'echo "$msg" | grep "$2"'
+                    (( DEBUG )) && echo 'echo '"$msg"' | grep '"$2"
+                    (( DEBUG )) && ([[ -n "$msg" ]] ||  echo "6.5if file is empty")
+                    [[ -n "$msg" ]] || return 1    # Not found
+                    msg=$(echo "$msg" | grep "$2" 2>&1)
+                    ret=$?
+                    (( DEBUG )) && echo "7if $ret"
+                    [ $ret -eq 0 ] && return 0     # Found
+                    [ $ret -gt 0 ] && return 1    # Not Found
+                    (( DEBUG )) && echo "8if"
+                    [[ "$msg" == *"No such"* ]] && return 1
+                    (( DEBUG )) && echo "9 if"
+                    [[ "$msg" == *"nicht gefunden"* ]] && return 1
+                    [[ "$msg" == *"Permission denied"* ]] && return 1
+                    return 0  # Found
         } # end _if_not_contains
+
+        function _if_contains(){
+            # Sample use
+            # _if_contains && run_this
+            # echo "${policies}" > temp.xml
+            # if _if_contains temp.xml "{1,}" ; then
+            # {
+            #   passed "passwords policy already set to {1,}"
+            # } else {
+            #   run this
+            # }
+            # fi
+            return ! _if_not_contains  "$1" "$2"
+        } # end _if_contains
+
 
         function if_user_exists() {
             # Sample use
@@ -3472,12 +3518,12 @@ function _download_linux() {
   local download_folder=""
   if [ -n "${2}" ] ; then # if not empty
     {
-        download_folder="${2} "
+        download_folder="${2}"
     }
   fi
   echo "     target url 1:<${1}>"
   [ -z "${1}" ] && echo "empty"
-  echo "download folder 2:<${2}>"
+  echo "download folder 2:<${download_folder}>"
   [ -z "${2}" ] && echo "empty"
   echo "  download file 3:<${3}>"
 #   file_exists_with_spaces "${download_folder}"
