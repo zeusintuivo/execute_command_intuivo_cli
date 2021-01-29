@@ -1620,7 +1620,7 @@ function _run_command(){
             local package="$1"
             local message="$2"
             local CHECK_INSTALLED=""
-            if ( command -v dpkg >/dev/null 2>&1; ) ; then
+            if ( ( command -v apt >/dev/null 2>&1; ) && ( command -v dpkg >/dev/null 2>&1; ) ) ; then
             {
               CHECK_INSTALLED=$(dpkg -s "${package}")
               if [[ "${CHECK_INSTALLED}" == *"Package: ${package}"* ]] ; then
@@ -1634,7 +1634,7 @@ function _run_command(){
               }
               fi
             }
-            elif ( command -v rpm >/dev/null 2>&1; ) ; then
+            elif ( ( command -v rpm >/dev/null 2>&1; ) && ( command -v dnf >/dev/null 2>&1; ) ) ; then
             {
               CHECK_INSTALLED=$(rpm -qa|grep -i "${package}")
               if [[ "${CHECK_INSTALLED}" == *"Package: ${package}"* ]] ; then
@@ -1960,11 +1960,11 @@ function _run_command(){
             local -i ret
             local msg
             ret=0
-            if ( command -v dpkg >/dev/null 2>&1; ) ; then
+            if ( ( command -v apt >/dev/null 2>&1; ) && ( command -v dpkg >/dev/null 2>&1; ) ) ; then
             {
                 msg="$(apt info $1  >/dev/null 2>&1)"
             }
-            elif ( command -v rpm >/dev/null 2>&1; ) ; then
+            elif ( ( command -v rpm >/dev/null 2>&1; ) && ( command -v dnf >/dev/null 2>&1; ) ) ; then
             {
                 msg="$(dnf info $1  >/dev/null 2>&1)"
             }
@@ -2378,7 +2378,7 @@ function _run_command(){
                 query=$(su - "${SUDO_USER}" -c "brew list --formula" 2>&1)
                 # query=$(_run_command "brew list --formula"  2>&1)
             }
-            elif ( command -v dnf >/dev/null 2>&1; ) ; then
+            elif ( ( command -v rpm >/dev/null 2>&1; ) && ( command -v dnf >/dev/null 2>&1; ) ); then
             {
                 packages=$(rpm -qa)
             }
@@ -2418,7 +2418,7 @@ function _run_command(){
                 install_this=$(echo -n ${install_this} | sed -e 's/^[[:space:]]*//' ) # trim_spaces
               }
               fi
-              if ( command -v apt >/dev/null 2>&1; ) ; then
+              if ( ( command -v apt >/dev/null 2>&1; ) && ( command -v dpkg >/dev/null 2>&1; ) ) ; then
               {
                 # REF: https://www.cyberciti.biz/faq/find-out-if-package-is-installed-in-linux/
                 packages=$(dpkg -l | egrep "$one_required" | cut -d' ' -f3 2>&1)
@@ -2436,7 +2436,7 @@ function _run_command(){
                 }
                 fi
               }
-              elif ( command -v dnf >/dev/null 2>&1; ) ; then
+              elif ( ( command -v rpm >/dev/null 2>&1; ) && ( command -v dnf >/dev/null 2>&1; ) ) ; then
               {
                 if ( echo "${packages}" | egrep "$one_required"| grep "^$one_required" | cut -d'-' -f1  >/dev/null 2>&1;) ; then
                 {
@@ -2484,12 +2484,12 @@ function _run_command(){
             {
               missing=$(echo -n ${missing} | sed -e 's/^[[:space:]]*//' ) # trim_start_space
               echo -e " ${CYAN} Installing missing packages: ${YELLOW} ${missing} ${RESET} ."
-              if ( command -v apt >/dev/null 2>&1; ) ; then
+              if ( ( command -v apt >/dev/null 2>&1; )  && ( command -v dpkg >/dev/null 2>&1; ) ); then
               {
                 install_result=$(sudo apt install ${missing} -yfq   2>&1) # capture all input and output
                 err_buff=$?
               }
-              elif ( command -v dnf >/dev/null 2>&1; ) ; then
+              elif ( ( command -v rpm >/dev/null 2>&1; ) && ( command -v dnf >/dev/null 2>&1; ) ) ; then
               {
                 install_result=$(sudo dnf install ${missing} -yfq   2>&1) # capture all input and output
                 err_buff=$?
@@ -2633,7 +2633,7 @@ function _run_command(){
             local required=$(grep -vE '^\s+#'<<<"${2}")
             for one_required in ${required}; do
             {
-              if ( command -v dpkg >/dev/null 2>&1; ) ; then
+              if ( ( command -v apt >/dev/null 2>&1; ) && ( command -v dpkg >/dev/null 2>&1; ) ) ; then
               {
                 dpkg -l | egrep "$one_required" &>/dev/null
                 if [ $? == 0 ]; then
@@ -2647,7 +2647,7 @@ function _run_command(){
                 }
                 fi
               }
-              elif ( command -v rpm >/dev/null 2>&1; ) ; then
+              elif ( ( command -v rpm >/dev/null 2>&1; ) && ( command -v dnf >/dev/null 2>&1; ) ) ; then
               {
                 rpm -qa | egrep "$one_required" &>/dev/null
                 if [ $? == 0 ]; then
@@ -2668,14 +2668,14 @@ function _run_command(){
 
             removing=$(echo ${removing} | sed -e 's/^[[:space:]]*//' | sed 's/^\ //g' | sed 's/^\t//g' ) # trim_start_space
 
-            if ( command -v dpkg >/dev/null 2>&1; ) ; then
+            if ( ( command -v apt >/dev/null 2>&1; ) && ( command -v dpkg >/dev/null 2>&1; ) ) ; then
             {
               [[ -n "${removing}" ]] && echo -e " ${CYAN} Apt-get removing packages: ${YELLOW} ${removing} ${RESET} ."
               [[ -n "${removing}" ]] && local remove_result=$(sudo apt-get remove ${removing} -yfq   2>&1 && sudo apt-get purge ${removing} -yfq   2>&1 && sudo apt-get autoremove -yfq   2>&1) # capture all input and output
               local err_buff=$?
               [[ -n "${remove_result}" ]] && handle_error "${err_buff}" "${remove_result}"
             }
-            elif ( command -v rpm >/dev/null 2>&1; ) ; then
+            elif ( ( command -v rpm >/dev/null 2>&1; ) && ( command -v dnf >/dev/null 2>&1; ) ) ; then
             {
               [[ -n "${removing}" ]] && echo -e " ${CYAN} Dnf removing packages: ${YELLOW} ${removing} ${RESET} ."
               [[ -n "${removing}" ]] && local remove_result=$(sudo dnf uninstall ${removing} -y   2>&1 && sudo dnf purge ${removing} -yfq   2>&1 && sudo apt-get autoremove -yfq   2>&1) # capture all input and output
