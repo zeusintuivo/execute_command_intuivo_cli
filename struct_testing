@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/env bash
 #!/bin/bash
 #
 # @author Zeus Intuivo <zeus@intuivo.com>
@@ -371,8 +371,12 @@ CERO="\033[01;0m"
           {
               (( DEBUG )) && echo -e "${LIGHTGREEN} ✔ ${LIGHTYELLOW} ${TESTING} has passed "
               return 0
-          } else {
-              echo -e "${RED} 𝞦 ${LIGHTYELLOW} ${TESTING} has failed "
+          } 
+          else 
+          {
+  
+              echo -e "${RED} 𝞦 \\n${BASH_SOURCE}:${BASH_LINENO[1]} ${FUNCNAME[-0]}(...) \\n$0:${BASH_LINENO[0]} ${FUNCNAME[1]}(...) \\n ${LIGHTYELLOW} ${TESTING} has failed "
+              failed enforce_variable_with_value "${1}" 
               exit 1
           }
           fi
@@ -3589,19 +3593,30 @@ function _download_linux() {
     echo "OPTIONS WGETRC:"
     cat -n /tmp/wgetrc
     echo "COMMAND WGET:"
-    passed "WGETRC=/tmp/wgetrc wget --max-redirect=10 --mirror --directory-prefix="${download_folder}" -O "${download_file}" --no-check-certificate "${target_url}""
-    cd ${download_folder}
+    passed "WGETRC=/tmp/wgetrc wget --max-redirect=10 --mirror --directory-prefix=${download_folder} -O ${download_file} --no-check-certificate ${target_url}"
+    cd "${download_folder}"
     pwd
     # if not defined and not empty try code normal
-    ( typeset -p "SUDO_USER"  &>/dev/null ) ||  wget --max-redirect=10 --mirror --directory-prefix="${download_folder}" -O "${download_file}" --no-check-certificate "${target_url}" # 2>/dev/null"
+    if ( typeset -p "SUDO_USER"  &>/dev/null ) ; then
+    {
+       cd "${download_folder}"
+       _trap_try_start
+       wget --max-redirect=10 --mirror --directory-prefix="${download_folder}" -O "${download_file}" --no-check-certificate "${target_url}" # 2>/dev/null"
+       _trap_catch_check
+    }
+    elif  ( typeset -p "SUDO_USER"  &>/dev/null ) ; then
+    {
+      _trap_try_start
+      su - "$SUDO_USER" -c 'cd '"${download_folder}"' && wget --max-redirect=10 --mirror --directory-prefix='"${download_folder}"' -O '"${download_file}"' --no-check-certificate '"${target_url}"' && pwd ' # 2>/dev/null"
+      _trap_catch_check
+    }
+    fi
     # ( typeset -p "SUDO_USER"  &>/dev/null ) ||  wget --max-redirect=10 --mirror  --no-check-certificate "${target_url}" # 2>/dev/null"
     # if defined and not empty
     # ( typeset -p "SUDO_USER"  &>/dev/null ) && echo "sudo user " >&2
-    ( typeset -p "SUDO_USER"  &>/dev/null ) &&  su - $SUDO_USER -c 'cd ${download_folder} && wget --max-redirect=10 --mirror --directory-prefix='"${download_folder}"' -O '"${download_file}"' --no-check-certificate '"${target_url}"' && pwd ' # 2>/dev/null"
     # ( typeset -p "SUDO_USER"  &>/dev/null ) &&  su - $SUDO_USER -c 'wget --max-redirect=10 --mirror  --no-check-certificate '"${target_url}"' ' # 2>/dev/null"
 
     # WGETRC=/tmp/wgetrc wget "${WGETCOMMAND}" # 2>/dev/null"
-    _trap_catch_check
     _assure_success
     echo "${msg}"
     echo -e "\033[7m*** Download Wget executed completed.\033[0m"
@@ -3611,10 +3626,10 @@ function _download_linux() {
   elif ( command -v curl >/dev/null 2>&1; ); then
     ensure curl or "curl is required"
    # if not defined and not empty try code normal
-    ( typeset -p "SUDO_USER"  &>/dev/null ) ||  curl -O "${target_url}" 2>/dev/null   # suppress only wget download messages, but keep wget output for variable
+    ( typeset -p "SUDO_USER"  &>/dev/null ) ||  cd "${download_folder}" && curl -O "${target_url}" 2>/dev/null   # suppress only wget download messages, but keep wget output for variable
     # if defined and not empty
     # ( typeset -p "SUDO_USER"  &>/dev/null ) && echo "sudo user " >&2
-    ( typeset -p "SUDO_USER"  &>/dev/null ) &&  su - $SUDO_USER -c 'curl -O '"${target_url}"' 2>/dev/null'   # suppress only wget download messages, but keep wget output for variable
+    ( typeset -p "SUDO_USER"  &>/dev/null ) &&  su - "$SUDO_USER" -c 'cd  '"${download_folder}"' && curl -O  '"${download_folder}/${download_file}"' '"${target_url}"' 2>/dev/null'   # suppress only wget download messages, but keep wget output for variable
 
     # _assure_success
   else
