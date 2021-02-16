@@ -333,6 +333,74 @@ CERO="\033[01;0m"
             kill_execution
         }
 
+        function enforce_parameter_with_options(){
+          # Sample use
+          # enforce_parameter_with_options 2 PLATFORM "${PLATFORM}" "mac windows linux"
+          # Tests for the function
+          typeset -r TESTING="that variable is listed and: ${CYAN}${2}${LIGHTYELLOW} and has value: ${RESET}<${YELLOW_OVER_DARKBLUE}${3}${RESET}>"
+          (( DEBUG )) && echo -e "${FUNCNAME[0]}"
+          (( DEBUG )) && echo ${@} -assume existing variable for this part
+          (( DEBUG )) && ( typeset -p "${1}"  &>/dev/null  ) && echo "1 defined 1"
+          (( DEBUG )) && ( typeset -p "${2}"  &>/dev/null  ) && echo "2 defined 2"
+          (( DEBUG )) && [ -n "${3+x}" ]  && echo "3 defined 3"
+          (( DEBUG )) && [ -n "${4+x}" ]  && echo "4 defined 4"
+          (( DEBUG )) && ( typeset -p "${2}"  &>/dev/null ) &&  [ -n "${3+x}" ]  && echo "2 declared,defined and with value not empty 3"
+          (( DEBUG )) && ( ( typeset -p "${2}"  &>/dev/null  ) || echo "2 not defined 2")
+          (( DEBUG )) && ( ! typeset -p "${2}"  &>/dev/null  ) && echo "2 not defined 3"
+          if ( typeset -p "${2}"  &>/dev/null ) &&  [ -n "${3+x}" ] ; then
+          {
+            local one=""
+            local -i found=0
+            while read -r one ; do 
+            {
+                (( DEBUG )) && echo "checking value ${FUNCNAME[1]} ${3}  ${one} "
+              if [[ -n "${one}" ]]  ; then  
+              {
+                if [[ "${3}" == "${one}" ]] ; then 
+                {
+                  found=1
+                  break;
+                }
+                fi
+              }
+              fi
+            }
+            done <<< "${4}" 
+            (( DEBUG )) && echo -e "${LIGHTGREEN} ✔ ${LIGHTYELLOW} ${TESTING} has passed "
+            (( found )) && return 0
+          } 
+          fi
+          echo -e "${RED} 𝞦 \\n${BASH_SOURCE}:${BASH_LINENO[1]} ${FUNCNAME[-0]}(...) \\n$0:${BASH_LINENO[0]} ${FUNCNAME[1]}(...) \\n ${LIGHTYELLOW} ${TESTING} has failed "
+          failed "enforce_parameter_with_options function ${FUNCNAME[1]} expects value at position <"${1}"> expect value <"${2}"> to look like or can be are <"${4}">"
+          exit 1
+        } # end enforce_parameter_with_options
+
+        function enforce_parameter_with_value(){
+          # Sample use
+          # enforce_parameter_with_value 1 URL "${URL}" "https://www.website.com/product/"
+          # enforce_parameter_with_value 3 PATTERN "${PATTERN}" "BCompareOSX*.*.*.*.zip"
+          # Tests for the function
+          typeset -r TESTING="that variable is listed and: ${CYAN}${2}${LIGHTYELLOW} and has value: ${RESET}<${YELLOW_OVER_DARKBLUE}${3}${RESET}>"
+          (( DEBUG )) && echo -e "${FUNCNAME[0]}"
+          (( DEBUG )) && echo ${@} -assume existing variable for this part
+          (( DEBUG )) && ( typeset -p "${1}"  &>/dev/null  ) && echo "1 defined 1"
+          (( DEBUG )) && ( typeset -p "${2}"  &>/dev/null  ) && echo "2 defined 2"
+          (( DEBUG )) && [ -n "${3+x}" ]  && echo "3 defined 3"
+          (( DEBUG )) && [ -n "${4+x}" ]  && echo "4 defined 4"
+          (( DEBUG )) && ( typeset -p "${2}"  &>/dev/null ) &&  [ -n "${3+x}" ]  && echo "2 declared,defined and with value not empty 3"
+          (( DEBUG )) && ( ( typeset -p "${2}"  &>/dev/null  ) || echo "2 not defined 2")
+          (( DEBUG )) && ( ! typeset -p "${2}"  &>/dev/null  ) && echo "2 not defined 3"
+          if ( typeset -p "${2}"  &>/dev/null ) &&  [ -n "${3+x}" ] ; then
+          {
+              (( DEBUG )) && echo -e "${LIGHTGREEN} ✔ ${LIGHTYELLOW} ${TESTING} has passed "
+              return 0
+          } 
+          fi
+          echo -e "${RED} 𝞦 \\n${BASH_SOURCE}:${BASH_LINENO[1]} ${FUNCNAME[-0]}(...) \\n$0:${BASH_LINENO[0]} ${FUNCNAME[1]}(...) \\n ${LIGHTYELLOW} ${TESTING} has failed "
+          failed "enforce_parameter_with_value function ${FUNCNAME[1]} expects value at position <"${1}"> expect value <"${2}"> to look like or can be are <"${4}">"
+          exit 1
+        } # end enforce_parameter_with_value
+
         function enforce_variable_with_value(){
           # Sample use
           # enforce_variable_with_value HOME $HOME
@@ -372,15 +440,10 @@ CERO="\033[01;0m"
               (( DEBUG )) && echo -e "${LIGHTGREEN} ✔ ${LIGHTYELLOW} ${TESTING} has passed "
               return 0
           } 
-          else 
-          {
-  
-              echo -e "${RED} 𝞦 \\n${BASH_SOURCE}:${BASH_LINENO[1]} ${FUNCNAME[-0]}(...) \\n$0:${BASH_LINENO[0]} ${FUNCNAME[1]}(...) \\n ${LIGHTYELLOW} ${TESTING} has failed "
-              failed enforce_variable_with_value "${1}" 
-              exit 1
-          }
-          fi
-          exit 1  # Stop the scripts execution
+          fi 
+          echo -e "${RED} 𝞦 \\n${BASH_SOURCE}:${BASH_LINENO[1]} ${FUNCNAME[-0]}(...) \\n$0:${BASH_LINENO[0]} ${FUNCNAME[1]}(...) \\n ${LIGHTYELLOW} ${TESTING} has failed "
+          failed "enforce_variable_with_value <"${1}">" 
+          exit 1
         } # end enforce_variable_with_value
 
         function assert() {
@@ -405,12 +468,8 @@ CERO="\033[01;0m"
             {
                 passed "${TESTING}"
             }
-            else
-            {
-                failed "${TESTING}"
-            }
             fi
-
+            failed "${TESTING}"
         }
         # end assert
 
@@ -445,19 +504,15 @@ CERO="\033[01;0m"
               [[ -n "${3+x}"  ]] && enhance_message "${3}"
               return 1
             }
-            else
-            {
-              passed "${TESTING}"
-              return 0
-            }
-            fi
+            fi 
+          passed "${TESTING}"
+          return 0
         } # end ensure
 
         function Installing() {
             echo -e "${GREEN} Installing ${RED}${1}${GREEN}, ${RED}${2} ${GREEN}${3} ${CYAN}${4}, ${RED}${5} ${GREEN}${6} ${CYAN}${*:7} ${GREEN}.${RESET}"
         } # end Installing
         alias installing=Installing
-
 
         function Testing() {
             echo -e "${CYAN} Testing ${PURPLE}${1}${GREEN}, ${RED}${2} ${GREEN}${3} ${CYAN}${4}, ${RED}${5} ${GREEN}${6} ${CYAN}${*:7} ${GREEN}.${RESET}"
@@ -3876,6 +3931,62 @@ function function_exists_with_spaces() {
             unset FUNCTIONS
             unset TESTING
 } # end function_exists_with_spaces
+
+function _linux_prepare() {
+  export  THISSCRIPTCOMPLETEPATH
+  typeset -gr THISSCRIPTCOMPLETEPATH="$(basename "$0")"
+  export _err
+  typeset -i _err=0
+  load_execute_boot_basic_with_sudo(){
+    # shellcheck disable=SC2030
+    if ( typeset -p "SUDO_USER"  &>/dev/null ) ; then
+    {
+      export USER_HOME
+      # typeset -rg USER_HOME=$(getent passwd $SUDO_USER | cut -d: -f6)  # Get the caller's of sudo home dir Just Linux
+      # shellcheck disable=SC2046
+      # shellcheck disable=SC2031
+      typeset -rg USER_HOME="$(echo -n $(bash -c "cd ~${SUDO_USER} && pwd"))"  # Get the caller's of sudo home dir LINUX and MAC
+    }
+    else
+    {
+      local USER_HOME=$HOME
+    }
+    fi
+    local -r provider="$USER_HOME/_/clis/execute_command_intuivo_cli/execute_boot_basic.sh"
+    echo source "${provider}"
+    # shellcheck disable=SC1090
+    [   -e "${provider}"  ] && source "${provider}"
+    [ ! -e "${provider}"  ] && eval """$(wget --quiet --no-check-certificate  https://raw.githubusercontent.com/zeusintuivo/execute_command_intuivo_cli/master/execute_boot_basic.sh -O -  2>/dev/null )"""   # suppress only wget download messages, but keep wget output for variable
+    if ( command -v failed >/dev/null 2>&1; ) ; then
+    {
+      return 0
+    }
+    else
+    {
+      echo -e "\n \n  ERROR! Loading execute_boot_basic.sh \n \n "
+      exit 1;
+    }
+    fi
+    return 0
+  } # end load_execute_boot_basic_with_sudo
+
+  load_execute_boot_basic_with_sudo
+  _err=$?
+  if [ $_err -ne 0 ] ;  then
+  {
+    >&2 echo -e "ERROR There was an error loading load_execute_boot_basic_with_sudo Err:$_err "
+    exit $_err
+  }
+  fi
+
+  # Overwrite trap
+  # function _trap_on_exit(){
+    # echo -e "\033[01;7m*** TRAP $THISSCRIPTCOMPLETEPATH EXITS ...\033[0m"
+  # }
+  #trap kill ERR
+  # trap _trap_on_exit EXIT
+  #trap kill INT
+} # end _linux_prepare
 
 function determine_os_and_fire_action() {
   # Interface
