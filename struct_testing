@@ -4126,6 +4126,40 @@ function determine_os_and_fire_action() {
   unset PARAMETERS
 } # end determine_os_and_fire_action
 
+function _do_not_downloadtwice(){
+    # Sample usage:
+    #    
+    #   enforce_variable_with_value USER_HOME "${USER_HOME}"
+    # local CODENAME=teamviewer.x86_64.rpm
+    # enforce_variable_with_value CODENAME "${CODENAME}"
+    # local TARGET_URL=https://download.teamviewer.com/download/linux/teamviewer.x86_64.rpm
+    # enforce_variable_with_value TARGET_URL "${TARGET_URL}"
+    # local DOWNLOADFOLDER="${USER_HOME}/Downloads"
+    # enforce_variable_with_value DOWNLOADFOLDER "${DOWNLOADFOLDER}"
+    # _do_not_downloadtwice "${TARGET_URL}" "${DOWNLOADFOLDER}"  "${CODENAME}"
+    #    
+    #
+    local TARGET_URL="${1}"
+    enforce_parameter_with_value 1 TARGET_URL "${TARGET_URL}" "https://download.teamviewer.com/download/linux/teamviewer.x86_64.rpm"
+    local DOWNLOADFOLDER="${2}"
+    enforce_parameter_with_value 2 DOWNLOADFOLDER "${DOWNLOADFOLDER}" "$USER_HOME/Downloads"
+    local CODENAME="${3}"
+    enforce_parameter_with_value 3 CODENAME "${CODENAME}" "teamviewer.x86_64.rpm"
+    
+    if it_exists_with_spaces "${DOWNLOADFOLDER}/${CODENAME}" ; then
+  {
+    file_exists_with_spaces "${DOWNLOADFOLDER}/${CODENAME}"
+  }
+  else
+  {
+    cd "${DOWNLOADFOLDER}"
+    _download "${TARGET_URL}" "${DOWNLOADFOLDER}"  "${CODENAME}"
+    file_exists_with_spaces "${DOWNLOADFOLDER}/${CODENAME}"
+  }
+  fi
+  return 0
+} # end _do_not_downloadtwice
+
 function _install_rpm() {
   #   Sample usage:
   #
