@@ -4265,11 +4265,18 @@ function raise_to_sudo_and_user_home() {
   #   typeset -i _err=0 
   #
   # ...
-  # then call it 
+  # wrapp it in local function exported
+  # export sudo_it
+  # function sudo_it() {
+  #   raise_to_sudo_and_user_home
+  # } # end sudo_it
+  #
+  # ...
+  # then call it the wrapper
   # ...
   #
-  #   raise_to_sudo_and_user_home
-  #   [ $? -gt 0 ] && failed to raise_to_sudo_and_user_home 
+  #  sudo_it
+  #  [ $? -gt 0 ] && failed to sudo_it raise_to_sudo_and_user_home
   #   enforce_variable_with_value USER_HOME "${USER_HOME}"
   #
   load_execute_boot_basic_with_sudo(){
