@@ -351,12 +351,12 @@ CERO="\033[01;0m"
           {
             local one=""
             local -i found=0
-            while read -r one ; do 
+            while read -r one ; do
             {
                 (( DEBUG )) && echo "checking value ${FUNCNAME[1]} ${3}  ${one} "
-              if [[ -n "${one}" ]]  ; then  
+              if [[ -n "${one}" ]]  ; then
               {
-                if [[ "${3}" == "${one}" ]] ; then 
+                if [[ "${3}" == "${one}" ]] ; then
                 {
                   found=1
                   break;
@@ -365,10 +365,10 @@ CERO="\033[01;0m"
               }
               fi
             }
-            done <<< "${4}" 
+            done <<< "${4}"
             (( DEBUG )) && echo -e "${LIGHTGREEN} ✔ ${LIGHTYELLOW} ${TESTING} has passed "
             (( found )) && return 0
-          } 
+          }
           fi
           echo -e "${RED} 𝞦 \\n${BASH_SOURCE}:${BASH_LINENO[1]} ${FUNCNAME[-0]}(...) \\n$0:${BASH_LINENO[0]} ${FUNCNAME[1]}(...) \\n ${LIGHTYELLOW} ${TESTING} has failed "
           failed "enforce_parameter_with_options function ${FUNCNAME[1]} expects value at position <"${1}"> expect value <"${2}"> to look like or can be are <"${4}">"
@@ -394,7 +394,7 @@ CERO="\033[01;0m"
           {
               (( DEBUG )) && echo -e "${LIGHTGREEN} ✔ ${LIGHTYELLOW} ${TESTING} has passed "
               return 0
-          } 
+          }
           fi
           echo -e "${RED} 𝞦 \\n${BASH_SOURCE}:${BASH_LINENO[1]} ${FUNCNAME[-0]}(...) \\n$0:${BASH_LINENO[0]} ${FUNCNAME[1]}(...) \\n ${LIGHTYELLOW} ${TESTING} has failed "
           failed "enforce_parameter_with_value function ${FUNCNAME[1]} expects value at position <"${1}"> expect value <"${2}"> to look like or can be are <"${4}">"
@@ -439,10 +439,10 @@ CERO="\033[01;0m"
           {
               (( DEBUG )) && echo -e "${LIGHTGREEN} ✔ ${LIGHTYELLOW} ${TESTING} has passed "
               return 0
-          } 
-          fi 
+          }
+          fi
           echo -e "${RED} 𝞦 \\n${BASH_SOURCE}:${BASH_LINENO[1]} ${FUNCNAME[-0]}(...) \\n$0:${BASH_LINENO[0]} ${FUNCNAME[1]}(...) \\n ${LIGHTYELLOW} ${TESTING} has failed "
-          failed "enforce_variable_with_value <"${1}">" 
+          failed "enforce_variable_with_value <"${1}">"
           exit 1
         } # end enforce_variable_with_value
 
@@ -504,7 +504,7 @@ CERO="\033[01;0m"
               [[ -n "${3+x}"  ]] && enhance_message "${3}"
               return 1
             }
-            fi 
+            fi
           passed "${TESTING}"
           return 0
         } # end ensure
@@ -4128,7 +4128,7 @@ function determine_os_and_fire_action() {
 
 function _do_not_downloadtwice(){
     # Sample usage:
-    #    
+    #
     #   enforce_variable_with_value USER_HOME "${USER_HOME}"
     # local CODENAME=teamviewer.x86_64.rpm
     # enforce_variable_with_value CODENAME "${CODENAME}"
@@ -4137,7 +4137,7 @@ function _do_not_downloadtwice(){
     # local DOWNLOADFOLDER="${USER_HOME}/Downloads"
     # enforce_variable_with_value DOWNLOADFOLDER "${DOWNLOADFOLDER}"
     # _do_not_downloadtwice "${TARGET_URL}" "${DOWNLOADFOLDER}"  "${CODENAME}"
-    #    
+    #
     #
     local TARGET_URL="${1}"
     enforce_parameter_with_value 1 TARGET_URL "${TARGET_URL}" "https://download.teamviewer.com/download/linux/teamviewer.x86_64.rpm"
@@ -4145,7 +4145,7 @@ function _do_not_downloadtwice(){
     enforce_parameter_with_value 2 DOWNLOADFOLDER "${DOWNLOADFOLDER}" "$USER_HOME/Downloads"
     local CODENAME="${3}"
     enforce_parameter_with_value 3 CODENAME "${CODENAME}" "teamviewer.x86_64.rpm"
-    
+
     if it_exists_with_spaces "${DOWNLOADFOLDER}/${CODENAME}" ; then
   {
     file_exists_with_spaces "${DOWNLOADFOLDER}/${CODENAME}"
@@ -4188,8 +4188,8 @@ function _install_rpm() {
     if  it_exists_with_spaces "${TARGET_DOWNLOAD_PATH}" ; then
     {
       echo Attempting to install "${TARGET_DOWNLOAD_PATH}"
-    } 
-    else 
+    }
+    else
     {
       return 1
     }
@@ -4205,8 +4205,8 @@ function _install_rpm() {
         Warning Package appearts broken, downloading again
       _download "${TARGET_URL}" "${DOWNLOADFOLDER}"  "${CODENAME}"
       _install_rpm "${TARGET_URL}" "${DOWNLOADFOLDER}"  "${CODENAME}"
-    } 
-    elif [[ "${msg}" == *"libQt5WebKit.so.5"* ]] && [[ "${msg}" == *"is needed"* ]] && (( ! LOOP )) ; then  
+    }
+    elif [[ "${msg}" == *"libQt5WebKit.so.5"* ]] && [[ "${msg}" == *"is needed"* ]] && (( ! LOOP )) ; then
     {
           echo "Suggested Fix "
       echo "# when error error: Failed dependencies:
@@ -4216,11 +4216,11 @@ function _install_rpm() {
             # then fix with
             # sudo dnf install -y qt5-devel qt-creator qt5-qtbase qt5-qtbase-devel
             # rpm again"
-      Attempting to fix 
+      Attempting to fix
       dnf install -y qt5-devel qt-creator qt5-qtbase qt5-qtbase-devel
       _install_rpm "${TARGET_URL}" "${DOWNLOADFOLDER}"  "${CODENAME}" 1
     }
-    elif [[ "${msg}" == *"libQt5WebKit.so.5"* ]] && [[ "${msg}" == *"is needed"* ]] && (( LOOP )) ; then  
+    elif [[ "${msg}" == *"libQt5WebKit.so.5"* ]] && [[ "${msg}" == *"is needed"* ]] && (( LOOP )) ; then
     {
           echo "Suggested Fix "
       echo "# when error error: Failed dependencies:
@@ -4233,16 +4233,16 @@ function _install_rpm() {
             # rpm again"
       failed "ERROR MSG:\n ${msg}"
     }
-    elif [[ "${msg}" == *"Failed dependencies"* ]] && [[ "${msg}" == *"is needed"* ]] ; then  
+    elif [[ "${msg}" == *"Failed dependencies"* ]] && [[ "${msg}" == *"is needed"* ]] ; then
     {
       # echo "Suggested Fix "
-      # echo "# when error error: 
+      # echo "# when error error:
       #       # fix with
       #       # then fix with
       #       # rpm again"
       failed "ERROR MSG:\n ${msg}"
-    } 
-    else 
+    }
+    else
     {
       passed "Seems there were no errors"
     }
@@ -4256,13 +4256,13 @@ function raise_to_sudo_and_user_home() {
   #
   # Sample usage:
   #
-  # Place this on the start of the script  that 
+  # Place this on the start of the script  that
   #  needs to reloaded as sudo "MOTHER" script:
   #
   #   export  THISSCRIPTCOMPLETEPATH
-  #   typeset -gr THISSCRIPTCOMPLETEPATH="$(basename "$0")"   # § This goes in the FATHER-MOTHER script 
-  #   export _err 
-  #   typeset -i _err=0 
+  #   typeset -gr THISSCRIPTCOMPLETEPATH="$(basename "$0")"   # § This goes in the FATHER-MOTHER script
+  #   export _err
+  #   typeset -i _err=0
   #
   # ...
   # wrapp it in local function exported
@@ -4331,6 +4331,21 @@ function raise_to_sudo_and_user_home() {
 } # end raise_to_sudo_and_user_home
 
 
+
+function enforce_web_is_reachable(){
+  # Sample use:
+  # enforce_web_is_reachable  "cms.artbox.one"
+  #
+  curl -I "${1}"
+  _err=$?
+  local TESTING="web address ${1} is reachable"
+  if [ $_err -gt 0 ] ; then
+  {
+    failed "${TESTING}"
+  }
+  fi
+  passed "${TESTING}"
+} # end enforce_web_is_reachable
 
 
     #[ ! -z "$0" ] && [ -e "$0" ] && THISSCRIPTNAME=`basename "$0"`
