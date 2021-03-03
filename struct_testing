@@ -1291,11 +1291,13 @@ function _run_command(){
   local _node_run_command=''
   echo -e "${PURPLE} ❓ ${CYAN}${*}"
   # shellcheck disable=SC2031
-  if ( is_defined_and_not_empty SUDO_USER "${SUDO_USER}" ) ; then
+  if ( is_defined_and_not_empty SUDO_USER "${SUDO_USER}" && is_defined_and_not_empty SUDO_UID "${SUDO_UID}"  ) ; then
   {
     _node_run_command="$(su - "${SUDO_USER}" -c 'cd '"${CALLERPWD}"' ; '"${*}"'' 2>&1)"  # stout and stderr both get
     _err=$?
-  } else {
+  }
+  else
+  {
     _node_run_command="$(cd "${CALLERPWD}" || true ; "${*}" 2>&1)"  # stout and stderr both get
     _err=$?
   }
@@ -1761,7 +1763,7 @@ function _run_command(){
 
         function type_function_exists() {
           # local DEBUG=1
-          if ( is_defined_and_not_empty SUDO_USER "${SUDO_USER}" ) ; then
+          if ( is_defined_and_not_empty SUDO_USER "${SUDO_USER}" && is_defined_and_not_empty SUDO_UID "${SUDO_UID}"  ) ; then
           {
               (( DEBUG )) && echo "type_function_exists:SUDO DEFINED"
               if ( su - $SUDO_USER -c 'type '"${*}"' >/dev/null 2>&1' ) ; then
@@ -4382,6 +4384,49 @@ function enforce_web_is_reachable(){
   passed "${TESTING}"
 } # end enforce_web_is_reachable
 
+
+function enforce_ip_resolves(){
+  # Sample use:
+  # enforce_ip_resolves  "pis.pixum.com" to "127.0.0.1"
+  # enforce_ip_resolves  "pis.pixum.com" not-to "127.0.0.1"
+  #
+  if [[ -n "${1}" ]] && ([[ "${2}" == "not-to" ]] || [[ "${2}" == "to" ]]) && [[ -n "${3}" ]]; then
+  {
+    echo "  Checking ip for to ${1} ${2} be ${3}"
+  }
+  else
+  {
+    echo "Wrong usage, sample call is:  enforce_ip_resolves  \"pis.pixum.com\" to \"127.0.0.1\" "
+    echo "Wrong usage, sample call is:  enforce_ip_resolves  \"pis.pixum.com\" not-to \"127.0.0.1\" "
+    failed callling enforce_ip_resolves
+    exit 1
+  }
+  fi
+  local msg
+  msg=$(dig  "${1}" | grep SERVER | cut -d\( -f2 | cut -d\) -f1 2>&1; )
+  _err=$?
+  local TESTING="web  that ip from ${1} resolves ${2} ${3}"
+  if [ $_err -gt 0 ] ; then
+  {
+    [ $_err -eq 28 ] && failed "ERROR Connection resolving dig tool . ${TESTING}"
+    failed "${TESTING}"
+    exit 1
+  }
+  fi
+  if [[ "${2}" == "to" ]] && [[ "${msg}" != "${3}" ]] ; then
+  {
+    failed "${TESTING}"
+    exit 1
+  }
+  fi
+  if [[ "${2}" == "not-to" ]] && [[ "${msg}" == "${3}" ]] ; then
+  {
+    failed "${TESTING}"
+    exit 1
+  }
+  fi
+  passed "${TESTING}"
+} # end enforce_ip_resolves
 
     #[ ! -z "$0" ] && [ -e "$0" ] && THISSCRIPTNAME=`basename "$0"`
 
