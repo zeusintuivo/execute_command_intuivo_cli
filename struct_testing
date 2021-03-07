@@ -337,7 +337,7 @@ CERO="\033[01;0m"
           # Sample use
           # enforce_parameter_with_options 2 PLATFORM "${PLATFORM}" "mac windows linux"
           # Tests for the function
-          typeset -r TESTING="that variable is listed and: ${CYAN}${2}${LIGHTYELLOW} and has value: ${RESET}<${YELLOW_OVER_DARKBLUE}${3}${RESET}>"
+          local TESTING="enforce_parameter_with_options function ${FUNCNAME[1]} param at position ${RESET}<${YELLOW_OVER_DARKBLUE}${1}${RESET}${LIGHTYELLOW}> alias for <${CYAN}${2}${LIGHTYELLOW}> to have one of these values ${RESET}<${YELLOW_OVER_DARKBLUE}${4}${RESET}>"
           (( DEBUG )) && echo -e "${FUNCNAME[0]}"
           (( DEBUG )) && echo ${@} -assume existing variable for this part
           (( DEBUG )) && ( typeset -p "${1}"  &>/dev/null  ) && echo "1 defined 1"
@@ -371,7 +371,7 @@ CERO="\033[01;0m"
           }
           fi
           echo -e "${RED} 𝞦 \\n${BASH_SOURCE}:${BASH_LINENO[1]} ${FUNCNAME[-0]}(...) \\n$0:${BASH_LINENO[0]} ${FUNCNAME[1]}(...) \\n ${LIGHTYELLOW} ${TESTING} has failed "
-          failed "enforce_parameter_with_options function ${FUNCNAME[1]} expects value at position <"${1}"> expect value <"${2}"> to look like or can be are <"${4}">"
+          failed "${TESTING}"
           exit 1
         } # end enforce_parameter_with_options
 
@@ -380,7 +380,7 @@ CERO="\033[01;0m"
           # enforce_parameter_with_value 1 URL "${URL}" "https://www.website.com/product/"
           # enforce_parameter_with_value 3 PATTERN "${PATTERN}" "BCompareOSX*.*.*.*.zip"
           # Tests for the function
-          typeset -r TESTING="that variable is listed and: ${CYAN}${2}${LIGHTYELLOW} and has value: ${RESET}<${YELLOW_OVER_DARKBLUE}${3}${RESET}>"
+          local TESTING="enforce_parameter_with_value function ${FUNCNAME[1]} expects value at position <"${1}"> expect value <"${2}"> to look like or can be are <"${4}">"
           (( DEBUG )) && echo -e "${FUNCNAME[0]}"
           (( DEBUG )) && echo ${@} -assume existing variable for this part
           (( DEBUG )) && ( typeset -p "${1}"  &>/dev/null  ) && echo "1 defined 1"
@@ -397,7 +397,7 @@ CERO="\033[01;0m"
           }
           fi
           echo -e "${RED} 𝞦 \\n${BASH_SOURCE}:${BASH_LINENO[1]} ${FUNCNAME[-0]}(...) \\n$0:${BASH_LINENO[0]} ${FUNCNAME[1]}(...) \\n ${LIGHTYELLOW} ${TESTING} has failed "
-          failed "enforce_parameter_with_value function ${FUNCNAME[1]} expects value at position <"${1}"> expect value <"${2}"> to look like or can be are <"${4}">"
+          failed "${TESTING}"
           exit 1
         } # end enforce_parameter_with_value
 
@@ -4403,7 +4403,8 @@ function enforce_ip_resolves(){
   }
   fi
   local msg
-  msg=$(dig  "${1}" | grep SERVER | cut -d\( -f2 | cut -d\) -f1 2>&1; )
+  # msg=$(dig  "${1}" | grep SERVER | cut -d\( -f2 | cut -d\) -f1 2>&1; )
+  msg=$(resolveip "${1}" | cut -d' ' -f6  2>&1; )
   _err=$?
   local TESTING="web  that ip from ${1} resolves ${2} ${3}"
   if [ $_err -gt 0 ] ; then
