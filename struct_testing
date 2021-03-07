@@ -337,6 +337,7 @@ CERO="\033[01;0m"
           # Sample use
           # enforce_parameter_with_options 2 PLATFORM "${PLATFORM}" "mac windows linux"
           # Tests for the function
+          DEBUG=1
           local TESTING="enforce_parameter_with_options function ${FUNCNAME[1]} param at position ${RESET}<${YELLOW_OVER_DARKBLUE}${1}${RESET}${LIGHTYELLOW}> alias for <${CYAN}${2}${LIGHTYELLOW}> to have one of these values ${RESET}<${YELLOW_OVER_DARKBLUE}${4}${RESET}>"
           (( DEBUG )) && echo -e "${FUNCNAME[0]}"
           (( DEBUG )) && echo ${@} -assume existing variable for this part
@@ -353,9 +354,10 @@ CERO="\033[01;0m"
             local -i found=0
             while read -r one ; do
             {
-                (( DEBUG )) && echo "checking value ${FUNCNAME[1]} ${3}  ${one} "
+              (( DEBUG )) && echo "checking value ${FUNCNAME[1]} ${3}  ${one} "
               if [[ -n "${one}" ]]  ; then
               {
+                (( DEBUG )) && echo "one is "
                 if [[ "${3}" == "${one}" ]] ; then
                 {
                   found=1
@@ -365,7 +367,8 @@ CERO="\033[01;0m"
               }
               fi
             }
-            done <<< "${4}"
+            done <<< $(switch_spaces_to_newlines <<< "${@}")
+            # done <<< "${4}"
             (( DEBUG )) && echo -e "${LIGHTGREEN} ✔ ${LIGHTYELLOW} ${TESTING} has passed "
             (( found )) && return 0
           }
@@ -545,15 +548,19 @@ CERO="\033[01;0m"
         alias showing=Showing
 
         function Message() {
+            trap 'EXIT 1' ERR
             local msg1="$1"
-            local msg2=$(echo "$*" | cüt "$1")
+            local msg2=$(echo "${*}" | cuet "${1}"  ;)
+            # local msg2=$(echo "${*}" | sed 's/'"""${msg1}"""'//g'  ;)
             echo  -e "${PURPLE}${PURPLE}+---${LIGHTYELLOW} ${LIGHTYELLOW} ${msg1} ${CYAN} ${msg2} ${RESET}"
         }
         alias message=Message
 
         function Comment() {
+            trap 'EXIT 1' ERR
             local msg1="$1"
-            local msg2=$(echo "$*" | cüt "$1")
+            local msg2=$(echo "${*}" | cuet "${1}"  ;)
+            # local msg2=$(echo "${*}" | sed 's/'"""${msg1}"""'//g'  ;)
             echo  -e "${PURPLE}${CYAN}+---${DARKBLUE} ${LIGHTYELLOW} ${msg1} ${CYAN} ${msg2} ${RESET}"
         }
         alias comment=Comment
