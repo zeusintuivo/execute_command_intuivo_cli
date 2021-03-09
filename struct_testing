@@ -3613,6 +3613,13 @@ function _download_linux() {
   [ -z "${1}" ] && failed \\n${BASH_SOURCE}:${BASH_LINENO[-0]} ${FUNCNAME[-0]}\(\) \\n$0:${BASH_LINENO[1]} ${FUNCNAME[1]}\(\) \\nCould not load 1.target_url string or it was empty. Expected one Parameter URL
   [ -z "${2}" ] && failed \\n${BASH_SOURCE}:${BASH_LINENO[-0]} ${FUNCNAME[-0]}\(\) \\n$0:${BASH_LINENO[1]} ${FUNCNAME[1]}\(\) \\nCould not load 2.download_folder string or it was empty. Expected one Parameter URL
   [ -z "${3}" ] && failed \\n${BASH_SOURCE}:${BASH_LINENO[-0]} ${FUNCNAME[-0]}\(\) \\n$0:${BASH_LINENO[1]} ${FUNCNAME[1]}\(\) \\nCould not load 3.download_file string or it was empty. Expected one Parameter URL
+  if enforce_web_is_reachable "${1}" && [ $? -gt 0 ] ;  then # if not empty
+  {
+    failed \\n${BASH_SOURCE}:${BASH_LINENO[-0]} ${FUNCNAME[-0]}\(\) \\n$0:${BASH_LINENO[1]} ${FUNCNAME[1]}\(\) \\nCould not load 1.target_url URL is Broken or not Reachable "<<${1}>>"
+  }
+  fi
+
+
   local download_file="${3}" || ""
 
   _trap_catch_check
@@ -3660,8 +3667,9 @@ function _download_linux() {
     passed "WGETRC=/tmp/wgetrc wget --max-redirect=10 --mirror --directory-prefix=${download_folder} -O ${download_file} --no-check-certificate ${target_url}"
     cd "${download_folder}"
     pwd
+    # exit 0
     # if not defined and not empty try code normal
-    if ( typeset -p "SUDO_USER"  &>/dev/null ) ; then
+    if ( ! typeset -p "SUDO_USER"  &>/dev/null ) ; then
     {
        cd "${download_folder}"
        _trap_try_start
@@ -3671,6 +3679,7 @@ function _download_linux() {
     elif  ( typeset -p "SUDO_USER"  &>/dev/null ) ; then
     {
       _trap_try_start
+      echo RUNNING:\nsu - "$SUDO_USER" -c 'cd '"${download_folder}"' && wget --max-redirect=10 --mirror --directory-prefix='"${download_folder}"' -O '"${download_file}"' --no-check-certificate '"${target_url}"' && pwd ' # 2>/dev/null"
       su - "$SUDO_USER" -c 'cd '"${download_folder}"' && wget --max-redirect=10 --mirror --directory-prefix='"${download_folder}"' -O '"${download_file}"' --no-check-certificate '"${target_url}"' && pwd ' # 2>/dev/null"
       _trap_catch_check
     }
@@ -4136,32 +4145,35 @@ function determine_os_and_fire_action() {
 } # end determine_os_and_fire_action
 
 function _do_not_downloadtwice(){
-    # Sample usage:
-    #
-    #   enforce_variable_with_value USER_HOME "${USER_HOME}"
-    # local CODENAME=teamviewer.x86_64.rpm
-    # enforce_variable_with_value CODENAME "${CODENAME}"
-    # local TARGET_URL=https://download.teamviewer.com/download/linux/teamviewer.x86_64.rpm
-    # enforce_variable_with_value TARGET_URL "${TARGET_URL}"
-    # local DOWNLOADFOLDER="${USER_HOME}/Downloads"
-    # enforce_variable_with_value DOWNLOADFOLDER "${DOWNLOADFOLDER}"
-    # _do_not_downloadtwice "${TARGET_URL}" "${DOWNLOADFOLDER}"  "${CODENAME}"
-    #
-    #
-    local TARGET_URL="${1}"
-    enforce_parameter_with_value 1 TARGET_URL "${TARGET_URL}" "https://download.teamviewer.com/download/linux/teamviewer.x86_64.rpm"
-    local DOWNLOADFOLDER="${2}"
-    enforce_parameter_with_value 2 DOWNLOADFOLDER "${DOWNLOADFOLDER}" "$USER_HOME/Downloads"
-    local CODENAME="${3}"
-    enforce_parameter_with_value 3 CODENAME "${CODENAME}" "teamviewer.x86_64.rpm"
+  # Sample usage:
+  #
+  #   enforce_variable_with_value USER_HOME "${USER_HOME}"
+  # local CODENAME=teamviewer.x86_64.rpm
+  # enforce_variable_with_value CODENAME "${CODENAME}"
+  # local TARGET_URL=https://download.teamviewer.com/download/linux/teamviewer.x86_64.rpm
+  # enforce_variable_with_value TARGET_URL "${TARGET_URL}"
+  # local DOWNLOADFOLDER="${USER_HOME}/Downloads"
+  # enforce_variable_with_value DOWNLOADFOLDER "${DOWNLOADFOLDER}"
+  # _do_not_downloadtwice "${TARGET_URL}" "${DOWNLOADFOLDER}"  "${CODENAME}"
+  #
+  #
+  local TARGET_URL="${1}"
+  enforce_parameter_with_value 1 TARGET_URL "${TARGET_URL}" "https://download.teamviewer.com/download/linux/teamviewer.x86_64.rpm"
+  local DOWNLOADFOLDER="${2}"
+  enforce_parameter_with_value 2 DOWNLOADFOLDER "${DOWNLOADFOLDER}" "$USER_HOME/Downloads"
+  local CODENAME="${3}"
+  enforce_parameter_with_value 3 CODENAME "${CODENAME}" "teamviewer.x86_64.rpm"
+  (( VERBOSE )) && echo  _do_not_downloadtwice "${TARGET_URL}" "${DOWNLOADFOLDER}"  "${CODENAME}"
 
-    if it_exists_with_spaces "${DOWNLOADFOLDER}/${CODENAME}" ; then
+  if it_exists_with_spaces "${DOWNLOADFOLDER}/${CODENAME}" ; then
   {
     file_exists_with_spaces "${DOWNLOADFOLDER}/${CODENAME}"
   }
   else
   {
     cd "${DOWNLOADFOLDER}"
+    (( VERBOSE )) && pwd
+    (( VERBOSE )) && echo  _download "${TARGET_URL}" "${DOWNLOADFOLDER}"  "${CODENAME}"
     _download "${TARGET_URL}" "${DOWNLOADFOLDER}"  "${CODENAME}"
     file_exists_with_spaces "${DOWNLOADFOLDER}/${CODENAME}"
   }
@@ -4381,7 +4393,7 @@ function enforce_web_is_reachable(){
   local msg
   msg=$(curl -I --connect-timeout 5.0  --max-time 10.0  "${1}" 2>&1; )
   _err=$?
-  local TESTING="web address ${1} is reachable"
+  local TESTING="web address ${BRIGHT_BLUE87}««${RED}${1}${BRIGHT_BLUE87}»»${LIGHTYELLOW} is reachable"
   if [ $_err -gt 0 ] ; then
   {
     [ $_err -eq 28 ] && failed "ERROR Connection resolving timed out . ${TESTING}"
