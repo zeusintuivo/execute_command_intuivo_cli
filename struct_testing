@@ -4181,6 +4181,97 @@ function _do_not_downloadtwice(){
   return 0
 } # end _do_not_downloadtwice
 
+function _install_apt() {
+  #   Sample usage:
+  #
+  # local TARGET_URL=https://zoom.us/client/latest/zoom_amd64.deb
+  # enforce_variable_with_value TARGET_URL "${TARGET_URL}"
+  #   local CODENAME=$(basename "${TARGET_URL}")
+  #   enforce_variable_with_value CODENAME "${CODENAME}"
+  #   local DOWNLOADFOLDER="${USER_HOME}/Downloads"
+  #   enforce_variable_with_value DOWNLOADFOLDER "${DOWNLOADFOLDER}"
+  #   _do_not_downloadtwice "${TARGET_URL}" "${DOWNLOADFOLDER}"  "${CODENAME}"
+  # _install_apt "${TARGET_URL}" "${DOWNLOADFOLDER}"  "${CODENAME}" 0
+  #
+  #
+    local TARGET_URL="${1}"
+    enforce_parameter_with_value 1 TARGET_URL "${TARGET_URL}" "https://download.teamviewer.com/download/linux/teamviewer.amd64.deb"
+    local DOWNLOADFOLDER="${2}"
+    enforce_parameter_with_value 2 DOWNLOADFOLDER "${DOWNLOADFOLDER}" "$USER_HOME/Downloads"
+    local CODENAME="${3}"
+    enforce_parameter_with_value 3 CODENAME "${CODENAME}" "teamviewer.amd64.deb"
+    local -i LOOP="${4}"
+    enforce_parameter_with_value 4 LOOP "${LOOP}" "1 or 2 or 0"
+    file_exists_with_spaces "${DOWNLOADFOLDER}/${CODENAME}"
+    local TARGET_DOWNLOAD_PATH="${DOWNLOADFOLDER}/${CODENAME}"
+    enforce_parameter_with_value COMPOSITE TARGET_DOWNLOAD_PATH "${TARGET_DOWNLOAD_PATH}" "$USER_HOME/Downloads/teamviewer.amd64.deb"
+
+    if  it_exists_with_spaces "${TARGET_DOWNLOAD_PATH}" ; then
+    {
+      echo Attempting to install "${TARGET_DOWNLOAD_PATH}"
+    }
+    else
+    {
+      return 1
+    }
+    fi
+    ensure dpkg or "Canceling Install. Could not find dpkg command to execute install"
+    ensure apt or "Canceling Install. Could not find apt command to execute install"
+    _trap_try_start # _trap_catch_check
+    local msg=$(apt install -y "${TARGET_DOWNLOAD_PATH}")
+    _trap_catch_check
+    echo "${msg}"
+    if [[ "${msg}" == *"not an dpkg package"* ]] ; then
+    {
+        Warning Package appearts broken, downloading again
+      _download "${TARGET_URL}" "${DOWNLOADFOLDER}"  "${CODENAME}"
+      _install_apt "${TARGET_URL}" "${DOWNLOADFOLDER}"  "${CODENAME}"
+    }
+    elif [[ "${msg}" == *"libQt5WebKit.so.5"* ]] && [[ "${msg}" == *"is needed"* ]] && (( ! LOOP )) ; then
+    {
+          echo "Suggested Fix "
+      echo "# when error error: Failed dependencies:
+            #        libQt5Svg.so.5()(64bit) is needed by "${CODENAME}"
+            # then correct with
+            # fix with
+            # then fix with
+            # sudo apt install -y qt5-devel qt-creator qt5-qtbase qt5-qtbase-devel
+            # dpkg again"
+      Attempting to fix
+      apt install -y qt5-devel qt-creator qt5-qtbase qt5-qtbase-devel
+      _install_apt "${TARGET_URL}" "${DOWNLOADFOLDER}"  "${CODENAME}" 1
+    }
+    elif [[ "${msg}" == *"libQt5WebKit.so.5"* ]] && [[ "${msg}" == *"is needed"* ]] && (( LOOP )) ; then
+    {
+          echo "Suggested Fix "
+      echo "# when error error: Failed dependencies:
+            #        libQt5Svg.so.5()(64bit) is needed by "${CODENAME}"
+            # then correct with
+            # fix with
+            # then fix with
+            # sudo apt install -y qt5-devel qt-creator qt5-qtbase qt5-qtbase-devel
+            # I could not install it automatically
+            # dpkg again"
+      failed "ERROR MSG:\n ${msg}"
+    }
+    elif [[ "${msg}" == *"Failed dependencies"* ]] && [[ "${msg}" == *"is needed"* ]] ; then
+    {
+      # echo "Suggested Fix "
+      # echo "# when error error:
+      #       # fix with
+      #       # then fix with
+      #       # dpkg again"
+      failed "ERROR MSG:\n ${msg}"
+    }
+    else
+    {
+      passed "Seems there were no errors"
+    }
+    fi
+    rm -f "${TARGET_DOWNLOAD_PATH}"
+    return 0
+} # end _install_apt
+
 function _install_rpm() {
   #   Sample usage:
   #
