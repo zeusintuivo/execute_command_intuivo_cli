@@ -2069,61 +2069,62 @@ function _run_command(){
             #    passed "passwords policy already set to {1,}"
             # }
             # fi
-            local -i ret
-            local msg
-            ret=0
-            (( DEBUG )) && echo "1if"
-            [ ! -e "$1" ] && return 1
-            (( DEBUG )) && (cat -n "$1" )
-            msg=$(cat "$1" 2>&1)
-            ret=$?
-            (( DEBUG )) && echo "2if"
-            (( DEBUG )) && echo "${msg}"
-            [ $ret -gt 0 ] && return 1
-            (( DEBUG )) && echo "3if"
-            [[ "$msg" == *"No such"* ]] && return 1
-            (( DEBUG )) && echo "4if"
-            [[ "$msg" == *"nicht gefunden"* ]] && return 1
-            (( DEBUG )) && echo "5if"
-            [[ "$msg" == *"Permission denied"* ]] && return 1
-            (( DEBUG )) && echo "6if"
-            ret=0
-            (( DEBUG )) && echo 'echo "$msg" | grep "$2"'
-            (( DEBUG )) && echo 'echo '"$msg"' | grep '"$2"
-            (( DEBUG )) && ([[ -n "$msg" ]] ||  echo "6.5if file is empty")
-            [[ -n "$msg" ]] || return 1    # Not found
-            msg=$(echo "$msg" | grep "$2" 2>&1)
-            ret=$?
-            (( DEBUG )) && echo "7if $ret"
-            [ $ret -eq 0 ] && return 0     # Found
-            [ $ret -gt 0 ] && return 1     # Not Found
-            (( DEBUG )) && echo "8if"
-            [[ "$msg" == *"No such"* ]] && return 1
-            (( DEBUG )) && echo "9 if"
-            [[ "$msg" == *"nicht gefunden"* ]] && return 1
-            [[ "$msg" == *"Permission denied"* ]] && return 1
-            return 0  # Found
+                    local -i ret
+                    local msg
+                    ret=0
+                    (( DEBUG )) && echo "1if"
+                    [ ! -e "$1" ] && return 1
+                    (( DEBUG )) && (cat -n "$1" )
+                    msg=$(cat "$1" 2>&1)
+                    ret=$?
+                    (( DEBUG )) && echo "2if"
+                    (( DEBUG )) && echo "${msg}"
+                    [ $ret -gt 0 ] && return 1
+                    (( DEBUG )) && echo "3if"
+                    [[ "$msg" == *"No such"* ]] && return 1
+                    (( DEBUG )) && echo "4if"
+                    [[ "$msg" == *"nicht gefunden"* ]] && return 1
+                    (( DEBUG )) && echo "5if"
+                    [[ "$msg" == *"Permission denied"* ]] && return 1
+                    (( DEBUG )) && echo "6if"
+                    ret=0
+                    (( DEBUG )) && echo 'echo "$msg" | grep "$2"'
+                    (( DEBUG )) && echo 'echo '"$msg"' | grep '"$2"
+                    (( DEBUG )) && ([[ -n "$msg" ]] ||  echo "6.5if file is empty")
+                    [[ -n "$msg" ]] || return 1    # Not found
+                    msg=$(echo "$msg" | grep "$2" 2>&1)
+                    ret=$?
+                    (( DEBUG )) && echo "7if $ret"
+                    [ $ret -eq 0 ] && return 0     # Found
+                    [ $ret -gt 0 ] && return 1    # Not Found
+                    (( DEBUG )) && echo "8if"
+                    [[ "$msg" == *"No such"* ]] && return 1
+                    (( DEBUG )) && echo "9 if"
+                    [[ "$msg" == *"nicht gefunden"* ]] && return 1
+                    [[ "$msg" == *"Permission denied"* ]] && return 1
+                    return 0  # Found
         } # end _if_not_contains
 
         function _if_contains(){
-            # Sample use
-            # 
-            # _if_contains && run_this
-            # 
-            # or
-            # 
-            # echo "${policies}" > temp.xml
-            # if _if_contains temp.xml "{1,}" ; then
-            # {
-            #   passed "passwords policy already set to {1,}"
-            # }
-            # else
-            # {
-            #   echo "set ${policies}" > temp.xml
-            # }
-            # fi
+             # Sample use
+             # 
+             # _if_contains && run_this
+             # 
+             # or
+             # 
+             # echo "${policies}" > temp.xml
+             # if _if_contains temp.xml "{1,}" ; then
+             # {
+             #   passed "passwords policy already set to {1,}"
+             # }
+             # else
+             # {
+             #   echo "set ${policies}" > temp.xml
+             # }
+             # fi
             return ! _if_not_contains  "$1" "$2"
         } # end _if_contains
+
 
         function if_user_exists() {
             # Sample use
