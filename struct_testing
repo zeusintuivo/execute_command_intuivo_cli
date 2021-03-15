@@ -2122,7 +2122,7 @@ function _run_command(){
             #   echo "set ${policies}" > temp.xml
             # }
             # fi
-            # return ! _if_not_contains  "$1" "$2"
+            return ! _if_not_contains  "$1" "$2"
         } # end _if_contains
 
         function if_user_exists() {
