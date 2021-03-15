@@ -2053,10 +2053,14 @@ function _run_command(){
         function _if_not_contains(){
             # Sample use:
             #       _if_not_contains  || run_this
+            #       (_if_not_contains  "${cronallowfile}" "root") || echo 'root' >> "${cronallowfile}"
+            #       (_if_not_contains  "${cronallowfile}" "${SUDO_USER}") ||  echo "${SUDO_USER}" >> "${cronallowfile}"
             #
             # discouraged use ---confusing using && and
             #    _if_not_contains  && run_this
             #
+            # or
+            # 
             # echo "${policies}" > temp.xml
             # if ! _if_not_contains temp.xml "{1,}" ; then
             # {
@@ -2103,16 +2107,22 @@ function _run_command(){
 
         function _if_contains(){
             # Sample use
+            # 
             # _if_contains && run_this
-            #   echo "${policies}" > temp.xml
+            # 
+            # or
+            # 
+            # echo "${policies}" > temp.xml
             # if _if_contains temp.xml "{1,}" ; then
             # {
             #   passed "passwords policy already set to {1,}"
-            # } else {
-            #   run this
+            # }
+            # else
+            # {
+            #   echo "set ${policies}" > temp.xml
             # }
             # fi
-            return ! _if_not_contains  "$1" "$2"
+            # return ! _if_not_contains  "$1" "$2"
         } # end _if_contains
 
         function if_user_exists() {
