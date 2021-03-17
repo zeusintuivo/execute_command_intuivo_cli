@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/env bash
 #!/bin/bash
 #
 # @author Zeus Intuivo <zeus@intuivo.com>
@@ -333,6 +333,77 @@ CERO="\033[01;0m"
             kill_execution
         }
 
+        function enforce_parameter_with_options(){
+          # Sample use
+          # enforce_parameter_with_options 2 PLATFORM "${PLATFORM}" "mac windows linux"
+          # Tests for the function
+          # DEBUG=1
+          local TESTING="enforce_parameter_with_options function ${FUNCNAME[1]} param at position ${RESET}<${YELLOW_OVER_DARKBLUE}${1}${RESET}${LIGHTYELLOW}> alias for <${CYAN}${2}${LIGHTYELLOW}> to have one of these values ${RESET}<${YELLOW_OVER_DARKBLUE}${4}${RESET}>"
+          (( DEBUG )) && echo -e "${FUNCNAME[0]}"
+          (( DEBUG )) && echo ${@} -assume existing variable for this part
+          (( DEBUG )) && ( typeset -p "${1}"  &>/dev/null  ) && echo "1 defined 1"
+          (( DEBUG )) && ( typeset -p "${2}"  &>/dev/null  ) && echo "2 defined 2"
+          (( DEBUG )) && [ -n "${3+x}" ]  && echo "3 defined 3"
+          (( DEBUG )) && [ -n "${4+x}" ]  && echo "4 defined 4"
+          (( DEBUG )) && ( typeset -p "${2}"  &>/dev/null ) &&  [ -n "${3+x}" ]  && echo "2 declared,defined and with value not empty 3"
+          (( DEBUG )) && ( ( typeset -p "${2}"  &>/dev/null  ) || echo "2 not defined 2")
+          (( DEBUG )) && ( ! typeset -p "${2}"  &>/dev/null  ) && echo "2 not defined 3"
+          if ( typeset -p "${2}"  &>/dev/null ) &&  [ -n "${3+x}" ] ; then
+          {
+            local one=""
+            local -i found=0
+            while read -r one ; do
+            {
+              (( DEBUG )) && echo "checking value ${FUNCNAME[1]} ${3}  ${one} "
+              if [[ -n "${one}" ]]  ; then
+              {
+                (( DEBUG )) && echo "one is "
+                if [[ "${3}" == "${one}" ]] ; then
+                {
+                  found=1
+                  break;
+                }
+                fi
+              }
+              fi
+            }
+            done <<< $(switch_spaces_to_newlines <<< "${@}")
+            # done <<< "${4}"
+            (( DEBUG )) && echo -e "${LIGHTGREEN} ✔ ${LIGHTYELLOW} ${TESTING} has passed "
+            (( found )) && return 0
+          }
+          fi
+          echo -e "${RED} 𝞦 \\n${BASH_SOURCE}:${BASH_LINENO[1]} ${FUNCNAME[-0]}(...) \\n$0:${BASH_LINENO[0]} ${FUNCNAME[1]}(...) \\n ${LIGHTYELLOW} ${TESTING} has failed "
+          failed "${TESTING}"
+          exit 1
+        } # end enforce_parameter_with_options
+
+        function enforce_parameter_with_value(){
+          # Sample use
+          # enforce_parameter_with_value 1 URL "${URL}" "https://www.website.com/product/"
+          # enforce_parameter_with_value 3 PATTERN "${PATTERN}" "BCompareOSX*.*.*.*.zip"
+          # Tests for the function
+          local TESTING="enforce_parameter_with_value function ${FUNCNAME[1]} expects value at position <"${1}"> expect value <"${2}"> to look like or can be are <"${4}">"
+          (( DEBUG )) && echo -e "${FUNCNAME[0]}"
+          (( DEBUG )) && echo ${@} -assume existing variable for this part
+          (( DEBUG )) && ( typeset -p "${1}"  &>/dev/null  ) && echo "1 defined 1"
+          (( DEBUG )) && ( typeset -p "${2}"  &>/dev/null  ) && echo "2 defined 2"
+          (( DEBUG )) && [ -n "${3+x}" ]  && echo "3 defined 3"
+          (( DEBUG )) && [ -n "${4+x}" ]  && echo "4 defined 4"
+          (( DEBUG )) && ( typeset -p "${2}"  &>/dev/null ) &&  [ -n "${3+x}" ]  && echo "2 declared,defined and with value not empty 3"
+          (( DEBUG )) && ( ( typeset -p "${2}"  &>/dev/null  ) || echo "2 not defined 2")
+          (( DEBUG )) && ( ! typeset -p "${2}"  &>/dev/null  ) && echo "2 not defined 3"
+          if ( typeset -p "${2}"  &>/dev/null ) &&  [ -n "${3+x}" ] ; then
+          {
+              (( DEBUG )) && echo -e "${LIGHTGREEN} ✔ ${LIGHTYELLOW} ${TESTING} has passed "
+              return 0
+          }
+          fi
+          echo -e "${RED} 𝞦 \\n${BASH_SOURCE}:${BASH_LINENO[1]} ${FUNCNAME[-0]}(...) \\n$0:${BASH_LINENO[0]} ${FUNCNAME[1]}(...) \\n ${LIGHTYELLOW} ${TESTING} has failed "
+          failed "${TESTING}"
+          exit 1
+        } # end enforce_parameter_with_value
+
         function enforce_variable_with_value(){
           # Sample use
           # enforce_variable_with_value HOME $HOME
@@ -371,12 +442,11 @@ CERO="\033[01;0m"
           {
               (( DEBUG )) && echo -e "${LIGHTGREEN} ✔ ${LIGHTYELLOW} ${TESTING} has passed "
               return 0
-          } else {
-              echo -e "${RED} 𝞦 ${LIGHTYELLOW} ${TESTING} has failed "
-              exit 1
           }
           fi
-          exit 1  # Stop the scripts execution
+          echo -e "${RED} 𝞦 \\n${BASH_SOURCE}:${BASH_LINENO[1]} ${FUNCNAME[-0]}(...) \\n$0:${BASH_LINENO[0]} ${FUNCNAME[1]}(...) \\n ${LIGHTYELLOW} ${TESTING} has failed "
+          failed "enforce_variable_with_value <"${1}">"
+          exit 1
         } # end enforce_variable_with_value
 
         function assert() {
@@ -401,12 +471,8 @@ CERO="\033[01;0m"
             {
                 passed "${TESTING}"
             }
-            else
-            {
-                failed "${TESTING}"
-            }
             fi
-
+            failed "${TESTING}"
         }
         # end assert
 
@@ -441,19 +507,15 @@ CERO="\033[01;0m"
               [[ -n "${3+x}"  ]] && enhance_message "${3}"
               return 1
             }
-            else
-            {
-              passed "${TESTING}"
-              return 0
-            }
             fi
+          passed "${TESTING}"
+          return 0
         } # end ensure
 
         function Installing() {
             echo -e "${GREEN} Installing ${RED}${1}${GREEN}, ${RED}${2} ${GREEN}${3} ${CYAN}${4}, ${RED}${5} ${GREEN}${6} ${CYAN}${*:7} ${GREEN}.${RESET}"
         } # end Installing
         alias installing=Installing
-
 
         function Testing() {
             echo -e "${CYAN} Testing ${PURPLE}${1}${GREEN}, ${RED}${2} ${GREEN}${3} ${CYAN}${4}, ${RED}${5} ${GREEN}${6} ${CYAN}${*:7} ${GREEN}.${RESET}"
@@ -486,15 +548,19 @@ CERO="\033[01;0m"
         alias showing=Showing
 
         function Message() {
+            trap 'exit 1' ERR
             local msg1="$1"
-            local msg2=$(echo "$*" | cüt "$1")
+            local msg2=$(echo "${*}" | cuet "${1}"  ;)
+            # local msg2=$(echo "${*}" | sed 's/'"""${msg1}"""'//g'  ;)
             echo  -e "${PURPLE}${PURPLE}+---${LIGHTYELLOW} ${LIGHTYELLOW} ${msg1} ${CYAN} ${msg2} ${RESET}"
         }
         alias message=Message
 
         function Comment() {
+            trap 'exit 1' ERR
             local msg1="$1"
-            local msg2=$(echo "$*" | cüt "$1")
+            local msg2=$(echo "${*}" | cuet "${1}"  ;)
+            # local msg2=$(echo "${*}" | sed 's/'"""${msg1}"""'//g'  ;)
             echo  -e "${PURPLE}${CYAN}+---${DARKBLUE} ${LIGHTYELLOW} ${msg1} ${CYAN} ${msg2} ${RESET}"
         }
         alias comment=Comment
@@ -633,6 +699,9 @@ CERO="\033[01;0m"
             does_not_exist_with_spaces "${*}"
         } # end file_does_not_exist_with_spaces
 
+        function it_does_not_exist(){
+            return ! it_exists $@
+        } # end it_does_not_exist
 
         function it_exists() {
             # Sample usage
@@ -1229,11 +1298,13 @@ function _run_command(){
   local _node_run_command=''
   echo -e "${PURPLE} ❓ ${CYAN}${*}"
   # shellcheck disable=SC2031
-  if ( is_defined_and_not_empty SUDO_USER "${SUDO_USER}" ) ; then
+  if ( is_defined_and_not_empty SUDO_USER "${SUDO_USER}" && is_defined_and_not_empty SUDO_UID "${SUDO_UID}"  ) ; then
   {
     _node_run_command="$(su - "${SUDO_USER}" -c 'cd '"${CALLERPWD}"' ; '"${*}"'' 2>&1)"  # stout and stderr both get
     _err=$?
-  } else {
+  }
+  else
+  {
     _node_run_command="$(cd "${CALLERPWD}" || true ; "${*}" 2>&1)"  # stout and stderr both get
     _err=$?
   }
@@ -1617,7 +1688,7 @@ function _run_command(){
             local package="$1"
             local message="$2"
             local CHECK_INSTALLED=""
-            if ( command -v dpkg >/dev/null 2>&1; ) ; then
+            if ( ( command -v apt >/dev/null 2>&1; ) && ( command -v dpkg >/dev/null 2>&1; ) ) ; then
             {
               CHECK_INSTALLED=$(dpkg -s "${package}")
               if [[ "${CHECK_INSTALLED}" == *"Package: ${package}"* ]] ; then
@@ -1631,7 +1702,7 @@ function _run_command(){
               }
               fi
             }
-            elif ( command -v rpm >/dev/null 2>&1; ) ; then
+            elif ( ( command -v rpm >/dev/null 2>&1; ) && ( command -v dnf >/dev/null 2>&1; ) ) ; then
             {
               CHECK_INSTALLED=$(rpm -qa|grep -i "${package}")
               if [[ "${CHECK_INSTALLED}" == *"Package: ${package}"* ]] ; then
@@ -1699,7 +1770,7 @@ function _run_command(){
 
         function type_function_exists() {
           # local DEBUG=1
-          if ( is_defined_and_not_empty SUDO_USER "${SUDO_USER}" ) ; then
+          if ( is_defined_and_not_empty SUDO_USER "${SUDO_USER}" && is_defined_and_not_empty SUDO_UID "${SUDO_UID}"  ) ; then
           {
               (( DEBUG )) && echo "type_function_exists:SUDO DEFINED"
               if ( su - $SUDO_USER -c 'type '"${*}"' >/dev/null 2>&1' ) ; then
@@ -1952,6 +2023,108 @@ function _run_command(){
             }
             fi
         } # end verify_installed_version_old
+
+        function _if_not_is_installed(){
+            local -i ret
+            local msg
+            ret=0
+            if ( ( command -v apt >/dev/null 2>&1; ) && ( command -v dpkg >/dev/null 2>&1; ) ) ; then
+            {
+                msg="$(apt info $1  >/dev/null 2>&1)"
+            }
+            elif ( ( command -v rpm >/dev/null 2>&1; ) && ( command -v dnf >/dev/null 2>&1; ) ) ; then
+            {
+                msg="$(dnf info $1  >/dev/null 2>&1)"
+            }
+            elif ( command -v brew >/dev/null 2>&1; ) ; then
+            {
+                msg="$(su - "${SUDO_USER}" -c "brew info $1  >/dev/null 2>&1")"
+            }
+            fi
+            ret=$?
+            [ $ret -gt 0 ] && return 1
+            [[ "$msg" == *"No such"* ]] && return 1
+            [[ "$msg" == *"nicht gefunden"* ]] && return 1
+            [[ "$msg" == *"Error"*   ]] && return 1
+            return 0
+        } # end _if_not_is_installed
+
+
+        function _if_not_contains(){
+            # Sample use:
+            #       _if_not_contains  || run_this
+            #       (_if_not_contains  "${cronallowfile}" "root") || echo 'root' >> "${cronallowfile}"
+            #       (_if_not_contains  "${cronallowfile}" "${SUDO_USER}") ||  echo "${SUDO_USER}" >> "${cronallowfile}"
+            #
+            # discouraged use ---confusing using && and
+            #    _if_not_contains  && run_this
+            #
+            # or
+            # 
+            # echo "${policies}" > temp.xml
+            # if ! _if_not_contains temp.xml "{1,}" ; then
+            # {
+            #   run this
+            # } else {
+            #    passed "passwords policy already set to {1,}"
+            # }
+            # fi
+                    local -i ret
+                    local msg
+                    ret=0
+                    (( DEBUG )) && echo "1if"
+                    [ ! -e "$1" ] && return 1
+                    (( DEBUG )) && (cat -n "$1" )
+                    msg=$(cat "$1" 2>&1)
+                    ret=$?
+                    (( DEBUG )) && echo "2if"
+                    (( DEBUG )) && echo "${msg}"
+                    [ $ret -gt 0 ] && return 1
+                    (( DEBUG )) && echo "3if"
+                    [[ "$msg" == *"No such"* ]] && return 1
+                    (( DEBUG )) && echo "4if"
+                    [[ "$msg" == *"nicht gefunden"* ]] && return 1
+                    (( DEBUG )) && echo "5if"
+                    [[ "$msg" == *"Permission denied"* ]] && return 1
+                    (( DEBUG )) && echo "6if"
+                    ret=0
+                    (( DEBUG )) && echo 'echo "$msg" | grep "$2"'
+                    (( DEBUG )) && echo 'echo '"$msg"' | grep '"$2"
+                    (( DEBUG )) && ([[ -n "$msg" ]] ||  echo "6.5if file is empty")
+                    [[ -n "$msg" ]] || return 1    # Not found
+                    msg=$(echo "$msg" | grep "$2" 2>&1)
+                    ret=$?
+                    (( DEBUG )) && echo "7if $ret"
+                    [ $ret -eq 0 ] && return 0     # Found
+                    [ $ret -gt 0 ] && return 1    # Not Found
+                    (( DEBUG )) && echo "8if"
+                    [[ "$msg" == *"No such"* ]] && return 1
+                    (( DEBUG )) && echo "9 if"
+                    [[ "$msg" == *"nicht gefunden"* ]] && return 1
+                    [[ "$msg" == *"Permission denied"* ]] && return 1
+                    return 0  # Found
+        } # end _if_not_contains
+
+        function _if_contains(){
+             # Sample use
+             # 
+             # _if_contains && run_this
+             # 
+             # or
+             # 
+             # echo "${policies}" > temp.xml
+             # if _if_contains temp.xml "{1,}" ; then
+             # {
+             #   passed "passwords policy already set to {1,}"
+             # }
+             # else
+             # {
+             #   echo "set ${policies}" > temp.xml
+             # }
+             # fi
+            return ! _if_not_contains  "$1" "$2"
+        } # end _if_contains
+
 
         function if_user_exists() {
             # Sample use
@@ -2234,7 +2407,203 @@ function _run_command(){
                 return 1
             }
             fi
+        } # end is_not_included
+
+        function install_requirements() {
+            # Sample use
+            #               local OS="${1}"
+            #
+            #               install_requirements "darwin" "
+            #               node
+            #               # instead of nvm
+            #               nodenv
+            #               rbenv
+            #               ag@the_silver_searcher
+            #               ack
+            #               "
+            #               install_requirements "${OS}" "
+            #                        build-essential
+            #                        # Ubuntu only
+            #                        ag@silversearcher-ag
+            #                        libreadline-dev
+            #                        zlib1g-dev
+            #                        flex
+            #                        bison
+            #                        libxml2-dev
+            #                        libxslt-dev
+            #                        libssl-dev
+            #
+            #                        libreadline6-dev
+            #                        libossp-uuid-dev
+            #                        uuid"
+            #
+            #
+
+            # room for detecting Linux and OS systems
+            local OS="${1}"
+            local missing=""
+            local one_required=""
+            local install_this=""
+            local required=$(grep -vE '^\s+#'<<<"${2}")
+            local packages=""
+            local query=""
+            local install_result=""
+            local err_buff=0
+
+            if ( command -v brew >/dev/null 2>&1; ) ; then
+            {
+                # query=$(brew list --formula 2>&1)
+                query=$(su - "${SUDO_USER}" -c "brew list --formula" 2>&1)
+                # query=$(_run_command "brew list --formula"  2>&1)
+            }
+            elif ( ( command -v rpm >/dev/null 2>&1; ) && ( command -v dnf >/dev/null 2>&1; ) ); then
+            {
+                packages=$(rpm -qa)
+            }
+            fi
+            for one_required in ${required}; do
+            {
+              if [[ -z "${one_required}" ]] ; then
+              {
+                continue
+              }
+              fi
+              if ( echo "${one_required}" | grep -q "^[[:space:]]*#" ) ; then
+              {
+                continue
+              }
+              fi
+              if ( echo "${one_required}" | grep -q "@" ) ; then
+              {
+                install_this="$( echo "${one_required}" | cut -d@ -f2- )"
+                one_required="$( echo "${one_required}" | cut -d@ -f1 )"
+              } else {
+                install_this="${one_required}"
+              }
+              fi
+
+              if [[ -z "${one_required}" ]] ; then
+              {
+                continue
+              } else {
+                one_required=$(echo -n ${one_required} | sed -e 's/^[[:space:]]*//' ) # trim_start_space
+              }
+              fi
+              if [[ -z "${install_this}" ]] ; then
+              {
+                install_this=$(echo -n ${one_required} | sed -e 's/^[[:space:]]*//' ) # trim_spaces
+              } else {
+                install_this=$(echo -n ${install_this} | sed -e 's/^[[:space:]]*//' ) # trim_spaces
+              }
+              fi
+              if ( ( command -v apt >/dev/null 2>&1; ) && ( command -v dpkg >/dev/null 2>&1; ) ) ; then
+              {
+                # REF: https://www.cyberciti.biz/faq/find-out-if-package-is-installed-in-linux/
+                packages=$(dpkg -l | egrep "$one_required" | cut -d' ' -f3 2>&1)
+                query=$(dpkg-query -W -f='${Status} ${Version}\n' "$one_required"  2>&1)
+                #if [[ "${query}" == "install ok"* ]] && ( is_included "$one_required" "${packages}" ); then
+                if [[ "${query}" == "install ok"* ]] ; then
+                {
+                    passed " ${GREEN} $one_required ${YELLOW} INSTALLED${RESET} ."
+                }
+                else
+                {
+                    echo -e " ${RED}  NEED TO INSTALL ${YELLOW} $one_required${RESET} ${RED}...${query}"
+                    missing="${missing} ${install_this}"
+                    echo  "${install_this}"
+                }
+                fi
+              }
+              elif ( ( command -v rpm >/dev/null 2>&1; ) && ( command -v dnf >/dev/null 2>&1; ) ) ; then
+              {
+                if ( echo "${packages}" | egrep "$one_required"| grep "^$one_required" | cut -d'-' -f1  >/dev/null 2>&1;) ; then
+                {
+                    passed " ${GREEN} $one_required ${YELLOW} INSTALLED${RESET} ."
+                }
+                else
+                {
+                    echo -e " ${RED}  NEED TO INSTALL ${YELLOW} $one_required${RESET} ${RED}...${query}"
+                    missing="${missing} ${install_this}"
+                    echo  "${install_this}"
+                }
+                fi
+              }
+              elif ( command -v brew >/dev/null 2>&1; ) ; then
+              {
+                # CHECK_INSTALLED=$(brew ls --versions "${one_required}")
+                # query=$(brew list --formula 2>&1)
+                # one_required="nano"
+                # query=$(su - "${SUDO_USER}" -c "brew list --formula" 2>&1)
+                # query=$(_run_command "brew list --formula"  2>&1)
+                # ( echo "${query}" | grep -q  "^zsh$" )  && echo "installed"
+                # [[ "$( echo "${query}" | grep   "^unar$" )" == "unar" ]] && echo "installed"
+                # ( echo "${query}" | grep -q  "^${one_required}$" ) && echo "installed"
+                if  ( echo "${query}" | grep -q  "^${one_required}$" ) ; then
+                {
+                    passed " ${GREEN} $one_required ${YELLOW} INSTALLED${RESET} ."
+                }
+                else
+                {
+                    echo -e " ${RED}  NEED TO INSTALL ${YELLOW} $one_required${RESET} ${RED}..."
+                    # echo -e "${YELLOW} Installing ${one_required}  ${CERO}"
+                    missing="${missing} ${install_this}"
+                    # su - "${SUDO_USER}" -c "brew install \"${install_this}\" "
+                    # _run_command "brew install \"${install_this}\" "
+                }
+                fi
+              }
+              fi
+            }
+            done
+
+
+            # Check Requirements OS Ubuntu 14.04 REF: https://wiki.postgresql.org/wiki/Compile_and_Install_from_source_code#Ubuntu
+            if [[ -n "${missing}" ]] ; then
+            {
+              missing=$(echo -n ${missing} | sed -e 's/^[[:space:]]*//' ) # trim_start_space
+              echo -e " ${CYAN} Installing missing packages: ${YELLOW} ${missing} ${RESET} ."
+              if ( ( command -v apt >/dev/null 2>&1; )  && ( command -v dpkg >/dev/null 2>&1; ) ); then
+              {
+                install_result=$(sudo apt install ${missing} -yfq   2>&1) # capture all input and output
+                err_buff=$?
+              }
+              elif ( ( command -v rpm >/dev/null 2>&1; ) && ( command -v dnf >/dev/null 2>&1; ) ) ; then
+              {
+                install_result=$(sudo dnf install ${missing} -yfq   2>&1) # capture all input and output
+                err_buff=$?
+              }
+              elif ( command -v brew >/dev/null 2>&1; ) ; then
+              {
+                # _run_command brew install ${missing}
+                su - "${SUDO_USER}" -c "brew install ${missing} "
+                err_buff=$?
+              }
+              fi
+            }
+            fi
+            # echo $install_result;
+            if [[ ! -z "${install_result}" ]] ; then #  && handle_error "${install_result}"
+            {
+                local error_happened=""
+                [[ "${PROCESSOR_ERROR}" == *"MAC"* ]] && [ $err_buff != 0 ] && error_happened="1"
+                [[ "${PROCESSOR_ERROR}" == *"INTEL"* ]] && (( $err_buff != 0 )) && error_happened="1"
+                if [ "${error_happened}" ]  ||  ( has_error_keyword "${install_result}" ) ; then
+                {
+                  echo -e "${PURPLE_BLUE} action ${RED}failed ${YELLOW226}!!!  ${RESET}"
+                  [[ "${install_result}" == *"Could not resolve"* ]] && echo -e "${BRIGHT_BLUE87} It appears YOU HAVE ${YELLOW226}NO INTERNET CONNECTION \o_0/ ${RESET}"
+                  [[ "${install_result}" == *"Repository not found"* ]] && echo -e "${BRIGHT_BLUE87} It appears YOU HAVE ${YELLOW226}NO ACCESS TO THIS FOR YOU ${RED} ${GIT_USER_NAME} ${RESET}"
+                  [[ "${install_result}" == *"Could not read from"* ]] && echo -e "${BRIGHT_BLUE87} It appears it exists but you are ${RED}NOT ${YELLOW226} ALLOWED ${RED} ${GIT_USER_NAME} ${YELLOW226}!!! ${RESET}"
+                  RED="\\033[01;31m"
+                  CYAN="\\033[01;36m"
+                  local display_install_result=$(echo -e "${install_result}" | sed "s/\(FAILED\|failed\|Failed\|ERROR\|Error\|error\|cannot\|continue\|logged\|inspection\|not\|exit\|more\|details\)/${RED}\1${CYAN}/g")
+                  failed "${RESET} \n .... \n ... ${display_install_result} \n ... \n ..."
+                }
+                fi
+
+            }
+            fi
         }
+        # end install_requirements
 
         function install_apt_get_requirements() {
             # Sample use
@@ -2264,8 +2633,6 @@ function _run_command(){
             local query=""
             for one_required in ${required}; do
             {
-              if ( command -v dpkg >/dev/null 2>&1; ) ; then
-              {
                 # REF: https://www.cyberciti.biz/faq/find-out-if-package-is-installed-in-linux/
                 packages=$(dpkg -l | egrep "$one_required" | cut -d' ' -f3 2>&1)
                 query=$(dpkg-query -W -f='${Status} ${Version}\n' "$one_required"  2>&1)
@@ -2280,24 +2647,6 @@ function _run_command(){
                     missing="${missing} ${one_required}"
                 }
                 fi
-              }
-              elif ( command -v rpm >/dev/null 2>&1; ) ; then
-              {
-                packages=$(rpm -qa | egrep "$one_required" | cut -d' ' -f3 2>&1)
-                query=$(rpm-query -W -f='${Status} ${Version}\n' "$one_required"  2>&1)
-                #if [[ "${query}" == "install ok"* ]] && ( is_included "$one_required" "${packages}" ); then
-                if [[ "${query}" == "install ok"* ]] ; then
-                {
-                    passed " ${GREEN} $one_required ${YELLOW} INSTALLED${RESET} ."
-                }
-                else
-                {
-                    echo -e " ${RED}  NEED TO INSTALL ${YELLOW} $one_required${RESET} ${RED}...${query}"
-                    missing="${missing} ${one_required}"
-                }
-                fi
-              }
-              fi
             }
             done
             missing=$(echo ${missing} | sed -e 's/^[[:space:]]*//' | sed 's/^\ //g' | sed 's/^\t//g' ) # trim_start_space
@@ -2362,7 +2711,7 @@ function _run_command(){
             local required=$(grep -vE '^\s+#'<<<"${2}")
             for one_required in ${required}; do
             {
-              if ( command -v dpkg >/dev/null 2>&1; ) ; then
+              if ( ( command -v apt >/dev/null 2>&1; ) && ( command -v dpkg >/dev/null 2>&1; ) ) ; then
               {
                 dpkg -l | egrep "$one_required" &>/dev/null
                 if [ $? == 0 ]; then
@@ -2376,7 +2725,7 @@ function _run_command(){
                 }
                 fi
               }
-              elif ( command -v rpm >/dev/null 2>&1; ) ; then
+              elif ( ( command -v rpm >/dev/null 2>&1; ) && ( command -v dnf >/dev/null 2>&1; ) ) ; then
               {
                 rpm -qa | egrep "$one_required" &>/dev/null
                 if [ $? == 0 ]; then
@@ -2397,14 +2746,14 @@ function _run_command(){
 
             removing=$(echo ${removing} | sed -e 's/^[[:space:]]*//' | sed 's/^\ //g' | sed 's/^\t//g' ) # trim_start_space
 
-            if ( command -v dpkg >/dev/null 2>&1; ) ; then
+            if ( ( command -v apt >/dev/null 2>&1; ) && ( command -v dpkg >/dev/null 2>&1; ) ) ; then
             {
               [[ -n "${removing}" ]] && echo -e " ${CYAN} Apt-get removing packages: ${YELLOW} ${removing} ${RESET} ."
               [[ -n "${removing}" ]] && local remove_result=$(sudo apt-get remove ${removing} -yfq   2>&1 && sudo apt-get purge ${removing} -yfq   2>&1 && sudo apt-get autoremove -yfq   2>&1) # capture all input and output
               local err_buff=$?
               [[ -n "${remove_result}" ]] && handle_error "${err_buff}" "${remove_result}"
             }
-            elif ( command -v rpm >/dev/null 2>&1; ) ; then
+            elif ( ( command -v rpm >/dev/null 2>&1; ) && ( command -v dnf >/dev/null 2>&1; ) ) ; then
             {
               [[ -n "${removing}" ]] && echo -e " ${CYAN} Dnf removing packages: ${YELLOW} ${removing} ${RESET} ."
               [[ -n "${removing}" ]] && local remove_result=$(sudo dnf uninstall ${removing} -y   2>&1 && sudo dnf purge ${removing} -yfq   2>&1 && sudo apt-get autoremove -yfq   2>&1) # capture all input and output
@@ -3251,12 +3600,12 @@ function _download_linux() {
   local download_folder=""
   if [ -n "${2}" ] ; then # if not empty
     {
-        download_folder="${2} "
+        download_folder="${2}"
     }
   fi
   echo "     target url 1:<${1}>"
   [ -z "${1}" ] && echo "empty"
-  echo "download folder 2:<${2}>"
+  echo "download folder 2:<${download_folder}>"
   [ -z "${2}" ] && echo "empty"
   echo "  download file 3:<${3}>"
 #   file_exists_with_spaces "${download_folder}"
@@ -3274,6 +3623,13 @@ function _download_linux() {
   [ -z "${1}" ] && failed \\n${BASH_SOURCE}:${BASH_LINENO[-0]} ${FUNCNAME[-0]}\(\) \\n$0:${BASH_LINENO[1]} ${FUNCNAME[1]}\(\) \\nCould not load 1.target_url string or it was empty. Expected one Parameter URL
   [ -z "${2}" ] && failed \\n${BASH_SOURCE}:${BASH_LINENO[-0]} ${FUNCNAME[-0]}\(\) \\n$0:${BASH_LINENO[1]} ${FUNCNAME[1]}\(\) \\nCould not load 2.download_folder string or it was empty. Expected one Parameter URL
   [ -z "${3}" ] && failed \\n${BASH_SOURCE}:${BASH_LINENO[-0]} ${FUNCNAME[-0]}\(\) \\n$0:${BASH_LINENO[1]} ${FUNCNAME[1]}\(\) \\nCould not load 3.download_file string or it was empty. Expected one Parameter URL
+  if enforce_web_is_reachable "${1}" && [ $? -gt 0 ] ;  then # if not empty
+  {
+    failed \\n${BASH_SOURCE}:${BASH_LINENO[-0]} ${FUNCNAME[-0]}\(\) \\n$0:${BASH_LINENO[1]} ${FUNCNAME[1]}\(\) \\nCould not load 1.target_url URL is Broken or not Reachable "<<${1}>>"
+  }
+  fi
+
+
   local download_file="${3}" || ""
 
   _trap_catch_check
@@ -3318,19 +3674,32 @@ function _download_linux() {
     echo "OPTIONS WGETRC:"
     cat -n /tmp/wgetrc
     echo "COMMAND WGET:"
-    passed "WGETRC=/tmp/wgetrc wget --max-redirect=10 --mirror --directory-prefix="${download_folder}" -O "${download_file}" --no-check-certificate "${target_url}""
-    cd ${download_folder}
+    passed "WGETRC=/tmp/wgetrc wget --max-redirect=10 --mirror --directory-prefix=${download_folder} -O ${download_file} --no-check-certificate ${target_url}"
+    cd "${download_folder}"
     pwd
+    # exit 0
     # if not defined and not empty try code normal
-    ( typeset -p "SUDO_USER"  &>/dev/null ) ||  wget --max-redirect=10 --mirror --directory-prefix="${download_folder}" -O "${download_file}" --no-check-certificate "${target_url}" # 2>/dev/null"
+    if ( ! typeset -p "SUDO_USER"  &>/dev/null ) ; then
+    {
+       cd "${download_folder}"
+       _trap_try_start
+       wget --max-redirect=10 --mirror --directory-prefix="${download_folder}" -O "${download_file}" --no-check-certificate "${target_url}" # 2>/dev/null"
+       _trap_catch_check
+    }
+    elif  ( typeset -p "SUDO_USER"  &>/dev/null ) ; then
+    {
+      _trap_try_start
+      echo RUNNING:\nsu - "$SUDO_USER" -c 'cd '"${download_folder}"' && wget --max-redirect=10 --mirror --directory-prefix='"${download_folder}"' -O '"${download_file}"' --no-check-certificate '"${target_url}"' && pwd ' # 2>/dev/null"
+      su - "$SUDO_USER" -c 'cd '"${download_folder}"' && wget --max-redirect=10 --mirror --directory-prefix='"${download_folder}"' -O '"${download_file}"' --no-check-certificate '"${target_url}"' && pwd ' # 2>/dev/null"
+      _trap_catch_check
+    }
+    fi
     # ( typeset -p "SUDO_USER"  &>/dev/null ) ||  wget --max-redirect=10 --mirror  --no-check-certificate "${target_url}" # 2>/dev/null"
     # if defined and not empty
     # ( typeset -p "SUDO_USER"  &>/dev/null ) && echo "sudo user " >&2
-    ( typeset -p "SUDO_USER"  &>/dev/null ) &&  su - $SUDO_USER -c 'cd ${download_folder} && wget --max-redirect=10 --mirror --directory-prefix='"${download_folder}"' -O '"${download_file}"' --no-check-certificate '"${target_url}"' && pwd ' # 2>/dev/null"
     # ( typeset -p "SUDO_USER"  &>/dev/null ) &&  su - $SUDO_USER -c 'wget --max-redirect=10 --mirror  --no-check-certificate '"${target_url}"' ' # 2>/dev/null"
 
     # WGETRC=/tmp/wgetrc wget "${WGETCOMMAND}" # 2>/dev/null"
-    _trap_catch_check
     _assure_success
     echo "${msg}"
     echo -e "\033[7m*** Download Wget executed completed.\033[0m"
@@ -3340,10 +3709,10 @@ function _download_linux() {
   elif ( command -v curl >/dev/null 2>&1; ); then
     ensure curl or "curl is required"
    # if not defined and not empty try code normal
-    ( typeset -p "SUDO_USER"  &>/dev/null ) ||  curl -O "${target_url}" 2>/dev/null   # suppress only wget download messages, but keep wget output for variable
+    ( typeset -p "SUDO_USER"  &>/dev/null ) ||  cd "${download_folder}" && curl -O "${target_url}" 2>/dev/null   # suppress only wget download messages, but keep wget output for variable
     # if defined and not empty
     # ( typeset -p "SUDO_USER"  &>/dev/null ) && echo "sudo user " >&2
-    ( typeset -p "SUDO_USER"  &>/dev/null ) &&  su - $SUDO_USER -c 'curl -O '"${target_url}"' 2>/dev/null'   # suppress only wget download messages, but keep wget output for variable
+    ( typeset -p "SUDO_USER"  &>/dev/null ) &&  su - "$SUDO_USER" -c 'cd  '"${download_folder}"' && curl -O  '"${download_folder}/${download_file}"' '"${target_url}"' 2>/dev/null'   # suppress only wget download messages, but keep wget output for variable
 
     # _assure_success
   else
@@ -3591,6 +3960,7 @@ function function_exists_with_spaces() {
             unset TESTING
 } # end function_exists_with_spaces
 
+
 function determine_os_and_fire_action() {
   # Interface
   # How to use
@@ -3783,6 +4153,402 @@ function determine_os_and_fire_action() {
   unset FUNCTION_TO_CALL
   unset PARAMETERS
 } # end determine_os_and_fire_action
+
+function _do_not_downloadtwice(){
+  # Sample usage:
+  #
+  #   enforce_variable_with_value USER_HOME "${USER_HOME}"
+  # local CODENAME=teamviewer.x86_64.rpm
+  # enforce_variable_with_value CODENAME "${CODENAME}"
+  # local TARGET_URL=https://download.teamviewer.com/download/linux/teamviewer.x86_64.rpm
+  # enforce_variable_with_value TARGET_URL "${TARGET_URL}"
+  # local DOWNLOADFOLDER="${USER_HOME}/Downloads"
+  # enforce_variable_with_value DOWNLOADFOLDER "${DOWNLOADFOLDER}"
+  # _do_not_downloadtwice "${TARGET_URL}" "${DOWNLOADFOLDER}"  "${CODENAME}"
+  #
+  #
+  local TARGET_URL="${1}"
+  enforce_parameter_with_value 1 TARGET_URL "${TARGET_URL}" "https://download.teamviewer.com/download/linux/teamviewer.x86_64.rpm"
+  local DOWNLOADFOLDER="${2}"
+  enforce_parameter_with_value 2 DOWNLOADFOLDER "${DOWNLOADFOLDER}" "$USER_HOME/Downloads"
+  local CODENAME="${3}"
+  enforce_parameter_with_value 3 CODENAME "${CODENAME}" "teamviewer.x86_64.rpm"
+  (( VERBOSE )) && echo  _do_not_downloadtwice "${TARGET_URL}" "${DOWNLOADFOLDER}"  "${CODENAME}"
+
+  if it_exists_with_spaces "${DOWNLOADFOLDER}/${CODENAME}" ; then
+  {
+    file_exists_with_spaces "${DOWNLOADFOLDER}/${CODENAME}"
+  }
+  else
+  {
+    cd "${DOWNLOADFOLDER}"
+    (( VERBOSE )) && pwd
+    (( VERBOSE )) && echo  _download "${TARGET_URL}" "${DOWNLOADFOLDER}"  "${CODENAME}"
+    _download "${TARGET_URL}" "${DOWNLOADFOLDER}"  "${CODENAME}"
+    file_exists_with_spaces "${DOWNLOADFOLDER}/${CODENAME}"
+  }
+  fi
+  return 0
+} # end _do_not_downloadtwice
+
+function _install_apt() {
+  #   Sample usage:
+  #
+  # local TARGET_URL=https://zoom.us/client/latest/zoom_amd64.deb
+  # enforce_variable_with_value TARGET_URL "${TARGET_URL}"
+  #   local CODENAME=$(basename "${TARGET_URL}")
+  #   enforce_variable_with_value CODENAME "${CODENAME}"
+  #   local DOWNLOADFOLDER="${USER_HOME}/Downloads"
+  #   enforce_variable_with_value DOWNLOADFOLDER "${DOWNLOADFOLDER}"
+  #   _do_not_downloadtwice "${TARGET_URL}" "${DOWNLOADFOLDER}"  "${CODENAME}"
+  # _install_apt "${TARGET_URL}" "${DOWNLOADFOLDER}"  "${CODENAME}" 0
+  #
+  #
+    local TARGET_URL="${1}"
+    enforce_parameter_with_value 1 TARGET_URL "${TARGET_URL}" "https://download.teamviewer.com/download/linux/teamviewer.amd64.deb"
+    local DOWNLOADFOLDER="${2}"
+    enforce_parameter_with_value 2 DOWNLOADFOLDER "${DOWNLOADFOLDER}" "$USER_HOME/Downloads"
+    local CODENAME="${3}"
+    enforce_parameter_with_value 3 CODENAME "${CODENAME}" "teamviewer.amd64.deb"
+    local -i LOOP="${4}"
+    enforce_parameter_with_value 4 LOOP "${LOOP}" "1 or 2 or 0"
+    file_exists_with_spaces "${DOWNLOADFOLDER}/${CODENAME}"
+    local TARGET_DOWNLOAD_PATH="${DOWNLOADFOLDER}/${CODENAME}"
+    enforce_parameter_with_value COMPOSITE TARGET_DOWNLOAD_PATH "${TARGET_DOWNLOAD_PATH}" "$USER_HOME/Downloads/teamviewer.amd64.deb"
+
+    if  it_exists_with_spaces "${TARGET_DOWNLOAD_PATH}" ; then
+    {
+      echo Attempting to install "${TARGET_DOWNLOAD_PATH}"
+    }
+    else
+    {
+      return 1
+    }
+    fi
+    ensure dpkg or "Canceling Install. Could not find dpkg command to execute install"
+    ensure apt or "Canceling Install. Could not find apt command to execute install"
+    _trap_try_start # _trap_catch_check
+    local msg=$(apt install -y "${TARGET_DOWNLOAD_PATH}")
+    _trap_catch_check
+    echo "${msg}"
+    if [[ "${msg}" == *"not an dpkg package"* ]] ; then
+    {
+        Warning Package appearts broken, downloading again
+      _download "${TARGET_URL}" "${DOWNLOADFOLDER}"  "${CODENAME}"
+      _install_apt "${TARGET_URL}" "${DOWNLOADFOLDER}"  "${CODENAME}"
+    }
+    elif [[ "${msg}" == *"libQt5WebKit.so.5"* ]] && [[ "${msg}" == *"is needed"* ]] && (( ! LOOP )) ; then
+    {
+          echo "Suggested Fix "
+      echo "# when error error: Failed dependencies:
+            #        libQt5Svg.so.5()(64bit) is needed by "${CODENAME}"
+            # then correct with
+            # fix with
+            # then fix with
+            # sudo apt install -y qt5-devel qt-creator qt5-qtbase qt5-qtbase-devel
+            # dpkg again"
+      Attempting to fix
+      apt install -y qt5-devel qt-creator qt5-qtbase qt5-qtbase-devel
+      _install_apt "${TARGET_URL}" "${DOWNLOADFOLDER}"  "${CODENAME}" 1
+    }
+    elif [[ "${msg}" == *"libQt5WebKit.so.5"* ]] && [[ "${msg}" == *"is needed"* ]] && (( LOOP )) ; then
+    {
+          echo "Suggested Fix "
+      echo "# when error error: Failed dependencies:
+            #        libQt5Svg.so.5()(64bit) is needed by "${CODENAME}"
+            # then correct with
+            # fix with
+            # then fix with
+            # sudo apt install -y qt5-devel qt-creator qt5-qtbase qt5-qtbase-devel
+            # I could not install it automatically
+            # dpkg again"
+      failed "ERROR MSG:\n ${msg}"
+    }
+    elif [[ "${msg}" == *"Failed dependencies"* ]] && [[ "${msg}" == *"is needed"* ]] ; then
+    {
+      # echo "Suggested Fix "
+      # echo "# when error error:
+      #       # fix with
+      #       # then fix with
+      #       # dpkg again"
+      failed "ERROR MSG:\n ${msg}"
+    }
+    else
+    {
+      passed "Seems there were no errors"
+    }
+    fi
+    rm -f "${TARGET_DOWNLOAD_PATH}"
+    return 0
+} # end _install_apt
+
+function _install_rpm() {
+  #   Sample usage:
+  #
+  # local TARGET_URL=https://zoom.us/client/latest/zoom_x86_64.rpm
+  # enforce_variable_with_value TARGET_URL "${TARGET_URL}"
+  #   local CODENAME=$(basename "${TARGET_URL}")
+  #   enforce_variable_with_value CODENAME "${CODENAME}"
+  #   local DOWNLOADFOLDER="${USER_HOME}/Downloads"
+  #   enforce_variable_with_value DOWNLOADFOLDER "${DOWNLOADFOLDER}"
+  #   _do_not_downloadtwice "${TARGET_URL}" "${DOWNLOADFOLDER}"  "${CODENAME}"
+  # _install_rpm "${TARGET_URL}" "${DOWNLOADFOLDER}"  "${CODENAME}" 0
+  #
+  #
+    local TARGET_URL="${1}"
+    enforce_parameter_with_value 1 TARGET_URL "${TARGET_URL}" "https://download.teamviewer.com/download/linux/teamviewer.x86_64.rpm"
+    local DOWNLOADFOLDER="${2}"
+    enforce_parameter_with_value 2 DOWNLOADFOLDER "${DOWNLOADFOLDER}" "$USER_HOME/Downloads"
+    local CODENAME="${3}"
+    enforce_parameter_with_value 3 CODENAME "${CODENAME}" "teamviewer.x86_64.rpm"
+    local -i LOOP="${4}"
+    enforce_parameter_with_value 4 LOOP "${LOOP}" "1 or 2 or 0"
+    file_exists_with_spaces "${DOWNLOADFOLDER}/${CODENAME}"
+    local TARGET_DOWNLOAD_PATH="${DOWNLOADFOLDER}/${CODENAME}"
+    enforce_parameter_with_value COMPOSITE TARGET_DOWNLOAD_PATH "${TARGET_DOWNLOAD_PATH}" "$USER_HOME/Downloads/teamviewer.x86_64.rpm"
+
+    if  it_exists_with_spaces "${TARGET_DOWNLOAD_PATH}" ; then
+    {
+      echo Attempting to install "${TARGET_DOWNLOAD_PATH}"
+    }
+    else
+    {
+      return 1
+    }
+    fi
+    ensure rpm or "Canceling Install. Could not find rpm command to execute install"
+    ensure dnf or "Canceling Install. Could not find dnf command to execute install"
+    _trap_try_start # _trap_catch_check
+    local msg=$(dnf install -y "${TARGET_DOWNLOAD_PATH}")
+    _trap_catch_check
+    echo "${msg}"
+    if [[ "${msg}" == *"not an rpm package"* ]] ; then
+    {
+        Warning Package appearts broken, downloading again
+      _download "${TARGET_URL}" "${DOWNLOADFOLDER}"  "${CODENAME}"
+      _install_rpm "${TARGET_URL}" "${DOWNLOADFOLDER}"  "${CODENAME}"
+    }
+    elif [[ "${msg}" == *"libQt5WebKit.so.5"* ]] && [[ "${msg}" == *"is needed"* ]] && (( ! LOOP )) ; then
+    {
+          echo "Suggested Fix "
+      echo "# when error error: Failed dependencies:
+            #        libQt5Svg.so.5()(64bit) is needed by "${CODENAME}"
+            # then correct with
+            # fix with
+            # then fix with
+            # sudo dnf install -y qt5-devel qt-creator qt5-qtbase qt5-qtbase-devel
+            # rpm again"
+      Attempting to fix
+      dnf install -y qt5-devel qt-creator qt5-qtbase qt5-qtbase-devel
+      _install_rpm "${TARGET_URL}" "${DOWNLOADFOLDER}"  "${CODENAME}" 1
+    }
+    elif [[ "${msg}" == *"libQt5WebKit.so.5"* ]] && [[ "${msg}" == *"is needed"* ]] && (( LOOP )) ; then
+    {
+          echo "Suggested Fix "
+      echo "# when error error: Failed dependencies:
+            #        libQt5Svg.so.5()(64bit) is needed by "${CODENAME}"
+            # then correct with
+            # fix with
+            # then fix with
+            # sudo dnf install -y qt5-devel qt-creator qt5-qtbase qt5-qtbase-devel
+            # I could not install it automatically
+            # rpm again"
+      failed "ERROR MSG:\n ${msg}"
+    }
+    elif [[ "${msg}" == *"Failed dependencies"* ]] && [[ "${msg}" == *"is needed"* ]] ; then
+    {
+      # echo "Suggested Fix "
+      # echo "# when error error:
+      #       # fix with
+      #       # then fix with
+      #       # rpm again"
+      failed "ERROR MSG:\n ${msg}"
+    }
+    else
+    {
+      passed "Seems there were no errors"
+    }
+    fi
+    rm -f "${TARGET_DOWNLOAD_PATH}"
+    return 0
+} # end _install_rpm
+
+export raise_to_sudo_and_user_home
+function raise_to_sudo_and_user_home() {
+  #
+  # Sample usage:
+  #
+  # Place this on the start of the script  that
+  #  needs to reloaded as sudo "MOTHER" script:
+  #
+  #   export  THISSCRIPTCOMPLETEPATH
+  #   typeset -gr THISSCRIPTCOMPLETEPATH="$(basename "$0")"   # § This goes in the FATHER-MOTHER script
+  #   export _err
+  #   typeset -i _err=0
+  #
+  # ...
+  # wrapp it in local function exported
+  # export sudo_it
+  # function sudo_it() {
+  #   raise_to_sudo_and_user_home
+  # } # end sudo_it
+  #
+  # ...
+  # then call it the wrapper
+  # ...
+  #
+  #  sudo_it
+  #  [ $? -gt 0 ] && failed to sudo_it raise_to_sudo_and_user_home
+  #   enforce_variable_with_value USER_HOME "${USER_HOME}"
+  #
+  load_execute_boot_basic_with_sudo(){
+    # shellcheck disable=SC2030
+    if ( typeset -p "SUDO_USER"  &>/dev/null ) ; then
+    {
+      export USER_HOME
+      # typeset -rg USER_HOME=$(getent passwd $SUDO_USER | cut -d: -f6)  # Get the caller's of sudo home dir Just Linux
+      # shellcheck disable=SC2046
+      # shellcheck disable=SC2031
+      typeset -r USER_HOME="$(echo -n $(bash -c "cd ~${SUDO_USER} && pwd"))"  # Get the caller's of sudo home dir LINUX and MAC
+    }
+    else
+    {
+      local USER_HOME=$HOME
+    }
+    fi
+    local -r provider="$USER_HOME/_/clis/execute_command_intuivo_cli/execute_boot_basic.sh"
+    echo source "${provider}"
+    # shellcheck disable=SC1090
+    [   -e "${provider}"  ] && source "${provider}"
+    [ ! -e "${provider}"  ] && eval """$(wget --quiet --no-check-certificate  https://raw.githubusercontent.com/zeusintuivo/execute_command_intuivo_cli/master/execute_boot_basic.sh -O -  2>/dev/null )"""   # suppress only wget download messages, but keep wget output for variable
+    if ( command -v failed >/dev/null 2>&1; ) ; then
+    {
+      return 0
+    }
+    else
+    {
+      echo -e "\n \n  ERROR! Loading execute_boot_basic.sh \n \n "
+      exit 1;
+    }
+    fi
+    return 0
+  } # end load_execute_boot_basic_with_sudo
+
+  load_execute_boot_basic_with_sudo
+  _err=$?
+  if [ $_err -ne 0 ] ;  then
+  {
+    >&2 echo -e "ERROR There was an error loading load_execute_boot_basic_with_sudo Err:$_err "
+    exit $_err
+  }
+  fi
+
+  # Overwrite trap
+  # function _trap_on_exit(){
+    # echo -e "\033[01;7m*** TRAP $THISSCRIPTCOMPLETEPATH EXITS ...\033[0m"
+  # }
+  #trap kill ERR
+  # trap _trap_on_exit EXIT
+  #trap kill INT
+} # end raise_to_sudo_and_user_home
+
+function enforce_node_is_version(){
+  # Sample use:
+  # enforce_node_is_version  "12.20.1"
+  #
+  echo "  Checking for node version to be ${1}"
+  local msg
+  msg=$(node --version | cut -c2- | grep "${1}" 2>&1; )
+  _err=$?
+  local TESTING="node is version ${1} "
+  if [ $_err -gt 0 ] ; then
+  {
+    failed "expected ${TESTING} but got <$(node --version)> "
+  }
+  fi
+  passed "${TESTING}"
+} # end enforce_node_is_version
+
+function enforce_vpn_is_on(){
+  # Sample use:
+  # enforce_vpn_is_on  "diginet"
+  #
+  echo "  Checking for connection to ${1}"
+  local msg
+  msg=$(/usr/bin/nmcli c show --active | /bin/grep vpn | /bin/grep "${1}" 2>&1; )
+  _err=$?
+  local TESTING="vpn is on ${1} "
+  if [ $_err -gt 0 ] ; then
+  {
+    failed "${TESTING}"
+  }
+  fi
+  passed "${TESTING}"
+} # end enforce_vpn_is_on
+
+function enforce_web_is_reachable(){
+  # Sample use:
+  # enforce_web_is_reachable  "cms.artbox.one"
+  #
+  echo "  Checking for connection to ${1}"
+  local msg
+  msg=$(curl -I --connect-timeout 5.0  --max-time 10.0  "${1}" 2>&1; )
+  _err=$?
+  local TESTING="web address ${BRIGHT_BLUE87}««${RED}${1}${BRIGHT_BLUE87}»»${LIGHTYELLOW} is reachable"
+  if [ $_err -gt 0 ] ; then
+  {
+    [ $_err -eq 28 ] && failed "ERROR Connection resolving timed out . ${TESTING}"
+    failed "${TESTING}"
+  }
+  fi
+  passed "${TESTING}"
+} # end enforce_web_is_reachable
+
+
+function enforce_ip_resolves(){
+  # Sample use:
+  # enforce_ip_resolves  "pis.pixum.com" to "127.0.0.1"
+  # enforce_ip_resolves  "pis.pixum.com" not-to "127.0.0.1"
+  #
+  if [[ -n "${1}" ]] && ([[ "${2}" == "not-to" ]] || [[ "${2}" == "to" ]]) && [[ -n "${3}" ]]; then
+  {
+    echo "  Checking ip for to ${1} ${2} be ${3}"
+  }
+  else
+  {
+    echo "Wrong usage, sample call is:  enforce_ip_resolves  \"pis.pixum.com\" to \"127.0.0.1\" "
+    echo "Wrong usage, sample call is:  enforce_ip_resolves  \"pis.pixum.com\" not-to \"127.0.0.1\" "
+    failed callling enforce_ip_resolves
+    exit 1
+  }
+  fi
+  local msg
+  # msg=$(dig  "${1}" | grep SERVER | cut -d\( -f2 | cut -d\) -f1 2>&1; )
+  msg=$(resolveip "${1}" | cut -d' ' -f6  2>&1; )
+  _err=$?
+  local TESTING="web  that ip from ${1} resolves ${2} ${3}"
+  if [ $_err -gt 0 ] ; then
+  {
+    [ $_err -eq 28 ] && failed "ERROR Connection resolving dig tool . ${TESTING}"
+    failed "${TESTING}"
+    exit 1
+  }
+  fi
+  if [[ "${2}" == "to" ]] && [[ "${msg}" != "${3}" ]] ; then
+  {
+    failed "${TESTING}"
+    exit 1
+  }
+  fi
+  if [[ "${2}" == "not-to" ]] && [[ "${msg}" == "${3}" ]] ; then
+  {
+    failed "${TESTING}"
+    exit 1
+  }
+  fi
+  passed "${TESTING}"
+} # end enforce_ip_resolves
+
     #[ ! -z "$0" ] && [ -e "$0" ] && THISSCRIPTNAME=`basename "$0"`
 
     # TRAP
