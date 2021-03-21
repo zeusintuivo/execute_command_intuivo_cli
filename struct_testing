@@ -1,4 +1,4 @@
-#!/bin/env bash
+#!/usr/bin/env bash
 #!/bin/bash
 #
 # @author Zeus Intuivo <zeus@intuivo.com>
@@ -348,6 +348,11 @@ CERO="\033[01;0m"
           (( DEBUG )) && ( typeset -p "${2}"  &>/dev/null ) &&  [ -n "${3+x}" ]  && echo "2 declared,defined and with value not empty 3"
           (( DEBUG )) && ( ( typeset -p "${2}"  &>/dev/null  ) || echo "2 not defined 2")
           (( DEBUG )) && ( ! typeset -p "${2}"  &>/dev/null  ) && echo "2 not defined 3"
+          local -i _seemsempty_=0
+          [[ "x${3}x" = "xx" ]] && _seemsempty_=1
+          (( _seemsempty_ )) && echo -e "${RED} 𝞦 \\n${BASH_SOURCE}:${BASH_LINENO[1]} ${FUNCNAME[-0]}(...) \\n$0:${BASH_LINENO[0]} ${FUNCNAME[1]}(...) \\n ${LIGHTYELLOW} ${TESTING} has failed "
+          (( _seemsempty_ )) && failed "${TESTING}"
+          (( _seemsempty_ )) && exit 1
           if ( typeset -p "${2}"  &>/dev/null ) &&  [ -n "${3+x}" ] ; then
           {
             local one=""
@@ -393,6 +398,16 @@ CERO="\033[01;0m"
           (( DEBUG )) && ( typeset -p "${2}"  &>/dev/null ) &&  [ -n "${3+x}" ]  && echo "2 declared,defined and with value not empty 3"
           (( DEBUG )) && ( ( typeset -p "${2}"  &>/dev/null  ) || echo "2 not defined 2")
           (( DEBUG )) && ( ! typeset -p "${2}"  &>/dev/null  ) && echo "2 not defined 3"
+          (( DEBUG )) && ( env | grep "${1}"  &>/dev/null  ) && echo "5 1 not in env "
+          (( DEBUG )) && [ -n "${2+x}" ]  && echo "2 failed empty 8"
+          (( DEBUG )) && [ -n "${2-x}" ]  && echo "2 failed empty 7"
+          (( DEBUG )) && [ -z "${2+x}" ]  && echo "2 failed empty 9"
+          (( DEBUG )) && [ -z "${2-x}" ]  && echo "2 failed empty 10"
+          local -i _seemsempty_=0
+          [[ "x${3}x" = "xx" ]] && _seemsempty_=1
+          (( _seemsempty_ )) && echo -e "${RED} 𝞦 \\n${BASH_SOURCE}:${BASH_LINENO[1]} ${FUNCNAME[-0]}(...) \\n$0:${BASH_LINENO[0]} ${FUNCNAME[1]}(...) \\n ${LIGHTYELLOW} ${TESTING} has failed "
+          (( _seemsempty_ )) && failed "${TESTING}"
+          (( _seemsempty_ )) && exit 1
           if ( typeset -p "${2}"  &>/dev/null ) &&  [ -n "${3+x}" ] ; then
           {
               (( DEBUG )) && echo -e "${LIGHTGREEN} ✔ ${LIGHTYELLOW} ${TESTING} has passed "
@@ -406,6 +421,7 @@ CERO="\033[01;0m"
 
         function enforce_variable_with_value(){
           # Sample use
+          DEBUG=1
           # enforce_variable_with_value HOME $HOME
           # enforce_variable_with_value USER_HOME $USER_HOME
           # enforce_variable_with_value SUDO_USER $SUDO_USER
@@ -423,13 +439,22 @@ CERO="\033[01;0m"
           # [ -n "${SUDO_USER+x}" ] && echo "SUDO_USER 111"
           # ( declare -p "HOME" ) && echo "HOME 2"
           typeset -r TESTING="that variable is listed and: ${CYAN}${1}${LIGHTYELLOW} and has value: ${RESET}<${YELLOW_OVER_DARKBLUE}${2}${RESET}>"
+          local -i _seemsempty_=0
           (( DEBUG )) && echo -e "${FUNCNAME[0]}"
-          (( DEBUG )) && echo ${@} -assume existing variable for this part
+          (( DEBUG )) && echo "x${1}x" -assume existing variable for this part
+          (( DEBUG )) && echo "x${2}x" -assume existing variable for this part
+          [[ "x${2}x" = "xx" ]] && _seemsempty_=1
+          (( DEBUG )) && [[ "x${2}x" = "xx" ]] && echo seems empty
           (( DEBUG )) && ( typeset -p "${1}"  &>/dev/null  ) && echo "1 defined 1"
           (( DEBUG )) && [ -n "${2+x}" ]  && echo "1 defined 2"
           (( DEBUG )) && ( typeset -p "${1}"  &>/dev/null ) &&  [ -n "${2+x}" ]  && echo "1 declared,defined and with value not empty 3"
           (( DEBUG )) && ( ( typeset -p "${1}"  &>/dev/null  ) || echo "1 not defined 1")
           (( DEBUG )) && ( ! typeset -p "${1}"  &>/dev/null  ) && echo "1 not defined 2"
+          (( DEBUG )) && ( env | grep "${1}"  &>/dev/null  ) && echo "2 not in env "
+          (( DEBUG )) && [ -n "${2+x}" ]  && echo "2 failed empty 8"
+          (( DEBUG )) && [ -n "${2-x}" ]  && echo "2 failed empty 7"
+          (( DEBUG )) && [ -z "${2+x}" ]  && echo "2 failed empty 9"
+          (( DEBUG )) && [ -z "${2-x}" ]  && echo "2 failed empty 10"
           # echo QWER - assume non existant variable for this part
           # ( typeset -p "QWER"  &>/dev/null  ) && echo "QWER defined 1"
           # [ -n "${QWER+x}" ]  && echo "QWER defined 2"
@@ -438,14 +463,17 @@ CERO="\033[01;0m"
           # ( ! typeset -p "QWER"  &>/dev/null  ) && echo "QWER not defined 2"
           # echo bye
           # exit 0
-          if ( typeset -p "${1}"  &>/dev/null ) &&  [ -n "${2+x}" ] ; then
+          (( _seemsempty_ )) && echo -e "${RED} 𝞦 enforce_variable_with_value \\n${BASH_SOURCE[1]}:${BASH_LINENO[1]} ${FUNCNAME[-0]}(...) \\n${BASH_SOURCE[1]}:${BASH_LINENO[0]} ${FUNCNAME[1]}(...) \\n ${LIGHTYELLOW} ${TESTING} has failed "
+          (( _seemsempty_ )) && failed "${TESTING}"
+          (( _seemsempty_ )) && exit 1
+          if (( typeset -p "${1}"  &>/dev/null ) &&  [ -n "${2+x}" ]) ; then
           {
               (( DEBUG )) && echo -e "${LIGHTGREEN} ✔ ${LIGHTYELLOW} ${TESTING} has passed "
               return 0
           }
           fi
-          echo -e "${RED} 𝞦 \\n${BASH_SOURCE}:${BASH_LINENO[1]} ${FUNCNAME[-0]}(...) \\n$0:${BASH_LINENO[0]} ${FUNCNAME[1]}(...) \\n ${LIGHTYELLOW} ${TESTING} has failed "
-          failed "enforce_variable_with_value <"${1}">"
+          echo -e "${RED} 𝞦 enforce_variable_with_value \\n${BASH_SOURCE[1]}:${BASH_LINENO[1]} ${FUNCNAME[-0]}(...) \\n${BASH_SOURCE[1]}:${BASH_LINENO[0]} ${FUNCNAME[1]}(...) \\n ${LIGHTYELLOW} ${TESTING} has failed "
+          failed "${TESTING}"
           exit 1
         } # end enforce_variable_with_value
 
@@ -3536,22 +3564,53 @@ function progressfilt() {
 } # end progressfilt
 
 function _download_mac() {
-    # -c Resume Downloads  -c option only works with FTP / HTTP servers that support the “range” header
+  local target_url="${1}"
+  local download_folder=""
+  if [ -n "${2}" ] ; then # if not empty
+  {
+    download_folder="${2}"
+  }
+  fi
+  echo "     target url 1:<${1}>"
+  [ -z "${1}" ] && echo "empty"
+  echo "download folder 2:<${download_folder}>"
+  [ -z "${2}" ] && echo "empty"
+  echo "  download file 3:<${3}>"
+  #   file_exists_with_spaces "${download_folder}"
+  directory_exists "${download_folder}"
+  #   [ -z "${3}" ] && echo "empty"
+  #   echo
+  # echo "# arguments called with ---->  ${@}     "
+  # echo "# \$1 ---------------------->  $1       "
+  # echo "# \$2 ---------------------->  $2       "
+  # echo "# path to me --------------->  ${0}     "
+  # echo "# parent path -------------->  ${0%/*}  "
+  # printf '$0 is: %s\n$BASH_SOURCE is: %s\n' "$0" "$BASH_SOURCE"
+  # echo "# my name ------------------>  ${0##*/} "
+  # echo
+  [ -z "${1}" ] && failed "\\n${BASH_SOURCE}:${BASH_LINENO[-0]} ${FUNCNAME[-0]}\(\) \\n$0:${BASH_LINENO[1]} ${FUNCNAME[1]}\(\) \\nCould not load 1.target_url string or it was empty. Expected one Parameter 1:<> URL <target url>"
+  [ -z "${2}" ] && failed "\\n${BASH_SOURCE}:${BASH_LINENO[-0]} ${FUNCNAME[-0]}\(\) \\n$0:${BASH_LINENO[1]} ${FUNCNAME[1]}\(\) \\nCould not load 2.download_folder string or it was empty. Expected one Parameter 2:<> <download folder>"
+  if enforce_web_is_reachable $(echo "${download_folder}") && [ $? -gt 0 ] ;  then # if not empty
+  {
+    failed \\n${BASH_SOURCE}:${BASH_LINENO[-0]} ${FUNCNAME[-0]}\(\) \\n$0:${BASH_LINENO[1]} ${FUNCNAME[1]}\(\) \\nCould not load 1.target_url URL is Broken or not Reachable "<<${1}>>"
+  }
+  fi
+  # -c Resume Downloads  -c option only works with FTP / HTTP servers that support the “range” header
   if ( command -v wget >/dev/null 2>&1; ) ; then
     # REF: https://www.linuxquestions.org/questions/linux-general-1/how-to-create-a-bash-script-to-wait-for-wget-to-finish-and-then-continue-621754/
-    for url in $(echo "${@}"); do
+    for url in $(echo "${download_folder}"); do
     {
-        # _try wget -c --directory-prefix=\"${USER_HOME}/Downloads/\"  --quiet --no-check-certificate "${@}" 2>/dev/null   # suppress only wget download messages, but keep wget output for variable
-        echo "wget -c --progress=bar:force --directory-prefix=\"${USER_HOME}/Downloads/\" --no-check-certificate \"${@}\" 2>&1 | progressfilt"
-        wget -c --progress=bar:force --directory-prefix="${USER_HOME}/Downloads/" --no-check-certificate "${@}" 2>&1 | progressfilt
-        # wget -c --directory-prefix=\"${USER_HOME}/Downloads/\"  --quiet --no-check-certificate "${@}" 2>/dev/null   # suppress only wget download messages, but keep wget output for variable
+      # _try wget -c --directory-prefix=\"${USER_HOME}/Downloads/\"  --quiet --no-check-certificate "${download_folder}" 2>/dev/null   # suppress only wget download messages, but keep wget output for variable
+      echo "wget -c --progress=bar:force --directory-prefix=\"${target_url}\" --no-check-certificate \"${download_folder}\" 2>&1 | progressfilt"
+      wget -c --progress=bar:force --directory-prefix="${target_url}" --no-check-certificate "${download_folder}" 2>&1 | progressfilt
+      # wget -c --directory-prefix=\"${USER_HOME}/Downloads/\"  --quiet --no-check-certificate "${download_folder}" 2>/dev/null   # suppress only wget download messages, but keep wget output for variable
     }
     done
   elif ( command -v curl >/dev/null 2>&1; ); then
-    _try curl -LO "${@}" 2>/dev/null   # suppress only wget download messages, but keep wget output for variable
+    _try curl -LO "${download_folder}" 2>/dev/null   # suppress only wget download messages, but keep wget output for variable
     wait
   else
-    failed "I cannot find wget or curl to download! ${@}"
+    failed "I cannot find wget or curl to download! ${download_folder}"
   fi
 } # end _download_mac
 
@@ -3559,7 +3618,7 @@ function _download() {
     # check operation systems
     if [[ "$(uname)" == "Darwin" ]] ; then
     # Do something under Mac OS X platform
-      _download_linux "${@}"
+      _download_mac "${@}"
     elif [[ "$(expr substr $(uname -s) 1 5)" == "Linux" ]] ; then
     # Do something under GNU/Linux platform
       _download_linux "${@}"
@@ -3620,9 +3679,9 @@ function _download_linux() {
     # printf '$0 is: %s\n$BASH_SOURCE is: %s\n' "$0" "$BASH_SOURCE"
     # echo "# my name ------------------>  ${0##*/} "
     # echo
-  [ -z "${1}" ] && failed \\n${BASH_SOURCE}:${BASH_LINENO[-0]} ${FUNCNAME[-0]}\(\) \\n$0:${BASH_LINENO[1]} ${FUNCNAME[1]}\(\) \\nCould not load 1.target_url string or it was empty. Expected one Parameter URL
-  [ -z "${2}" ] && failed \\n${BASH_SOURCE}:${BASH_LINENO[-0]} ${FUNCNAME[-0]}\(\) \\n$0:${BASH_LINENO[1]} ${FUNCNAME[1]}\(\) \\nCould not load 2.download_folder string or it was empty. Expected one Parameter URL
-  [ -z "${3}" ] && failed \\n${BASH_SOURCE}:${BASH_LINENO[-0]} ${FUNCNAME[-0]}\(\) \\n$0:${BASH_LINENO[1]} ${FUNCNAME[1]}\(\) \\nCould not load 3.download_file string or it was empty. Expected one Parameter URL
+  [ -z "${1}" ] && failed "\\n${BASH_SOURCE}:${BASH_LINENO[-0]} ${FUNCNAME[-0]}\(\) \\n$0:${BASH_LINENO[1]} ${FUNCNAME[1]}\(\) \\nCould not load 1.target_url string or it was empty. Expected one Parameter 1:<> URL <target url>"
+  [ -z "${2}" ] && failed "\\n${BASH_SOURCE}:${BASH_LINENO[-0]} ${FUNCNAME[-0]}\(\) \\n$0:${BASH_LINENO[1]} ${FUNCNAME[1]}\(\) \\nCould not load 2.download_folder string or it was empty. Expected one Parameter 2:<> <download folder>"
+  [ -z "${3}" ] && failed "\\n${BASH_SOURCE}:${BASH_LINENO[-0]} ${FUNCNAME[-0]}\(\) \\n$0:${BASH_LINENO[1]} ${FUNCNAME[1]}\(\) \\nCould not load 3.download_file string or it was empty. Expected one Parameter 3:<> <download file>"
   if enforce_web_is_reachable "${1}" && [ $? -gt 0 ] ;  then # if not empty
   {
     failed \\n${BASH_SOURCE}:${BASH_LINENO[-0]} ${FUNCNAME[-0]}\(\) \\n$0:${BASH_LINENO[1]} ${FUNCNAME[1]}\(\) \\nCould not load 1.target_url URL is Broken or not Reachable "<<${1}>>"
@@ -3689,7 +3748,7 @@ function _download_linux() {
     elif  ( typeset -p "SUDO_USER"  &>/dev/null ) ; then
     {
       _trap_try_start
-      echo RUNNING:\nsu - "$SUDO_USER" -c 'cd '"${download_folder}"' && wget --max-redirect=10 --mirror --directory-prefix='"${download_folder}"' -O '"${download_file}"' --no-check-certificate '"${target_url}"' && pwd ' # 2>/dev/null"
+      echo -e RUNNING:\nsu - "$SUDO_USER" -c 'cd '"${download_folder}"' && wget --max-redirect=10 --mirror --directory-prefix='"${download_folder}"' -O '"${download_file}"' --no-check-certificate '"${target_url}"' && pwd ' # 2>/dev/null"
       su - "$SUDO_USER" -c 'cd '"${download_folder}"' && wget --max-redirect=10 --mirror --directory-prefix='"${download_folder}"' -O '"${download_file}"' --no-check-certificate '"${target_url}"' && pwd ' # 2>/dev/null"
       _trap_catch_check
     }
@@ -4548,6 +4607,189 @@ function enforce_ip_resolves(){
   fi
   passed "${TESTING}"
 } # end enforce_ip_resolves
+
+function _remove_dmgs_app_if_exists() {
+  # Sample use 
+  #       _remove_dmgs_app_if_exists "${APPDIR}" 
+  local APPDIR="${1}" 
+  if  it_exists_with_spaces "/Applications/${APPDIR}" ; then
+  {
+    echo Remove installed "/Applications/${APPDIR}"
+    sudo rm -rf  "/Applications/${APPDIR}"
+    directory_does_not_exist_with_spaces  "/Applications/${APPDIR}"
+  }
+  fi
+  return 0
+} # end _remove_dmgs_app_if_exists
+function _process_dmgs_dmg_or_zip() {
+  # Sample use 
+  #     _process_dmgs_dmg_or_zip "${extension}" "${DOWNLOADFOLDER}" "${CODENAME}" "${APPDIR}" "${UNZIPDIR}"
+  local extension="${1}"
+  local DOWNLOADFOLDER="${2}"
+  local CODENAME="${3}"
+  local APPDIR="${4}"
+  local UNZIPDIR="${5}"
+  if [[ -n "${extension}" ]] && [[ "${extension}"  == "zip" ]] ; then
+  {
+    echo Unzipping downloaded
+    unzip "${DOWNLOADFOLDER}/${CODENAME}"
+    directory_exists_with_spaces "${DOWNLOADFOLDER}/${APPDIR}"
+    echo "sudo  cp -R \"${DOWNLOADFOLDER}/${APPDIR}\" \"/Applications/\""
+    cp -R "${DOWNLOADFOLDER}/${APPDIR}" "/Applications/"
+  }
+  else # elif [[ -n "${extension}" ]] && [[ "${extension}"  == "dmg" ]] ; then
+  {
+    echo Attaching dmg downloaded
+    hdiutil attach "${DOWNLOADFOLDER}/${CODENAME}"
+    ls "/Volumes"
+    directory_exists_with_spaces "/Volumes/${UNZIPDIR}"
+    directory_exists_with_spaces "/Volumes/${UNZIPDIR}/${APPDIR}"
+    echo "sudo  cp -R \"/Volumes/${UNZIPDIR}/${APPDIR}\" \"/Applications/\""
+    cp -R "/Volumes/${UNZIPDIR}/${APPDIR}" "/Applications/"
+    hdiutil detach "/Volumes/${UNZIPDIR}"
+  }
+  fi
+  return 0
+} # end _process_dmgs_dmg_or_zip
+
+function _trust_dmgs_application() {
+  # Sample use 
+  #  _trust_dmgs_application "${APPDIR}"
+  echo  Removing macOS gatekeeper quarantine attribute
+  chown  -R $SUDO_USER "/Applications/${APPDIR}"
+  chgrp  -R staff "/Applications/${APPDIR}"
+  xattr -d com.apple.quarantine  "/Applications/${APPDIR}"
+  return 0
+} # end  _trust_dmgs_application
+
+function _install_dmgs_dmg__64() {
+  # Sample use 
+  # local target_name="LittleSnitch-4.6.dmg"
+  # local target_app="Little Snitch 4.6/Little Installer.app"
+  # local target_url="https://www.obdev.at/ftp/pub/Products/littlesnitch/LittleSnitch-4.6.dmg"  
+  #  _install_dmgs_dmg__64 "${target_name}" "${target_app}" "${target_url}"
+  #
+  #  or zip
+  #
+  # local target_name="BetterTouchTool.zip"
+  # local target_app="BetterTouchTool.app"
+  # local target_url="https://raw.githubusercontent.com/danielng01/product-builds/master/iris/macos/Iris-1.2.0-OSX.zip"  
+  # _install_dmgs_dmg__64 "${target_name}" "${target_app}" "${target_url}"
+  #
+  local CODENAME="${1}"
+  local extension="$(echo "${CODENAME}" | rev | cut -d'.' -f 1 | rev)"
+  local APPDIR="${2}"
+  local TARGET_URL="${3}"
+  # CODENAME="$(basename "${TARGET_URL}" )"
+  echo "${CODENAME}";
+  echo "Extension:${extension}"
+  # local VERSION="$(echo -en "${CODENAME}" | sed 's/RubyMine-//g' | sed 's/.dmg//g' )"
+  # enforce_variable_with_value VERSION "${VERSION}"
+  # local UNZIPDIR="$(echo -en "${CODENAME}" | sed 's/.dmg//g'| sed 's/-//g')"
+  # local UNZIPDIR="$(echo -en "${APPDIR}" | sed 's/.app//g')"
+  # echo "$(pwd)"
+  local UNZIPDIR="$(dirname  "${APPDIR}")"
+  local APPDIR="${APPDIR##*/}"    # same as  $(basename "${APPDIR}")
+  # local APPDIR="$(echo -en "${CODENAME}" | sed 's/.dmg//g'| sed 's/-//g').app"
+  # echo "${CODENAME}";
+  # echo "${URL}";
+  echo "CODENAME: ${CODENAME}"
+  enforce_variable_with_value CODENAME "${CODENAME}"
+  enforce_variable_with_value TARGET_URL "${TARGET_URL}"
+  enforce_variable_with_value USER_HOME "${USER_HOME}"
+  echo "UNZIPDIR: ${UNZIPDIR}"
+  enforce_variable_with_value UNZIPDIR "${UNZIPDIR}"
+  echo "APPDIR: ${APPDIR}"
+  enforce_variable_with_value APPDIR "${APPDIR}"
+  local DOWNLOADFOLDER="${USER_HOME}/Downloads"
+  enforce_variable_with_value DOWNLOADFOLDER "${DOWNLOADFOLDER}"
+  directory_exists_with_spaces "${DOWNLOADFOLDER}"
+
+  _do_not_downloadtwice "${TARGET_URL}" "${DOWNLOADFOLDER}"  "${CODENAME}"
+  _remove_dmgs_app_if_exists "${APPDIR}" 
+
+  _process_dmgs_dmg_or_zip "${extension}" "${DOWNLOADFOLDER}" "${CODENAME}" "${APPDIR}" "${UNZIPDIR}"
+
+  directory_exists_with_spaces "/Applications/${APPDIR}"
+  ls -d "/Applications/${APPDIR}"
+  
+  _trust_dmgs_application "${APPDIR}"
+  return 0
+} # end _install_dmgs_dmg__64
+
+function _install_dmgs_list(){
+  # Sample use 
+  #
+  #     local TARGET_URL
+  #     TARGET_URL="VSCode-darwin.zip|Visual Studio Code - Insiders.app|https://code.visualstudio.com/sha/download?build=insider&os=darwin"
+  #     enforce_variable_with_value TARGET_URL "${TARGET_URL}"
+  #     _install_dmgs_list "${TARGET_URL}"
+  # or
+  #    local installlist 
+  #    installlist="
+  #      Caffeine.dmg|Caffeine/Caffeine.app|https://github.com/IntelliScape/caffeine/releases/download/1.1.3/Caffeine.dmg
+  #      Keybase.dmg|Keybase App/Keybase.app|https://prerelease.keybase.io/Keybase.dmg
+  #      Brave-Browser.dmg|Brave Browser/Brave Browser.app|https://referrals.brave.com/latest/Brave-Browser.dmg
+  #      Firefox 84.0.2.dmg|Firefox/Firefox.app|https://download-installer.cdn.mozilla.net/pub/firefox/releases/84.0.2/mac/de/Firefox%2084.0.2.dmg
+  #      MFF2_latest.dmg|MultiFirefox/MultiFirefox.app|http://mff.s3.amazonaws.com/MFF2_latest.dmg
+  #      vlc-3.0.11.dmg|VLC media player/VLC.app|https://download.vlc.de/vlc/macosx/vlc-3.0.11.dmg
+  #      mattermost-desktop-4.6.2-mac.dmg|Mattermost 4.6.2.app/Mattermost.app|https://releases.mattermost.com/desktop/4.6.2/mattermost-desktop-4.6.2-mac.dmg?src=dl
+  #      gimp-2.10.22-x86_64-2.dmg|GIMP 2.10 Install/GIMP-2.10.app|https://ftp.lysator.liu.se/pub/gimp/v2.10/osx/gimp-2.10.22-x86_64-2.dmg
+  #      sketch-70.3-109109.zip|Sketch.app|https://download.sketch.com/sketch-70.3-109109.zip
+  #      Iris-1.2.0-OSX.zip|Iris.app|https://raw.githubusercontent.com/danielng01/product-builds/master/iris/macos/Iris-1.2.0-OSX.zip
+  #      BetterTouchTool.zip|BetterTouchTool.app|https://folivora.ai/releases/BetterTouchTool.zip
+  #      Options_8.36.76.zip|LogiMgr Installer 8.36.76.app|https://download01.logi.com/web/ftp/pub/techsupport/options/Options_8.36.76.zip
+  #      tsetup.2.5.7.dmg|Telegram Desktop/Telegram.app|https://updates.tdesktop.com/tmac/tsetup.2.5.7.dmg
+  #      VSCode-darwin.zip|Visual Studio Code.app|https://az764295.vo.msecnd.net/stable/ea3859d4ba2f3e577a159bc91e3074c5d85c0523/VSCode-darwin.zip
+  #      VSCode-darwin.zip|Visual Studio Code.app|https://code.visualstudio.com/sha/download?build=stable&os=darwin
+  #      VSCode-darwin.zip|Visual Studio Code - Insiders.app|https://az764295.vo.msecnd.net/insider/5a52bc29d5e9bc419077552d336ea26d904299fa/VSCode-darwin.zip
+  #      VSCode-darwin.zip|Visual Studio Code - Insiders.app|https://code.visualstudio.com/sha/download?build=insider&os=darwin
+  #      BCompareOSX-4.3.7.25118.zip|Beyond Compare.app|https://www.scootersoftware.com/BCompareOSX-4.3.7.25118.zip
+  #      dbeaver-ce-7.3.4-macos.dmg|DBeaver Community/DBeaver.app|https://download.dbeaver.com/community/7.3.4/dbeaver-ce-7.3.4-macos.dmg
+  #      Inkscape-1.0.2.dmg|Inkscape/Inkscape.app|https://media.inkscape.org/dl/resources/file/Inkscape-1.0.2.dmg
+  #      LittleSnitch-4.6.dmg|Little Snitch 4.6/Little Installer.app|https://www.obdev.at/ftp/pub/Products/littlesnitch/LittleSnitch-4.6.dmg
+  #    "  
+  #     _install_dmgs_dmg__64 "${installlist}"
+  # Pending how to do pkg automatic?   # 1Password.pkg|https://c.1password.com/dist/1P/mac7/1Password-7.7.pkg
+  local installlist one  target_name target_url target_app app_name # extension
+  installlist="${*}"
+  Checking dmgs apps
+  while read -r one ; do
+  {
+    if [[ -n "${one}" ]] ; then
+    {
+
+      target_name="$(echo "${one}" | cut -d'|' -f1)"
+      # extension="$(echo "${target_name}" | rev | cut -d'.' -f 1 | rev)"
+      target_app="$(echo "${one}" | cut -d'|' -f2)"
+      app_name="$(echo "$(basename "${target_app}")")"
+      target_url="$(echo "${one}" | cut -d'|' -f3-)"
+      if [[ -n "${target_name}" ]] ; then
+      {
+        if [[ -n "${target_url}" ]] ; then
+        {
+          if [[ ! -d "/Applications/${app_name}" ]] ; then
+          {
+            Installing "${app_name}"
+            _install_dmgs_dmg__64 "${target_name}" "${target_app}" "${target_url}"
+          }
+          else
+          {
+            passed  "/Applications/${app_name}"  --skipping already installed
+          }
+          fi
+        }
+        fi
+      }
+      fi
+    }
+    fi
+  }
+  done <<< "${installlist}"
+  return 0
+} # end _install_dmgs_list
+
+
 
     #[ ! -z "$0" ] && [ -e "$0" ] && THISSCRIPTNAME=`basename "$0"`
 
