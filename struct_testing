@@ -3605,16 +3605,16 @@ function _download_mac() {
     for url in $(echo "${download_folder}"); do
     {
       # _try wget -c --directory-prefix=\"${USER_HOME}/Downloads/\"  --quiet --no-check-certificate "${download_folder}" 2>/dev/null   # suppress only wget download messages, but keep wget output for variable
-      echo "wget -c --progress=bar:force --directory-prefix=\"${target_url}\" --no-check-certificate \"${download_folder}\" 2>&1 | progressfilt"
-      wget -c --progress=bar:force --directory-prefix="${target_url}" --no-check-certificate "${download_folder}" 2>&1 | progressfilt
+      echo "wget -c --progress=bar:force --directory-prefix=\"${download_folder}\" --no-check-certificate \"${target_url}\" 2>&1 | progressfilt"
+      wget -c --progress=bar:force --directory-prefix="${download_folder}" --no-check-certificate "${target_url}" 2>&1 | progressfilt
       # wget -c --directory-prefix=\"${USER_HOME}/Downloads/\"  --quiet --no-check-certificate "${download_folder}" 2>/dev/null   # suppress only wget download messages, but keep wget output for variable
     }
     done
   elif ( command -v curl >/dev/null 2>&1; ); then
-    _try curl -LO "${download_folder}" 2>/dev/null   # suppress only wget download messages, but keep wget output for variable
+    _try curl -LO "${target_url}" 2>/dev/null   # suppress only wget download messages, but keep wget output for variable
     wait
   else
-    failed "I cannot find wget or curl to download! ${download_folder}"
+    failed "I cannot find wget or curl to download! ${target_url}"
   fi
 } # end _download_mac
 
@@ -4616,6 +4616,15 @@ function _remove_dmgs_app_if_exists() {
   # Sample use 
   #       _remove_dmgs_app_if_exists "${APPDIR}" 
   local APPDIR="${1}" 
+  [[ -n "${APPDIR}" ]] && APPDIR="$(basename "${1}")"
+  DEBUG=1
+  if (( DEBUG )) ; then 
+  {
+    echo "        APPDIR 1: <${1}>"
+    echo "  APPDIR after  : <${APPDIR}>"
+  }
+  fi
+  enforce_parameter_with_value 1 APPDIR "${APPDIR}" "Beyond Compare.app"
   if  it_exists_with_spaces "/Applications/${APPDIR}" ; then
   {
     echo Remove installed "/Applications/${APPDIR}"
@@ -4632,10 +4641,36 @@ function _process_dmgs_dmg_or_zip() {
   local DOWNLOADFOLDER="${2}"
   local CODENAME="${3}"
   local APPDIR="${4}"
+  [[ -n "${APPDIR}" ]] && APPDIR="$(basename "${4}")"
   local UNZIPDIR="${5}"
+  [[ -n "${UNZIPDIR}" ]] && UNZIPDIR="$(basename "${5}")"
+  DEBUG=1
+  if (( DEBUG )) ; then 
+  {
+    echo "     extension 1: <${1}>"
+    echo "DOWNLOADFOLDER 2: <${2}>"
+    echo "      CODENAME 3: <${3}>"
+    echo "        APPDIR 4: <${4}>"
+    echo "  APPDIR after  : <${APPDIR}>"
+    echo "      UNZIPDIR 5: <${5}>"
+    echo "UNZIPDIR after  : <${UNZIPDIR}>"
+  }
+  fi
+  [[ "${UNZIPDIR}" == "." ]] && UNZIPDIR=""
+  enforce_parameter_with_options 1 extension "${extension}" "dmg zip"
+  enforce_parameter_with_value 2 DOWNLOADFOLDER "${DOWNLOADFOLDER}" "/Users/user or /home/user"
+  enforce_parameter_with_value 3 CODENAME "${CODENAME}" "Beyond Compare or BCompareOSX*.*.*.*.zip"
+  enforce_parameter_with_value 4 APPDIR "${APPDIR}" "Beyond Compare.app"
+  enforce_parameter_with_value 5 UNZIPDIR "${UNZIPDIR}" "BCompareOSX*.*.*.*.zip"
   if [[ -n "${extension}" ]] && [[ "${extension}"  == "zip" ]] ; then
   {
     echo Unzipping downloaded
+    if it_exists_with_spaces "${DOWNLOADFOLDER}/${APPDIR}" ; then 
+    {
+      echo Removing previous found unzipped
+      rm -rf "${DOWNLOADFOLDER}/${APPDIR}"
+    }
+    fi
     unzip "${DOWNLOADFOLDER}/${CODENAME}"
     directory_exists_with_spaces "${DOWNLOADFOLDER}/${APPDIR}"
     echo "sudo  cp -R \"${DOWNLOADFOLDER}/${APPDIR}\" \"/Applications/\""
@@ -4659,6 +4694,16 @@ function _process_dmgs_dmg_or_zip() {
 function _trust_dmgs_application() {
   # Sample use 
   #  _trust_dmgs_application "${APPDIR}"
+  local APPDIR="${1}" 
+  [[ -n "${APPDIR}" ]] && APPDIR="$(basename "${1}")"
+  DEBUG=1
+  if (( DEBUG )) ; then 
+  {
+    echo "        APPDIR 1: <${1}>"
+    echo "  APPDIR after  : <${APPDIR}>"
+  }
+  fi
+  enforce_parameter_with_value 1 APPDIR "${APPDIR}" "Beyond Compare.app"
   echo  Removing macOS gatekeeper quarantine attribute
   chown  -R $SUDO_USER "/Applications/${APPDIR}"
   chgrp  -R staff "/Applications/${APPDIR}"
@@ -4757,6 +4802,17 @@ function _install_dmgs_list(){
   # Pending how to do pkg automatic?   # 1Password.pkg|https://c.1password.com/dist/1P/mac7/1Password-7.7.pkg
   local installlist one  target_name target_url target_app app_name # extension
   installlist="${*}"
+  DEBUG=1
+  if (( DEBUG )) ; then 
+  {
+    echo "        installlist 1: <${*}>"
+    echo "  installlist after  : <${installlist}>"
+  }
+  fi
+  enforce_parameter_with_value 1 installlist "${installlist}" "
+  LittleSnitch-4.6.dmg|Little Snitch 4.6/Little Installer.app|https://www.obdev.at/ftp/pub/Products/littlesnitch/LittleSnitch-4.6.dmg
+  BetterTouchTool.zip|BetterTouchTool.app|https://folivora.ai/releases/BetterTouchTool.zip
+  "
   Checking dmgs apps
   while read -r one ; do
   {
