@@ -421,7 +421,7 @@ CERO="\033[01;0m"
 
         function enforce_variable_with_value(){
           # Sample use
-          DEBUG=1
+          # DEBUG=1
           # enforce_variable_with_value HOME $HOME
           # enforce_variable_with_value USER_HOME $USER_HOME
           # enforce_variable_with_value SUDO_USER $SUDO_USER
@@ -3564,6 +3564,10 @@ function progressfilt() {
 } # end progressfilt
 
 function _download_mac() {
+  # Sample use
+  #
+  #       _download_mac "${URL}" "${USER_HOME}/Downloads"
+  #
   local target_url="${1}"
   local download_folder=""
   if [ -n "${2}" ] ; then # if not empty
@@ -3571,10 +3575,10 @@ function _download_mac() {
     download_folder="${2}"
   }
   fi
-  echo "     target url 1:<${1}>"
-  [ -z "${1}" ] && echo "empty"
+  echo "     target url 1:<${target_url}>"
+  [ -z "${target_url}" ] && echo "empty"
   echo "download folder 2:<${download_folder}>"
-  [ -z "${2}" ] && echo "empty"
+  [ -z "${target_url}" ] && echo "empty"
   echo "  download file 3:<${3}>"
   #   file_exists_with_spaces "${download_folder}"
   directory_exists "${download_folder}"
@@ -3590,9 +3594,9 @@ function _download_mac() {
   # echo
   [ -z "${1}" ] && failed "\\n${BASH_SOURCE}:${BASH_LINENO[-0]} ${FUNCNAME[-0]}\(\) \\n$0:${BASH_LINENO[1]} ${FUNCNAME[1]}\(\) \\nCould not load 1.target_url string or it was empty. Expected one Parameter 1:<> URL <target url>"
   [ -z "${2}" ] && failed "\\n${BASH_SOURCE}:${BASH_LINENO[-0]} ${FUNCNAME[-0]}\(\) \\n$0:${BASH_LINENO[1]} ${FUNCNAME[1]}\(\) \\nCould not load 2.download_folder string or it was empty. Expected one Parameter 2:<> <download folder>"
-  if enforce_web_is_reachable $(echo "${download_folder}") && [ $? -gt 0 ] ;  then # if not empty
+  if enforce_web_is_reachable $(echo "${target_url}") && [ $? -gt 0 ] ;  then # if not empty
   {
-    failed \\n${BASH_SOURCE}:${BASH_LINENO[-0]} ${FUNCNAME[-0]}\(\) \\n$0:${BASH_LINENO[1]} ${FUNCNAME[1]}\(\) \\nCould not load 1.target_url URL is Broken or not Reachable "<<${1}>>"
+    failed \\n${BASH_SOURCE}:${BASH_LINENO[-0]} ${FUNCNAME[-0]}\(\) \\n$0:${BASH_LINENO[1]} ${FUNCNAME[1]}\(\) \\nCould not load 1.target_url URL is Broken or not Reachable "<<${target_url}>>"
   }
   fi
   # -c Resume Downloads  -c option only works with FTP / HTTP servers that support the “range” header
