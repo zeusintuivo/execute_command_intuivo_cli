@@ -4555,8 +4555,11 @@ function enforce_web_is_reachable(){
   #
   echo "  Checking for connection to ${1}"
   local msg
-  msg=$(curl -I --connect-timeout 5.0  --max-time 10.0  "${1}" 2>&1; )
+  msg=$(curl -I --connect-timeout 5 --max-time 10 "${1}" 2>&1; )
   _err=$?
+  # local DEBUG=1
+  (( DEBUG )) && echo enforce_web_is_reachable curl -I --connect-timeout 5  --max-time 10 "${1}"
+  (( DEBUG )) && echo enforce_web_is_reachable curl exit code $_err
   local TESTING="web address ${BRIGHT_BLUE87}««${RED}${1}${BRIGHT_BLUE87}»»${LIGHTYELLOW} is reachable"
   if [ $_err -gt 0 ] ; then
   {
