@@ -3523,6 +3523,20 @@ enter_last_only_removed() {
 #     echo "Needs to run as sudo ... ${0}"
 #   fi
 # } # end execute_as_sudo
+function _find_downloads_folder(){
+  # Sample Use
+  # 
+  #      local DOWNLOADFOLDER="$(_find_downloads_folder)"
+  #      enforce_variable_with_value DOWNLOADFOLDER "${DOWNLOADFOLDER}"
+  #      cd "${DOWNLOADFOLDER}"
+  #      _download_mac "${TARGET_URL}" "${DOWNLOADFOLDER}"
+  #
+  local DOWNLOADFOLDER="$(su - "${SUDO_USER}" -c 'xdg-user-dir DOWNLOAD')"
+  enforce_variable_with_value DOWNLOADFOLDER "${DOWNLOADFOLDER}"
+  cd "${DOWNLOADFOLDER}"
+    echo -n "${DOWNLOADFOLDER}"
+  return 0
+} # end _find_downloads_folder
 
 function _download_win() {
    curl -O "${*}"
@@ -4435,6 +4449,7 @@ function _install_rpm() {
     rm -f "${TARGET_DOWNLOAD_PATH}"
     return 0
 } # end _install_rpm
+
 
 export raise_to_sudo_and_user_home
 function raise_to_sudo_and_user_home() {
