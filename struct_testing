@@ -4268,6 +4268,27 @@ function _do_not_downloadtwice(){
   return 0
 } # end _do_not_downloadtwice
 
+function _remove_downloaded_codename_or_err(){
+  local _err=${1}
+  local DOWNLOADFOLDER_CODENAME="${2}"
+  if [ $_err -eq 0 ] ; then
+  {
+    if it_exists_with_spaces "${DOWNLOADFOLDER_CODENAME}"; then 
+    {
+      Message Removing Downloaded file "${DOWNLOADFOLDER_CODENAME}"
+      rm "${DOWNLOADFOLDER_CODENAME}"
+      _err=$?
+      [ $_err -gt 0 ] && return $_err
+      file_does_not_exist_with_spaces "${DOWNLOADFOLDER_CODENAME}"
+      passed Removed Downloaded file "${DOWNLOADFOLDER_CODENAME}"
+      return 0
+    }
+    fi
+  }
+  fi
+  return $_err
+} # end _remove_downloaded_codename_or_err
+
 function _install_apt() {
   #   Sample usage:
   #
