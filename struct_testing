@@ -4166,6 +4166,21 @@ function determine_os_and_fire_action() {
         }
         fi
     }
+    elif [[ "$DISTRO" == *"bian"* ]]; then
+    {
+        # ubuntu lsb_release -i | sed 's/Distributor\ ID://g' = \tUbuntu\n
+        if ( uname -a | grep x86_64 >/dev/null 2>&1; )  ; then
+        {
+           FUNCTION_TO_CALL='_debian__64'
+           PARAMETERS="$@"
+        }
+        elif ( uname -a | grep i686 >/dev/null 2>&1; )  ; then
+        {
+           FUNCTION_TO_CALL='_debian__32'
+           PARAMETERS="$@"
+        }
+        fi
+    }
     else
     {
       # ubuntu lsb_release -i | sed 's/Distributor\ ID://g' = \tUbuntu\n
