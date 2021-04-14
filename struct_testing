@@ -4206,9 +4206,9 @@ function determine_os_and_fire_action() {
   else
     failed system not recognized
   fi
-  if [[ -z "$FUNCTION_TO_CALL" ]]; then  # if empty
+  if [[ -z "${FUNCTION_TO_CALL}" ]]; then  # if empty
   {
-     failed to determine FUNCTION_TO_CALL for this OS. uname -a, cat /etc/os-release, lsb_release -i
+     failed "ERROR to determine FUNCTION_TO_CALL for this OS. uname -a, cat /etc/os-release, lsb_release -i <${FUNCTION_TO_CALL}>"
   }
   else
   {
