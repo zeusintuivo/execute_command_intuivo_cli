@@ -2621,8 +2621,8 @@ function _run_command(){
                   [[ "${install_result}" == *"Could not resolve"* ]] && echo -e "${BRIGHT_BLUE87} It appears YOU HAVE ${YELLOW226}NO INTERNET CONNECTION \o_0/ ${RESET}"
                   [[ "${install_result}" == *"Repository not found"* ]] && echo -e "${BRIGHT_BLUE87} It appears YOU HAVE ${YELLOW226}NO ACCESS TO THIS FOR YOU ${RED} ${GIT_USER_NAME} ${RESET}"
                   [[ "${install_result}" == *"Could not read from"* ]] && echo -e "${BRIGHT_BLUE87} It appears it exists but you are ${RED}NOT ${YELLOW226} ALLOWED ${RED} ${GIT_USER_NAME} ${YELLOW226}!!! ${RESET}"
-                  RED="\\033[01;31m"
-                  CYAN="\\033[01;36m"
+                  RED="\\\\033[01;31m"
+                  CYAN="\\\\033[01;36m"
                   local display_install_result=$(echo -e "${install_result}" | sed "s/\(FAILED\|failed\|Failed\|ERROR\|Error\|error\|cannot\|continue\|logged\|inspection\|not\|exit\|more\|details\)/${RED}\1${CYAN}/g")
                   failed "${RESET} \n .... \n ... ${display_install_result} \n ... \n ..."
                 }
