@@ -4057,7 +4057,7 @@ function determine_os_and_fire_action() {
   # of the function that is missing like _archlinux__64
   local FUNCTION_TO_CALL=""
   local PARAMETERS=""
-  local -i DEBUG=1
+  local -i DEBUG=0
   # Check operating systems
   # echo  ${@}
   if [[ "$(uname)" == "Darwin" ]] ; then
