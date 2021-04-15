@@ -2651,13 +2651,14 @@ function _run_command(){
                 if [ "${error_happened}" ]  ||  ( has_error_keyword "${install_result}" ) ; then
                 {
                   echo -e "${PURPLE_BLUE} action ${RED}failed ${YELLOW226}!!!  ${RESET}"
+                  local REPLACERED="\\\\033[01;31m"
+                  local REPLACECYAN="\\\\033[01;36m"
+                  local display_install_result=$(echo -e "${install_result}" | sed "s/\(FAILED\|failed\|additional\ disk\|Failed\|ERROR\|Error\|error\|cannot\|continue\|logged\|inspection\|not\|exit\|more\|details\)/${REPLACERED}\1${REPLACECYAN}/g")
+                  failed "${RESET} \n .... \n ... ${display_install_result} \n ... \n ..."
                   [[ "${install_result}" == *"Could not resolve"* ]] && echo -e "${BRIGHT_BLUE87} It appears YOU HAVE ${YELLOW226}NO INTERNET CONNECTION \o_0/ ${RESET}"
                   [[ "${install_result}" == *"Repository not found"* ]] && echo -e "${BRIGHT_BLUE87} It appears YOU HAVE ${YELLOW226}NO ACCESS TO THIS FOR YOU ${RED} ${GIT_USER_NAME} ${RESET}"
                   [[ "${install_result}" == *"Could not read from"* ]] && echo -e "${BRIGHT_BLUE87} It appears it exists but you are ${RED}NOT ${YELLOW226} ALLOWED ${RED} ${GIT_USER_NAME} ${YELLOW226}!!! ${RESET}"
-                  local REPLACERED="\\\\033[01;31m"
-                  local REPLACECYAN="\\\\033[01;36m"
-                  local display_install_result=$(echo -e "${install_result}" | sed "s/\(FAILED\|failed\|Failed\|ERROR\|Error\|error\|cannot\|continue\|logged\|inspection\|not\|exit\|more\|details\)/${REPLACERED}\1${REPLACECYAN}/g")
-                  failed "${RESET} \n .... \n ... ${display_install_result} \n ... \n ..."
+                  [[ "${install_result}" == *"additional disk"* ]] && echo -e "${BRIGHT_BLUE87} It appears .. ${RED}There is no space  ${YELLOW226}!!! !!!  ${RED}\\${BRIGHT_BLUE87}o${RED}_${BRIGHT_BLUE87}0${RED}/ ${RESET}"
                 }
                 fi
 
