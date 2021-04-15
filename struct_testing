@@ -2088,7 +2088,7 @@ function _run_command(){
             #    _if_not_contains  && run_this
             #
             # or
-            # 
+            #
             # echo "${policies}" > temp.xml
             # if ! _if_not_contains temp.xml "{1,}" ; then
             # {
@@ -2135,11 +2135,11 @@ function _run_command(){
 
         function _if_contains(){
              # Sample use
-             # 
+             #
              # _if_contains && run_this
-             # 
+             #
              # or
-             # 
+             #
              # echo "${policies}" > temp.xml
              # if _if_contains temp.xml "{1,}" ; then
              # {
@@ -2477,16 +2477,20 @@ function _run_command(){
             local query=""
             local install_result=""
             local err_buff=0
-
-            if ( command -v brew >/dev/null 2>&1; ) ; then
+            # local DEBUG=1
+            if ( ( command -v rpm >/dev/null 2>&1; ) && ( command -v dnf >/dev/null 2>&1; ) ); then
             {
+                (( DEBUG )) && echo "rpm read packages"
+                packages=$(rpm -qa)
+                # (( DEBUG )) && echo "\n rpm \n \n $packages \n \n rpm"
+
+            }
+            elif ( command -v brew >/dev/null 2>&1; ) ; then
+            {
+                (( DEBUG )) && echo "BREW list formulas"
                 # query=$(brew list --formula 2>&1)
                 query=$(su - "${SUDO_USER}" -c "brew list --formula" 2>&1)
                 # query=$(_run_command "brew list --formula"  2>&1)
-            }
-            elif ( ( command -v rpm >/dev/null 2>&1; ) && ( command -v dnf >/dev/null 2>&1; ) ); then
-            {
-                packages=$(rpm -qa)
             }
             fi
             for one_required in ${required}; do
@@ -2526,6 +2530,7 @@ function _run_command(){
               fi
               if ( ( command -v apt >/dev/null 2>&1; ) && ( command -v dpkg >/dev/null 2>&1; ) ) ; then
               {
+                (( DEBUG )) && echo "apt search using dpkg"
                 # REF: https://www.cyberciti.biz/faq/find-out-if-package-is-installed-in-linux/
                 packages=$(dpkg -l | egrep "$one_required" | cut -d' ' -f3 2>&1)
                 query=$(dpkg-query -W -f='${Status} ${Version}\n' "$one_required"  2>&1)
@@ -2544,12 +2549,25 @@ function _run_command(){
               }
               elif ( ( command -v rpm >/dev/null 2>&1; ) && ( command -v dnf >/dev/null 2>&1; ) ) ; then
               {
-                if ( echo "${packages}" | egrep "$one_required"| grep "^$one_required" | cut -d'-' -f1  >/dev/null 2>&1;) ; then
+                (( DEBUG )) && echo "rpm search loaded packages $one_required"
+                echo "rpm --------1"
+                echo "${packages}" | grep "$one_required"
+                echo "rpm --------2"
+                echo "${packages}" | grep "$one_required"| grep "^$one_required"
+                echo "rpm --------3"
+                echo "${packages}" | egrep "$one_required"| grep "^$one_required" | cut -d'-' -f1
+                echo "rpm --------4"
+                echo "rpm RETURNED:$?"
+                if     ( echo "${packages}" | grep "$one_required" >/dev/null 2>&1; ) \
+                    && ( echo "${packages}" | grep "$one_required"| grep "^$one_required" >/dev/null 2>&1; ) \
+                    && ( echo "${packages}" | egrep "$one_required"| grep "^$one_required" | cut -d'-' -f1  >/dev/null 2>&1; ) ; then
                 {
+                    (( DEBUG )) && echo "rpm passed"
                     passed " ${GREEN} $one_required ${YELLOW} INSTALLED${RESET} ."
                 }
                 else
                 {
+                    (( DEBUG )) && echo "rpm failed"
                     echo -e " ${RED}  NEED TO INSTALL ${YELLOW} $one_required${RESET} ${RED}...${query}"
                     missing="${missing} ${install_this}"
                     echo  "${install_this}"
@@ -2558,6 +2576,7 @@ function _run_command(){
               }
               elif ( command -v brew >/dev/null 2>&1; ) ; then
               {
+                (( DEBUG )) && echo "brew"
                 # CHECK_INSTALLED=$(brew ls --versions "${one_required}")
                 # query=$(brew list --formula 2>&1)
                 # one_required="nano"
@@ -2588,21 +2607,27 @@ function _run_command(){
             # Check Requirements OS Ubuntu 14.04 REF: https://wiki.postgresql.org/wiki/Compile_and_Install_from_source_code#Ubuntu
             if [[ -n "${missing}" ]] ; then
             {
+              (( DEBUG )) && echo "There are missing"
               missing=$(echo -n ${missing} | sed -e 's/^[[:space:]]*//' ) # trim_start_space
               echo -e " ${CYAN} Installing missing packages: ${YELLOW} ${missing} ${RESET} ."
               if ( ( command -v apt >/dev/null 2>&1; )  && ( command -v dpkg >/dev/null 2>&1; ) ); then
               {
+                (( DEBUG )) && echo "apt install"
                 install_result=$(sudo apt install ${missing} -yfq   2>&1) # capture all input and output
                 err_buff=$?
               }
               elif ( ( command -v rpm >/dev/null 2>&1; ) && ( command -v dnf >/dev/null 2>&1; ) ) ; then
               {
-                install_result=$(sudo dnf install ${missing} -yfq   2>&1) # capture all input and output
+                (( DEBUG )) && echo "dnf install ${missing}"
+                install_result=$(sudo dnf install ${missing} -y  2>&1) # capture all input and output
+                (( DEBUG )) && echo "dnf install_result"
+
                 err_buff=$?
               }
               elif ( command -v brew >/dev/null 2>&1; ) ; then
               {
                 # _run_command brew install ${missing}
+                (( DEBUG )) && echo "brew install"
                 su - "${SUDO_USER}" -c "brew install ${missing} "
                 err_buff=$?
               }
@@ -2612,6 +2637,7 @@ function _run_command(){
             # echo $install_result;
             if [[ ! -z "${install_result}" ]] ; then #  && handle_error "${install_result}"
             {
+                (( DEBUG )) && echo "errors install"
                 local error_happened=""
                 [[ "${PROCESSOR_ERROR}" == *"MAC"* ]] && [ $err_buff != 0 ] && error_happened="1"
                 [[ "${PROCESSOR_ERROR}" == *"INTEL"* ]] && (( $err_buff != 0 )) && error_happened="1"
@@ -2621,9 +2647,9 @@ function _run_command(){
                   [[ "${install_result}" == *"Could not resolve"* ]] && echo -e "${BRIGHT_BLUE87} It appears YOU HAVE ${YELLOW226}NO INTERNET CONNECTION \o_0/ ${RESET}"
                   [[ "${install_result}" == *"Repository not found"* ]] && echo -e "${BRIGHT_BLUE87} It appears YOU HAVE ${YELLOW226}NO ACCESS TO THIS FOR YOU ${RED} ${GIT_USER_NAME} ${RESET}"
                   [[ "${install_result}" == *"Could not read from"* ]] && echo -e "${BRIGHT_BLUE87} It appears it exists but you are ${RED}NOT ${YELLOW226} ALLOWED ${RED} ${GIT_USER_NAME} ${YELLOW226}!!! ${RESET}"
-                  RED="\\033[01;31m"
-                  CYAN="\\033[01;36m"
-                  local display_install_result=$(echo -e "${install_result}" | sed "s/\(FAILED\|failed\|Failed\|ERROR\|Error\|error\|cannot\|continue\|logged\|inspection\|not\|exit\|more\|details\)/${RED}\1${CYAN}/g")
+                  local REPLACERED="\\\\033[01;31m"
+                  local REPLACECYAN="\\\\033[01;36m"
+                  local display_install_result=$(echo -e "${install_result}" | sed "s/\(FAILED\|failed\|Failed\|ERROR\|Error\|error\|cannot\|continue\|logged\|inspection\|not\|exit\|more\|details\)/${REPLACERED}\1${REPLACECYAN}/g")
                   failed "${RESET} \n .... \n ... ${display_install_result} \n ... \n ..."
                 }
                 fi
@@ -2784,7 +2810,7 @@ function _run_command(){
             elif ( ( command -v rpm >/dev/null 2>&1; ) && ( command -v dnf >/dev/null 2>&1; ) ) ; then
             {
               [[ -n "${removing}" ]] && echo -e " ${CYAN} Dnf removing packages: ${YELLOW} ${removing} ${RESET} ."
-              [[ -n "${removing}" ]] && local remove_result=$(sudo dnf uninstall ${removing} -y   2>&1 && sudo dnf purge ${removing} -yfq   2>&1 && sudo apt-get autoremove -yfq   2>&1) # capture all input and output
+              [[ -n "${removing}" ]] && local remove_result=$(sudo dnf uninstall ${removing} -y   2>&1 && sudo dnf purge ${removing} -y  2>&1 && sudo dnf autoremove -y   2>&1) # capture all input and output
               local err_buff=$?
               [[ -n "${remove_result}" ]] && handle_error "${err_buff}" "${remove_result}"
             }
@@ -3525,7 +3551,7 @@ enter_last_only_removed() {
 # } # end execute_as_sudo
 function _find_downloads_folder(){
   # Sample Use
-  # 
+  #
   #      local DOWNLOADFOLDER="$(_find_downloads_folder)"
   #      enforce_variable_with_value DOWNLOADFOLDER "${DOWNLOADFOLDER}"
   #      cd "${DOWNLOADFOLDER}"
@@ -4273,7 +4299,7 @@ function _remove_downloaded_codename_or_err(){
   local DOWNLOADFOLDER_CODENAME="${2}"
   if [ $_err -eq 0 ] ; then
   {
-    if it_exists_with_spaces "${DOWNLOADFOLDER_CODENAME}"; then 
+    if it_exists_with_spaces "${DOWNLOADFOLDER_CODENAME}"; then
     {
       Message Removing Downloaded file "${DOWNLOADFOLDER_CODENAME}"
       rm "${DOWNLOADFOLDER_CODENAME}"
@@ -4652,12 +4678,12 @@ function enforce_ip_resolves(){
 } # end enforce_ip_resolves
 
 function _remove_dmgs_app_if_exists() {
-  # Sample use 
-  #       _remove_dmgs_app_if_exists "${APPDIR}" 
-  local APPDIR="${1}" 
+  # Sample use
+  #       _remove_dmgs_app_if_exists "${APPDIR}"
+  local APPDIR="${1}"
   [[ -n "${APPDIR}" ]] && APPDIR="$(basename "${1}")"
   DEBUG=1
-  if (( DEBUG )) ; then 
+  if (( DEBUG )) ; then
   {
     echo "        APPDIR 1: <${1}>"
     echo "  APPDIR after  : <${APPDIR}>"
@@ -4674,7 +4700,7 @@ function _remove_dmgs_app_if_exists() {
   return 0
 } # end _remove_dmgs_app_if_exists
 function _process_dmgs_dmg_or_zip() {
-  # Sample use 
+  # Sample use
   #     _process_dmgs_dmg_or_zip "${extension}" "${DOWNLOADFOLDER}" "${CODENAME}" "${APPDIR}" "${UNZIPDIR}"
   local extension="${1}"
   local DOWNLOADFOLDER="${2}"
@@ -4684,7 +4710,7 @@ function _process_dmgs_dmg_or_zip() {
   local UNZIPDIR="${5}"
   [[ -n "${UNZIPDIR}" ]] && UNZIPDIR="$(basename "${5}")"
   DEBUG=1
-  if (( DEBUG )) ; then 
+  if (( DEBUG )) ; then
   {
     echo "     extension 1: <${1}>"
     echo "DOWNLOADFOLDER 2: <${2}>"
@@ -4704,7 +4730,7 @@ function _process_dmgs_dmg_or_zip() {
   if [[ -n "${extension}" ]] && [[ "${extension}"  == "zip" ]] ; then
   {
     echo Unzipping downloaded
-    if it_exists_with_spaces "${DOWNLOADFOLDER}/${APPDIR}" ; then 
+    if it_exists_with_spaces "${DOWNLOADFOLDER}/${APPDIR}" ; then
     {
       echo Removing previous found unzipped
       rm -rf "${DOWNLOADFOLDER}/${APPDIR}"
@@ -4731,12 +4757,12 @@ function _process_dmgs_dmg_or_zip() {
 } # end _process_dmgs_dmg_or_zip
 
 function _trust_dmgs_application() {
-  # Sample use 
+  # Sample use
   #  _trust_dmgs_application "${APPDIR}"
-  local APPDIR="${1}" 
+  local APPDIR="${1}"
   [[ -n "${APPDIR}" ]] && APPDIR="$(basename "${1}")"
   DEBUG=1
-  if (( DEBUG )) ; then 
+  if (( DEBUG )) ; then
   {
     echo "        APPDIR 1: <${1}>"
     echo "  APPDIR after  : <${APPDIR}>"
@@ -4751,17 +4777,17 @@ function _trust_dmgs_application() {
 } # end  _trust_dmgs_application
 
 function _install_dmgs_dmg__64() {
-  # Sample use 
+  # Sample use
   # local target_name="LittleSnitch-4.6.dmg"
   # local target_app="Little Snitch 4.6/Little Installer.app"
-  # local target_url="https://www.obdev.at/ftp/pub/Products/littlesnitch/LittleSnitch-4.6.dmg"  
+  # local target_url="https://www.obdev.at/ftp/pub/Products/littlesnitch/LittleSnitch-4.6.dmg"
   #  _install_dmgs_dmg__64 "${target_name}" "${target_app}" "${target_url}"
   #
   #  or zip
   #
   # local target_name="BetterTouchTool.zip"
   # local target_app="BetterTouchTool.app"
-  # local target_url="https://raw.githubusercontent.com/danielng01/product-builds/master/iris/macos/Iris-1.2.0-OSX.zip"  
+  # local target_url="https://raw.githubusercontent.com/danielng01/product-builds/master/iris/macos/Iris-1.2.0-OSX.zip"
   # _install_dmgs_dmg__64 "${target_name}" "${target_app}" "${target_url}"
   #
   local CODENAME="${1}"
@@ -4794,26 +4820,26 @@ function _install_dmgs_dmg__64() {
   directory_exists_with_spaces "${DOWNLOADFOLDER}"
 
   _do_not_downloadtwice "${TARGET_URL}" "${DOWNLOADFOLDER}"  "${CODENAME}"
-  _remove_dmgs_app_if_exists "${APPDIR}" 
+  _remove_dmgs_app_if_exists "${APPDIR}"
 
   _process_dmgs_dmg_or_zip "${extension}" "${DOWNLOADFOLDER}" "${CODENAME}" "${APPDIR}" "${UNZIPDIR}"
 
   directory_exists_with_spaces "/Applications/${APPDIR}"
   ls -d "/Applications/${APPDIR}"
-  
+
   _trust_dmgs_application "${APPDIR}"
   return 0
 } # end _install_dmgs_dmg__64
 
 function _install_dmgs_list(){
-  # Sample use 
+  # Sample use
   #
   #     local TARGET_URL
   #     TARGET_URL="VSCode-darwin.zip|Visual Studio Code - Insiders.app|https://code.visualstudio.com/sha/download?build=insider&os=darwin"
   #     enforce_variable_with_value TARGET_URL "${TARGET_URL}"
   #     _install_dmgs_list "${TARGET_URL}"
   # or
-  #    local installlist 
+  #    local installlist
   #    installlist="
   #      Caffeine.dmg|Caffeine/Caffeine.app|https://github.com/IntelliScape/caffeine/releases/download/1.1.3/Caffeine.dmg
   #      Keybase.dmg|Keybase App/Keybase.app|https://prerelease.keybase.io/Keybase.dmg
@@ -4836,13 +4862,13 @@ function _install_dmgs_list(){
   #      dbeaver-ce-7.3.4-macos.dmg|DBeaver Community/DBeaver.app|https://download.dbeaver.com/community/7.3.4/dbeaver-ce-7.3.4-macos.dmg
   #      Inkscape-1.0.2.dmg|Inkscape/Inkscape.app|https://media.inkscape.org/dl/resources/file/Inkscape-1.0.2.dmg
   #      LittleSnitch-4.6.dmg|Little Snitch 4.6/Little Installer.app|https://www.obdev.at/ftp/pub/Products/littlesnitch/LittleSnitch-4.6.dmg
-  #    "  
+  #    "
   #     _install_dmgs_dmg__64 "${installlist}"
   # Pending how to do pkg automatic?   # 1Password.pkg|https://c.1password.com/dist/1P/mac7/1Password-7.7.pkg
   local installlist one  target_name target_url target_app app_name # extension
   installlist="${*}"
   DEBUG=1
-  if (( DEBUG )) ; then 
+  if (( DEBUG )) ; then
   {
     echo "        installlist 1: <${*}>"
     echo "  installlist after  : <${installlist}>"
