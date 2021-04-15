@@ -2543,21 +2543,21 @@ function _run_command(){
                 {
                     echo -e " ${RED}  NEED TO INSTALL ${YELLOW} $one_required${RESET} ${RED}...${query}"
                     missing="${missing} ${install_this}"
-                    echo  "${install_this}"
+                    (( DEBUG )) && echo  "${install_this}"
                 }
                 fi
               }
               elif ( ( command -v rpm >/dev/null 2>&1; ) && ( command -v dnf >/dev/null 2>&1; ) ) ; then
               {
                 (( DEBUG )) && echo "rpm search loaded packages $one_required"
-                echo "rpm --------1"
-                echo "${packages}" | grep "$one_required"
-                echo "rpm --------2"
-                echo "${packages}" | grep "$one_required"| grep "^$one_required"
-                echo "rpm --------3"
-                echo "${packages}" | egrep "$one_required"| grep "^$one_required" | cut -d'-' -f1
-                echo "rpm --------4"
-                echo "rpm RETURNED:$?"
+                (( DEBUG )) && echo "rpm --------1"
+                (( DEBUG )) && echo "${packages}" | grep "$one_required"
+                (( DEBUG )) && echo "rpm --------2"
+                (( DEBUG )) && echo "${packages}" | grep "$one_required"| grep "^$one_required"
+                (( DEBUG )) && echo "rpm --------3"
+                (( DEBUG )) && echo "${packages}" | egrep "$one_required"| grep "^$one_required" | cut -d'-' -f1
+                (( DEBUG )) && echo "rpm --------4"
+                (( DEBUG )) && echo "rpm RETURNED:$?"
                 if     ( echo "${packages}" | grep "$one_required" >/dev/null 2>&1; ) \
                     && ( echo "${packages}" | grep "$one_required"| grep "^$one_required" >/dev/null 2>&1; ) \
                     && ( echo "${packages}" | egrep "$one_required"| grep "^$one_required" | cut -d'-' -f1  >/dev/null 2>&1; ) ; then
@@ -2570,7 +2570,7 @@ function _run_command(){
                     (( DEBUG )) && echo "rpm failed"
                     echo -e " ${RED}  NEED TO INSTALL ${YELLOW} $one_required${RESET} ${RED}...${query}"
                     missing="${missing} ${install_this}"
-                    echo  "${install_this}"
+                    (( DEBUG )) && echo  "${install_this}"
                 }
                 fi
               }
@@ -2656,6 +2656,7 @@ function _run_command(){
 
             }
             fi
+            return 0
         }
         # end install_requirements
 
@@ -4580,9 +4581,11 @@ function raise_to_sudo_and_user_home() {
         exit 69
       fi
     fi
-    [[ -z "${bootbasicsource}" ]] && echo -e "\n \n  ERROR! Loading execute_boot_basic.sh. bootbasicsource did not download or is empty " && exit 1
-    echo "${bootbasicsource}">/tmp/struct_testing
-    source /tmp/struct_testing
+    [[ -z "${bootbasicsource}" ]] && echo -e "\n \n  ERROR! Loading execute_boot_basic.sh  bootbasicsource did not download or is empty " && exit 1
+    local _temp_dir="$(mktemp -d 2>/dev/null || mktemp -d -t 'execute_boot_basic_source')"
+    echo "${bootbasicsource}">"${_temp_dir}/execute_boot_basic_source"
+    echo "Temp execute_boot_basic.sh location ${_temp_dir}/execute_boot_basic_source"
+    source "${_temp_dir}/execute_boot_basic_source"
     _err=$?
     [ $_err -gt 0 ] &&  echo -e "\n \n  ERROR! Loading execute_boot_basic.sh. Occured while running 'source' err:$_err  \n \n  " && exit 1
     if  ! typeset -f on_int >/dev/null 2>&1; then
