@@ -2485,6 +2485,10 @@ function _run_command(){
                 # (( DEBUG )) && echo "\n rpm \n \n $packages \n \n rpm"
 
             }
+            elif ( ( command -v apt >/dev/null 2>&1; ) && ( command -v dpkg >/dev/null 2>&1; ) ) ; then
+            {
+                packages=$(dpkg -l | egrep "$one_required" | cut -d' ' -f3 2>&1)
+            }
             elif ( command -v brew >/dev/null 2>&1; ) ; then
             {
                 (( DEBUG )) && echo "BREW list formulas"
@@ -2532,8 +2536,11 @@ function _run_command(){
               {
                 (( DEBUG )) && echo "apt search using dpkg"
                 # REF: https://www.cyberciti.biz/faq/find-out-if-package-is-installed-in-linux/
-                packages=$(dpkg -l | egrep "$one_required" | cut -d' ' -f3 2>&1)
-                query=$(dpkg-query -W -f='${Status} ${Version}\n' "$one_required"  2>&1)
+                if query=$(dpkg-query -W -f='${Status} ${Version}\n' "$one_required"  2>&1) ; then
+                {
+                    echo -e " ${CYAN}  CHECKING ${YELLOW} $one_required${RESET}"
+                }
+                fi
                 #if [[ "${query}" == "install ok"* ]] && ( is_included "$one_required" "${packages}" ); then
                 if [[ "${query}" == "install ok"* ]] ; then
                 {
