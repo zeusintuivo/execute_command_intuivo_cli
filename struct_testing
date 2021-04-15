@@ -4192,6 +4192,21 @@ function determine_os_and_fire_action() {
         }
         fi
     }
+    elif [[ "$DISTRO" == *"bian"* ]]; then
+    {
+        # ubuntu lsb_release -i | sed 's/Distributor\ ID://g' = \tUbuntu\n
+        if ( uname -a | grep x86_64 >/dev/null 2>&1; )  ; then
+        {
+           FUNCTION_TO_CALL='_debian__64'
+           PARAMETERS="$@"
+        }
+        elif ( uname -a | grep i686 >/dev/null 2>&1; )  ; then
+        {
+           FUNCTION_TO_CALL='_debian__32'
+           PARAMETERS="$@"
+        }
+        fi
+    }
     else
     {
       # ubuntu lsb_release -i | sed 's/Distributor\ ID://g' = \tUbuntu\n
@@ -4232,9 +4247,9 @@ function determine_os_and_fire_action() {
   else
     failed system not recognized
   fi
-  if [[ -z "$FUNCTION_TO_CALL" ]]; then  # if empty
+  if [[ -z "${FUNCTION_TO_CALL}" ]]; then  # if empty
   {
-     failed to determine FUNCTION_TO_CALL for this OS. uname -a, cat /etc/os-release, lsb_release -i
+     failed "ERROR to determine FUNCTION_TO_CALL for this OS. uname -a, cat /etc/os-release, lsb_release -i <${FUNCTION_TO_CALL}>"
   }
   else
   {
@@ -4541,20 +4556,38 @@ function raise_to_sudo_and_user_home() {
       local USER_HOME=$HOME
     }
     fi
-    local -r provider="$USER_HOME/_/clis/execute_command_intuivo_cli/execute_boot_basic.sh"
-    echo source "${provider}"
     # shellcheck disable=SC1090
-    [   -e "${provider}"  ] && source "${provider}"
-    [ ! -e "${provider}"  ] && eval """$(wget --quiet --no-check-certificate  https://raw.githubusercontent.com/zeusintuivo/execute_command_intuivo_cli/master/execute_boot_basic.sh -O -  2>/dev/null )"""   # suppress only wget download messages, but keep wget output for variable
-    if ( command -v failed >/dev/null 2>&1; ) ; then
-    {
-      return 0
-    }
+    local -r provider="$USER_HOME/_/clis/execute_command_intuivo_cli/execute_boot_basic.sh"
+    local _err=0 bootbasicsource
+    if [   -e "${provider}"  ] ; then
+      echo "Loading locally"
+      bootbasicsource="""$(<"${provider}")"""
+      _err=$?
+      [ $_err -gt 0 ] &&  echo -e "\n \n  ERROR! Loading execute_boot_basic.sh. running 'source locally' returned error did not download or is empty err:$_err  \n \n  " && exit 1
     else
-    {
-      echo -e "\n \n  ERROR! Loading execute_boot_basic.sh \n \n "
-      exit 1;
-    }
+      if ( command -v curl >/dev/null 2>&1; )  ; then
+        echo "Loading execute_boot_basic.sh from the net using curl "
+        bootbasicsource="""$(curl https://raw.githubusercontent.com/zeusintuivo/execute_command_intuivo_cli/master/execute_boot_basic.sh  -so -   2>/dev/null )"""  #  2>/dev/null suppress only curl download messages, but keep curl output for variable
+        _err=$?
+        [ $_err -gt 0 ] &&  echo -e "\n \n  ERROR! Loading execute_boot_basic.sh. running 'curl' returned error did not download or is empty err:$_err  \n \n  " && exit 1
+      elif ( command -v wget >/dev/null 2>&1; ) ; then
+        echo "Loading execute_boot_basic.sh from the net using wget "
+        bootbasicsource="""$(wget --quiet --no-check-certificate  https://raw.githubusercontent.com/zeusintuivo/execute_command_intuivo_cli/master/execute_boot_basic.sh -O -   2>/dev/null )"""  #  2>/dev/null suppress only wget download messages, but keep wget output for variable
+        _err=$?
+        [ $_err -gt 0 ] &&  echo -e "\n \n  ERROR! Loading execute_boot_basic.sh. running 'wget' returned error did not download or is empty err:$_err  \n \n  " && exit 1
+      else
+        echo -e "\n \n  ERROR! Loading execute_boot_basic.sh could not find wget or curl to download  \n \n "
+        exit 69
+      fi
+    fi
+    [[ -z "${bootbasicsource}" ]] && echo -e "\n \n  ERROR! Loading execute_boot_basic.sh. bootbasicsource did not download or is empty " && exit 1
+    echo "${bootbasicsource}">/tmp/struct_testing
+    source /tmp/struct_testing
+    _err=$?
+    [ $_err -gt 0 ] &&  echo -e "\n \n  ERROR! Loading execute_boot_basic.sh. Occured while running 'source' err:$_err  \n \n  " && exit 1
+    if  ! typeset -f on_int >/dev/null 2>&1; then
+      echo -e "\n \n  ERROR! Loading execute_boot_basic.sh. on_int function was not found.. was not loaded !!!  \n \n "
+      exit 69;
     fi
     return 0
   } # end load_execute_boot_basic_with_sudo
