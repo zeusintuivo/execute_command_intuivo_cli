@@ -3566,7 +3566,7 @@ function _find_downloads_folder(){
   #      cd "${DOWNLOADFOLDER}"
   #      _download_mac "${TARGET_URL}" "${DOWNLOADFOLDER}"
   #
-  if ( command -v wget >/dev/null 2>&1; ) ; then
+  if ( command -v xdg-user-dir >/dev/null 2>&1; ) ; then
   {
     local DOWNLOADFOLDER="$(su - "${SUDO_USER}" -c 'xdg-user-dir DOWNLOAD')"
     enforce_variable_with_value DOWNLOADFOLDER "${DOWNLOADFOLDER}"
