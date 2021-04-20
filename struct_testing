@@ -3566,10 +3566,20 @@ function _find_downloads_folder(){
   #      cd "${DOWNLOADFOLDER}"
   #      _download_mac "${TARGET_URL}" "${DOWNLOADFOLDER}"
   #
-  local DOWNLOADFOLDER="$(su - "${SUDO_USER}" -c 'xdg-user-dir DOWNLOAD')"
-  enforce_variable_with_value DOWNLOADFOLDER "${DOWNLOADFOLDER}"
-  cd "${DOWNLOADFOLDER}"
+  if ( command -v wget >/dev/null 2>&1; ) ; then
+  {
+    local DOWNLOADFOLDER="$(su - "${SUDO_USER}" -c 'xdg-user-dir DOWNLOAD')"
+    enforce_variable_with_value DOWNLOADFOLDER "${DOWNLOADFOLDER}"
+    cd "${DOWNLOADFOLDER}"
     echo -n "${DOWNLOADFOLDER}"
+  }
+  else
+  {
+    local _temp_dir="$(mktemp -d 2>/dev/null || mktemp -d -t 'tempdownloads')"
+    cd "${_temp_dir}"
+    echo -n "${_temp_dir}"
+   }
+  fi
   return 0
 } # end _find_downloads_folder
 
