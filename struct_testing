@@ -3641,6 +3641,7 @@ function _download_mac() {
   echo "  download file 3:<${3}>"
   #   file_exists_with_spaces "${download_folder}"
   directory_exists "${download_folder}"
+  cd "${download_folder}"
   #   [ -z "${3}" ] && echo "empty"
   #   echo
   # echo "# arguments called with ---->  ${@}     "
@@ -3695,25 +3696,25 @@ function _download() {
 function _download_linux() {
 
 
-# You're close. The correct way to approach this is using the HEAD method.
+  # You're close. The correct way to approach this is using the HEAD method.
 
-# With cURL:
+  # With cURL:
 
-# if curl --head --silent --fail ftp://ftp.somewhere.com/bigfile.gz 2> /dev/null;
-#  then
-#   echo "This page exists."
-#  else
-#   echo "This page does not exist."
-# fi
+  # if curl --head --silent --fail ftp://ftp.somewhere.com/bigfile.gz 2> /dev/null;
+  #  then
+  #   echo "This page exists."
+  #  else
+  #   echo "This page does not exist."
+  # fi
 
-# or using wget:
+  # or using wget:
 
-# if wget -q --method=HEAD ftp://ftp.somewhere.com/bigfile.gz;
-#  then
-#   echo "This page exists."
-#  else
-#   echo "This page does not exist."
-# fi
+  # if wget -q --method=HEAD ftp://ftp.somewhere.com/bigfile.gz;
+  #  then
+  #   echo "This page exists."
+  #  else
+  #   echo "This page does not exist."
+  # fi
 
 
   local thisscriptname=$(dirname "struct_testing")
@@ -3721,16 +3722,16 @@ function _download_linux() {
   local target_url="${1}"
   local download_folder=""
   if [ -n "${2}" ] ; then # if not empty
-    {
-        download_folder="${2}"
-    }
+  {
+      download_folder="${2}"
+  }
   fi
   echo "     target url 1:<${1}>"
   [ -z "${1}" ] && echo "empty"
   echo "download folder 2:<${download_folder}>"
   [ -z "${2}" ] && echo "empty"
   echo "  download file 3:<${3}>"
-#   file_exists_with_spaces "${download_folder}"
+  #   file_exists_with_spaces "${download_folder}"
   directory_exists "${download_folder}"
     #   [ -z "${3}" ] && echo "empty"
     #   echo
@@ -3762,41 +3763,42 @@ function _download_linux() {
     ensure wget or "Wget is required"
     # # REF: about :> http://unix.stackexchange.com/questions/37507/what-does-do-here
     _trap_try_start
-    :> /tmp/wgetrc   # here :> equals to Equivalent to the following: cat /dev/null > wgetrc which Nulls out the file called "wgetrc" in the current directory. As in creates an empty file "wgetrc" if one doesn't exist or overwrites one with nothing if it does.
+    local _temp_dir="$(mktemp -d 2>/dev/null || mktemp -d -t '_download_linux')"
+    :> ${_temp_dir}/wgetrc   # here :> equals to Equivalent to the following: cat /dev/null > wgetrc which Nulls out the file called "wgetrc" in the current directory. As in creates an empty file "wgetrc" if one doesn't exist or overwrites one with nothing if it does.
     _trap_catch_check
-    file_exists_with_spaces /tmp/wgetrc
+    file_exists_with_spaces ${_temp_dir}/wgetrc
     _trap_try_start
-    echo "noclobber=off" >> /tmp/wgetrc
+    echo "noclobber=off" >> ${_temp_dir}/wgetrc
     _trap_catch_check
-    echo "dirstruct=off" >> /tmp/wgetrc
-    # echo "verbose=off" >> /tmp/wgetrc    # NOTE Can't be verbose and quiet at the same time.--quiet
-    echo "verbose=on" >> /tmp/wgetrc    # NOTE Can't be verbose and quiet at the same time.--quiet
-    echo "progress=bar:default" >> /tmp/wgetrc
-    echo "tries=3" >> /tmp/wgetrc
-    echo "max-redirect=10" >> /tmp/wgetrc
-    echo "check_certificate=off" >> /tmp/wgetrc
-    echo "mirror=on" >> /tmp/wgetrc
-    echo "content_disposition=on" >> /tmp/wgetrc
-    echo "dir_prefix=." >> /tmp/wgetrc
-    # echo "dir_prefix=${download_folder}" >> /tmp/wgetrc
-    echo "directory-prefix=${download_folder}" >> /tmp/wgetrc
-    # echo "output-document=${download_file}" >> /tmp/wgetrc   # Set the output filename--the same as '-O FILE'.
-    # echo "input=${target_url}" >> /tmp/wgetrc   #  Read the URLs from STRING, like '-i FILE'.
+    echo "dirstruct=off" >> ${_temp_dir}/wgetrc
+    # echo "verbose=off" >> ${_temp_dir}/wgetrc     # NOTE Can't be verbose and quiet at the same time.--quiet
+    echo "verbose=on" >> ${_temp_dir}/wgetrc     # NOTE Can't be verbose and quiet at the same time.--quiet
+    echo "progress=bar:default" >> ${_temp_dir}/wgetrc
+    echo "tries=3" >> ${_temp_dir}/wgetrc
+    echo "max-redirect=10" >> ${_temp_dir}/wgetrc
+    echo "check_certificate=off" >> ${_temp_dir}/wgetrc
+    echo "mirror=on" >> ${_temp_dir}/wgetrc
+    echo "content_disposition=on" >> ${_temp_dir}/wgetrc
+    echo "dir_prefix=." >> ${_temp_dir}/wgetrc
+    # echo "dir_prefix=${download_folder}" >> ${_temp_dir}/wgetrc
+    echo "directory-prefix=${download_folder}" >> ${_temp_dir}/wgetrc
+    # echo "output-document=${download_file}" >> ${_temp_dir}/wgetrc    # Set the output filename--the same as '-O FILE'.
+    # echo "input=${target_url}" >> ${_temp_dir}/wgetrc    #  Read the URLs from STRING, like '-i FILE'.
     # _trap_try_start # _trap_catch_check
     # WGETRC=wgetrc wget --directory-prefix="${USER_HOME}/Downloads/" --quiet --no-check-certificate "${target_url}" 2>/dev/null
     #  _trap_catch_check
-    # WGETRC=/tmp/wgetrc wget --quiet --no-check-certificate "${target_url}" 2>/dev/null   # suppress only wget download messages, but keep wget output for variable
-    # _try "WGETRC=/tmp/wgetrc wget --mirror --directory-prefix=\"${download_folder}\" --quiet --no-check-certificate \"${target_url}\"" # 2>/dev/null"
+    # WGETRC=${_temp_dir}/wgetrc  wget --quiet --no-check-certificate "${target_url}" 2>/dev/null   # suppress only wget download messages, but keep wget output for variable
+    # _try "WGETRC=${_temp_dir}/wgetrc  wget --mirror --directory-prefix=\"${download_folder}\" --quiet --no-check-certificate \"${target_url}\"" # 2>/dev/null"
     _trap_try_start # _trap_catch_check
-    WGETRC=/tmp/wgetrc
-    # WGETRC=/tmp/wgetrc wget --max-redirect=10 --mirror --directory-prefix="${download_folder}" --no-check-certificate "${target_url}" # 2>/dev/null"
-    # WGETRC=/tmp/wgetrc wget --mirror --content-disposition "${download_folder}" "${download_file}" --no-check-certificate "${target_url}" # 2>/dev/null"
+    WGETRC=${_temp_dir}/wgetrc
+    # WGETRC=${_temp_dir}/wgetrc  wget --max-redirect=10 --mirror --directory-prefix="${download_folder}" --no-check-certificate "${target_url}" # 2>/dev/null"
+    # WGETRC=${_temp_dir}/wgetrc  wget --mirror --content-disposition "${download_folder}" "${download_file}" --no-check-certificate "${target_url}" # 2>/dev/null"
     local WGETCOMMAND=""
     echo "WGET:"
     echo "OPTIONS WGETRC:"
-    cat -n /tmp/wgetrc
+    cat -n ${_temp_dir}/wgetrc
     echo "COMMAND WGET:"
-    passed "WGETRC=/tmp/wgetrc wget --max-redirect=10 --mirror --directory-prefix=${download_folder} -O ${download_file} --no-check-certificate ${target_url}"
+    passed "WGETRC=${_temp_dir}/wgetrc  wget --max-redirect=10 --mirror --directory-prefix=${download_folder} -O ${download_file} --no-check-certificate ${target_url}"
     cd "${download_folder}"
     pwd
     # exit 0
@@ -3821,12 +3823,12 @@ function _download_linux() {
     # ( typeset -p "SUDO_USER"  &>/dev/null ) && echo "sudo user " >&2
     # ( typeset -p "SUDO_USER"  &>/dev/null ) &&  su - $SUDO_USER -c 'wget --max-redirect=10 --mirror  --no-check-certificate '"${target_url}"' ' # 2>/dev/null"
 
-    # WGETRC=/tmp/wgetrc wget "${WGETCOMMAND}" # 2>/dev/null"
+    # WGETRC=${_temp_dir}/wgetrc  wget "${WGETCOMMAND}" # 2>/dev/null"
     _assure_success
     echo "${msg}"
     echo -e "\033[7m*** Download Wget executed completed.\033[0m"
-    rm -f /tmp/wgetrc
-    file_does_not_exist_with_spaces wgetrc
+    rm -f ${_temp_dir}/wgetrc
+    file_does_not_exist_with_spaces ${_temp_dir}/wgetrc
     # file_exists_with_spaces "${download_folder}/${download_file}"
   elif ( command -v curl >/dev/null 2>&1; ); then
     ensure curl or "curl is required"
