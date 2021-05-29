@@ -4667,15 +4667,46 @@ function enforce_vpn_is_on(){
   passed "${TESTING}"
 } # end enforce_vpn_is_on
 
+function extract_domainname(){
+  # Sample usage
+  #  local _domain=$(extract_domainname "https://www.cyberciti.biz/faq/")
+  #  enforce_variable_with_value _domain "${_domain}"
+  #
+  # REF: https://www.cyberciti.biz/faq/get-extract-domain-name-from-url-in-linux-unix-bash/
+  local _url="${1}"
+
+  ## Remove protocol part of url  ##
+  _url="${_url#http://}"
+  _url="${_url#https://}"
+  _url="${_url#ftp://}"
+  _url="${_url#scp://}"
+  _url="${_url#scp://}"
+  _url="${_url#sftp://}"
+
+  ## Remove username and/or username:password part of URL  ##
+  _url="${_url#*:*@}"
+  _url="${_url#*@}"
+
+  ## Remove rest of urls ##
+  _url=${_url%%/*}
+
+  ## Show domain name only ##
+  echo "${_url}"
+  return 0
+} # end enforce_vpn_is_on
+
 function enforce_web_is_reachable(){
   # Sample use:
   # enforce_web_is_reachable  "cms.artbox.one"
   #
-  echo "  Checking for connection to ${1}"
+  local _url="${1}"
+  local _domain=$(extract_domainname "${_url}")
+  enforce_variable_with_value _domain "${_domain}"
+  echo "  Checking for connection to ${_domain}"
   local msg
-  msg=$(curl -I --connect-timeout 5 --max-time 10 "${1}" 2>&1; )
+  msg=$(curl -I --connect-timeout 5 --max-time 10 "${_domain}" 2>&1; )
   _err=$?
-  # local DEBUG=1
+  local DEBUG=1
   (( DEBUG )) && echo enforce_web_is_reachable curl -I --connect-timeout 5  --max-time 10 "${1}"
   (( DEBUG )) && echo enforce_web_is_reachable curl exit code $_err
   local TESTING="web address ${BRIGHT_BLUE87}««${RED}${1}${BRIGHT_BLUE87}»»${LIGHTYELLOW} is reachable"
