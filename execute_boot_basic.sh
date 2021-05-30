@@ -110,7 +110,7 @@ load_execute_as_sudo(){
     # shellcheck disable=SC2030
     if ( ! typeset -p "SUDO_USER"  &>/dev/null ) ; then
       export USER_HOME
-      typeset -r USER_HOME=$HOME
+      typeset USER_HOME=$HOME
     fi
     (( DEBUG )) && echo "USER_HOME:${USER_HOME}  ? 1"
     (( DEBUG )) && echo "-----HOME:${HOME}  ? 1"
