@@ -375,20 +375,25 @@ CERO="\033[01;0m"
             done <<< $(switch_spaces_to_newlines <<< "${@}")
             # done <<< "${4}"
             (( DEBUG )) && echo -e "${LIGHTGREEN} ✔ ${LIGHTYELLOW} ${TESTING} has passed "
-            (( found )) && return 0
+            #(( found )) &&
+            return 0
+          }
+          else
+          {
+            echo -e "${RED} 𝞦 \\n${BASH_SOURCE}:${BASH_LINENO[1]} ${FUNCNAME[-0]}(...) \\n$0:${BASH_LINENO[0]} ${FUNCNAME[1]}(...) \\n ${LIGHTYELLOW} ${TESTING} has failed "
+            failed "${TESTING}"
+            exit 1
           }
           fi
-          echo -e "${RED} 𝞦 \\n${BASH_SOURCE}:${BASH_LINENO[1]} ${FUNCNAME[-0]}(...) \\n$0:${BASH_LINENO[0]} ${FUNCNAME[1]}(...) \\n ${LIGHTYELLOW} ${TESTING} has failed "
-          failed "${TESTING}"
-          exit 1
+
         } # end enforce_parameter_with_options
 
-        function enforce_parameter_with_value(){
+        function parameter_with_value() {
           # Sample use
-          # enforce_parameter_with_value 1 URL "${URL}" "https://www.website.com/product/"
-          # enforce_parameter_with_value 3 PATTERN "${PATTERN}" "BCompareOSX*.*.*.*.zip"
+          # if parameter_with_value 1 URL "${URL}" "https://www.website.com/product/" ; then
+          # if ( parameter_with_value 3 PATTERN "${PATTERN}" "BCompareOSX*.*.*.*.zip" ) ; then
           # Tests for the function
-          local TESTING="enforce_parameter_with_value function ${FUNCNAME[1]} expects value at position <"${1}"> expect value <"${2}"> to look like or can be are <"${4}">"
+          local TESTING="parameter_with_value function ${FUNCNAME[1]} expects value at position <"${1}"> expect value <"${2}"> to look like or can be are <"${4}">"
           (( DEBUG )) && echo -e "${FUNCNAME[0]}"
           (( DEBUG )) && echo ${@} -assume existing variable for this part
           (( DEBUG )) && ( typeset -p "${1}"  &>/dev/null  ) && echo "1 defined 1"
@@ -413,10 +418,34 @@ CERO="\033[01;0m"
               (( DEBUG )) && echo -e "${LIGHTGREEN} ✔ ${LIGHTYELLOW} ${TESTING} has passed "
               return 0
           }
+          else
+          {
+            echo -e "${RED} 𝞦 \\n${BASH_SOURCE}:${BASH_LINENO[1]} ${FUNCNAME[-0]}(...) \\n$0:${BASH_LINENO[0]} ${FUNCNAME[1]}(...) \\n ${LIGHTYELLOW} ${TESTING} has failed "
+            failed "${TESTING}"
+            return 1
+          }
           fi
-          echo -e "${RED} 𝞦 \\n${BASH_SOURCE}:${BASH_LINENO[1]} ${FUNCNAME[-0]}(...) \\n$0:${BASH_LINENO[0]} ${FUNCNAME[1]}(...) \\n ${LIGHTYELLOW} ${TESTING} has failed "
-          failed "${TESTING}"
-          exit 1
+          return 0
+        } # end parameter_with_value
+
+        function enforce_parameter_with_value() {
+          # Sample use
+          # enforce_parameter_with_value 1 URL "${URL}" "https://www.website.com/product/"
+          # enforce_parameter_with_value 3 PATTERN "${PATTERN}" "BCompareOSX*.*.*.*.zip"
+          # Tests for the function
+          local TESTING="enforce_parameter_with_value function ${FUNCNAME[1]} expects value at position <"${1}"> expect value <"${2}"> to look like or can be are <"${4}">"
+          if ( parameter_with_value "${1}" "${2}"  "${3}" "${4}"  ) ; then
+          {
+            return 0
+          }
+          else
+          {
+            echo -e "${RED} 𝞦 \\n${BASH_SOURCE}:${BASH_LINENO[1]} ${FUNCNAME[-0]}(...) \\n$0:${BASH_LINENO[0]} ${FUNCNAME[1]}(...) \\n ${LIGHTYELLOW} ${TESTING} has failed "
+            failed "${TESTING}"
+            exit 1
+          }
+          fi
+          return 0
         } # end enforce_parameter_with_value
 
         function enforce_variable_with_value(){
@@ -3671,7 +3700,9 @@ function _download_mac() {
     }
     done
   elif ( command -v curl >/dev/null 2>&1; ); then
-    _try curl -LO "${target_url}" 2>/dev/null   # suppress only wget download messages, but keep wget output for variable
+    pwd
+    # _try
+    curl -LO "${target_url}" 2>/dev/null   # suppress only wget download messages, but keep wget output for variable
     wait
   else
     failed "I cannot find wget or curl to download! ${target_url}"
@@ -4570,7 +4601,11 @@ function raise_to_sudo_and_user_home() {
       # typeset -rg USER_HOME=$(getent passwd $SUDO_USER | cut -d: -f6)  # Get the caller's of sudo home dir Just Linux
       # shellcheck disable=SC2046
       # shellcheck disable=SC2031
-      typeset USER_HOME="$(echo -n $(bash -c "cd ~${SUDO_USER} && pwd"))"  # Get the caller's of sudo home dir LINUX and MAC
+      if ! ( env | grep "USER_HOME" &>/dev/null ) ; then
+      {
+          typeset USER_HOME="$(echo -n $(bash -c "cd ~${SUDO_USER} && pwd"))"  # Get the caller's of sudo home dir LINUX and MAC
+      }
+      fi
     }
     else
     {
@@ -4823,7 +4858,18 @@ function _process_dmgs_dmg_or_zip() {
       rm -rf "${DOWNLOADFOLDER}/${APPDIR}"
     }
     fi
-    unzip "${DOWNLOADFOLDER}/${CODENAME}"
+    cd "${DOWNLOADFOLDER}"
+    if unzip "${DOWNLOADFOLDER}/${CODENAME}" ; then
+    {
+        echo "unzipped "
+        pwd
+    }
+    else
+    {
+        echo "else unzipped"
+        pwd
+    }
+    fi
     directory_exists_with_spaces "${DOWNLOADFOLDER}/${APPDIR}"
     echo "sudo  cp -R \"${DOWNLOADFOLDER}/${APPDIR}\" \"/Applications/\""
     cp -R "${DOWNLOADFOLDER}/${APPDIR}" "/Applications/"
@@ -4891,6 +4937,7 @@ function _install_dmgs_dmg__64() {
   # echo "$(pwd)"
   local UNZIPDIR="$(dirname  "${APPDIR}")"
   local APPDIR="${APPDIR##*/}"    # same as  $(basename "${APPDIR}")
+  #local APPDIR=$(basename "${APPDIR}")
   # local APPDIR="$(echo -en "${CODENAME}" | sed 's/.dmg//g'| sed 's/-//g').app"
   # echo "${CODENAME}";
   # echo "${URL}";
@@ -4908,7 +4955,11 @@ function _install_dmgs_dmg__64() {
 
   _do_not_downloadtwice "${TARGET_URL}" "${DOWNLOADFOLDER}"  "${CODENAME}"
   _remove_dmgs_app_if_exists "${APPDIR}"
-
+  if [[ "${UNZIPDIR}" == '.' ]] ; then
+  {
+    UNZIPDIR="$(echo -en "${CODENAME}" | sed 's/.zip//g' | sed 's/.dmg//g')"
+  }
+  fi
   _process_dmgs_dmg_or_zip "${extension}" "${DOWNLOADFOLDER}" "${CODENAME}" "${APPDIR}" "${UNZIPDIR}"
 
   directory_exists_with_spaces "/Applications/${APPDIR}"
@@ -4934,7 +4985,7 @@ function _install_dmgs_list(){
   #      Firefox 84.0.2.dmg|Firefox/Firefox.app|https://download-installer.cdn.mozilla.net/pub/firefox/releases/84.0.2/mac/de/Firefox%2084.0.2.dmg
   #      MFF2_latest.dmg|MultiFirefox/MultiFirefox.app|http://mff.s3.amazonaws.com/MFF2_latest.dmg
   #      vlc-3.0.11.dmg|VLC media player/VLC.app|https://download.vlc.de/vlc/macosx/vlc-3.0.11.dmg
-  #      mattermost-desktop-4.6.2-mac.dmg|Mattermost 4.6.2.app/Mattermost.app|https://releases.mattermost.com/desktop/4.6.2/mattermost-desktop-4.6.2-mac.dmg?src=dl
+  #      mattermost-desktop-4.6.2-mac.dmg|Mattermost 4.6.2.app/Mattermost.app|https://releases.mattermost.com/desktop/4.6.2/mattermost-desktop-4.6.2-mac.dmg
   #      gimp-2.10.22-x86_64-2.dmg|GIMP 2.10 Install/GIMP-2.10.app|https://ftp.lysator.liu.se/pub/gimp/v2.10/osx/gimp-2.10.22-x86_64-2.dmg
   #      sketch-70.3-109109.zip|Sketch.app|https://download.sketch.com/sketch-70.3-109109.zip
   #      Iris-1.2.0-OSX.zip|Iris.app|https://raw.githubusercontent.com/danielng01/product-builds/master/iris/macos/Iris-1.2.0-OSX.zip
