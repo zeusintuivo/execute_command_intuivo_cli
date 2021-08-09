@@ -579,6 +579,11 @@ CERO="\033[01;0m"
         } # end Loading
         alias loading=Loading
 
+        function Creating() {
+            echo -e "${DARK_BLUE_OVER_PEACH} Creating ${YELLOW_OVER_DARKBLUE}${1}${GREEN}, ${LIGHTPINK_OVER_DARKBLUE}${2} ${GREEN}${3} ${CYAN}${4}, ${RED}${5} ${GREEN}${6} ${CYAN}${*:7} ${GREEN}.${RESET}"
+        } # end Loading
+        alias creating=Creating
+
         function Updating() {
             echo -e "${ORANGE} Updating ${BRIGHT_BLUE87}${1}${GREEN}, ${YELLOW226}${2} ${GREEN}${3} ${CYAN}${4}, ${RED}${5} ${GREEN}${6} ${CYAN}${*:7} ${GREEN}.${RESET}"
         } # end Loading
