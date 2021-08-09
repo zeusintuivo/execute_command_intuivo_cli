@@ -577,7 +577,12 @@ CERO="\033[01;0m"
         function Loading() {
             echo -e "${CYAN} Loading ${GREEN}${1}${GRAY241}, ${RED}${2} ${GREEN}${3} ${CYAN}${4}, ${RED}${5} ${GREEN}${6} ${CYAN}${*:7} ${GREEN}.${RESET}"
         } # end Loading
-        alias loading=loading
+        alias loading=Loading
+
+        function Updating() {
+            echo -e "${ORANGE} Updating ${BRIGHT_BLUE87}${1}${GREEN}, ${YELLOW226}${2} ${GREEN}${3} ${CYAN}${4}, ${RED}${5} ${GREEN}${6} ${CYAN}${*:7} ${GREEN}.${RESET}"
+        } # end Loading
+        alias updating=Updating
 
         function Testing() {
             echo -e "${CYAN} Testing ${PURPLE}${1}${GREEN}, ${RED}${2} ${GREEN}${3} ${CYAN}${4}, ${RED}${5} ${GREEN}${6} ${CYAN}${*:7} ${GREEN}.${RESET}"
