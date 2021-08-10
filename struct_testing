@@ -316,6 +316,7 @@ CERO="\033[01;0m"
                 local -i _counter=0
                 local -i _counter_offset=0
                 echo -e " ☠ ${LIGHTPINK} ERROR STACK TRACE: ${len}  ${RESET}"  >&2
+                # echo -e "0000${BRIGHT_BLUE87} ${BASH_SOURCE[0]}:${BASH_LINENO[0]} \t\t  ${FUNCNAME[0]}() ${RESET}"  >&2
                 echo -e "${BRIGHT_BLUE87} ${__caller_script_name}:${__caller_line} \t\t  ${FUNCNAME[1]}() ${RESET}"  >&2
                 for (( _counter=1; _counter<${_error_count}; _counter++ )); do
                     (( _counter_offset=_counter + 1 ))
@@ -329,6 +330,9 @@ CERO="\033[01;0m"
         }
 
         function failed() {
+            # echo -e "${BASH_SOURCE[0]}:${BASH_LINENO[0]} \t\t  ${FUNCNAME[0]}() ${RESET}"  >&1
+            # echo -e "${BASH_SOURCE[1]}:${BASH_LINENO[1]} \t\t  ${FUNCNAME[1]}() ${RESET}"  >&1
+            # echo -e "${BASH_SOURCE[2]}:${BASH_LINENO[2]} \t\t  ${FUNCNAME[2]}() ${RESET}"  >&1
             warning "${@}  ${RED} has failed! "
             kill_execution
         }
@@ -618,6 +622,51 @@ CERO="\033[01;0m"
             "${@}"
         } # end Showing
         alias showing=Showing
+
+
+        function cüt() {
+            # DUPLICATED IN script cüt
+
+            # if value is not set  -- exit silent it
+            if [[ -z "$1"  ]] ; then
+                exit 0
+            fi
+
+            # Escape chars / !
+            function escape_slashes {
+                sed 's/\//\\\//g'
+            }
+            function escape_quotes {
+                sed 's/\"/\\\"/g'
+            }
+            function escape_bangs {
+                sed 's/\!/\\\!/g'
+            }
+            function escape_dots {
+                sed 's/\./\\\./g'
+            }
+            SEEKING=$(echo """$*"""  | escape_dots | escape_slashes | escape_quotes | escape_bangs)
+
+
+
+            # if everything else --
+
+            # check operation systems
+            (
+              if [[ "$(uname)" == "Darwin" ]] ; then
+                # Do something under Mac OS X platform
+                sed 's/'"""${SEEKING}"""'//g' ;
+              elif [[ "$(expr substr $(uname -s) 1 5)" == "Linux" ]] ; then
+                # Do something under GNU/Linux platform
+                sed 's/'"""${SEEKING}"""'//g'  ;
+
+              elif [[ "$(expr substr $(uname -s) 1 10)" == "MINGW32_NT" ]] ; then
+                # Do something under Windows NT platform
+                sed 's/'"""${SEEKING}"""'//g' ;
+                # nothing here
+              fi
+            )
+        }
 
         function Message() {
             trap 'exit 1' ERR
@@ -4969,7 +5018,11 @@ function _install_dmgs_dmg__64() {
   directory_exists_with_spaces "${DOWNLOADFOLDER}"
 
   _do_not_downloadtwice "${TARGET_URL}" "${DOWNLOADFOLDER}"  "${CODENAME}"
-  _remove_dmgs_app_if_exists "${APPDIR}"
+  if _remove_dmgs_app_if_exists "${APPDIR}" ; then
+  {
+    passed ${ORANGE} WARNING! ${YELLOW_OVER_DARKBLUE} failed to remove ${YELLOW_OVER_GRAY241}"${APPDIR}"${RESET}
+  }
+  fi
   if [[ "${UNZIPDIR}" == '.' ]] ; then
   {
     UNZIPDIR="$(echo -en "${CODENAME}" | sed 's/.zip//g' | sed 's/.dmg//g')"
