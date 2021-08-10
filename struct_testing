@@ -645,7 +645,16 @@ CERO="\033[01;0m"
             function escape_dots {
                 sed 's/\./\\\./g'
             }
-            SEEKING=$(echo """$*"""  | escape_dots | escape_slashes | escape_quotes | escape_bangs)
+            function escape_braket_open {
+                # sed "s/\[/5QU4R3D8R4CK3T0P3N/g"
+                sed "s/\[/\\\[/g"
+            }
+# squared_braket_open_decode() {
+    # sed "s/5QU4R3D8R4CK3T0P3N/\[/g"
+    # sed "s/5QU4R3D8R4CK3T0P3N/\[/g"
+# }
+
+            SEEKING=$(echo """$*"""  | escape_dots | escape_slashes | escape_quotes | escape_bangs | escape_braket_open )
 
 
 
