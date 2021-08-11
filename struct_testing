@@ -252,6 +252,7 @@ function HOW_TO_LOAD_JUST_ONE_SCRIPT_ONLINE_ALWAYS_STRUCT_USING_WGET() {
 #
 
 RED="\033[01;31m"
+DARKERRED="\033[38;5;1m"
 #RED="\033[38;5;1m"
 ORANGE="\033[38;5;202m"
 
@@ -2472,7 +2473,7 @@ function _run_command(){
             local missing=""
             local one_required=""
             local install_this=""
-            local required=$(grep -vE '^\s+#'<<<"${2}")
+            local required=$(grep -vE '^#'<<<$(grep -vE '^\s+#'<<<"${2}"))
             local packages=""
             local query=""
             local install_result=""
@@ -2691,7 +2692,7 @@ function _run_command(){
             local OS="${1}"
             local missing=""
             local one_required=""
-            local required=$(grep -vE '^\s+#'<<<"${2}")
+            local required=$(grep -vE '^#'<<<$(grep -vE '^\s+#'<<<"${2}"))
             local packages=""
             local query=""
             for one_required in ${required}; do
@@ -2771,7 +2772,7 @@ function _run_command(){
             local OS="${1}"
             local removing=""
             local one_required=""
-            local required=$(grep -vE '^\s+#'<<<"${2}")
+            local required=$(grep -vE '^#'<<<$(grep -vE '^\s+#'<<<"${2}"))
             for one_required in ${required}; do
             {
               if ( ( command -v apt >/dev/null 2>&1; ) && ( command -v dpkg >/dev/null 2>&1; ) ) ; then
