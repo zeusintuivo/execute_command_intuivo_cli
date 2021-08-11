@@ -317,6 +317,7 @@ CERO="\033[01;0m"
                 local -i _counter=0
                 local -i _counter_offset=0
                 echo -e " ☠ ${LIGHTPINK} ERROR STACK TRACE: ${len}  ${RESET}"  >&2
+                # echo -e "0000${BRIGHT_BLUE87} ${BASH_SOURCE[0]}:${BASH_LINENO[0]} \t\t  ${FUNCNAME[0]}() ${RESET}"  >&2
                 echo -e "${BRIGHT_BLUE87} ${__caller_script_name}:${__caller_line} \t\t  ${FUNCNAME[1]}() ${RESET}"  >&2
                 for (( _counter=1; _counter<${_error_count}; _counter++ )); do
                     (( _counter_offset=_counter + 1 ))
@@ -330,6 +331,9 @@ CERO="\033[01;0m"
         }
 
         function failed() {
+            # echo -e "${BASH_SOURCE[0]}:${BASH_LINENO[0]} \t\t  ${FUNCNAME[0]}() ${RESET}"  >&1
+            # echo -e "${BASH_SOURCE[1]}:${BASH_LINENO[1]} \t\t  ${FUNCNAME[1]}() ${RESET}"  >&1
+            # echo -e "${BASH_SOURCE[2]}:${BASH_LINENO[2]} \t\t  ${FUNCNAME[2]}() ${RESET}"  >&1
             warning "${@}  ${RED} has failed! "
             kill_execution
         }
@@ -376,20 +380,25 @@ CERO="\033[01;0m"
             done <<< $(switch_spaces_to_newlines <<< "${@}")
             # done <<< "${4}"
             (( DEBUG )) && echo -e "${LIGHTGREEN} ✔ ${LIGHTYELLOW} ${TESTING} has passed "
-            (( found )) && return 0
+            #(( found )) &&
+            return 0
+          }
+          else
+          {
+            echo -e "${RED} 𝞦 \\n${BASH_SOURCE}:${BASH_LINENO[1]} ${FUNCNAME[-0]}(...) \\n$0:${BASH_LINENO[0]} ${FUNCNAME[1]}(...) \\n ${LIGHTYELLOW} ${TESTING} has failed "
+            failed "${TESTING}"
+            exit 1
           }
           fi
-          echo -e "${RED} 𝞦 \\n${BASH_SOURCE}:${BASH_LINENO[1]} ${FUNCNAME[-0]}(...) \\n$0:${BASH_LINENO[0]} ${FUNCNAME[1]}(...) \\n ${LIGHTYELLOW} ${TESTING} has failed "
-          failed "${TESTING}"
-          exit 1
+
         } # end enforce_parameter_with_options
 
-        function enforce_parameter_with_value(){
+        function parameter_with_value() {
           # Sample use
-          # enforce_parameter_with_value 1 URL "${URL}" "https://www.website.com/product/"
-          # enforce_parameter_with_value 3 PATTERN "${PATTERN}" "BCompareOSX*.*.*.*.zip"
+          # if parameter_with_value 1 URL "${URL}" "https://www.website.com/product/" ; then
+          # if ( parameter_with_value 3 PATTERN "${PATTERN}" "BCompareOSX*.*.*.*.zip" ) ; then
           # Tests for the function
-          local TESTING="enforce_parameter_with_value function ${FUNCNAME[1]} expects value at position <"${1}"> expect value <"${2}"> to look like or can be are <"${4}">"
+          local TESTING="parameter_with_value function ${FUNCNAME[1]} expects value at position <"${1}"> expect value <"${2}"> to look like or can be are <"${4}">"
           (( DEBUG )) && echo -e "${FUNCNAME[0]}"
           (( DEBUG )) && echo ${@} -assume existing variable for this part
           (( DEBUG )) && ( typeset -p "${1}"  &>/dev/null  ) && echo "1 defined 1"
@@ -414,10 +423,34 @@ CERO="\033[01;0m"
               (( DEBUG )) && echo -e "${LIGHTGREEN} ✔ ${LIGHTYELLOW} ${TESTING} has passed "
               return 0
           }
+          else
+          {
+            echo -e "${RED} 𝞦 \\n${BASH_SOURCE}:${BASH_LINENO[1]} ${FUNCNAME[-0]}(...) \\n$0:${BASH_LINENO[0]} ${FUNCNAME[1]}(...) \\n ${LIGHTYELLOW} ${TESTING} has failed "
+            failed "${TESTING}"
+            return 1
+          }
           fi
-          echo -e "${RED} 𝞦 \\n${BASH_SOURCE}:${BASH_LINENO[1]} ${FUNCNAME[-0]}(...) \\n$0:${BASH_LINENO[0]} ${FUNCNAME[1]}(...) \\n ${LIGHTYELLOW} ${TESTING} has failed "
-          failed "${TESTING}"
-          exit 1
+          return 0
+        } # end parameter_with_value
+
+        function enforce_parameter_with_value() {
+          # Sample use
+          # enforce_parameter_with_value 1 URL "${URL}" "https://www.website.com/product/"
+          # enforce_parameter_with_value 3 PATTERN "${PATTERN}" "BCompareOSX*.*.*.*.zip"
+          # Tests for the function
+          local TESTING="enforce_parameter_with_value function ${FUNCNAME[1]} expects value at position <"${1}"> expect value <"${2}"> to look like or can be are <"${4}">"
+          if ( parameter_with_value "${1}" "${2}"  "${3}" "${4}"  ) ; then
+          {
+            return 0
+          }
+          else
+          {
+            echo -e "${RED} 𝞦 \\n${BASH_SOURCE}:${BASH_LINENO[1]} ${FUNCNAME[-0]}(...) \\n$0:${BASH_LINENO[0]} ${FUNCNAME[1]}(...) \\n ${LIGHTYELLOW} ${TESTING} has failed "
+            failed "${TESTING}"
+            exit 1
+          }
+          fi
+          return 0
         } # end enforce_parameter_with_value
 
         function enforce_variable_with_value(){
@@ -537,14 +570,29 @@ CERO="\033[01;0m"
               return 1
             }
             fi
-          passed "${TESTING}"
-          return 0
+            passed "${TESTING}"
+            return 0
         } # end ensure
 
         function Installing() {
             echo -e "${GREEN} Installing ${RED}${1}${GREEN}, ${RED}${2} ${GREEN}${3} ${CYAN}${4}, ${RED}${5} ${GREEN}${6} ${CYAN}${*:7} ${GREEN}.${RESET}"
         } # end Installing
         alias installing=Installing
+
+        function Loading() {
+            echo -e "${CYAN} Loading ${GREEN}${1}${GRAY241}, ${RED}${2} ${GREEN}${3} ${CYAN}${4}, ${RED}${5} ${GREEN}${6} ${CYAN}${*:7} ${GREEN}.${RESET}"
+        } # end Loading
+        alias loading=Loading
+
+        function Creating() {
+            echo -e "${DARK_BLUE_OVER_PEACH} Creating ${YELLOW_OVER_DARKBLUE}${1}${GREEN}, ${LIGHTPINK_OVER_DARKBLUE}${2} ${GREEN}${3} ${CYAN}${4}, ${RED}${5} ${GREEN}${6} ${CYAN}${*:7} ${GREEN}.${RESET}"
+        } # end Loading
+        alias creating=Creating
+
+        function Updating() {
+            echo -e "${ORANGE} Updating ${BRIGHT_BLUE87}${1}${GREEN}, ${YELLOW226}${2} ${GREEN}${3} ${CYAN}${4}, ${RED}${5} ${GREEN}${6} ${CYAN}${*:7} ${GREEN}.${RESET}"
+        } # end Loading
+        alias updating=Updating
 
         function Testing() {
             echo -e "${CYAN} Testing ${PURPLE}${1}${GREEN}, ${RED}${2} ${GREEN}${3} ${CYAN}${4}, ${RED}${5} ${GREEN}${6} ${CYAN}${*:7} ${GREEN}.${RESET}"
@@ -575,6 +623,60 @@ CERO="\033[01;0m"
             "${@}"
         } # end Showing
         alias showing=Showing
+
+
+        function cüt() {
+            # DUPLICATED IN script cüt
+
+            # if value is not set  -- exit silent it
+            if [[ -z "$1"  ]] ; then
+                exit 0
+            fi
+
+            # Escape chars / !
+            function escape_slashes {
+                sed 's/\//\\\//g'
+            }
+            function escape_quotes {
+                sed 's/\"/\\\"/g'
+            }
+            function escape_bangs {
+                sed 's/\!/\\\!/g'
+            }
+            function escape_dots {
+                sed 's/\./\\\./g'
+            }
+            function escape_braket_open {
+                # sed "s/\[/5QU4R3D8R4CK3T0P3N/g"
+                sed "s/\[/\\\[/g"
+            }
+# squared_braket_open_decode() {
+    # sed "s/5QU4R3D8R4CK3T0P3N/\[/g"
+    # sed "s/5QU4R3D8R4CK3T0P3N/\[/g"
+# }
+
+            SEEKING=$(echo """$*"""  | escape_dots | escape_slashes | escape_quotes | escape_bangs | escape_braket_open )
+
+
+
+            # if everything else --
+
+            # check operation systems
+            (
+              if [[ "$(uname)" == "Darwin" ]] ; then
+                # Do something under Mac OS X platform
+                sed 's/'"""${SEEKING}"""'//g' ;
+              elif [[ "$(expr substr $(uname -s) 1 5)" == "Linux" ]] ; then
+                # Do something under GNU/Linux platform
+                sed 's/'"""${SEEKING}"""'//g'  ;
+
+              elif [[ "$(expr substr $(uname -s) 1 10)" == "MINGW32_NT" ]] ; then
+                # Do something under Windows NT platform
+                sed 's/'"""${SEEKING}"""'//g' ;
+                # nothing here
+              fi
+            )
+        }
 
         function Message() {
             trap 'exit 1' ERR
@@ -1869,7 +1971,7 @@ function _run_command(){
             local TESTING
             if contains_newlines "${@}" ; then
             {
-                SERVICE_NAMES="${@}"
+                SERVICE_NAMES=$(grep -vE '^\s+#'<<<"${@}")
                 while read -r SERVICE_NAME; do
                 {
                     if [[ -n "$SERVICE_NAME" ]] ; then  # is not empty
@@ -3672,7 +3774,9 @@ function _download_mac() {
     }
     done
   elif ( command -v curl >/dev/null 2>&1; ); then
-    _try curl -LO "${target_url}" 2>/dev/null   # suppress only wget download messages, but keep wget output for variable
+    pwd
+    # _try
+    curl -LO "${target_url}" 2>/dev/null   # suppress only wget download messages, but keep wget output for variable
     wait
   else
     failed "I cannot find wget or curl to download! ${target_url}"
@@ -4571,7 +4675,11 @@ function raise_to_sudo_and_user_home() {
       # typeset -rg USER_HOME=$(getent passwd $SUDO_USER | cut -d: -f6)  # Get the caller's of sudo home dir Just Linux
       # shellcheck disable=SC2046
       # shellcheck disable=SC2031
-      typeset USER_HOME="$(echo -n $(bash -c "cd ~${SUDO_USER} && pwd"))"  # Get the caller's of sudo home dir LINUX and MAC
+      if ! ( env | grep "USER_HOME" &>/dev/null ) ; then
+      {
+          typeset USER_HOME="$(echo -n $(bash -c "cd ~${SUDO_USER} && pwd"))"  # Get the caller's of sudo home dir LINUX and MAC
+      }
+      fi
     }
     else
     {
@@ -4824,7 +4932,18 @@ function _process_dmgs_dmg_or_zip() {
       rm -rf "${DOWNLOADFOLDER}/${APPDIR}"
     }
     fi
-    unzip "${DOWNLOADFOLDER}/${CODENAME}"
+    cd "${DOWNLOADFOLDER}"
+    if unzip "${DOWNLOADFOLDER}/${CODENAME}" ; then
+    {
+        echo "unzipped "
+        pwd
+    }
+    else
+    {
+        echo "else unzipped"
+        pwd
+    }
+    fi
     directory_exists_with_spaces "${DOWNLOADFOLDER}/${APPDIR}"
     echo "sudo  cp -R \"${DOWNLOADFOLDER}/${APPDIR}\" \"/Applications/\""
     cp -R "${DOWNLOADFOLDER}/${APPDIR}" "/Applications/"
@@ -4892,6 +5011,7 @@ function _install_dmgs_dmg__64() {
   # echo "$(pwd)"
   local UNZIPDIR="$(dirname  "${APPDIR}")"
   local APPDIR="${APPDIR##*/}"    # same as  $(basename "${APPDIR}")
+  #local APPDIR=$(basename "${APPDIR}")
   # local APPDIR="$(echo -en "${CODENAME}" | sed 's/.dmg//g'| sed 's/-//g').app"
   # echo "${CODENAME}";
   # echo "${URL}";
@@ -4908,8 +5028,16 @@ function _install_dmgs_dmg__64() {
   directory_exists_with_spaces "${DOWNLOADFOLDER}"
 
   _do_not_downloadtwice "${TARGET_URL}" "${DOWNLOADFOLDER}"  "${CODENAME}"
-  _remove_dmgs_app_if_exists "${APPDIR}"
-
+  if _remove_dmgs_app_if_exists "${APPDIR}" ; then
+  {
+    passed ${ORANGE} WARNING! ${YELLOW_OVER_DARKBLUE} failed to remove ${YELLOW_OVER_GRAY241}"${APPDIR}"${RESET}
+  }
+  fi
+  if [[ "${UNZIPDIR}" == '.' ]] ; then
+  {
+    UNZIPDIR="$(echo -en "${CODENAME}" | sed 's/.zip//g' | sed 's/.dmg//g')"
+  }
+  fi
   _process_dmgs_dmg_or_zip "${extension}" "${DOWNLOADFOLDER}" "${CODENAME}" "${APPDIR}" "${UNZIPDIR}"
 
   directory_exists_with_spaces "/Applications/${APPDIR}"
@@ -4935,7 +5063,7 @@ function _install_dmgs_list(){
   #      Firefox 84.0.2.dmg|Firefox/Firefox.app|https://download-installer.cdn.mozilla.net/pub/firefox/releases/84.0.2/mac/de/Firefox%2084.0.2.dmg
   #      MFF2_latest.dmg|MultiFirefox/MultiFirefox.app|http://mff.s3.amazonaws.com/MFF2_latest.dmg
   #      vlc-3.0.11.dmg|VLC media player/VLC.app|https://download.vlc.de/vlc/macosx/vlc-3.0.11.dmg
-  #      mattermost-desktop-4.6.2-mac.dmg|Mattermost 4.6.2.app/Mattermost.app|https://releases.mattermost.com/desktop/4.6.2/mattermost-desktop-4.6.2-mac.dmg?src=dl
+  #      mattermost-desktop-4.6.2-mac.dmg|Mattermost 4.6.2.app/Mattermost.app|https://releases.mattermost.com/desktop/4.6.2/mattermost-desktop-4.6.2-mac.dmg
   #      gimp-2.10.22-x86_64-2.dmg|GIMP 2.10 Install/GIMP-2.10.app|https://ftp.lysator.liu.se/pub/gimp/v2.10/osx/gimp-2.10.22-x86_64-2.dmg
   #      sketch-70.3-109109.zip|Sketch.app|https://download.sketch.com/sketch-70.3-109109.zip
   #      Iris-1.2.0-OSX.zip|Iris.app|https://raw.githubusercontent.com/danielng01/product-builds/master/iris/macos/Iris-1.2.0-OSX.zip
