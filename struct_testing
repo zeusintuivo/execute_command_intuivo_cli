@@ -3929,8 +3929,8 @@ function _download_linux() {
     elif  ( typeset -p "SUDO_USER"  &>/dev/null ) ; then
     {
       _trap_try_start
-      echo -e RUNNING:\nsu - "$SUDO_USER" -c 'cd '"${download_folder}"' && wget --max-redirect=10 --mirror --directory-prefix='"${download_folder}"' -O '"${download_file}"' --no-check-certificate '"${target_url}"' && pwd ' # 2>/dev/null"
-      su - "$SUDO_USER" -c 'cd '"${download_folder}"' && wget --max-redirect=10 --mirror --directory-prefix='"${download_folder}"' -O '"${download_file}"' --no-check-certificate '"${target_url}"' && pwd ' # 2>/dev/null"
+      echo -e RUNNING:\nsu - "$SUDO_USER" -c 'cd "'"${download_folder}"'" && wget --max-redirect=10 --mirror --directory-prefix="'"${download_folder}"'" -O "'"${download_file}"'" --no-check-certificate '"${target_url}"' && pwd ' # 2>/dev/null"
+      su - "$SUDO_USER" -c 'cd "'"${download_folder}"'" && wget --max-redirect=10 --mirror --directory-prefix="'"${download_folder}"'" -O "'"${download_file}"'" --no-check-certificate '"${target_url}"' && pwd ' # 2>/dev/null"
       _trap_catch_check
     }
     fi
