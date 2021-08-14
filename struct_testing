@@ -3671,6 +3671,7 @@ function _find_downloads_folder(){
   #
   if ( command -v xdg-user-dir >/dev/null 2>&1; ) ; then
   {
+    enforce_variable_with_value SUDO_USER "${SUDO_USER}"
     local DOWNLOADFOLDER="$(su - "${SUDO_USER}" -c 'xdg-user-dir DOWNLOAD')"
     enforce_variable_with_value DOWNLOADFOLDER "${DOWNLOADFOLDER}"
     cd "${DOWNLOADFOLDER}"
