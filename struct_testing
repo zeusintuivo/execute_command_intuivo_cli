@@ -999,7 +999,7 @@ CERO="\033[01;0m"
             if [ -n "${_ONE_DIR-x}" ] ; then # if its set and not empty
             {
                 # if not empty
-                if [  -n "${_ONE_DIR}" ] ; then
+                if [[  -n "${_ONE_DIR}" ]] ; then
                 {
                     # AS a NOTE ~/  <-- will fail always
                     # SO ~/.pyenv <-- will fail always
@@ -3848,7 +3848,7 @@ function _download_linux() {
   [ -z "${2}" ] && echo "empty"
   echo "  download file 3:<${3}>"
   #   file_exists_with_spaces "${download_folder}"
-  directory_exists "${download_folder}"
+  directory_exists_with_spaces "${download_folder}"
     #   [ -z "${3}" ] && echo "empty"
     #   echo
     # echo "# arguments called with ---->  ${@}     "
