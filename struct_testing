@@ -598,7 +598,7 @@ CERO="\033[01;0m"
             echo -e "${DARK_BLUE_OVER_PEACH} Skipping ${YELLOW_OVER_DARKBLUE}${1}${GREEN}, ${LIGHTPINK_OVER_DARKBLUE}${2} ${GREEN}${3} ${CYAN}${4}, ${RED}${5} ${GREEN}${6} ${CYAN}${*:7} ${GREEN}.${RESET}"
         } # end Loading
         alias skipping=Skipping
-        
+
         function Updating() {
             echo -e "${ORANGE} Updating ${BRIGHT_BLUE87}${1}${GREEN}, ${YELLOW226}${2} ${GREEN}${3} ${CYAN}${4}, ${RED}${5} ${GREEN}${6} ${CYAN}${*:7} ${GREEN}.${RESET}"
         } # end Loading
@@ -2403,9 +2403,11 @@ function _run_command(){
             esac
             if [[ $op != $3 ]]
             then
-                echo "FAIL: Expected '$3', Actual '$op', Arg1 '$1', Arg2 '$2'"
+                (( DEBUG )) && echo "struct_testing.testvercomp() FAIL: Expected '$3', Actual '$op', Arg1 '$1', Arg2 '$2'"
+                return 1
             else
-                echo "Pass: '$1 $op $2'"
+                (( DEBUG )) && echo "struct_testing.testvercomp() Pass: '$1 $op $2'"
+                return 0
             fi
             # Tests
             # # Run tests
@@ -2439,20 +2441,23 @@ function _run_command(){
         } # end testvercomp
 
         function to_lowercase() {
+            local _words="${*}"
+            (( DEBUG )) && echo "${*}"
+            enforce_parameter_with_value 1** _words "${_words}" "HERE IS SOME TEXT"
             # local env_bash_version=$(extract_version  <<< $(/usr/bin/env bash --version) | head -1)
             local env_bash_version=$(extract_version  <<< $(echo $BASH_VERSION) | head -1)
             [ -z "${BASH_VERSION}" ] && env_bash_version=$(extract_version  <<< $(/usr/bin/env bash --version) | head -1)
-            echo "bash version", $env_bash_version
+            (( DEBUG )) && echo "bash version", $env_bash_version
             [ -z "${1}" ] && return 1  # no argument passed
-            if ( testvercomp $env_bash_version 3 ">" ) ; then
+            if ( testvercomp $env_bash_version 4 ">" ) ; then
             {
                 # greater than version 3
-                echo "${1,,}"         # bash Convert string to lowercase Bash 4 REF: https://stackoverflow.com/questions/2264428/converting-string-to-lower-case-in-bash-shell-scripting
+                echo -n "${1,,}"         # bash Convert string to lowercase Bash 4 REF: https://stackoverflow.com/questions/2264428/converting-string-to-lower-case-in-bash-shell-scripting
             }
             else
             {
                 # less than version 3
-                echo "${1}" | sed 'y/ABCDEFGHIJKLMNOPQRSTUVWXYZ/abcdefghijklmnopqrstuvwxyz/'         # bash Convert string to lowercase Bash 4 REF: https://stackoverflow.com/questions/2264428/converting-string-to-lower-case-in-bash-shell-scripting
+                echo -n "${1}" | sed 'y/ABCDEFGHIJKLMNOPQRSTUVWXYZ/abcdefghijklmnopqrstuvwxyz/'         # bash Convert string to lowercase Bash 4 REF: https://stackoverflow.com/questions/2264428/converting-string-to-lower-case-in-bash-shell-scripting
             }
             fi
         } # end to_lowercase
