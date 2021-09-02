@@ -1981,7 +1981,7 @@ function _run_command(){
             local TESTING
             if contains_newlines "${@}" ; then
             {
-                SERVICE_NAMES=$(grep -vE '^\s+#'<<<"${@}")
+                SERVICE_NAMES="$(grep -vE '^\s+#|^#'<<<"${@}")"
                 while read -r SERVICE_NAME; do
                 {
                     if [[ -n "$SERVICE_NAME" ]] ; then  # is not empty
