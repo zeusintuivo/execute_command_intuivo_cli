@@ -4762,7 +4762,7 @@ function enforce_node_is_version(){
   # Sample use:
   # enforce_node_is_version  "12.20.1"
   #
-  echo "  Checking for node version to be ${1}"
+  (( DEBUG )) && echo "  Checking for node version to be ${1}"
   local msg
   msg=$(node --version | cut -c2- | grep "${1}" 2>&1; )
   _err=$?
@@ -4772,14 +4772,15 @@ function enforce_node_is_version(){
     failed "expected ${TESTING} but got <$(node --version)> "
   }
   fi
-  passed "${TESTING}"
+  (( DEBUG )) && passed "${TESTING}"
+  return 0
 } # end enforce_node_is_version
 
 function enforce_vpn_is_on(){
   # Sample use:
   # enforce_vpn_is_on  "diginet"
   #
-  echo "  Checking for connection to ${1}"
+  (( DEBUG )) && echo "  Checking for connection to ${1}"
   local msg
   msg=$(/usr/bin/nmcli c show --active | /bin/grep vpn | /bin/grep "${1}" 2>&1; )
   _err=$?
@@ -4789,7 +4790,8 @@ function enforce_vpn_is_on(){
     failed "${TESTING}"
   }
   fi
-  passed "${TESTING}"
+  (( DEBUG )) && passed "${TESTING}"
+  return 0
 } # end enforce_vpn_is_on
 
 function extract_domainname(){
