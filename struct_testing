@@ -4415,8 +4415,42 @@ function determine_os_and_fire_action() {
   unset PARAMETERS
 } # end determine_os_and_fire_action
 
+function _move_to_target_dir() {
+  # Sample use
+  #
+  #   _move_to_target_dir "${DOWNLOADFOLDER}" ${_target_dir_install}" "${TARGETFOLDER}"
+  #
+  local DOWNLOADFOLDER="${1}" #    param order    varname             varvalue                   sample_value
+  enforce_parameter_with_value     "1"             DOWNLOADFOLDER      "${DOWNLOADFOLDER}"        "\${USER_HOME}/Downloads \${DOWNLOADFOLDER}"
+
+  local _target_dir_install="${2}" # param order   varname             varvalue                   sample_value
+  enforce_parameter_with_value         "2"         _target_dir_install  "${_target_dir_install}"   "${USER_HOME}/_/software/phpstorm"
+
+  local TARGETFOLDER="${3}" # param order      varname           varvalue                   sample_value
+  enforce_parameter_with_value     "3"        TARGETFOLDER     "${TARGETFOLDER}"   "${USER_HOME}/_/software"
+
+  local NEWDIRCODENAME=$(ls -1tr "${DOWNLOADFOLDER}/"  | tail  -1)
+  local FROMUZIPPED="${DOWNLOADFOLDER}/${NEWDIRCODENAME}"
+  directory_exists_with_spaces  "${FROMUZIPPED}"
+
+  _backup_current  "${_target_dir_install}"
+
+  [ ! -d "${TARGETFOLDER}" ] &&  mkdir -p "${TARGETFOLDER}"
+  directory_exists_with_spaces "${TARGETFOLDER}"
+
+  [ -e "${_target_dir_install}" ] && rm -rf "${_target_dir_install}"
+  mv "${FROMUZIPPED}" "${_target_dir_install}"
+
+  directory_does_not_exist_with_spaces "${FROMUZIPPED}"
+  directory_exists_with_spaces "${_target_dir_install}"
+
+} # end _move_to_tartget_dir
+
 function _backup_current(){
-  # Sample use:   _backup_current  "${USER_HOME}/_/software/phpstorm"
+  # Sample use:
+  #
+  #   _backup_current  "${USER_HOME}/_/software/phpstorm"
+  #
   local __dir="${*}"  #           param order   varname   varvalue      valid_options
   # enforce_parameter_with_options 1            __dir     "${__dir}"    "/home/user/Downloads /home/user2/Downloads"
   #                  #             param order  varname   varvalue      sample_value
@@ -4424,15 +4458,15 @@ function _backup_current(){
 
   if  it_exists_with_spaces "${__dir}" ; then
   {
-     folder_date=$(date +"%Y%m%d")
+     local folder_date=$(date +"%Y%m%d")
      if  it_exists_with_spaces "${__dir}_${folder_date}" ; then
      {
        warning A backup already exists for today "${ret}:${msg} \n ... adding time"
        folder_date=$(date +"%Y%m%d%H%M")
      }
      fi
-     msg=$(mv "${__dir}" "${__dir}_${folder_date}")
-     ret=$?
+     local msg=$(mv "${__dir}" "${__dir}_${folder_date}")
+     local ret=$?
      if [ $ret -gt 0 ] ; then
      {
        warning failed to move backup "${ret}:${msg} \n"
@@ -4443,6 +4477,58 @@ function _backup_current(){
   }
   fi
 } # end backup_current
+
+function _untar_gz_download(){
+  # Sample use:
+  #    _untar_gz_download  "${DOWNLOADFOLDER}"   "${DOWNLOADFOLDER}/${CODENAME}.tar.gz"
+  #
+  local DOWNLOADFOLDER="${1}" #  param order  varname        varvalue                 sample_value
+  enforce_parameter_with_value     "1"        DOWNLOADFOLDER "${DOWNLOADFOLDER}"    "\${USER_HOME}/Downloads \${DOWNLOADFOLDER}"
+  local _tar_file="${2}"
+  enforce_parameter_with_value     "2"        _tar_file      "${_tar_file}"         "\${DOWNLOADFOLDER}/\${CODENAME}.tar.gz"
+
+  ensure tar or "Canceling Install. Could not find tar command to execute unzip"
+  ensure awk or "Canceling Install. Could not find awk command to execute unzip"
+  ensure pv or "Canceling Install. Could not find pv command to execute unzip"
+  ensure du or "Canceling Install. Could not find du command to execute unzip"
+  ensure gzip or "Canceling Install. Could not find gzip command to execute unzip"
+  ensure gio or "Canceling Install. Could not find gio command to execute gio"
+  ensure update-mime-database or "Canceling Install. Could not find update-mime-database command to execute update-mime-database"
+  ensure update-desktop-database or "Canceling Install. Could not find update-desktop-database command to execute update"
+  ensure touch or "Canceling Install. Could not find touch command to execute touch"
+
+  # provide error handling , once learned goes here. LEarn under if, once learned here.
+  # Start loop while ERROR flag in case needs to try again, based on error
+  cd "${DOWNLOADFOLDER}"
+  #_try "tar xvzf  \"${DOWNLOADFOLDER}/${CODENAME}.tar.gz\"--directory=${DOWNLOADFOLDER}"
+  # GROw bar with tar Progress bar tar REF: https://superuser.com/questions/168749/is-there-a-way-to-see-any-tar-progress-per-file
+  # Compress tar cvfj big-files.tar.bz2 folder-with-big-files
+  # Compress tar cf - ${DOWNLOADFOLDER}/${CODENAME}.tar.gz --directory=${DOWNLOADFOLDER} -P | pv -s $(du -sb ${DOWNLOADFOLDER}/${CODENAME}.tar.gz | awk '{print $1}') | gzip > big-files.tar.gz
+  # Extract tar Progress bar REF: https://coderwall.com/p/l_m2yg/tar-untar-on-osx-linux-with-progress-bars
+  # Extract tar sample pv file.tgz | tar xzf - -C target_directory
+  # Working simplme tar:  tar xvzf ${DOWNLOADFOLDER}/${CODENAME}.tar.gz --directory=${DOWNLOADFOLDER}
+  pv "${_tar_file}"  | tar xzf - -C "${DOWNLOADFOLDER}"
+  #local msg=$(_try "tar xvzf  \"${DOWNLOADFOLDER}/${CODENAME}.tar.gz\" --directory=${DOWNLOADFOLDER} " )
+  #  tar xvzf file.tar.gz
+  # Where,
+  # x: This option tells tar to extract the files.
+  # v: The “v” stands for “verbose.” This option will list all of the files one by one in the archive.
+  # z: The z option is very important and tells the tar command to uncompress the file (gzip).
+  # f: This options tells tar that you are going to give it a file name to work with.
+  local msg
+  local folder_date
+  local ret=$?
+  if [ $ret -gt 0 ] ; then
+  {
+    failed "${ret}:${msg}"
+    # add error handling knowledge while learning.
+  }
+  else
+  {
+    passed Install with Untar Unzip success!
+  }
+  fi
+} # end _untar_gz_download
 
 
 function _do_not_downloadtwice(){
