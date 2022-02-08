@@ -4415,6 +4415,36 @@ function determine_os_and_fire_action() {
   unset PARAMETERS
 } # end determine_os_and_fire_action
 
+function _backup_current(){
+  # Sample use:   _backup_current  "${USER_HOME}/_/software/phpstorm"
+  local __dir="${*}"  #           param order   varname   varvalue      valid_options
+  # enforce_parameter_with_options 1            __dir     "${__dir}"    "/home/user/Downloads /home/user2/Downloads"
+  #                  #             param order  varname   varvalue      sample_value
+  enforce_parameter_with_value     "*"          __dir     "${__dir}"    "${USER_HOME}/_/software/phpstorm"
+
+  if  it_exists_with_spaces "${__dir}" ; then
+  {
+     folder_date=$(date +"%Y%m%d")
+     if  it_exists_with_spaces "${__dir}_${folder_date}" ; then
+     {
+       warning A backup already exists for today "${ret}:${msg} \n ... adding time"
+       folder_date=$(date +"%Y%m%d%H%M")
+     }
+     fi
+     msg=$(mv "${__dir}" "${__dir}_${folder_date}")
+     ret=$?
+     if [ $ret -gt 0 ] ; then
+     {
+       warning failed to move backup "${ret}:${msg} \n"
+     }
+     fi
+     directory_exists_with_spaces "${__dir}_${folder_date}"
+     file_does_not_exist_with_spaces "${__dir}"
+  }
+  fi
+} # end backup_current
+
+
 function _do_not_downloadtwice(){
   # Sample usage:
   #
@@ -4425,6 +4455,7 @@ function _do_not_downloadtwice(){
   # enforce_variable_with_value TARGET_URL "${TARGET_URL}"
   # local DOWNLOADFOLDER="${USER_HOME}/Downloads"
   # enforce_variable_with_value DOWNLOADFOLDER "${DOWNLOADFOLDER}"
+  #
   # _do_not_downloadtwice "${TARGET_URL}" "${DOWNLOADFOLDER}"  "${CODENAME}"
   #
   #
@@ -4432,6 +4463,7 @@ function _do_not_downloadtwice(){
   enforce_parameter_with_value 1 TARGET_URL "${TARGET_URL}" "https://download.teamviewer.com/download/linux/teamviewer.x86_64.rpm"
   local DOWNLOADFOLDER="${2}"
   enforce_parameter_with_value 2 DOWNLOADFOLDER "${DOWNLOADFOLDER}" "$USER_HOME/Downloads"
+  file_exists_with_spaces "${DOWNLOADFOLDER}"
   local CODENAME="${3}"
   enforce_parameter_with_value 3 CODENAME "${CODENAME}" "teamviewer.x86_64.rpm"
   (( VERBOSE )) && echo  _do_not_downloadtwice "${TARGET_URL}" "${DOWNLOADFOLDER}"  "${CODENAME}"
@@ -4449,7 +4481,6 @@ function _do_not_downloadtwice(){
     file_exists_with_spaces "${DOWNLOADFOLDER}/${CODENAME}"
   }
   fi
-  return 0
 } # end _do_not_downloadtwice
 
 function _remove_downloaded_codename_or_err(){
