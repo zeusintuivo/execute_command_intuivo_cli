@@ -329,6 +329,7 @@ CERO="\033[01;0m"
             }
             fi
         }
+        alias warning=Warning
 
         function failed() {
             # echo -e "${BASH_SOURCE[0]}:${BASH_LINENO[0]} \t\t  ${FUNCNAME[0]}() ${RESET}"  >&1
@@ -4706,18 +4707,18 @@ function raise_to_sudo_and_user_home() {
     local -r provider="$USER_HOME/_/clis/execute_command_intuivo_cli/execute_boot_basic.sh"
     local _err=0 bootbasicsource
     if [   -e "${provider}"  ] ; then
-      echo "Loading locally"
+      (( DEBUG )) && echo "$0 execute_command_intuivo_cli/struct_testing load_execute_boot_basic_with_sudo() Loading locally"
       bootbasicsource="""$(<"${provider}")"""
       _err=$?
       [ $_err -gt 0 ] &&  echo -e "\n \n  ERROR! Loading execute_boot_basic.sh. running 'source locally' returned error did not download or is empty err:$_err  \n \n  " && exit 1
     else
       if ( command -v curl >/dev/null 2>&1; )  ; then
-        echo "Loading execute_boot_basic.sh from the net using curl "
+        (( DEBUG )) && echo "$0 execute_command_intuivo_cli/struct_testing load_execute_boot_basic_with_sudo() curl Loading execute_boot_basic.sh from the net using curl "
         bootbasicsource="""$(curl https://raw.githubusercontent.com/zeusintuivo/execute_command_intuivo_cli/master/execute_boot_basic.sh  -so -   2>/dev/null )"""  #  2>/dev/null suppress only curl download messages, but keep curl output for variable
         _err=$?
         [ $_err -gt 0 ] &&  echo -e "\n \n  ERROR! Loading execute_boot_basic.sh. running 'curl' returned error did not download or is empty err:$_err  \n \n  " && exit 1
       elif ( command -v wget >/dev/null 2>&1; ) ; then
-        echo "Loading execute_boot_basic.sh from the net using wget "
+        (( DEBUG )) && echo "$0 execute_command_intuivo_cli/struct_testing load_execute_boot_basic_with_sudo() wget Loading execute_boot_basic.sh from the net using wget "
         bootbasicsource="""$(wget --quiet --no-check-certificate  https://raw.githubusercontent.com/zeusintuivo/execute_command_intuivo_cli/master/execute_boot_basic.sh -O -   2>/dev/null )"""  #  2>/dev/null suppress only wget download messages, but keep wget output for variable
         _err=$?
         [ $_err -gt 0 ] &&  echo -e "\n \n  ERROR! Loading execute_boot_basic.sh. running 'wget' returned error did not download or is empty err:$_err  \n \n  " && exit 1
@@ -4729,7 +4730,7 @@ function raise_to_sudo_and_user_home() {
     [[ -z "${bootbasicsource}" ]] && echo -e "\n \n  ERROR! Loading execute_boot_basic.sh  bootbasicsource did not download or is empty " && exit 1
     local _temp_dir="$(mktemp -d 2>/dev/null || mktemp -d -t 'execute_boot_basic_source')"
     echo "${bootbasicsource}">"${_temp_dir}/execute_boot_basic_source"
-    echo "Temp execute_boot_basic.sh location ${_temp_dir}/execute_boot_basic_source"
+    (( DEBUG )) && echo "$0 execute_command_intuivo_cli/struct_testing load_execute_boot_basic_with_sudo() Temp execute_boot_basic.sh location ${_temp_dir}/execute_boot_basic_source"
     source "${_temp_dir}/execute_boot_basic_source"
     _err=$?
     [ $_err -gt 0 ] &&  echo -e "\n \n  ERROR! Loading execute_boot_basic.sh. Occured while running 'source' err:$_err  \n \n  " && exit 1

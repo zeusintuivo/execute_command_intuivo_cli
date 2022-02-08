@@ -146,7 +146,7 @@ load_execute_as_sudo(){
     fi
     if ( command -v execute_as_sudo >/dev/null 2>&1; ) ; then
     {
-      echo "$provider" Loaded Now checking..
+      (( DEBUG )) && echo "$provider Loaded Now checking.."
       return 0
     }
     else
@@ -180,11 +180,11 @@ enforce_variable_with_value USER_HOME "$USER_HOME"
 # shellcheck disable=SC2031
 (( DEBUG )) &&  echo "$SUDO_USER"
 (( DEBUG )) &&  env | grep SUDO
-echo -e "${CYAN} \__________Sudoed Correctly ${BRIGHT_BLUE87}✔️${CYAN}"
+(( DEBUG )) && echo -e "execute_command_intuivo_cli/execute_boot_basic.sh ${CYAN} \__________Sudoed Correctly ${BRIGHT_BLUE87}✔️${CYAN}"
 # shellcheck disable=SC2031
-echo -e "${CYAN}                           ${LIGHTPINK} SUDO_USER ️${YELLOW_OVER_DARKBLUE} $SUDO_USER ${BRIGHT_BLUE87}✔️${CYAN}"
-echo -e "${CYAN}                           ${LIGHTPINK} USER_HOME ️${YELLOW_OVER_DARKBLUE} $USER_HOME ${BRIGHT_BLUE87} ✔️${CYAN}"
-echo -e "${provider} Loaded ${BRIGHT_BLUE87}✔️${CYAN}"
+(( DEBUG )) && echo -e "execute_command_intuivo_cli/execute_boot_basic.sh ${CYAN}                           ${LIGHTPINK} SUDO_USER ️${YELLOW_OVER_DARKBLUE} $SUDO_USER ${BRIGHT_BLUE87}✔️${CYAN}"
+(( DEBUG )) && echo -e "execute_command_intuivo_cli/execute_boot_basic.sh ${CYAN}                           ${LIGHTPINK} USER_HOME ️${YELLOW_OVER_DARKBLUE} $USER_HOME ${BRIGHT_BLUE87} ✔️${CYAN}"
+(( DEBUG )) && echo -e "execute_command_intuivo_cli/execute_boot_basic.sh ${provider} Loaded ${BRIGHT_BLUE87}✔️${CYAN}"
 
 
 # exit 0
@@ -355,7 +355,7 @@ execute_command_intuivo_cli/struct_testing:passed
       }
       else
       {
-        echo -e "${_url} Loaded Correctly ${BRIGHT_BLUE87}✔️${CYAN}"
+        (( DEBUG )) && echo -e "execute_command_intuivo_cli/execute_boot_basic.sh ${_url} Loaded Correctly ${BRIGHT_BLUE87}✔️${CYAN}"
       }
       fi
     }
