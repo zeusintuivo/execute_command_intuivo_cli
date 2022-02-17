@@ -3713,7 +3713,16 @@ function progressfilt() {
     # $ wget --progress=bar:force http://somesite.com/TheFile.jpeg 2>&1 | progressfilt
     # 100%[======================================>] 15,790      48.8K/s   in 0.3s
     # 2011-01-13 22:09:59 (48.8 KB/s) - 'TheFile.jpeg' saved [15790/15790]
+    local _err=$?
+    if [ ${_err} -ne 0 ] ; then
+    {
+       echo "$0:progressfilt: error: ${_err} cannot continue"
+       return ${_err}
+       exit ${_err} 
+    }
+    fi
     local flag=false c count cr=$'\r' nl=$'\n'
+    
     while IFS='' read -d '' -rn 1 c; do
     {
         if $flag;  then
@@ -3780,23 +3789,39 @@ function _download_mac() {
   }
   fi
   # -c Resume Downloads  -c option only works with FTP / HTTP servers that support the “range” header
-  if ( command -v wget >/dev/null 2>&1; ) ; then
+  if ( command -v curl >/dev/null 2>&1; ); then
+  {
+    pwd
+    # _try
+    echo "curl -LO  -k -s --url  \"${target_url}\" 2>/dev/null   # suppress only wget download messages, but keep wget output for variable"
+set -ex
+    # curl -LO  -k -s --url  "${target_url}" 2>/dev/null   # suppress only wget download messages, but keep wget output for variable
+    curl -LO "${target_url}" 2>/dev/null   # suppress only wget download messages, but keep wget output for variable
+      echo $?
+      ls -la
+set +ex
+    wait
+  }
+  elif ( command -v wget >/dev/null 2>&1; ) ; then
+  {
     # REF: https://www.linuxquestions.org/questions/linux-general-1/how-to-create-a-bash-script-to-wait-for-wget-to-finish-and-then-continue-621754/
     for url in $(echo "${download_folder}"); do
     {
       # _try wget -c --directory-prefix=\"${USER_HOME}/Downloads/\"  --quiet --no-check-certificate "${download_folder}" 2>/dev/null   # suppress only wget download messages, but keep wget output for variable
       echo "wget -c --progress=bar:force --directory-prefix=\"${download_folder}\" --no-check-certificate \"${target_url}\" 2>&1 | progressfilt"
+set -ex
       wget -c --progress=bar:force --directory-prefix="${download_folder}" --no-check-certificate "${target_url}" 2>&1 | progressfilt
+      echo $?
+      ls -la
+set +ex
       # wget -c --directory-prefix=\"${USER_HOME}/Downloads/\"  --quiet --no-check-certificate "${download_folder}" 2>/dev/null   # suppress only wget download messages, but keep wget output for variable
     }
     done
-  elif ( command -v curl >/dev/null 2>&1; ); then
-    pwd
-    # _try
-    curl -LO "${target_url}" 2>/dev/null   # suppress only wget download messages, but keep wget output for variable
-    wait
+  }
   else
+  {
     failed "I cannot find wget or curl to download! ${target_url}"
+  }
   fi
 } # end _download_mac
 
