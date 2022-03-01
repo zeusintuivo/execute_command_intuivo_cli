@@ -89,7 +89,7 @@ function HOW_TO_LOAD_SEVERAL_FILES() {
         local cached_directory="$HOME/_/clis/execute_command_intuivo_cli/"
         local EXECOMCLI=""
         local provider=""
-        [   -d "${cached_directory}" ] &&  provider="file://${cached_directory}"
+        [   -d "${cached_directory}" ] &&  provider="${cached_directory}"
         [ ! -d "${cached_directory}" ] &&  provider="https://raw.githubusercontent.com/zeusintuivo/execute_command_intuivo_cli/master/"
         local BASH_SCRIPTS="
     struct_testing
@@ -113,7 +113,7 @@ function HOW_TO_LOAD_SEVERAL_FILES() {
         unset ONE_SCRIPT
         unset BASH_SCRIPTS
         unset provider
-        ( ( ! command -v passed >/dev/null 2>&1;) && echo -e "\n \n  ERROR! Loading struct_testing \n \n " && exit 69; )
+        ( ( ! command -v passed >/dev/null 2>&1;) && echo -e "\n \n  ERROR! Loading ${ONE_SCRIPT} \n \n " && exit 69; )
     }
     # end load_execute_commands_wget
     load_execute_commands_wget
@@ -3718,11 +3718,11 @@ function progressfilt() {
     {
        echo "$0:progressfilt: error: ${_err} cannot continue"
        return ${_err}
-       exit ${_err} 
+       exit ${_err}
     }
     fi
     local flag=false c count cr=$'\r' nl=$'\n'
-    
+
     while IFS='' read -d '' -rn 1 c; do
     {
         if $flag;  then
