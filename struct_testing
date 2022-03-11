@@ -512,6 +512,35 @@ CERO="\033[01;0m"
           exit 1
         } # end enforce_variable_with_value
 
+        function _contains() {
+          # Sample use
+          #   _contains ".tar.xz' $VAR
+          #   _contains "nano-' $VAR
+          local _what="${1}"
+          local _which="${2}"
+          if [[ "${_which}" == *"${_what}"* ]] ; then
+          {
+            return 0
+          }
+          fi
+          return 1
+        } # end _contains
+
+        function enforce_contains() {
+          # Sample use
+          #   enforce_contains ".tar.xz' $VAR
+          #   enfore_contains "nano-' $VAR
+          local _what="${1}"
+          local _which="${2}"
+          local _test="expected to contain <${_what}> inside <${_which}>"
+          if _contains "${_what}"  "${_which}"  ; then
+          {
+            return 0
+          }
+          fi
+          failed "${_test}"
+        } # end enforce_contains
+
         function assert() {
             # Sample usage
             #
