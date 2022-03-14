@@ -4546,9 +4546,9 @@ function _untar_gz_download(){
   ensure pv or "Canceling Install. Could not find pv command to execute unzip"
   ensure du or "Canceling Install. Could not find du command to execute unzip"
   ensure gzip or "Canceling Install. Could not find gzip command to execute unzip"
-  ensure gio or "Canceling Install. Could not find gio command to execute gio"
-  ensure update-mime-database or "Canceling Install. Could not find update-mime-database command to execute update-mime-database"
-  ensure update-desktop-database or "Canceling Install. Could not find update-desktop-database command to execute update"
+  # ensure gio or "Canceling Install. Could not find gio command to execute gio"
+  # ensure update-mime-database or "Canceling Install. Could not find update-mime-database command to execute update-mime-database"
+  # ensure update-desktop-database or "Canceling Install. Could not find update-desktop-database command to execute update"
   ensure touch or "Canceling Install. Could not find touch command to execute touch"
 
   # provide error handling , once learned goes here. LEarn under if, once learned here.
