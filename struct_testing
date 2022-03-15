@@ -5169,7 +5169,7 @@ function _trust_dmgs_application() {
   echo  Removing macOS gatekeeper quarantine attribute
   chown  -R $SUDO_USER "/Applications/${APPDIR}"
   chgrp  -R staff "/Applications/${APPDIR}"
-  xattr -d com.apple.quarantine  "/Applications/${APPDIR}"
+  #xattr -d com.apple.quarantine  "/Applications/${APPDIR}"
   return 0
 } # end  _trust_dmgs_application
 
