@@ -1944,18 +1944,31 @@ function _run_command(){
           if ( is_defined_and_not_empty SUDO_USER "${SUDO_USER}" && is_defined_and_not_empty SUDO_UID "${SUDO_UID}"  ) ; then
           {
               (( DEBUG )) && echo "type_function_exists:SUDO DEFINED"
-              if ( su - $SUDO_USER -c 'type '"${*}"' >/dev/null 2>&1' ) ; then
+              if [[ "$(( type "${*}" > /dev/null 2>&1 ) && echo "hola" )" == *"hola"* ]] ; then
+              #if [[ "$(( ( su - $SUDO_USER -c 'type '"${*}"' >/dev/null 2>&1' ) ) && echo "hola" )" == *"hola"* ]] ; then
+              #if ( su - $SUDO_USER -c 'type '"${*}"' >/dev/null 2>&1' ) ; then
               {
                 (( DEBUG )) && echo "type_function_exists:TYPE is installed ${*} "
                 return 0
               }
               fi
               (( DEBUG )) && echo "type_function_exists:TYPE is not installed ${*} "
+              (( DEBUG )) && echo "type_function_exists:trying with command ${*} "
+              if [[ "$(( ( su - $SUDO_USER -c 'command -v '"${*}"' >/dev/null 2>&1' ) ) && echo "hola" )" == *"hola"* ]] ; then
+              {
+                (( DEBUG )) && echo "type_function_exists:COMMAND is installed ${*} "
+                return 0
+              }
+              fi
+              (( DEBUG )) && echo "type_function_exists:TYPE abd COMMAND fail to find installed or available ${*} "
               return 1
           }
           fi
           (( DEBUG )) && echo "type_function_exists:SUDO NOT DEFINED"
-          if ( type "${*}" > /dev/null 2>&1 ) ; then
+          # if [[ "$(( type wget > /dev/null 2>&1 ) && echo "hola" )" == *"hola"* ]] ; then  echo "has" ; else  echo "has not" ; fi
+          # [[ "$(( type wgot > /dev/null 2>&1 ) && echo "hola" )" == *"hola"* ]] && echo "has"
+          if [[ "$(( type "${*}" > /dev/null 2>&1 ) && echo "hola" )" == *"hola"* ]] ; then
+          # if ( type "${*}" > /dev/null 2>&1 ) ; then
           {
             (( DEBUG )) && echo "type_function_exists:TYPE is installed ${*} "
             return 0
@@ -1983,6 +1996,15 @@ function _run_command(){
             #passed "${TESTING}"  # assumed else
             return 1
         } # end is_installed
+
+export is_not_installed
+#function is_not_installed (){
+#  if ( command -v $1 >/dev/null 2>&1; ) ; then
+#    return 1
+#  else
+#    return 0
+#  fi
+#} # end is_not_installed
 
         function is_not_installed() {
             # Sample use
@@ -2075,6 +2097,31 @@ function _run_command(){
         alias is_installed_version=version_installed_is
         alias is_version=version_installed_is
         alias version_is=version_installed_is
+function major_minor_version() {
+  echo "${1%%.*}.$(x="${1#*.}"; echo "${x%%.*}")"
+}
+
+function version_gt() {
+  [[ "${1%.*}" -gt "${2%.*}" ]] || [[ "${1%.*}" -eq "${2%.*}" && "${1#*.}" -gt "${2#*.}" ]]
+}
+function version_ge() {
+  [[ "${1%.*}" -gt "${2%.*}" ]] || [[ "${1%.*}" -eq "${2%.*}" && "${1#*.}" -ge "${2#*.}" ]]
+}
+function version_lt() {
+    # Sample use 
+    # 
+    #  macos_version="$(major_minor_version "$(/usr/bin/sw_vers -productVersion)")"
+    #  if version_lt "$macos_version" "10.7"; then
+    #  {
+    #     failed "$(cat <<EOABORT
+    # Your Mac OS X version is too old. See:
+    #   ${tty_underline}https://github.com/mistydemeo/tigerbrew${tty_reset}
+    # EOABORT
+    # )"
+    #  
+    #
+  [[ "${1%.*}" -lt "${2%.*}" ]] || [[ "${1%.*}" -eq "${2%.*}" && "${1#*.}" -lt "${2#*.}" ]]
+}
 
         function verify_installed_version() {
             # Sample use
@@ -2195,6 +2242,32 @@ function _run_command(){
             fi
         } # end verify_installed_version_old
 
+function _ensure_touch_dir_and_file() {
+    # Sample use 
+    # 
+    #  _ensure_touch_dir_and_file "${cronallowdir}" "${cronallowfile}"
+    #  _ensure_touch_dir_and_file "${USER_HOME}/_/clis" "${USER_HOME}/_/clis/updateall.bash"
+    # 
+    #
+  local launchdir_default="${1}"
+  local launchfile_default="${2}"
+
+  enforce_variable_with_value launchdir_default "${launchdir_default}"
+  enforce_variable_with_value launchfile_default "${launchfile_default}"
+  enforce_variable_with_value SUDO_USER "${SUDO_USER}"
+  enforce_variable_with_value USER_HOME "${USER_HOME}"
+
+  if it_does_not_exist_with_spaces "${launchfile_default}" ; then
+  {
+    mkdir -p "${launchdir_default}"
+    directory_exists_with_spaces "${launchdir_default}"
+    touch "${launchfile_default}"
+    chown -R "${SUDO_USER}" "${launchdir_default}"
+  }
+  fi
+  file_exists_with_spaces "${launchfile_default}"
+} # end _ensure_touch_dir_and_file
+
         function _if_not_is_installed(){
             local -i ret
             local msg
@@ -2209,7 +2282,7 @@ function _run_command(){
             }
             elif ( command -v brew >/dev/null 2>&1; ) ; then
             {
-                msg="$(su - "${SUDO_USER}" -c "brew info $1  >/dev/null 2>&1")"
+                msg="$(su - "${SUDO_USER}" -c "/usr/local/bin/brew info $1  >/dev/null 2>&1")"
             }
             fi
             ret=$?
@@ -2293,8 +2366,32 @@ function _run_command(){
              #   echo "set ${policies}" > temp.xml
              # }
              # fi
-            return ! _if_not_contains  "$1" "$2"
+             if _if_not_contains  "$1" "$2" ; then 
+             {
+               return 0
+             }
+             fi
+             return 1 
         } # end _if_contains
+
+
+# Checking selftest _if_contains
+if it_exists_with_spaces "${USER_HOME}/.bashrc" ; then
+{
+  if _if_contains  "${USER_HOME}/.bashrc" "PETERPIZZA" ; then
+  {
+    failed "self test bad .bashrc should not have PETERPIZZA word"
+  }
+  fi
+  if ! _if_contains  "${USER_HOME}/.bashrc" "then" ; then
+  {
+    failed ".bashrc should have the then word"
+  }
+  fi
+  # echo hola
+  # exit 0
+}
+fi
 
 
         function if_user_exists() {
@@ -2640,9 +2737,10 @@ function _run_command(){
             elif ( command -v brew >/dev/null 2>&1; ) ; then
             {
                 (( DEBUG )) && echo "BREW list formulas"
-                # query=$(brew list --formula 2>&1)
-                query=$(su - "${SUDO_USER}" -c "brew list --formula" 2>&1)
-                # query=$(_run_command "brew list --formula"  2>&1)
+                # query=$(/usr/local/bin/brew list --formula 2>&1)
+                query=$(su - "${SUDO_USER}" -c "/usr/local/bin/brew list --formula" 2>&1)
+echo "$query"
+                # query=$(_run_command "/usr/local/bin/brew list --formula"  2>&1)
             }
             fi
             for one_required in ${required}; do
@@ -2729,10 +2827,10 @@ function _run_command(){
                 }
                 fi
               }
-              elif ( command -v brew >/dev/null 2>&1; ) ; then
+              elif ( command -v /usr/local/bin/brew >/dev/null 2>&1; ) ; then
               {
-                (( DEBUG )) && echo "brew"
-                # CHECK_INSTALLED=$(brew ls --versions "${one_required}")
+                (( DEBUG )) && echo "/usr/local/bin/brew"
+                # CHECK_INSTALLED=$(/usr/local/bin/brew ls --versions "${one_required}")
                 # query=$(brew list --formula 2>&1)
                 # one_required="nano"
                 # query=$(su - "${SUDO_USER}" -c "brew list --formula" 2>&1)
@@ -2782,8 +2880,8 @@ function _run_command(){
               elif ( command -v brew >/dev/null 2>&1; ) ; then
               {
                 # _run_command brew install ${missing}
-                (( DEBUG )) && echo "brew install"
-                su - "${SUDO_USER}" -c "brew install ${missing} "
+                (( DEBUG )) && echo "/usr/local/bin/brew install"
+                su - "${SUDO_USER}" -c "/usr/local/bin/brew install ${missing} "
                 err_buff=$?
               }
               fi
@@ -3825,7 +3923,7 @@ function _download_mac() {
     echo "curl -LO  -k -s --url  \"${target_url}\" 2>/dev/null   # suppress only wget download messages, but keep wget output for variable"
 set -ex
     # curl -LO  -k -s --url  "${target_url}" 2>/dev/null   # suppress only wget download messages, but keep wget output for variable
-    curl -LO "${target_url}" 2>/dev/null   # suppress only wget download messages, but keep wget output for variable
+    curl -kLO "${target_url}" 2>/dev/null   # suppress only wget download messages, but keep wget output for variable
       echo $?
       ls -la
 set +ex
@@ -5228,6 +5326,17 @@ function _install_dmgs_dmg__64() {
     UNZIPDIR="$(echo -en "${CODENAME}" | sed 's/.zip//g' | sed 's/.dmg//g')"
   }
   fi
+
+  local -i size=0
+  size=$(du "${DOWNLOADFOLDER}/${CODENAME}" | cut -d/ -f1)
+  if [ ${size} -lt 1000 ] ; then
+  {
+    nurindatei "${DOWNLOADFOLDER}/${CODENAME}" 404
+    echo -e "${RED} 𝞦 SKIPPING ${LIGHTYELLOW} failed to download this one. It seems too small  ${RESET}"
+    return 0
+  }
+  fi
+
   _process_dmgs_dmg_or_zip "${extension}" "${DOWNLOADFOLDER}" "${CODENAME}" "${APPDIR}" "${UNZIPDIR}"
 
   directory_exists_with_spaces "/Applications/${APPDIR}"
