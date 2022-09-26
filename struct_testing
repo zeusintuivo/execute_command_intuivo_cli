@@ -4448,12 +4448,12 @@ function get_architecture(){
   fi
   if [ -z ${return_function_to_call} ] || [[ "${return_function_to_call}" =~ 'nknown' ]] ; then
   {
-     if [[ "${uname -a}" =~  'x86_64' ]] ; then
+     if [[ "$(uname -a)" =~  'x86_64' ]] ; then
      {
        return_function_to_call="_${system_nick}__64"
      }
      fi
-     if [[ "${uname -a}" =~  'i686' ]] ; then
+     if [[ "$(uname -a)" =~  'i686' ]] ; then
      {
        return_function_to_call="_${system_nick}__32"
      }
