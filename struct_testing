@@ -473,37 +473,53 @@ CERO="\033[01;0m"
           # [ -n "${CAN_I_RUN_SUDO+x}" ] && echo "CAN_I_RUN_SUDO 12"
           # [ -n "${SUDO_USER+x}" ] && echo "SUDO_USER 111"
           # ( declare -p "HOME" ) && echo "HOME 2"
-          typeset -r TESTING="that variable is listed and: ${CYAN}${1}${LIGHTYELLOW} and has value: ${RESET}<${YELLOW_OVER_DARKBLUE}${2}${RESET}>"
+          local _err_arriving=$?
+#          typeset -r TESTING="that variable is listed and: ${CYAN}${1}${LIGHTYELLOW} and has value: ${RESET}<${YELLOW_OVER_DARKBLUE}${2}${RESET}>"
+          if [ ${_err_arriving} -gt 0 ] ; then
+          {
+             warning _err_arriving:${_err_arriving}
+             warning failed $0 $*
+             failed "${TESTING}" ${RED} Stopped executing becuase it arrived with \$_ERR not Zero
+          }
+          fi
           local -i _seemsempty_=0
-          (( DEBUG )) && echo -e "${FUNCNAME[0]}"
-          (( DEBUG )) && echo "x${1}x" -assume existing variable for this part
-          (( DEBUG )) && echo "x${2}x" -assume existing variable for this part
+          if (( DEBUG )) ; then
+            echo -e "${FUNCNAME[0]}"
+            echo "x${1}x" -assume existing variable for this part
+            echo "x${2}x" -assume existing variable for this part
+          fi
           [[ "x${2}x" = "xx" ]] && _seemsempty_=1
-          (( DEBUG )) && [[ "x${2}x" = "xx" ]] && echo seems empty
-          (( DEBUG )) && ( typeset -p "${1}"  &>/dev/null  ) && echo "1 defined 1"
-          (( DEBUG )) && [ -n "${2+x}" ]  && echo "1 defined 2"
-          (( DEBUG )) && ( typeset -p "${1}"  &>/dev/null ) &&  [ -n "${2+x}" ]  && echo "1 declared,defined and with value not empty 3"
-          (( DEBUG )) && ( ( typeset -p "${1}"  &>/dev/null  ) || echo "1 not defined 1")
-          (( DEBUG )) && ( ! typeset -p "${1}"  &>/dev/null  ) && echo "1 not defined 2"
-          (( DEBUG )) && ( env | grep "${1}"  &>/dev/null  ) && echo "2 not in env "
-          (( DEBUG )) && [ -n "${2+x}" ]  && echo "2 failed empty 8"
-          (( DEBUG )) && [ -n "${2-x}" ]  && echo "2 failed empty 7"
-          (( DEBUG )) && [ -z "${2+x}" ]  && echo "2 failed empty 9"
-          (( DEBUG )) && [ -z "${2-x}" ]  && echo "2 failed empty 10"
-          # echo QWER - assume non existant variable for this part
-          # ( typeset -p "QWER"  &>/dev/null  ) && echo "QWER defined 1"
-          # [ -n "${QWER+x}" ]  && echo "QWER defined 2"
-          # ( typeset -p "QWER"  &>/dev/null ) &&  [ -n "${QWER+x}" ]  && echo "QWER defined 3"
-          # ( typeset -p "QWER"  &>/dev/null  ) || echo "QWER not defined 1"
-          # ( ! typeset -p "QWER"  &>/dev/null  ) && echo "QWER not defined 2"
-          # echo bye
-          # exit 0
+          if (( DEBUG )) ; then
+            if [[ "x${2}x" = "xx" ]] ; then
+              echo seems empty
+            fi
+            ( typeset -p "${1}"  &>/dev/null  ) && echo "1 defined 1"
+            [ -n "${2+x}" ]  && echo "1 defined 2"
+            ( typeset -p "${1}"  &>/dev/null ) &&  [ -n "${2+x}" ]  && echo "1 declared,defined and with value not empty 3"
+            ( ( typeset -p "${1}"  &>/dev/null  ) || echo "1 not defined 1")
+            ( ! typeset -p "${1}"  &>/dev/null  ) && echo "1 not defined 2"
+            ( env | grep "${1}"  &>/dev/null  ) && echo "2 not in env "
+            [ -n "${2+x}" ]  && echo "2 failed empty 8"
+            [ -n "${2-x}" ]  && echo "2 failed empty 7"
+            [ -z "${2+x}" ]  && echo "2 failed empty 9"
+            [ -z "${2-x}" ]  && echo "2 failed empty 10"
+            # echo QWER - assume non existant variable for this part
+            # ( typeset -p "QWER"  &>/dev/null  ) && echo "QWER defined 1"
+            # [ -n "${QWER+x}" ]  && echo "QWER defined 2"
+            # ( typeset -p "QWER"  &>/dev/null ) &&  [ -n "${QWER+x}" ]  && echo "QWER defined 3"
+            # ( typeset -p "QWER"  &>/dev/null  ) || echo "QWER not defined 1"
+            # ( ! typeset -p "QWER"  &>/dev/null  ) && echo "QWER not defined 2"
+            # echo bye
+            # exit 0
+          fi
           (( _seemsempty_ )) && echo -e "${RED} 𝞦 enforce_variable_with_value \\n${BASH_SOURCE[1]}:${BASH_LINENO[1]} ${FUNCNAME[-0]}(...) \\n${BASH_SOURCE[1]}:${BASH_LINENO[0]} ${FUNCNAME[1]}(...) \\n ${LIGHTYELLOW} ${TESTING} has failed "
           (( _seemsempty_ )) && failed "${TESTING}"
           (( _seemsempty_ )) && exit 1
           if (( typeset -p "${1}"  &>/dev/null ) &&  [ -n "${2+x}" ]) ; then
           {
-              (( DEBUG )) && echo -e "${LIGHTGREEN} ✔ ${LIGHTYELLOW} ${TESTING} has passed "
+              if (( DEBUG )) ; then
+                echo -e "${LIGHTGREEN} ✔ ${LIGHTYELLOW} ${TESTING} has passed "
+              fi
               return 0
           }
           fi
@@ -1069,7 +1085,7 @@ CERO="\033[01;0m"
             {
                 while read -r ONE_FILE; do
                 if [ -n "${ONE_FILE}" ] ; then # if not empty
-                    TESTING="that file ${CYAN}${ONE_FILE}${LIGHTYELLOW} exists"
+                    TESTING="that file „${CYAN}${ONE_FILE}${LIGHTYELLOW}” exists"
                     # DEBUG echo -e "${BASH_SOURCE[0]} ->\n  .. ${FUNCNAME[0]}():$ONE_FILE"
                     if it_exists_with_spaces "${ONE_FILE}" ; then
                     {
@@ -1944,18 +1960,31 @@ function _run_command(){
           if ( is_defined_and_not_empty SUDO_USER "${SUDO_USER}" && is_defined_and_not_empty SUDO_UID "${SUDO_UID}"  ) ; then
           {
               (( DEBUG )) && echo "type_function_exists:SUDO DEFINED"
-              if ( su - $SUDO_USER -c 'type '"${*}"' >/dev/null 2>&1' ) ; then
+              if [[ "$(( type "${*}" > /dev/null 2>&1 ) && echo "hola" )" == *"hola"* ]] ; then
+              #if [[ "$(( ( su - $SUDO_USER -c 'type '"${*}"' >/dev/null 2>&1' ) ) && echo "hola" )" == *"hola"* ]] ; then
+              #if ( su - $SUDO_USER -c 'type '"${*}"' >/dev/null 2>&1' ) ; then
               {
                 (( DEBUG )) && echo "type_function_exists:TYPE is installed ${*} "
                 return 0
               }
               fi
               (( DEBUG )) && echo "type_function_exists:TYPE is not installed ${*} "
+              (( DEBUG )) && echo "type_function_exists:trying with command ${*} "
+              if [[ "$(( ( su - $SUDO_USER -c 'command -v '"${*}"' >/dev/null 2>&1' ) ) && echo "hola" )" == *"hola"* ]] ; then
+              {
+                (( DEBUG )) && echo "type_function_exists:COMMAND is installed ${*} "
+                return 0
+              }
+              fi
+              (( DEBUG )) && echo "type_function_exists:TYPE abd COMMAND fail to find installed or available ${*} "
               return 1
           }
           fi
           (( DEBUG )) && echo "type_function_exists:SUDO NOT DEFINED"
-          if ( type "${*}" > /dev/null 2>&1 ) ; then
+          # if [[ "$(( type wget > /dev/null 2>&1 ) && echo "hola" )" == *"hola"* ]] ; then  echo "has" ; else  echo "has not" ; fi
+          # [[ "$(( type wgot > /dev/null 2>&1 ) && echo "hola" )" == *"hola"* ]] && echo "has"
+          if [[ "$(( type "${*}" > /dev/null 2>&1 ) && echo "hola" )" == *"hola"* ]] ; then
+          # if ( type "${*}" > /dev/null 2>&1 ) ; then
           {
             (( DEBUG )) && echo "type_function_exists:TYPE is installed ${*} "
             return 0
@@ -1983,6 +2012,15 @@ function _run_command(){
             #passed "${TESTING}"  # assumed else
             return 1
         } # end is_installed
+
+export is_not_installed
+#function is_not_installed (){
+#  if ( command -v $1 >/dev/null 2>&1; ) ; then
+#    return 1
+#  else
+#    return 0
+#  fi
+#} # end is_not_installed
 
         function is_not_installed() {
             # Sample use
@@ -2075,6 +2113,31 @@ function _run_command(){
         alias is_installed_version=version_installed_is
         alias is_version=version_installed_is
         alias version_is=version_installed_is
+function major_minor_version() {
+  echo "${1%%.*}.$(x="${1#*.}"; echo "${x%%.*}")"
+}
+
+function version_gt() {
+  [[ "${1%.*}" -gt "${2%.*}" ]] || [[ "${1%.*}" -eq "${2%.*}" && "${1#*.}" -gt "${2#*.}" ]]
+}
+function version_ge() {
+  [[ "${1%.*}" -gt "${2%.*}" ]] || [[ "${1%.*}" -eq "${2%.*}" && "${1#*.}" -ge "${2#*.}" ]]
+}
+function version_lt() {
+    # Sample use
+    #
+    #  macos_version="$(major_minor_version "$(/usr/bin/sw_vers -productVersion)")"
+    #  if version_lt "$macos_version" "10.7"; then
+    #  {
+    #     failed "$(cat <<EOABORT
+    # Your Mac OS X version is too old. See:
+    #   ${tty_underline}https://github.com/mistydemeo/tigerbrew${tty_reset}
+    # EOABORT
+    # )"
+    #
+    #
+  [[ "${1%.*}" -lt "${2%.*}" ]] || [[ "${1%.*}" -eq "${2%.*}" && "${1#*.}" -lt "${2#*.}" ]]
+}
 
         function verify_installed_version() {
             # Sample use
@@ -2195,6 +2258,32 @@ function _run_command(){
             fi
         } # end verify_installed_version_old
 
+function _ensure_touch_dir_and_file() {
+    # Sample use
+    #
+    #  _ensure_touch_dir_and_file "${cronallowdir}" "${cronallowfile}"
+    #  _ensure_touch_dir_and_file "${USER_HOME}/_/clis" "${USER_HOME}/_/clis/updateall.bash"
+    #
+    #
+  local launchdir_default="${1}"
+  local launchfile_default="${2}"
+
+  enforce_variable_with_value launchdir_default "${launchdir_default}"
+  enforce_variable_with_value launchfile_default "${launchfile_default}"
+  enforce_variable_with_value SUDO_USER "${SUDO_USER}"
+  enforce_variable_with_value USER_HOME "${USER_HOME}"
+
+  if it_does_not_exist_with_spaces "${launchfile_default}" ; then
+  {
+    mkdir -p "${launchdir_default}"
+    directory_exists_with_spaces "${launchdir_default}"
+    touch "${launchfile_default}"
+    chown -R "${SUDO_USER}" "${launchdir_default}"
+  }
+  fi
+  file_exists_with_spaces "${launchfile_default}"
+} # end _ensure_touch_dir_and_file
+
         function _if_not_is_installed(){
             local -i ret
             local msg
@@ -2209,7 +2298,7 @@ function _run_command(){
             }
             elif ( command -v brew >/dev/null 2>&1; ) ; then
             {
-                msg="$(su - "${SUDO_USER}" -c "brew info $1  >/dev/null 2>&1")"
+                msg="$(su - "${SUDO_USER}" -c "/usr/local/bin/brew info $1  >/dev/null 2>&1")"
             }
             fi
             ret=$?
@@ -2293,8 +2382,32 @@ function _run_command(){
              #   echo "set ${policies}" > temp.xml
              # }
              # fi
-            return ! _if_not_contains  "$1" "$2"
+             if _if_not_contains  "$1" "$2" ; then
+             {
+               return 0
+             }
+             fi
+             return 1
         } # end _if_contains
+
+
+# Checking selftest _if_contains
+if it_exists_with_spaces "${USER_HOME}/.bashrc" ; then
+{
+  if _if_contains  "${USER_HOME}/.bashrc" "PETERPIZZA" ; then
+  {
+    failed "self test bad .bashrc should not have PETERPIZZA word"
+  }
+  fi
+  if ! _if_contains  "${USER_HOME}/.bashrc" "then" ; then
+  {
+    failed ".bashrc should have the then word"
+  }
+  fi
+  # echo hola
+  # exit 0
+}
+fi
 
 
         function if_user_exists() {
@@ -2643,10 +2756,10 @@ function _run_command(){
             {
                 if (( DEBUG )) ; then
                   echo "BREW list formulas"
-                fi
-                # query=$(brew list --formula 2>&1)
-                query=$(su - "${SUDO_USER}" -c "brew list --formula" 2>&1)
-                # query=$(_run_command "brew list --formula"  2>&1)
+                fi                # query=$(/usr/local/bin/brew list --formula 2>&1)
+                query=$(su - "${SUDO_USER}" -c "/usr/local/bin/brew list --formula" 2>&1)
+                echo "$query"
+                # query=$(_run_command "/usr/local/bin/brew list --formula"  2>&1)
             }
             fi
             for one_required in ${required}; do
@@ -2714,29 +2827,13 @@ function _run_command(){
               {
                 if (( DEBUG )) ; then
                   echo "rpm search loaded packages $one_required"
-                fi
-                if (( DEBUG )) ; then
                   echo "rpm --------1"
-                fi
-                if (( DEBUG )) ; then
                   echo "${packages}" | grep "$one_required"
-                fi
-                if (( DEBUG )) ; then
                   echo "rpm --------2"
-                fi
-                if (( DEBUG )) ; then
                   echo "${packages}" | grep "$one_required"| grep "^$one_required"
-                fi
-                if (( DEBUG )) ; then
                   echo "rpm --------3"
-                fi
-                if (( DEBUG )) ; then
                   echo "${packages}" | egrep "$one_required"| grep "^$one_required" | cut -d'-' -f1
-                fi
-                if (( DEBUG )) ; then
                   echo "rpm --------4"
-                fi
-                if (( DEBUG )) ; then
                   echo "rpm RETURNED:$?"
                 fi
                 if     ( echo "${packages}" | grep "$one_required" >/dev/null 2>&1; ) \
@@ -2761,12 +2858,13 @@ function _run_command(){
                 }
                 fi
               }
-              elif ( command -v brew >/dev/null 2>&1; ) ; then
+              elif ( command -v /usr/local/bin/brew >/dev/null 2>&1; ) ; then
               {
                 if (( DEBUG )) ; then
-                  echo "brew"
+                  echo "/usr/local/bin/brew"
                 fi
                 # CHECK_INSTALLED=$(brew ls --versions "${one_required}")
+                # CHECK_INSTALLED=$(/usr/local/bin/brew ls --versions "${one_required}")
                 # query=$(brew list --formula 2>&1)
                 # one_required="nano"
                 # query=$(su - "${SUDO_USER}" -c "brew list --formula" 2>&1)
@@ -2824,8 +2922,11 @@ function _run_command(){
               {
                 # _run_command brew install ${missing}
                 if (( DEBUG )) ; then
+                  echo "/usr/local/bin/brew install"
                   echo "brew install"
                 fi
+                su - "${SUDO_USER}" -c "/usr/local/bin/brew install ${missing} "
+
                 su - "${SUDO_USER}" -c "brew install ${missing} "
                 err_buff=$?
               }
@@ -3759,10 +3860,64 @@ function _find_downloads_folder(){
   #      cd "${DOWNLOADFOLDER}"
   #      _download_mac "${TARGET_URL}" "${DOWNLOADFOLDER}"
   #
+  local DOWNLOADFOLDER=""
+  local -i _err=0
+  # first try typical assignation
+  # check operation systems
+  if [[ "$(uname)" == "Darwin" ]] ; then
+    # Do something under Mac OS X platform
+    DOWNLOADFOLDER=/Users/"${SUDO_USER}"/Downloads
+  elif [[ "$(expr substr $(uname -s) 1 5)" == "Linux" ]] ; then
+    # Do something under GNU/Linux platform
+    DOWNLOADFOLDER=/home/"${SUDO_USER}"/Downloads
+  elif [[ "$(expr substr $(uname -s) 1 10)" == "MINGW32_NT" ]] ; then
+    # Do something under Windows NT platform
+    DOWNLOADFOLDER=/C/Users/"${SUDO_USER}"/Downloads
+    # nothing here
+  fi
+  if [ -n "${DOWNLOADFOLDER}" ] ; then
+  {
+    if it_exists_with_spaces "${DOWNLOADFOLDER}" ; then
+    {
+      cd "${DOWNLOADFOLDER}"
+      echo -n "${DOWNLOADFOLDER}"
+      return 0
+    }
+    fi
+  }
+  fi
+
+
   if ( command -v xdg-user-dir >/dev/null 2>&1; ) ; then
   {
     enforce_variable_with_value SUDO_USER "${SUDO_USER}"
     local DOWNLOADFOLDER="$(su - "${SUDO_USER}" -c 'xdg-user-dir DOWNLOAD')"
+    _err=$?
+    # this could have failed live above, because of login problems or broken user, or lack of rights, etc
+    # so try again with normal call
+    if [ -z "${DOWNLOADFOLDER}" ] || [ ${_err} -gt 0 ] ; then
+    {
+      # getting /root/Downloads ?
+      DOWNLOADFOLDER="$(xdg-user-dir DOWNLOAD)"
+      _err=$?
+    }
+    fi
+    # check again for value in case that fails also
+    #  if so, then create with mkdir process, I assume this will always work, #nevermakeassumptions btw
+    if [ -z "${DOWNLOADFOLDER}" ] || [ ${_err} -gt 0 ] ; then
+    {
+      DOWNLOADFOLDER="$(mktemp -d 2>/dev/null || mktemp -d -t 'tempdownloads')"
+      _err=$?
+    }
+    fi
+    # check empty of error
+    if [ -z "${DOWNLOADFOLDER}" ] || [ ${_err} -gt 0 ] ; then
+    {
+      return 1  # here one is for error
+      exit 1
+    }
+    fi
+    # finally check we got a value
     enforce_variable_with_value DOWNLOADFOLDER "${DOWNLOADFOLDER}"
     cd "${DOWNLOADFOLDER}"
     echo -n "${DOWNLOADFOLDER}"
@@ -3870,7 +4025,7 @@ function _download_mac() {
     echo "curl -LO  -k -s --url  \"${target_url}\" 2>/dev/null   # suppress only wget download messages, but keep wget output for variable"
 set -ex
     # curl -LO  -k -s --url  "${target_url}" 2>/dev/null   # suppress only wget download messages, but keep wget output for variable
-    curl -LO "${target_url}" 2>/dev/null   # suppress only wget download messages, but keep wget output for variable
+    curl -kLO "${target_url}" 2>/dev/null   # suppress only wget download messages, but keep wget output for variable
       echo $?
       ls -la
 set +ex
@@ -4305,6 +4460,41 @@ function function_exists_with_spaces() {
             unset TESTING
 } # end function_exists_with_spaces
 
+function get_architecture(){
+  # How to use
+  #    FUNCTION_TO_CALL=$(get_architecture "debian")
+  # > _debian__64
+  # > _debian__32
+  #    FUNCTION_TO_CALL=$(get_architecture "${DISTRO}")
+  #
+  local system_nick="${1}"
+  local return_function_to_call=""
+  if [[ "$(uname -i)" == "x86_64" ]] ; then
+  {
+    return_function_to_call="_${system_nick}__64"
+  }
+  elif [[ "$(uname -i)" == "i686"   ]] ; then
+  {
+    return_function_to_call="_${system_nick}__32"
+  }
+  fi
+  if [ -z ${return_function_to_call} ] || [[ "${return_function_to_call}" =~ 'nknown' ]] ; then
+  {
+     if [[ "$(uname -a)" =~  'x86_64' ]] ; then
+     {
+       return_function_to_call="_${system_nick}__64"
+     }
+     fi
+     if [[ "$(uname -a)" =~  'i686' ]] ; then
+     {
+       return_function_to_call="_${system_nick}__32"
+     }
+     fi
+  }
+  fi
+  echo -n ${return_function_to_call}
+  return 0
+} # end get_architecture
 
 function determine_os_and_fire_action() {
   # Interface
@@ -4411,7 +4601,7 @@ function determine_os_and_fire_action() {
                 # $ echo $VERSION
                 # 17 (Beefy Miracle)
                 DISTRO=$ID
-    }
+        }
         fi
     }
     fi
@@ -4423,68 +4613,28 @@ function determine_os_and_fire_action() {
 
     if [[ "$DISTRO" == *"edora"* ]]; then
     {
-        if [[ "$(uname -i)" == "x86_64" ]] ; then
-        {
-            FUNCTION_TO_CALL='_fedora__64'
-            PARAMETERS="$@"
-        }
-        elif [[ "$(uname -i)" == "i686"   ]] ; then
-        {
-            FUNCTION_TO_CALL='_fedora__32'
-            PARAMETERS="$@"
-        }
-        fi
+      FUNCTION_TO_CALL=$(get_architecture "fedora")
+      PARAMETERS="$@"
     }
     elif [[ "$DISTRO" == *"untu"* ]]; then
     {
-        # ubuntu lsb_release -i | sed 's/Distributor\ ID://g' = \tUbuntu\n
-        if [[ "$(uname -i)" == "x86_64" ]] ; then
-        {
-           FUNCTION_TO_CALL='_ubuntu__64'
-           PARAMETERS="$@"
-        }
-        elif [[ "$(uname -i)" == "i686"   ]] ; then
-        {
-           FUNCTION_TO_CALL='_ubuntu__32'
-           PARAMETERS="$@"
-        }
-        fi
+      # ubuntu lsb_release -i | sed 's/Distributor\ ID://g' = \tUbuntu\n
+      FUNCTION_TO_CALL=$(get_architecture "ubuntu")
+      PARAMETERS="$@"
     }
     elif [[ "$DISTRO" == *"bian"* ]]; then
     {
-        # ubuntu lsb_release -i | sed 's/Distributor\ ID://g' = \tUbuntu\n
-        if ( uname -a | grep x86_64 >/dev/null 2>&1; )  ; then
-        {
-           FUNCTION_TO_CALL='_debian__64'
-           PARAMETERS="$@"
-        }
-        elif ( uname -a | grep i686 >/dev/null 2>&1; )  ; then
-        {
-           FUNCTION_TO_CALL='_debian__32'
-           PARAMETERS="$@"
-        }
-        fi
+      FUNCTION_TO_CALL=$(get_architecture "debian")
+      PARAMETERS="$@"
     }
     else
     {
-      # ubuntu lsb_release -i | sed 's/Distributor\ ID://g' = \tUbuntu\n
-        if [[ "$(uname -i)" == "x86_64" ]] ; then
-        {
-           FUNCTION_TO_CALL="_${DISTRO}__64"
-           PARAMETERS="$@"
-        }
-        elif [[ "$(uname -i)" == "i686"   ]] ; then
-        {
-           FUNCTION_TO_CALL="_${DISTRO}__32"
-           PARAMETERS="$@"
-        }
-        fi
+      FUNCTION_TO_CALL=$(get_architecture "${DISTRO}")
+      PARAMETERS="$@"
     }
     fi
     if (( DEBUG )) ; then
       echo "FUNCTION_TO_CALL: $FUNCTION_TO_CALL"
-    fi
-    if (( DEBUG )) ; then
       echo "uname -i: $(uname -i)"
     fi
     # For everything else (or if above failed), just use generic identifier
@@ -4667,6 +4817,7 @@ function _do_not_downloadtwice(){
   local TARGET_URL="${1}"
   enforce_parameter_with_value 1 TARGET_URL "${TARGET_URL}" "https://download.teamviewer.com/download/linux/teamviewer.x86_64.rpm"
   local DOWNLOADFOLDER="${2}"
+  Comment "DOWNLOADFOLDER:„${DOWNLOADFOLDER}”"
   enforce_parameter_with_value 2 DOWNLOADFOLDER "${DOWNLOADFOLDER}" "$USER_HOME/Downloads"
   file_exists_with_spaces "${DOWNLOADFOLDER}"
   local CODENAME="${3}"
@@ -4821,6 +4972,7 @@ function _install_rpm() {
     enforce_parameter_with_value 3 CODENAME "${CODENAME}" "teamviewer.x86_64.rpm"
     local -i LOOP="${4}"
     enforce_parameter_with_value 4 LOOP "${LOOP}" "1 or 2 or 0"
+    Comment testing "${DOWNLOADFOLDER}/${CODENAME}"
     file_exists_with_spaces "${DOWNLOADFOLDER}/${CODENAME}"
     local TARGET_DOWNLOAD_PATH="${DOWNLOADFOLDER}/${CODENAME}"
     enforce_parameter_with_value COMPOSITE TARGET_DOWNLOAD_PATH "${TARGET_DOWNLOAD_PATH}" "$USER_HOME/Downloads/teamviewer.x86_64.rpm"
@@ -5305,6 +5457,17 @@ function _install_dmgs_dmg__64() {
     UNZIPDIR="$(echo -en "${CODENAME}" | sed 's/.zip//g' | sed 's/.dmg//g')"
   }
   fi
+
+  local -i size=0
+  size=$(du "${DOWNLOADFOLDER}/${CODENAME}" | cut -d/ -f1)
+  if [ ${size} -lt 1000 ] ; then
+  {
+    nurindatei "${DOWNLOADFOLDER}/${CODENAME}" 404
+    echo -e "${RED} 𝞦 SKIPPING ${LIGHTYELLOW} failed to download this one. It seems too small  ${RESET}"
+    return 0
+  }
+  fi
+
   _process_dmgs_dmg_or_zip "${extension}" "${DOWNLOADFOLDER}" "${CODENAME}" "${APPDIR}" "${UNZIPDIR}"
 
   directory_exists_with_spaces "/Applications/${APPDIR}"
