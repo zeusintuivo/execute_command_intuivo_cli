@@ -1967,7 +1967,7 @@ function _run_command(){
           (( DEBUG )) && echo "type_function_exists:SUDO NOT DEFINED"
           # if [[ "$(( type wget > /dev/null 2>&1 ) && echo "hola" )" == *"hola"* ]] ; then  echo "has" ; else  echo "has not" ; fi
           # [[ "$(( type wgot > /dev/null 2>&1 ) && echo "hola" )" == *"hola"* ]] && echo "has"
-          if [[ "$(( type "${*}" > /dev/null 2>&1 ) && echo "hola" )" == *"hola"* ]] ; then
+          if [[ $(( type "${*}" > /dev/null 2>&1 ) && echo "hola" ) == *"hola"* ]] ; then
           # if ( type "${*}" > /dev/null 2>&1 ) ; then
           {
             (( DEBUG )) && echo "type_function_exists:TYPE is installed ${*} "
