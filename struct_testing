@@ -2332,34 +2332,90 @@ function _ensure_touch_dir_and_file() {
                     local -i ret
                     local msg
                     ret=0
-                    (( DEBUG )) && echo "1if"
-                    [ ! -e "$1" ] && return 1
-                    (( DEBUG )) && (cat -n "$1" )
+                    if (( DEBUG )) ; then
+                    {
+                      echo "1if"
+                    } 
+                    fi
+                    if [ ! -e "$1" ] ; then
+                    {
+                     return 1
+                    }
+                    fi
+                    if (( DEBUG )) ; then
+                    {
+                      (cat -n "$1" )
+                    } 
+                    fi
                     msg=$(cat "$1" 2>&1)
                     ret=$?
-                    (( DEBUG )) && echo "2if"
-                    (( DEBUG )) && echo "${msg}"
-                    [ $ret -gt 0 ] && return 1
-                    (( DEBUG )) && echo "3if"
+                    if (( DEBUG )) ; then
+                    {
+                      echo "2if"
+                    } 
+                    fi
+                    if (( DEBUG )) ; then
+                    {
+                      echo "${msg}"
+                    } 
+                    fi
+                    if [ $ret -gt 0 ] ; then
+                    {
+                      return 1
+                    } 
+                    fi 
+                    if (( DEBUG )) ; then
+                    {
+                      echo "3if"
+                    } 
+                    fi
                     [[ "$msg" == *"No such"* ]] && return 1
-                    (( DEBUG )) && echo "4if"
+                    if (( DEBUG )) ; then
+                    {
+                      echo "4if"
+                    } 
+                    fi
                     [[ "$msg" == *"nicht gefunden"* ]] && return 1
-                    (( DEBUG )) && echo "5if"
+                    if (( DEBUG )) ; then
+                    {
+                      echo "5if"
+                    } 
+                    fi
                     [[ "$msg" == *"Permission denied"* ]] && return 1
-                    (( DEBUG )) && echo "6if"
+                    if (( DEBUG )) ; then
+                    {
+                      echo "6if"
+                    } 
+                    fi
                     ret=0
-                    (( DEBUG )) && echo 'echo "$msg" | grep "$2"'
-                    (( DEBUG )) && echo 'echo '"$msg"' | grep '"$2"
-                    (( DEBUG )) && ([[ -n "$msg" ]] ||  echo "6.5if file is empty")
+                    if (( DEBUG )) ; then
+                    {
+                      echo 'echo "$msg" | grep "$2"'
+                      echo 'echo "$msg" | grep "$2"'
+                      ([[ -n "$msg" ]] ||  echo "6.5if file is empty")
+                    } 
+                    fi
                     [[ -n "$msg" ]] || return 1    # Not found
                     msg=$(echo "$msg" | grep "$2" 2>&1)
                     ret=$?
-                    (( DEBUG )) && echo "7if $ret"
+                    if (( DEBUG )) ; then
+                    {
+                      echo "7if $ret"
+                    } 
+                    fi
                     [ $ret -eq 0 ] && return 0     # Found
                     [ $ret -gt 0 ] && return 1    # Not Found
-                    (( DEBUG )) && echo "8if"
+                    if (( DEBUG )) ; then
+                    {
+                      echo "8if"
+                    } 
+                    fi
                     [[ "$msg" == *"No such"* ]] && return 1
-                    (( DEBUG )) && echo "9 if"
+                    if (( DEBUG )) ; then
+                    {
+                      echo "9 if"
+                    } 
+                    fi
                     [[ "$msg" == *"nicht gefunden"* ]] && return 1
                     [[ "$msg" == *"Permission denied"* ]] && return 1
                     return 0  # Found
