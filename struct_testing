@@ -2392,16 +2392,16 @@ function _ensure_touch_dir_and_file() {
                     }
                     fi
                     [[ -n "$msg" ]] || return 1    # Not found
-                    # msg=$(echo "$msg" | grep "$2" 2>&1)
-                    # ret=$?
+                    msg=$(echo "$msg" | grep "$2" 2>&1)
+                    ret=$?
                                         # TEST if [[ "$( echo "holahello" | 2>&1 grep "hllo" )" == *"hello"* ]] ; then {  ret=1; echo "ret"$ret; echo "found"; } else { echo "didnot work"; } fi;
-                                        if [[ "$( echo "$msg" | 2>&1 grep "$2" )" == *"$2"* ]] ; then
-                                        {
+                     #                   if [[ "$( echo "$msg" | 2>&1 grep "$2" )" == *"$2"* ]] ; then
+                     #                   {
                                             # msg=$(echo "$msg" | grep "$2" 2>&1)
                                             # ret=$?  # expectef to get 1 for not found from grep
-                                            ret=1
-                                        }
-                                        fi
+                     #                       ret=1
+                     #                   }
+                     #                   fi
                     if (( DEBUG )) ; then
                     {
                       echo "7if $ret"
