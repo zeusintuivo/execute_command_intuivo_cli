@@ -5543,8 +5543,8 @@ function _check_size_bigger_than() {
   # 
   local -i size=0
   local -i than=${1:1000}
-  local _file="${1}"
-  enforce_parameter_with_value 1 _file "${_file}" "/home/user/work/filename.html"
+  local _file="${2}"
+  enforce_parameter_with_value 2 _file "${_file}" "/home/user/work/filename.html"
   
   size=$(du "${_file}" | cut -d/ -f1)
   if [ ${size} -lt ${than} ] ; then
