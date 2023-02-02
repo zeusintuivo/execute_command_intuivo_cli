@@ -5518,12 +5518,8 @@ function _install_dmgs_dmg__64() {
   }
   fi
 
-  local -i size=0
-  size=$(du "${DOWNLOADFOLDER}/${CODENAME}" | cut -d/ -f1)
-  if [ ${size} -lt 1000 ] ; then
+  if ( ! _check_size_bigger_than 1000 "${DOWNLOADFOLDER}/${CODENAME}" ) ; then 
   {
-    nurindatei "${DOWNLOADFOLDER}/${CODENAME}" 404
-    echo -e "${RED} 𝞦 SKIPPING ${LIGHTYELLOW} failed to download this one. It seems too small  ${RESET}"
     return 0
   }
   fi
@@ -5536,6 +5532,30 @@ function _install_dmgs_dmg__64() {
   _trust_dmgs_application "${APPDIR}"
   return 0
 } # end _install_dmgs_dmg__64
+
+function _check_size_bigger_than() {
+  # Sample use 
+  #  if ( ! _check_size_bigger_than 1000 "${DOWNLOADFOLDER}/${CODENAME}" ) ; then 
+  #  {
+  #    return 0
+  #  }
+  #  fi
+  # 
+  local -i size=0
+  local -i than=${1:1000}
+  local _file="${1}"
+  enforce_parameter_with_value 1 _file "${_file}" "/home/user/work/filename.html"
+  
+  size=$(du "${_file}" | cut -d/ -f1)
+  if [ ${size} -lt ${than} ] ; then
+  {
+    nurindatei "${_file}" 404
+    echo -e "${RED} 𝞦 SKIPPING ${LIGHTYELLOW} failed to download this one. It seems too small  ${RESET}"
+    return 1
+  }
+  fi
+  return 0
+} # end _check_size_bigger_than
 
 function _install_dmgs_list(){
   # Sample use
