@@ -119,14 +119,17 @@ load_execute_as_sudo(){
     # Test home value part 2
     # echo "${USER_HOME}  ? 2"
     # echo "${HOME}  ? 2"
+    echo "... sudologic persisting USER_HOME:$USER_HOME"
     typeset provider="$USER_HOME/_/clis/task_intuivo_cli/execute_as_sudo.sh"
     # Test provider
     # wget --quiet --no-check-certificate  https://raw.githubusercontent.com/zeusintuivo/task_intuivo_cli/master/execute_as_sudo.sh -O -
     # curl https://raw.githubusercontent.com/zeusintuivo/task_intuivo_cli/master/execute_as_sudo.sh  -o -
     # echo "${provider}  ?"
     # shellcheck disable=SC1090
-    if [   -e "${provider}"  ] ; then
+    if [[   -e "${provider}"  ]] ; then
     {
+      local _temp_dir="$(mktemp -d 2>/dev/null || mktemp -d -t 'execute_as_sudo.sh')"
+      echo "3.0 sudologic execute_as_sudo.sh Sourced locally next line without temp location:$USER_HOME/_/clis/task_intuivo_cli/execute_as_sudo.sh"
       source "${provider}"
     }
     else
@@ -134,9 +137,11 @@ load_execute_as_sudo(){
       provider="https://raw.githubusercontent.com/zeusintuivo/task_intuivo_cli/master/execute_as_sudo.sh"
       if ( command -v wget >/dev/null 2>&1; ) ; then
         echo "   wget --quiet --no-check-certificate "${provider}" -O -"
+        echo "3.1 sudologic execute_as_sudo.sh Wget Attempting to eval without temp location:$USER_HOME/_/clis/task_intuivo_cli/execute_as_sudo.sh"
         eval """$(wget --quiet --no-check-certificate "${provider}" -O -  2>/dev/null )"""   # suppress only wget download mess$
       elif ( command -v curl >/dev/null 2>&1; ); then
         echo "   curl "${provider}" -o -"
+        echo "3.2 sudologic execute_as_sudo.sh Curl Attempting to eval next line without temp location:$USER_HOME/_/clis/task_intuivo_cli/execute_as_sudo.sh"
         eval """$(curl "${provider}" -o -  2>/dev/null )"""   # suppress only curl download messages, but keep curl output for $
       else
         echo -e "\n \n  ERROR! Could not download execute_boot_basic.sh. There is no wget or curl installed or reacheable \n \n "
@@ -168,6 +173,7 @@ if [ $_err -ne 0 ] ;  then
   exit $_err
 }
 fi
+echo "3.3 sudologic execute_boot_basic.sh Back again loading scripts procedure from list Attempting "
 
 # USER_HOME=$(getent passwd $SUDO_USER | cut -d: -f6)
 enforce_variable_with_value HOME "$HOME"
@@ -216,8 +222,8 @@ boostrap_intuivo_bash_app(){
     local -r _filelocal="${USER_HOME}/_/clis"
     local _project=""
     local -r _fileremote="https://raw.githubusercontent.com/zeusintuivo"
-    [[ -d "${_filelocal}" ]] &&  local -r _provider="${_filelocal}"
-    [[ ! -d "${_filelocal}" ]] &&  local -r _provider="${_fileremote}"
+    local _provider="${_fileremote}"
+    [[   -d "${_filelocal}" ]] &&  _provider="${_filelocal}"
     local _one=""
     local _script=""
     local _tmp_file=""
@@ -253,11 +259,34 @@ execute_command_intuivo_cli/struct_testing:passed
         if [[ "${_provider}" == *"https://"*  ]] ; then
         {
           _url="${_provider}/${_project}/master/${_script}"
-        } else {
+        } 
+        else 
+        {
+          # 
+          # Take extra step the make sure 
+          # Full file path is accessible 
+          # Other wise default again to url 
+          # ... usually if  -d "${_filelocal}" detects _/clis folder 
+          # it assumes local load, but if _/clis exists but not the file inside
+          # we cased a bug, so here we fix that to make sure 
+          # filepath exists or default to url https again.
+          #
           _url="${_provider}/${_project}/${_script}"
+          if [[   -e "${_url}" ]] ; then
+          {
+            _url="${_provider}/${_project}/${_script}"
+          }
+          else
+          {
+            _provider="${_fileremote}"
+            _url="${_provider}/${_project}/master/${_script}"
+          }
+          fi  
         }
         fi
-      } else {
+      } 
+      else 
+      {
         if [[ "${_one}" == *:*  ]] ; then
         {
           _function_test=$(echo "${_one}" | cut -d: -f2  2>&1 )
@@ -267,83 +296,102 @@ execute_command_intuivo_cli/struct_testing:passed
         _url="${_provider}/${_one}"
       }
       fi
-      _tmp_file="/tmp/${_script}"
-      (( DEBUG )) && echo "-----_tmp_file:: $_tmp_file"
+      
       (( DEBUG )) && echo _function_test:: "$_function_test"
       (( DEBUG )) && echo "----------_url:: $_url"
-
-      # Second part distributed values downloads
-      if [[ "${_provider}" == *"https://"*  ]] ; then
+      # 
+      # Do not reload an extension or scrip that has already being loaded
+      #
+      if typeset -f "$_function_test" >/dev/null 2>&1; then
       {
-        (( DEBUG )) && echo "is https://"
-        if ( command -v wget >/dev/null 2>&1; ) ; then
-        {
-          echo -e "try:    wget --quiet --no-check-certificate "${_url}" -O -"
-          _execoncli="""$(wget --quiet --no-check-certificate  "${_url}" -O -  2>/dev/null )"""   # suppress only wget download messages, but keep wget output for variable
-          err=$?
-        }
-        elif ( command -v curl >/dev/null 2>&1; ); then
-        {
-          echo -e "try:    curl "${_url}" -o -"
-          _execoncli="""$(curl "${_url}" -o - 2>/dev/null )"""   # suppress only curl download messages, but keep curl output for variable
-          err=$?
-        }
-        else
-        {
-          echo -e "\n \n  ERROR! Could not download ${_script}. There is no wget or curl installed or reacheable \n \n "
-          exit 1;
-        }
-        fi
-        # _msg=$("${_execoncli}")
-        # err=$?
-        # if [ $err -ne 0 ] ;  then
-        # {
-        #  echo -e "\nERROR downloading ${_script}\n_url: ${_url}  \n_msg: ${_msg} \n_execoncli: ${_execoncli}  \n_err: ${_err} \n\n"
-        #  exit 1
-        # }
-        # fi
-        _msg=$(echo -n """${_execoncli}""" > "${_tmp_file}" 2>&1 )
-        err=$?
-        if [ $err -ne 0 ] ;  then
-        {
-          echo -e "\nERROR trying to write \n_tmpfile=${_tmp_file} \n_script: ${_one} \n_msg: ${_msg} \n_err: ${_err}  \n\n"
-          exit 1
-        }
-        fi
-        #  ++ sources
-        [[ ! -e "${_tmp_file}" ]]  && echo -e "\nERROR Local tmp File does not exists or cannot be accessed: \n${_tmp_file}" && exit 1
-        # shellcheck disable=SC1090
-        . "${_tmp_file}"
-        err=$?
-        if [ $err -ne 0 ] ;  then
-        {
-          # shellcheck disable=SC1090
-          _msg=$(. "${_tmp_file}" 2>&1 )
-          echo -e "\nERROR sourcing from file \n_tmpfile=${_tmp_file} \n_script: ${_one} \n_msg: ${_msg} \n_err: ${_err}  \n\n"
-          exit 1
-        }
-        fi
+        echo -e "skipping:   already loaded "$_function_test":"${_url}" "
       }
       else
       {
-        (( DEBUG )) && echo "-----is a file:: $_url "
-        [[ ! -e "$_url" ]]  && echo -e "\nERROR Local File does not exists  or cannot be accessed: \n ${_url}" && exit 1
-        (( DEBUG )) && echo "----file exits:: $_url"
-        # shellcheck disable=SC1090
-        . "${_url}"
-        # . /USER_HOME/zeus/_/clis/task_intuivo_cli/add_error_trap.sh
-        err=$?
-        # (( DEBUG )) && echo "---- source err: $_err"
-        if [ $err -ne 0 ] ;  then
+        #
+        # Second part distributed values downloads
+        #
+        local _temp_dir="$(mktemp -d 2>/dev/null || mktemp -d -t "${_script}_source")"
+        _tmp_file="${_temp_dir}/${_script}"
+        echo "3.4 sudologic  execute_boot_basic.sh Temp for ${_script} location in ${_tmp_file}"
+        (( DEBUG )) && echo "-----_tmp_file:: $_tmp_file"
+
+        if [[ "${_provider}" == *"https://"*  ]] ; then
         {
+          (( DEBUG )) && echo "is https://"
+          if ( command -v wget >/dev/null 2>&1; ) ; then
+          {
+            echo -e "try:    wget --quiet --no-check-certificate "${_url}" -O -"
+            _execoncli="""$(wget --quiet --no-check-certificate  "${_url}" -O -  2>/dev/null )"""   # suppress only wget download messages, but keep wget output for variable
+            err=$?
+          }
+          elif ( command -v curl >/dev/null 2>&1; ); then
+          {
+            echo -e "try:    curl "${_url}" -o -"
+            _execoncli="""$(curl "${_url}" -o - 2>/dev/null )"""   # suppress only curl download messages, but keep curl output for variable
+            err=$?
+          }
+          else
+          {
+            echo -e "\n \n  ERROR! Could not download ${_script}. There is no wget or curl installed or reacheable \n \n "
+            exit 1;
+          }
+          fi
+          # _msg=$("${_execoncli}")
+          # err=$?
+          # if [ $err -ne 0 ] ;  then
+          # {
+          #  echo -e "\nERROR downloading ${_script}\n_url: ${_url}  \n_msg: ${_msg} \n_execoncli: ${_execoncli}  \n_err: ${_err} \n\n"
+          #  exit 1
+          # }
+          # fi
+          _msg=$(echo -n """${_execoncli}""" > "${_tmp_file}" 2>&1 )
+          err=$?
+          if [ $err -ne 0 ] ;  then
+          {
+            echo -e "\nERROR trying to write \n_tmpfile=${_tmp_file} \n_script: ${_one} \n_msg: ${_msg} \n_err: ${_err}  \n\n"
+            exit 1
+          }
+          fi
+          #  ++ sources
+          [[ ! -e "${_tmp_file}" ]]  && echo -e "\nERROR Local tmp File does not exists or cannot be accessed: \n${_tmp_file}" && exit 1
           # shellcheck disable=SC1090
-          _msg=$(. "${_url}" 2>&1 )
-          echo -e "\nERROR sourcing from file \n_url=${_url} \n_script: ${_one} \n_msg: ${_msg} \n_err: ${_err}  \n\n"
-          exit 1
+          . "${_tmp_file}"
+          err=$?
+          if [ $err -ne 0 ] ;  then
+          {
+            # shellcheck disable=SC1090
+            _msg=$(. "${_tmp_file}" 2>&1 )
+            echo -e "\nERROR sourcing from file \n_tmpfile=${_tmp_file} \n_script: ${_one} \n_msg: ${_msg} \n_err: ${_err}  \n\n"
+            exit 1
+          }
+          fi
+        }
+        else
+        {
+          #
+          # Here url contains not a URL but a file path full name
+          #
+          (( DEBUG )) && echo "-----is a file:: $_url "
+          [[ ! -e "$_url" ]]  && echo -e "\nERROR Local File does not exists  or cannot be accessed: \n ${_url}" && exit 1
+          (( DEBUG )) && echo "----file exits:: $_url"
+          # shellcheck disable=SC1090
+          . "${_url}"
+          # . /USER_HOME/zeus/_/clis/task_intuivo_cli/add_error_trap.sh
+          err=$?
+          # (( DEBUG )) && echo "---- source err: $_err"
+          if [ $err -ne 0 ] ;  then
+          {
+            # shellcheck disable=SC1090
+            _msg=$(. "${_url}" 2>&1 )
+            echo -e "\nERROR sourcing from file \n_url=${_url} \n_script: ${_one} \n_msg: ${_msg} \n_err: ${_err}  \n\n"
+            exit 1
+          }
+          fi
         }
         fi
-      }
-      fi
+      } 
+      fi # end already loaded  
       # Test function exitance if loaded propertly
       # type -f on_error
       # (( DEBUG )) &&  echo "-------command:: $(command -v on_error )"

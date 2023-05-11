@@ -2298,7 +2298,7 @@ function _ensure_touch_dir_and_file() {
             }
             elif ( command -v brew >/dev/null 2>&1; ) ; then
             {
-                msg="$(su - "${SUDO_USER}" -c "/usr/local/bin/brew info $1  >/dev/null 2>&1")"
+                msg="$(su - "${SUDO_USER}" -c "/opt/homebrew/bin/brew info $1  >/dev/null 2>&1")"
             }
             fi
             ret=$?
@@ -2816,10 +2816,10 @@ fi
             {
                 if (( DEBUG )) ; then
                   echo "BREW list formulas"
-                fi                # query=$(/usr/local/bin/brew list --formula 2>&1)
-                query=$(su - "${SUDO_USER}" -c "/usr/local/bin/brew list --formula" 2>&1)
+                fi                # query=$(/opt/homebrew/bin/brew list --formula 2>&1)
+                query=$(su - "${SUDO_USER}" -c "/opt/homebrew/bin/brew list --formula" 2>&1)
                 echo "$query"
-                # query=$(_run_command "/usr/local/bin/brew list --formula"  2>&1)
+                # query=$(_run_command "/opt/homebrew/bin/brew list --formula"  2>&1)
             }
             fi
             for one_required in ${required}; do
@@ -2918,13 +2918,13 @@ fi
                 }
                 fi
               }
-              elif ( command -v /usr/local/bin/brew >/dev/null 2>&1; ) ; then
+              elif ( command -v /opt/homebrew/bin/brew >/dev/null 2>&1; ) ; then
               {
                 if (( DEBUG )) ; then
-                  echo "/usr/local/bin/brew"
+                  echo "/opt/homebrew/bin/brew"
                 fi
                 # CHECK_INSTALLED=$(brew ls --versions "${one_required}")
-                # CHECK_INSTALLED=$(/usr/local/bin/brew ls --versions "${one_required}")
+                # CHECK_INSTALLED=$(/opt/homebrew/bin/brew ls --versions "${one_required}")
                 # query=$(brew list --formula 2>&1)
                 # one_required="nano"
                 # query=$(su - "${SUDO_USER}" -c "brew list --formula" 2>&1)
@@ -2982,10 +2982,10 @@ fi
               {
                 # _run_command brew install ${missing}
                 if (( DEBUG )) ; then
-                  echo "/usr/local/bin/brew install"
+                  echo "/opt/homebrew/bin/brew install"
                   echo "brew install"
                 fi
-                su - "${SUDO_USER}" -c "/usr/local/bin/brew install ${missing} "
+                su - "${SUDO_USER}" -c "/opt/homebrew/bin/brew install ${missing} "
 
                 su - "${SUDO_USER}" -c "brew install ${missing} "
                 err_buff=$?
@@ -4593,6 +4593,17 @@ function determine_os_and_fire_action() {
          FUNCTION_TO_CALL='_darwin__32'
          PARAMETERS="$@"
       }
+      elif [[ "$(uname -m)" == "arm64"   ]] ; then
+      {
+         FUNCTION_TO_CALL='_darwin__arm64'
+         PARAMETERS="$@"
+      }
+      else
+      {
+        FUNCTION_TO_CALL="_darwin__$(uname -m)"
+        PARAMETERS="$@"
+        warning "ERROR to determine "$(uname)" architecture (uname -m)  for: <$(uname -m)>"  
+      }
       fi
   elif [[ "$(expr substr $(uname -s) 1 5)" == "Linux" ]] ; then
     if (( DEBUG )) ; then
@@ -5152,6 +5163,7 @@ function raise_to_sudo_and_user_home() {
     }
     fi
     # shellcheck disable=SC1090
+    echo "... sudologic identified USER_HOME:$USER_HOME"
     local -r provider="$USER_HOME/_/clis/execute_command_intuivo_cli/execute_boot_basic.sh"
     local _err=0 bootbasicsource
     if [   -e "${provider}"  ] ; then
@@ -5187,6 +5199,7 @@ function raise_to_sudo_and_user_home() {
     if (( DEBUG )) ; then
       echo "$0 execute_command_intuivo_cli/struct_testing load_execute_boot_basic_with_sudo() Temp execute_boot_basic.sh location ${_temp_dir}/execute_boot_basic_source"
     fi
+    echo "2. sudologic execute_boot_basic.sh Temp location ${_temp_dir}/execute_boot_basic_source"
     source "${_temp_dir}/execute_boot_basic_source"
     _err=$?
     [ $_err -gt 0 ] &&  echo -e "\n \n  ERROR! Loading execute_boot_basic.sh. Occured while running 'source' err:$_err  \n \n  " && exit 1
@@ -5700,4 +5713,3 @@ function _install_dmgs_list(){
    ##    ##             ##    ##     ##  ##  #### ##    ##
    ##    ##       ##    ##    ##     ##  ##   ### ##    ##
    ##    ########  ######     ##    #### ##    ##  ######
-
