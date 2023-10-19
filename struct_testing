@@ -2129,12 +2129,13 @@ function version_lt() {
     #  macos_version="$(major_minor_version "$(/usr/bin/sw_vers -productVersion)")"
     #  if version_lt "$macos_version" "10.7"; then
     #  {
-    #     failed "$(cat <<EOABORT
+    #     failed "$(cat <<#EOABORT
     # Your Mac OS X version is too old. See:
     #   ${tty_underline}https://github.com/mistydemeo/tigerbrew${tty_reset}
-    # EOABORT
+    #EOABORT
     # )"
     #
+
     #
   [[ "${1%.*}" -lt "${2%.*}" ]] || [[ "${1%.*}" -eq "${2%.*}" && "${1#*.}" -lt "${2#*.}" ]]
 }
