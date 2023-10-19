@@ -2986,10 +2986,18 @@ fi
                   echo "/opt/homebrew/bin/brew install"
                   echo "brew install"
                 fi
-                su - "${SUDO_USER}" -c "/opt/homebrew/bin/brew install ${missing} "
+                if [[ -e /opt/homebrew/bin/brew ]] ; then
+                {
+                    su - "${SUDO_USER}" -c "/opt/homebrew/bin/brew install ${missing} "
+                    err_buff=$?
+                }
+                else
+                {
+                    su - "${SUDO_USER}" -c "brew install ${missing} "
+                    err_buff=$?
+                }
+                fi
 
-                su - "${SUDO_USER}" -c "brew install ${missing} "
-                err_buff=$?
               }
               fi
             }
