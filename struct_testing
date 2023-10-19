@@ -1960,7 +1960,7 @@ function _run_command(){
           if ( is_defined_and_not_empty SUDO_USER "${SUDO_USER}" && is_defined_and_not_empty SUDO_UID "${SUDO_UID}"  ) ; then
           {
               (( DEBUG )) && echo "type_function_exists:SUDO DEFINED"
-              if [[ "$(( type "${*}" > /dev/null 2>&1 ) && echo "hola" )" == *"hola"* ]] ; then
+              if [[ "$( ( type "${*}" > /dev/null 2>&1 ) && echo "hola" )" == *"hola"* ]] ; then
               #if [[ "$(( ( su - $SUDO_USER -c 'type '"${*}"' >/dev/null 2>&1' ) ) && echo "hola" )" == *"hola"* ]] ; then
               #if ( su - $SUDO_USER -c 'type '"${*}"' >/dev/null 2>&1' ) ; then
               {
@@ -1970,7 +1970,7 @@ function _run_command(){
               fi
               (( DEBUG )) && echo "type_function_exists:TYPE is not installed ${*} "
               (( DEBUG )) && echo "type_function_exists:trying with command ${*} "
-              if [[ "$(( ( su - $SUDO_USER -c 'command -v '"${*}"' >/dev/null 2>&1' ) ) && echo "hola" )" == *"hola"* ]] ; then
+              if [[ "$( ( ( su - $SUDO_USER -c 'command -v '"${*}"' >/dev/null 2>&1' ) ) && echo "hola" )" == *"hola"* ]] ; then
               {
                 (( DEBUG )) && echo "type_function_exists:COMMAND is installed ${*} "
                 return 0
@@ -1983,7 +1983,7 @@ function _run_command(){
           (( DEBUG )) && echo "type_function_exists:SUDO NOT DEFINED"
           # if [[ "$(( type wget > /dev/null 2>&1 ) && echo "hola" )" == *"hola"* ]] ; then  echo "has" ; else  echo "has not" ; fi
           # [[ "$(( type wgot > /dev/null 2>&1 ) && echo "hola" )" == *"hola"* ]] && echo "has"
-          if [[ $(( type "${*}" > /dev/null 2>&1 ) && echo "hola" ) == *"hola"* ]] ; then
+          if [[ $( ( type "${*}" > /dev/null 2>&1 ) && echo "hola" ) == *"hola"* ]] ; then
           # if ( type "${*}" > /dev/null 2>&1 ) ; then
           {
             (( DEBUG )) && echo "type_function_exists:TYPE is installed ${*} "
@@ -2054,7 +2054,7 @@ export is_not_installed
                 {
                     if [[ -n "$SERVICE_NAME" ]] ; then  # is not empty
                     {
-                        TESTING="that: ${CYAN}${SERVICE_NAME}${GREEN} is installed"
+                        TESTING="that: ${CYAN}${SERVICE_NAME}${GREEN} is installed and executable from command line"
                         if !  is_installed "${SERVICE_NAME}"; then
                         {
                             failed "${TESTING}" # assumed else
@@ -2799,7 +2799,7 @@ fi
             local query=""
             local install_result=""
             local err_buff=0
-            # local DEBUG=1
+            # local DEBUG=1s
             if ( ( command -v rpm >/dev/null 2>&1; ) && ( command -v dnf >/dev/null 2>&1; ) ); then
             {
                 if (( DEBUG )) ; then
@@ -2816,10 +2816,12 @@ fi
             elif ( command -v brew >/dev/null 2>&1; ) ; then
             {
                 if (( DEBUG )) ; then
-                  echo "BREW list formulas"
+                  Comment struct_testing:$LINENO $FUNCNAME[0] "BREW list formulas"
                 fi                # query=$(/opt/homebrew/bin/brew list --formula 2>&1)
                 query=$(su - "${SUDO_USER}" -c "/opt/homebrew/bin/brew list --formula" 2>&1)
-                echo "$query"
+                if (( DEBUG )) ; then
+                  Comment struct_testing:$LINENO $FUNCNAME[0] "$query"
+                fi
                 # query=$(_run_command "/opt/homebrew/bin/brew list --formula"  2>&1)
             }
             fi
@@ -2839,7 +2841,9 @@ fi
               {
                 install_this="$( echo "${one_required}" | cut -d@ -f2- )"
                 one_required="$( echo "${one_required}" | cut -d@ -f1 )"
-              } else {
+              } 
+              else
+              {
                 install_this="${one_required}"
               }
               fi
@@ -2847,21 +2851,25 @@ fi
               if [[ -z "${one_required}" ]] ; then
               {
                 continue
-              } else {
+              } 
+              else
+              {
                 one_required=$(echo -n ${one_required} | sed -e 's/^[[:space:]]*//' ) # trim_start_space
               }
               fi
               if [[ -z "${install_this}" ]] ; then
               {
                 install_this=$(echo -n ${one_required} | sed -e 's/^[[:space:]]*//' ) # trim_spaces
-              } else {
+              } 
+              else
+              {
                 install_this=$(echo -n ${install_this} | sed -e 's/^[[:space:]]*//' ) # trim_spaces
               }
               fi
               if ( ( command -v apt >/dev/null 2>&1; ) && ( command -v dpkg >/dev/null 2>&1; ) ) ; then
               {
                 if (( DEBUG )) ; then
-                  echo "apt search using dpkg"
+                  Comment struct_testing:$LINENO $FUNCNAME[0] "apt search using dpkg"
                 fi
                 # REF: https://www.cyberciti.biz/faq/find-out-if-package-is-installed-in-linux/
                 if query=$(dpkg-query -W -f='${Status} ${Version}\n' "$one_required"  2>&1) ; then
@@ -2879,7 +2887,7 @@ fi
                     echo -e " ${RED}  NEED TO INSTALL ${YELLOW} $one_required${RESET} ${RED}...${query}"
                     missing="${missing} ${install_this}"
                     if (( DEBUG )) ; then
-                      echo  "${install_this}"
+                      Comment struct_testing:$LINENO $FUNCNAME[0]  "${install_this}"
                     fi
                 }
                 fi
@@ -2887,7 +2895,7 @@ fi
               elif ( ( command -v rpm >/dev/null 2>&1; ) && ( command -v dnf >/dev/null 2>&1; ) ) ; then
               {
                 if (( DEBUG )) ; then
-                  echo "rpm search loaded packages $one_required"
+                  Comment struct_testing:$LINENO $FUNCNAME[0] "rpm search loaded packages $one_required"
                   echo "rpm --------1"
                   echo "${packages}" | grep "$one_required"
                   echo "rpm --------2"
@@ -2922,7 +2930,7 @@ fi
               elif ( command -v /opt/homebrew/bin/brew >/dev/null 2>&1; ) ; then
               {
                 if (( DEBUG )) ; then
-                  echo "/opt/homebrew/bin/brew"
+                  Comment struct_testing:$LINENO $FUNCNAME[0] "/opt/homebrew/bin/brew"
                 fi
                 # CHECK_INSTALLED=$(brew ls --versions "${one_required}")
                 # CHECK_INSTALLED=$(/opt/homebrew/bin/brew ls --versions "${one_required}")
@@ -2933,7 +2941,7 @@ fi
                 # ( echo "${query}" | grep -q  "^zsh$" )  && echo "installed"
                 # [[ "$( echo "${query}" | grep   "^unar$" )" == "unar" ]] && echo "installed"
                 # ( echo "${query}" | grep -q  "^${one_required}$" ) && echo "installed"
-                if  ( echo "${query}" | grep -q  "^${one_required}$" ) ; then
+                if  ( echo "${query}" >/dev/null 2>&1 | grep -q  "^${one_required}$" >/dev/null 2>&1; ) ; then
                 {
                     passed " ${GREEN} $one_required ${YELLOW} INSTALLED${RESET} ."
                 }
@@ -2956,7 +2964,7 @@ fi
             if [[ -n "${missing}" ]] ; then
             {
               if (( DEBUG )) ; then
-                echo "There are missing"
+                Comment struct_testing:$LINENO $FUNCNAME[0] "There are missing"
               fi
               missing=$(echo -n ${missing} | sed -e 's/^[[:space:]]*//' ) # trim_start_space
               echo -e " ${CYAN} Installing missing packages: ${YELLOW} ${missing} ${RESET} ."
@@ -2983,8 +2991,8 @@ fi
               {
                 # _run_command brew install ${missing}
                 if (( DEBUG )) ; then
-                  echo "/opt/homebrew/bin/brew install"
-                  echo "brew install"
+                  Comment struct_testing:$LINENO $FUNCNAME[0] "/opt/homebrew/bin/brew install"
+                  echo "brew install "
                 fi
                 if [[ -e /opt/homebrew/bin/brew ]] ; then
                 {
@@ -2997,26 +3005,39 @@ fi
                     err_buff=$?
                 }
                 fi
-
+                if (( DEBUG )) ; then
+                  Comment struct_testing:$LINENO $FUNCNAME[0] install_result="${install_result}"
+                  Comment struct_testing:$LINENO $FUNCNAME[0] err_buff="${err_buff}"
+                fi
               }
               fi
             }
             fi
+            if [[ "${install_result}" == *"is already installed"* ]] ; then
+             echo -e "${BRIGHT_BLUE87}  ${install_result}  \o_0/ ${RESET} ... ignoring "
+            fi
             # echo $install_result;
-            if [[ ! -z "${install_result}" ]] ; then #  && handle_error "${install_result}"
+            if [[ -n "${install_result}" ]] ; then #  && handle_error "${install_result}"
             {
                 if (( DEBUG )) ; then
-                  echo "errors install"
+                  Comment struct_testing:$LINENO $FUNCNAME[0] "errors install"
                 fi
                 local error_happened=""
                 [[ "${PROCESSOR_ERROR}" == *"MAC"* ]] && [ $err_buff != 0 ] && error_happened="1"
                 [[ "${PROCESSOR_ERROR}" == *"INTEL"* ]] && (( $err_buff != 0 )) && error_happened="1"
+                 if (( DEBUG )) ; then
+                  Comment struct_testing:$LINENO $FUNCNAME[0] error_happened="${error_happened}"
+                fi
                 if [ "${error_happened}" ]  ||  ( has_error_keyword "${install_result}" ) ; then
                 {
                   echo -e "${PURPLE_BLUE} action ${RED}failed ${YELLOW226}!!!  ${RESET}"
                   local REPLACERED="\\\\033[01;31m"
                   local REPLACECYAN="\\\\033[01;36m"
                   local display_install_result=$(echo -e "${install_result}" | sed "s/\(FAILED\|failed\|additional\ disk\|Failed\|ERROR\|Error\|error\|cannot\|continue\|logged\|inspection\|not\|exit\|more\|details\)/${REPLACERED}\1${REPLACECYAN}/g")
+
+                  if (( DEBUG )) ; then
+                    Comment "struct_testing:$LINENO $FUNCNAME[0] ${RED} ABOUT TO THROW failed${CYAN}() ${RESET}"
+                  fi                  
                   failed "${RESET} \n .... \n ... ${display_install_result} \n ... \n ..."
                   [[ "${install_result}" == *"Could not resolve"* ]] && echo -e "${BRIGHT_BLUE87} It appears YOU HAVE ${YELLOW226}NO INTERNET CONNECTION \o_0/ ${RESET}"
                   [[ "${install_result}" == *"Repository not found"* ]] && echo -e "${BRIGHT_BLUE87} It appears YOU HAVE ${YELLOW226}NO ACCESS TO THIS FOR YOU ${RED} ${GIT_USER_NAME} ${RESET}"
@@ -3027,6 +3048,9 @@ fi
 
             }
             fi
+            if (( DEBUG )) ; then
+              Comment "struct_testing:$LINENO $FUNCNAME[0] ${GREEN} return ${CYAN}0 ${RESET}"
+            fi  
             return 0
         }
         # end install_requirements
