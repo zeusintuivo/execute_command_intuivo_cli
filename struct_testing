@@ -2988,12 +2988,12 @@ fi
                 fi
                 if [[ -e /opt/homebrew/bin/brew ]] ; then
                 {
-                    su - "${SUDO_USER}" -c "/opt/homebrew/bin/brew install ${missing} "
+                    install_result=$(su - "${SUDO_USER}" -c "/opt/homebrew/bin/brew install ${missing} " 2>&1) # capture all input and output
                     err_buff=$?
                 }
                 else
                 {
-                    su - "${SUDO_USER}" -c "brew install ${missing} "
+                    install_result=$(su - "${SUDO_USER}" -c "brew install ${missing} " 2>&1) # capture all input and output
                     err_buff=$?
                 }
                 fi
