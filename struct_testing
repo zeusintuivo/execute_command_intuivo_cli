@@ -2994,14 +2994,15 @@ fi
                   Comment struct_testing:$LINENO $FUNCNAME[0] "/opt/homebrew/bin/brew install"
                   echo "brew install "
                 fi
+                export ARCHFLAGS="-arch $(uname -m)"
                 if [[ -e /opt/homebrew/bin/brew ]] ; then
                 {
-                    install_result=$(su - "${SUDO_USER}" -c "/opt/homebrew/bin/brew install ${missing} " 2>&1) # capture all input and output
+                    install_result=$(ARCHFLAGS="-arch $(uname -m)" su - "${SUDO_USER}" -c  "/opt/homebrew/bin/brew install ${missing} " 2>&1) # capture all input and output
                     err_buff=$?
                 }
                 else
                 {
-                    install_result=$(su - "${SUDO_USER}" -c "brew install ${missing} " 2>&1) # capture all input and output
+                    install_result=$(ARCHFLAGS="-arch $(uname -m)" su - "${SUDO_USER}" -c  "brew install ${missing} " 2>&1) # capture all input and output
                     err_buff=$?
                 }
                 fi
