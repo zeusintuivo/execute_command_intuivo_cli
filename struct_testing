@@ -752,6 +752,15 @@ CERO="\033[01;0m"
         }
         alias comment=Comment
 
+        function Working() {
+            trap 'exit 1' ERR
+            local msg1="$1"
+            local msg2=$(echo -e "${*}" | cüt "${1}"  ;)
+            # local msg2=$(echo "${*}" | sed 's/'"""${msg1}"""'//g'  ;)
+            echo  -e "${PURPLE}π‘“……… ${CYAN} ${msg1} ${DARKBLUE} ${msg2} ${LIGHTYELLOW}  ${CYAN} ${RESET}"
+        }
+        alias working=Working
+
         function not() {
             local order="empty"  # Tasjgjgggg
             if [[ -n "${1+x}"  ]] ; then  # check if a variable is set and not empty
