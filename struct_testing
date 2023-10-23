@@ -4309,7 +4309,7 @@ function _download_linux() {
 
     # WGETRC=${_temp_dir}/wgetrc  wget "${WGETCOMMAND}" # 2>/dev/null"
     _assure_success
-    echo "${msg}"
+    echo "${msg:-}"
     echo -e "\033[7m*** Download Wget executed completed.\033[0m"
     rm -f ${_temp_dir}/wgetrc
     file_does_not_exist_with_spaces ${_temp_dir}/wgetrc
@@ -4933,6 +4933,7 @@ function _do_not_downloadtwice(){
   # _do_not_downloadtwice "${TARGET_URL}" "${DOWNLOADFOLDER}"  "${CODENAME}"
   #
   #
+	local -i _VERBOSE=${VERBOSE:-0}
   local TARGET_URL="${1}"
   enforce_parameter_with_value 1 TARGET_URL "${TARGET_URL}" "https://download.teamviewer.com/download/linux/teamviewer.x86_64.rpm"
   local DOWNLOADFOLDER="${2}"
@@ -4942,8 +4943,7 @@ function _do_not_downloadtwice(){
   local CODENAME="${3}"
   enforce_parameter_with_value 3 CODENAME "${CODENAME}" "teamviewer.x86_64.rpm"
 
-  local -i _verbose=${VERBOSE:-0}
-  (( _verbose )) && echo  _do_not_downloadtwice "${TARGET_URL}" "${DOWNLOADFOLDER}"  "${CODENAME}"
+	(( _VERBOSE )) && echo  _do_not_downloadtwice "${TARGET_URL}" "${DOWNLOADFOLDER}"  "${CODENAME}"
 
   if it_exists_with_spaces "${DOWNLOADFOLDER}/${CODENAME}" ; then
   {
@@ -4952,8 +4952,8 @@ function _do_not_downloadtwice(){
   else
   {
     cd "${DOWNLOADFOLDER}"
-    (( VERBOSE )) && pwd
-    (( VERBOSE )) && echo  _download "${TARGET_URL}" "${DOWNLOADFOLDER}"  "${CODENAME}"
+    (( _VERBOSE )) && pwd
+    (( _VERBOSE )) && echo  _download "${TARGET_URL}" "${DOWNLOADFOLDER}"  "${CODENAME}"
     _download "${TARGET_URL}" "${DOWNLOADFOLDER}"  "${CODENAME}"
     file_exists_with_spaces "${DOWNLOADFOLDER}/${CODENAME}"
   }
