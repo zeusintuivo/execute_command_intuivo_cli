@@ -850,7 +850,7 @@ is_help() {
     fi
 }
 provide_help() {
-    if is_help "${1}"; then   # Not empty and help
+    if is_help "${1:-}"; then   # Not empty and help
     {
         echo "$DESCRIPTION"
         anounce Available commands

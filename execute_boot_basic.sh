@@ -90,7 +90,8 @@ typeset -i _err=0
 CYAN="\033[01;36m"
 BRIGHT_BLUE87="\033[38;5;87m"
 echo -e "${CYAN}"
-if (( DEBUG )) &&  ( typeset -p "THISSCRIPTCOMPLETEPATH"  &>/dev/null ) ; then
+typeset -i temporalDEBUG=${DEBUG:-0}
+if (( temporalDEBUG )) &&  ( typeset -p "THISSCRIPTCOMPLETEPATH"  &>/dev/null ) ; then
 {
   export THISSCRIPTCOMPLETEPATH
   typeset -r THISSCRIPTCOMPLETEPATH="$(pwd)/$(basename "$0")"
@@ -98,10 +99,11 @@ if (( DEBUG )) &&  ( typeset -p "THISSCRIPTCOMPLETEPATH"  &>/dev/null ) ; then
 fi
 
 load_execute_as_sudo(){
-    # DEBUG=1
+	  local _DEBUG=${DEBUG:-0}
+    # _DEBUG=1
     # Test home value part 1
-    (( DEBUG )) && echo "USER_HOME:${USER_HOME}  ? 1"
-    (( DEBUG )) && echo "-----HOME:${HOME}  ? 1"
+    (( _DEBUG )) && echo "USER_HOME:${USER_HOME}  ? 1"
+    (( _DEBUG )) && echo "-----HOME:${HOME}  ? 1"
     # if ( typeset -p "SUDO_USER"  &>/dev/null ) &&  [ -n "${2+x}" ] ; then
       # exit 0
       # export USER_HOME
@@ -112,9 +114,9 @@ load_execute_as_sudo(){
       export USER_HOME
       typeset USER_HOME=$HOME
     fi
-    (( DEBUG )) && echo "USER_HOME:${USER_HOME}  ? 1"
-    (( DEBUG )) && echo "-----HOME:${HOME}  ? 1"
-    # DEBUG=0
+    (( _DEBUG )) && echo "USER_HOME:${USER_HOME}  ? 1"
+    (( _DEBUG )) && echo "-----HOME:${HOME}  ? 1"
+    # _DEBUG=0
 
     # Test home value part 2
     # echo "${USER_HOME}  ? 2"
@@ -151,7 +153,7 @@ load_execute_as_sudo(){
     fi
     if ( command -v execute_as_sudo >/dev/null 2>&1; ) ; then
     {
-      (( DEBUG )) && echo "$provider Loaded Now checking.."
+      (( _DEBUG )) && echo "$provider Loaded Now checking.."
       return 0
     }
     else
@@ -184,21 +186,21 @@ enforce_variable_with_value SUDO_COMMAND "$SUDO_COMMAND"
 # declare -rg USER_HOME=$(getent passwd $SUDO_USER | cut -d: -f6)
 enforce_variable_with_value USER_HOME "$USER_HOME"
 # shellcheck disable=SC2031
-(( DEBUG )) &&  echo "$SUDO_USER"
-(( DEBUG )) &&  env | grep SUDO
-(( DEBUG )) && echo -e "execute_command_intuivo_cli/execute_boot_basic.sh ${CYAN} \__________Sudoed Correctly ${BRIGHT_BLUE87}✔️${CYAN}"
+(( temporalDEBUG )) &&  echo "$SUDO_USER"
+(( temporalDEBUG )) &&  env | grep SUDO
+(( temporalDEBUG )) && echo -e "execute_command_intuivo_cli/execute_boot_basic.sh ${CYAN} \__________Sudoed Correctly ${BRIGHT_BLUE87}✔️${CYAN}"
 # shellcheck disable=SC2031
-(( DEBUG )) && echo -e "execute_command_intuivo_cli/execute_boot_basic.sh ${CYAN}                           ${LIGHTPINK} SUDO_USER ️${YELLOW_OVER_DARKBLUE} $SUDO_USER ${BRIGHT_BLUE87}✔️${CYAN}"
-(( DEBUG )) && echo -e "execute_command_intuivo_cli/execute_boot_basic.sh ${CYAN}                           ${LIGHTPINK} USER_HOME ️${YELLOW_OVER_DARKBLUE} $USER_HOME ${BRIGHT_BLUE87} ✔️${CYAN}"
-(( DEBUG )) && echo -e "execute_command_intuivo_cli/execute_boot_basic.sh ${provider} Loaded ${BRIGHT_BLUE87}✔️${CYAN}"
+(( temporalDEBUG )) && echo -e "execute_command_intuivo_cli/execute_boot_basic.sh ${CYAN}                           ${LIGHTPINK} SUDO_USER ️${YELLOW_OVER_DARKBLUE} $SUDO_USER ${BRIGHT_BLUE87}✔️${CYAN}"
+(( temporalDEBUG )) && echo -e "execute_command_intuivo_cli/execute_boot_basic.sh ${CYAN}                           ${LIGHTPINK} USER_HOME ️${YELLOW_OVER_DARKBLUE} $USER_HOME ${BRIGHT_BLUE87} ✔️${CYAN}"
+(( temporalDEBUG )) && echo -e "execute_command_intuivo_cli/execute_boot_basic.sh ${provider} Loaded ${BRIGHT_BLUE87}✔️${CYAN}"
 
 
 # exit 0
 # . ./execute_as_sudo.sh
 # THISSCRIPTCOMPLETEPATH="$(pwd)/$THISSCRIPTCOMPLETEPATH"
 # export THISSCRIPTCOMPLETEPATH=`basename "$0"`
-# DEBUG=1
- (( DEBUG )) && echo "THISSCRIPTCOMPLETEPATH:: $THISSCRIPTCOMPLETEPATH"
+# temporalDEBUG=1
+ (( temporalDEBUG )) && echo "THISSCRIPTCOMPLETEPATH:: $THISSCRIPTCOMPLETEPATH"
 function on_int() {
     echo -e " ☠ ${LIGHTPINK} KILL EXECUTION SIGNAL SEND ${RESET}"
     echo -e " ☠ ${YELLOW_OVER_DARKBLUE}  ${*} ${RESET}"
@@ -218,7 +220,8 @@ boostrap_intuivo_bash_app(){
     local _msg
     local _url=""
     local _execoncli=""
-    (( DEBUG )) && echo "----------HOME:: $USER_HOME"
+    local _DEBUG=${DEBUG:-0}
+    (( _DEBUG )) && echo "----------HOME:: $USER_HOME"
     local -r _filelocal="${USER_HOME}/_/clis"
     local _project=""
     local -r _fileremote="https://raw.githubusercontent.com/zeusintuivo"
@@ -235,13 +238,13 @@ task_intuivo_cli/add_error_trap.sh:_trap_on_error
 execute_command_intuivo_cli/execute_command:_execute_command_worker
 execute_command_intuivo_cli/struct_testing:passed
 " )
-    (( DEBUG )) && echo "------_scripts:: $_scripts"
+    (( _DEBUG )) && echo "------_scripts:: $_scripts"
     while read -r _one; do
     {
       [[ -z "${_one}" ]] && continue                         # if  empt loop again
       # ( declare -p "${_one}"  &>/dev/null )  && continue     # if not  empty and defined
-      (( DEBUG )) && echo "----------_one:: $_one"
-      (( DEBUG )) && echo "-----_provider:: $_provider"
+      (( _DEBUG )) && echo "----------_one:: $_one"
+      (( _DEBUG )) && echo "-----_provider:: $_provider"
 
       # First part read _one and distribute values
       if [[ "${_one}" == *"/"*  ]] ; then
@@ -254,8 +257,8 @@ execute_command_intuivo_cli/struct_testing:passed
           _script=$(echo "${_script}" | cut -d\: -f1  2>&1)
         }
         fi
-        (( DEBUG )) && echo "------_project:: $_project"
-        (( DEBUG )) && echo "-------_script:: $_script"
+        (( _DEBUG )) && echo "------_project:: $_project"
+        (( _DEBUG )) && echo "-------_script:: $_script"
         if [[ "${_provider}" == *"https://"*  ]] ; then
         {
           _url="${_provider}/${_project}/master/${_script}"
@@ -297,8 +300,8 @@ execute_command_intuivo_cli/struct_testing:passed
       }
       fi
       
-      (( DEBUG )) && echo _function_test:: "$_function_test"
-      (( DEBUG )) && echo "----------_url:: $_url"
+      (( _DEBUG )) && echo _function_test:: "$_function_test"
+      (( _DEBUG )) && echo "----------_url:: $_url"
       # 
       # Do not reload an extension or scrip that has already being loaded
       #
@@ -314,11 +317,11 @@ execute_command_intuivo_cli/struct_testing:passed
         local _temp_dir="$(mktemp -d 2>/dev/null || mktemp -d -t "${_script}_source")"
         _tmp_file="${_temp_dir}/${_script}"
         echo "3.4 sudologic  execute_boot_basic.sh Temp for ${_script} location in ${_tmp_file}"
-        (( DEBUG )) && echo "-----_tmp_file:: $_tmp_file"
+        (( _DEBUG )) && echo "-----_tmp_file:: $_tmp_file"
 
         if [[ "${_provider}" == *"https://"*  ]] ; then
         {
-          (( DEBUG )) && echo "is https://"
+          (( _DEBUG )) && echo "is https://"
           if ( command -v wget >/dev/null 2>&1; ) ; then
           {
             echo -e "try:    wget --quiet --no-check-certificate "${_url}" -O -"
@@ -372,14 +375,14 @@ execute_command_intuivo_cli/struct_testing:passed
           #
           # Here url contains not a URL but a file path full name
           #
-          (( DEBUG )) && echo "-----is a file:: $_url "
+          (( _DEBUG )) && echo "-----is a file:: $_url "
           [[ ! -e "$_url" ]]  && echo -e "\nERROR Local File does not exists  or cannot be accessed: \n ${_url}" && exit 1
-          (( DEBUG )) && echo "----file exits:: $_url"
+          (( _DEBUG )) && echo "----file exits:: $_url"
           # shellcheck disable=SC1090
           . "${_url}"
           # . /USER_HOME/zeus/_/clis/task_intuivo_cli/add_error_trap.sh
           err=$?
-          # (( DEBUG )) && echo "---- source err: $_err"
+          # (( _DEBUG )) && echo "---- source err: $_err"
           if [ $err -ne 0 ] ;  then
           {
             # shellcheck disable=SC1090
@@ -394,7 +397,7 @@ execute_command_intuivo_cli/struct_testing:passed
       fi # end already loaded  
       # Test function exitance if loaded propertly
       # type -f on_error
-      # (( DEBUG )) &&  echo "-------command:: $(command -v on_error )"
+      # (( _DEBUG )) &&  echo "-------command:: $(command -v on_error )"
       #  ( ( ! command -v passed >/dev/null 2>&1; ) && echo -e "\n \n  ERROR! Loading struct_testing \n \n " && exit 69; )
       if ( ( ! command -v "${_function_test}" >/dev/null 2>&1; ) && exit 69; ) ;  then
       {
@@ -403,7 +406,7 @@ execute_command_intuivo_cli/struct_testing:passed
       }
       else
       {
-        (( DEBUG )) && echo -e "execute_command_intuivo_cli/execute_boot_basic.sh ${_url} Loaded Correctly ${BRIGHT_BLUE87}✔️${CYAN}"
+        (( _DEBUG )) && echo -e "execute_command_intuivo_cli/execute_boot_basic.sh ${_url} Loaded Correctly ${BRIGHT_BLUE87}✔️${CYAN}"
       }
       fi
     }
@@ -417,6 +420,7 @@ execute_command_intuivo_cli/struct_testing:passed
     unset _project
     unset _tmp_file
     unset _function_test
+		unset _DEBUG
     # unset _scripts # unset: _scripts: cannot unset: readonly variable ..is normal behavoir or bash as of now
     # unset _provider  # unset: _scripts: cannot unset: readonly variable ..is normal behavoir or bash as of now
     return 0
@@ -424,5 +428,7 @@ execute_command_intuivo_cli/struct_testing:passed
 boostrap_intuivo_bash_app
 
 # shellcheck disable=SC2031
-(( DEBUG )) && echo "$SUDO_USER" || true
-(( DEBUG )) && env | grep SUDO || true
+(( temporalDEBUG )) && echo "$SUDO_USER" || true
+(( temporalDEBUG )) && env | grep SUDO || true
+
+

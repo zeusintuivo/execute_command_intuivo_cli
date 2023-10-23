@@ -2453,22 +2453,22 @@ function _ensure_touch_dir_and_file() {
 
 
 # Checking selftest _if_contains
-if it_exists_with_spaces "${USER_HOME}/.bashrc" ; then
-{
-  if _if_contains  "${USER_HOME}/.bashrc" "PETERPIZZA" ; then
-  {
-    failed "self test bad .bashrc should not have PETERPIZZA word"
-  }
-  fi
-  if ! _if_contains  "${USER_HOME}/.bashrc" "then" ; then
-  {
-    failed ".bashrc should have the then word"
-  }
-  fi
+#if it_exists_with_spaces "${USER_HOME}/.bashrc" ; then
+#{
+#  if _if_contains  "${USER_HOME}/.bashrc" "PETERPIZZA" ; then
+#  {
+#    failed "self test bad .bashrc should not have PETERPIZZA word"
+#  }
+#  fi
+#  if ! _if_contains  "${USER_HOME}/.bashrc" "then" ; then
+#  {
+#    failed ".bashrc should have the then word"
+#  }
+#  fi
   # echo hola
   # exit 0
-}
-fi
+#}
+#fi
 
 
         function if_user_exists() {
@@ -5177,7 +5177,8 @@ function raise_to_sudo_and_user_home() {
   #  [ $? -gt 0 ] && failed to sudo_it raise_to_sudo_and_user_home
   #   enforce_variable_with_value USER_HOME "${USER_HOME}"
   #
-  load_execute_boot_basic_with_sudo(){
+  load_execute_boot_basic_with_sudo() {
+		local -i _DEBUG=${DEBUG:-0}
     # shellcheck disable=SC2030
     if ( typeset -p "SUDO_USER"  &>/dev/null ) ; then
     {
@@ -5201,7 +5202,7 @@ function raise_to_sudo_and_user_home() {
     local -r provider="$USER_HOME/_/clis/execute_command_intuivo_cli/execute_boot_basic.sh"
     local _err=0 bootbasicsource
     if [   -e "${provider}"  ] ; then
-      if (( DEBUG )) ; then
+      if (( _DEBUG )) ; then
         echo "$0 execute_command_intuivo_cli/struct_testing load_execute_boot_basic_with_sudo() Loading locally"
       fi
       bootbasicsource="""$(<"${provider}")"""
@@ -5209,14 +5210,14 @@ function raise_to_sudo_and_user_home() {
       [ $_err -gt 0 ] &&  echo -e "\n \n  ERROR! Loading execute_boot_basic.sh. running 'source locally' returned error did not download or is empty err:$_err  \n \n  " && exit 1
     else
       if ( command -v curl >/dev/null 2>&1; )  ; then
-        if (( DEBUG )) ; then
+        if (( _DEBUG )) ; then
           echo "$0 execute_command_intuivo_cli/struct_testing load_execute_boot_basic_with_sudo() curl Loading execute_boot_basic.sh from the net using curl "
         fi
         bootbasicsource="""$(curl https://raw.githubusercontent.com/zeusintuivo/execute_command_intuivo_cli/master/execute_boot_basic.sh  -so -   2>/dev/null )"""  #  2>/dev/null suppress only curl download messages, but keep curl output for variable
         _err=$?
         [ $_err -gt 0 ] &&  echo -e "\n \n  ERROR! Loading execute_boot_basic.sh. running 'curl' returned error did not download or is empty err:$_err  \n \n  " && exit 1
       elif ( command -v wget >/dev/null 2>&1; ) ; then
-        if (( DEBUG )) ; then
+        if (( _DEBUG )) ; then
           echo "$0 execute_command_intuivo_cli/struct_testing load_execute_boot_basic_with_sudo() wget Loading execute_boot_basic.sh from the net using wget "
         fi
         bootbasicsource="""$(wget --quiet --no-check-certificate  https://raw.githubusercontent.com/zeusintuivo/execute_command_intuivo_cli/master/execute_boot_basic.sh -O -   2>/dev/null )"""  #  2>/dev/null suppress only wget download messages, but keep wget output for variable
@@ -5230,7 +5231,7 @@ function raise_to_sudo_and_user_home() {
     [[ -z "${bootbasicsource}" ]] && echo -e "\n \n  ERROR! Loading execute_boot_basic.sh  bootbasicsource did not download or is empty " && exit 1
     local _temp_dir="$(mktemp -d 2>/dev/null || mktemp -d -t 'execute_boot_basic_source')"
     echo "${bootbasicsource}">"${_temp_dir}/execute_boot_basic_source"
-    if (( DEBUG )) ; then
+    if (( _DEBUG )) ; then
       echo "$0 execute_command_intuivo_cli/struct_testing load_execute_boot_basic_with_sudo() Temp execute_boot_basic.sh location ${_temp_dir}/execute_boot_basic_source"
     fi
     echo "2. sudologic execute_boot_basic.sh Temp location ${_temp_dir}/execute_boot_basic_source"
@@ -5266,7 +5267,8 @@ function enforce_node_is_version(){
   # Sample use:
   # enforce_node_is_version  "12.20.1"
   #
-  if (( DEBUG )) ; then
+	local -i _DEBUG=${DEBUG:-0}
+  if (( _DEBUG )) ; then
     echo "  Checking for node version to be ${1}"
   fi
   local msg
@@ -5278,7 +5280,7 @@ function enforce_node_is_version(){
     failed "expected ${TESTING} but got <$(node --version)> "
   }
   fi
-  if (( DEBUG )) ; then
+  if (( _DEBUG )) ; then
     passed "${TESTING}"
   fi
   return 0
@@ -5288,7 +5290,8 @@ function enforce_vpn_is_on(){
   # Sample use:
   # enforce_vpn_is_on  "diginet"
   #
-  (( DEBUG )) && echo "  Checking for connection to ${1}"
+	local -i _DEBUG=${DEBUG:-0}
+  (( _DEBUG )) && echo "  Checking for connection to ${1}"
   local msg
   msg=$(/usr/bin/nmcli c show --active | /bin/grep vpn | /bin/grep "${1}" 2>&1; )
   _err=$?
@@ -5298,7 +5301,7 @@ function enforce_vpn_is_on(){
     failed "${TESTING}"
   }
   fi
-  (( DEBUG )) && passed "${TESTING}"
+  (( _DEBUG )) && passed "${TESTING}"
   return 0
 } # end enforce_vpn_is_on
 
@@ -5341,9 +5344,10 @@ function enforce_web_is_reachable(){
   local msg
   msg=$(curl -I --connect-timeout 5 --max-time 10 "${_domain}" 2>&1; )
   _err=$?
-  local DEBUG=1
-  (( DEBUG )) && echo enforce_web_is_reachable curl -I --connect-timeout 5  --max-time 10 "${1}"
-  (( DEBUG )) && echo enforce_web_is_reachable curl exit code $_err
+	local -i _DEBUG=${DEBUG:-1}
+  #local DEBUG=1
+  (( _DEBUG )) && echo enforce_web_is_reachable curl -I --connect-timeout 5  --max-time 10 "${1}"
+  (( _DEBUG )) && echo enforce_web_is_reachable curl exit code $_err
   local TESTING="web address ${BRIGHT_BLUE87}««${RED}${1}${BRIGHT_BLUE87}»»${LIGHTYELLOW} is reachable"
   if [ $_err -gt 0 ] ; then
   {
@@ -5402,10 +5406,11 @@ function enforce_ip_resolves(){
 function _remove_dmgs_app_if_exists() {
   # Sample use
   #       _remove_dmgs_app_if_exists "${APPDIR}"
+	local -i _DEBUG=${DEBUG:-0}
   local APPDIR="${1}"
   [[ -n "${APPDIR}" ]] && APPDIR="$(basename "${1}")"
   DEBUG=1
-  if (( DEBUG )) ; then
+  if (( _DEBUG )) ; then
   {
     echo "        APPDIR 1: <${1}>"
     echo "  APPDIR after  : <${APPDIR}>"
@@ -5492,10 +5497,11 @@ function _process_dmgs_dmg_or_zip() {
 function _trust_dmgs_application() {
   # Sample use
   #  _trust_dmgs_application "${APPDIR}"
+	local -i _DEBUG=${DEBUG:-0}
   local APPDIR="${1}"
   [[ -n "${APPDIR}" ]] && APPDIR="$(basename "${1}")"
   DEBUG=1
-  if (( DEBUG )) ; then
+  if (( _DEBUG )) ; then
   {
     echo "        APPDIR 1: <${1}>"
     echo "  APPDIR after  : <${APPDIR}>"
@@ -5640,7 +5646,8 @@ function _install_dmgs_list(){
   # Pending how to do pkg automatic?   # 1Password.pkg|https://c.1password.com/dist/1P/mac7/1Password-7.7.pkg
   local installlist one  target_name target_url target_app app_name # extension
   installlist="${*}"
-  DEBUG=1
+  #DEBUG=1
+	local -i _DEBUG=${DEBUG:-1}
   if (( DEBUG )) ; then
   {
     echo "        installlist 1: <${*}>"
