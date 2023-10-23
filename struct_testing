@@ -2799,11 +2799,16 @@ function _ensure_touch_dir_and_file() {
             #
 
             # room for detecting Linux and OS systems
-            local OS="${1}"
+            local OS="${1:-}"
+            if [[ -z "${2:-}" ]] ; then
+            {
+              return 0
+            }
+            fi
             local missing=""
             local one_required=""
             local install_this=""
-            local required=$(grep -vE '^#'<<<$(grep -vE '^\s+#'<<<"${2}"))
+            local required=$(grep -vE '^#'<<<$(grep -vE '^\s+#'<<<"${2:-}"))
             local packages=""
             local query=""
             local install_result=""
