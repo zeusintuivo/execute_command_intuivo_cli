@@ -1965,42 +1965,42 @@ function _run_command(){
         } # end is_service_running
 
         function type_function_exists() {
-          # local DEBUG=1
+          local -i _DEBUG=${DEBUG:-0}
           if ( is_defined_and_not_empty SUDO_USER "${SUDO_USER}" && is_defined_and_not_empty SUDO_UID "${SUDO_UID}"  ) ; then
           {
-              (( DEBUG )) && echo "type_function_exists:SUDO DEFINED"
+              (( _DEBUG )) && echo "type_function_exists:SUDO DEFINED"
               if [[ "$( ( type "${*}" > /dev/null 2>&1 ) && echo "hola" )" == *"hola"* ]] ; then
               #if [[ "$(( ( su - $SUDO_USER -c 'type '"${*}"' >/dev/null 2>&1' ) ) && echo "hola" )" == *"hola"* ]] ; then
               #if ( su - $SUDO_USER -c 'type '"${*}"' >/dev/null 2>&1' ) ; then
               {
-                (( DEBUG )) && echo "type_function_exists:TYPE is installed ${*} "
+                (( _DEBUG )) && echo "type_function_exists:TYPE is installed ${*} "
                 return 0
               }
               fi
-              (( DEBUG )) && echo "type_function_exists:TYPE is not installed ${*} "
-              (( DEBUG )) && echo "type_function_exists:trying with command ${*} "
+              (( _DEBUG )) && echo "type_function_exists:TYPE is not installed ${*} "
+              (( _DEBUG )) && echo "type_function_exists:trying with command ${*} "
               if [[ "$( ( ( su - $SUDO_USER -c 'command -v '"${*}"' >/dev/null 2>&1' ) ) && echo "hola" )" == *"hola"* ]] ; then
               {
-                (( DEBUG )) && echo "type_function_exists:COMMAND is installed ${*} "
+                (( _DEBUG )) && echo "type_function_exists:COMMAND is installed ${*} "
                 return 0
               }
               fi
-              (( DEBUG )) && echo "type_function_exists:TYPE abd COMMAND fail to find installed or available ${*} "
+              (( _DEBUG )) && echo "type_function_exists:TYPE abd COMMAND fail to find installed or available ${*} "
               return 1
           }
           fi
-          (( DEBUG )) && echo "type_function_exists:SUDO NOT DEFINED"
+          (( _DEBUG )) && echo "type_function_exists:SUDO NOT DEFINED"
           # if [[ "$(( type wget > /dev/null 2>&1 ) && echo "hola" )" == *"hola"* ]] ; then  echo "has" ; else  echo "has not" ; fi
           # [[ "$(( type wgot > /dev/null 2>&1 ) && echo "hola" )" == *"hola"* ]] && echo "has"
           if [[ $( ( type "${*}" > /dev/null 2>&1 ) && echo "hola" ) == *"hola"* ]] ; then
           # if ( type "${*}" > /dev/null 2>&1 ) ; then
           {
-            (( DEBUG )) && echo "type_function_exists:TYPE is installed ${*} "
+            (( _DEBUG )) && echo "type_function_exists:TYPE is installed ${*} "
             return 0
           }
           fi
-          (( DEBUG )) && echo "type_function_exists:TYPE is not installed ${*} "
-          (( DEBUG )) && echo "( type nvm > /dev/null 2>&1 )"
+          (( _DEBUG )) && echo "type_function_exists:TYPE is not installed ${*} "
+          (( _DEBUG )) && echo "( type nvm > /dev/null 2>&1 )"
           return 1
         } # type_function_exists
 
