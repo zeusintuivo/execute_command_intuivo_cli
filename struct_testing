@@ -473,6 +473,7 @@ CERO="\033[01;0m"
           # [ -n "${CAN_I_RUN_SUDO+x}" ] && echo "CAN_I_RUN_SUDO 12"
           # [ -n "${SUDO_USER+x}" ] && echo "SUDO_USER 111"
           # ( declare -p "HOME" ) && echo "HOME 2"
+          local -i _DEBUG=${DEBUG:-0}
           local _err_arriving=$?
 #          typeset -r TESTING="that variable is listed and: ${CYAN}${1}${LIGHTYELLOW} and has value: ${RESET}<${YELLOW_OVER_DARKBLUE}${2}${RESET}>"
           if [ ${_err_arriving} -gt 0 ] ; then
@@ -483,13 +484,13 @@ CERO="\033[01;0m"
           }
           fi
           local -i _seemsempty_=0
-          if (( DEBUG )) ; then
+          if (( _DEBUG )) ; then
             echo -e "${FUNCNAME[0]}"
             echo "x${1}x" -assume existing variable for this part
             echo "x${2}x" -assume existing variable for this part
           fi
           [[ "x${2}x" = "xx" ]] && _seemsempty_=1
-          if (( DEBUG )) ; then
+          if (( _DEBUG )) ; then
             if [[ "x${2}x" = "xx" ]] ; then
               echo seems empty
             fi
@@ -517,7 +518,7 @@ CERO="\033[01;0m"
           (( _seemsempty_ )) && exit 1
           if (( typeset -p "${1}"  &>/dev/null ) &&  [ -n "${2+x}" ]) ; then
           {
-              if (( DEBUG )) ; then
+              if (( _DEBUG )) ; then
                 echo -e "${LIGHTGREEN} ✔ ${LIGHTYELLOW} ${TESTING} has passed "
               fi
               return 0
@@ -3011,11 +3012,13 @@ function _ensure_touch_dir_and_file() {
                 export ARCHFLAGS="-arch $(uname -m)"
                 if [[ -e /opt/homebrew/bin/brew ]] ; then
                 {
+                    Comment "ARCHFLAGS=\"-arch $(uname -m)\" su - \"${SUDO_USER}\" -c  \"/opt/homebrew/bin/brew install ${missing} \" "
                     install_result=$(ARCHFLAGS="-arch $(uname -m)" su - "${SUDO_USER}" -c  "/opt/homebrew/bin/brew install ${missing} " 2>&1) # capture all input and output
                     err_buff=$?
                 }
                 else
                 {
+                    Comment "ARCHFLAGS=\"-arch $(uname -m)\" su - \"${SUDO_USER}\" -c  \"brew install ${missing} \" "
                     install_result=$(ARCHFLAGS="-arch $(uname -m)" su - "${SUDO_USER}" -c  "brew install ${missing} " 2>&1) # capture all input and output
                     err_buff=$?
                 }
@@ -5193,31 +5196,143 @@ function raise_to_sudo_and_user_home() {
   #  [ $? -gt 0 ] && failed to sudo_it raise_to_sudo_and_user_home
   #   enforce_variable_with_value USER_HOME "${USER_HOME}"
   #
+
+    unset HAVE_SUDO_ACCESS # unset this from the environment
+
+    have_sudo_access() {
+      if [[ ! -x "/usr/bin/sudo" ]]
+      then
+        return 1
+      fi
+
+      local -a SUDO=("/usr/bin/sudo")
+      if [[ -n "${SUDO_ASKPASS-}" ]]
+      then
+        SUDO+=("-A")
+      elif [[ -n "${NONINTERACTIVE-}" ]]
+      then
+        SUDO+=("-n")
+      fi
+
+      if [[ -z "${HAVE_SUDO_ACCESS-}" ]]
+      then
+        if [[ -n "${NONINTERACTIVE-}" ]]
+        then
+          "${SUDO[@]}" -l mkdir &>/dev/null
+        else
+          "${SUDO[@]}" -v && "${SUDO[@]}" -l mkdir &>/dev/null
+        fi
+        HAVE_SUDO_ACCESS="$?"
+      fi
+
+      if [[ "$(uname)" == "Darwin" ]] && [[ "${HAVE_SUDO_ACCESS}" -ne 0 ]]
+      then
+        failed "Need sudo access on macOS (e.g. the user ${USER} needs to be an Administrator)!"
+      fi
+
+      return "${HAVE_SUDO_ACCESS}"
+    }
+    # string formatters
+    if [[ -t 1 ]]
+    then
+      tty_escape() { printf "\033[%sm" "$1"; }
+    else
+      tty_escape() { :; }
+    fi
+    tty_mkbold() { tty_escape "1;$1"; }
+    tty_underline="$(tty_escape "4;39")"
+    tty_blue="$(tty_mkbold 34)"
+    tty_red="$(tty_mkbold 31)"
+    tty_bold="$(tty_mkbold 39)"
+    tty_reset="$(tty_escape 0)"
+
+
+    shell_join() {
+      local arg
+      printf "%s" "$1"
+      shift
+      for arg in "$@"
+      do
+        printf " "
+        printf "%s" "${arg// /\ }"
+      done
+    }
+
+
+
+    ohai() {
+      printf "${tty_blue}==>${tty_bold} %s${tty_reset}\n" "$(shell_join "$@")"
+    }
+
+    execute() {
+      if ! "$@"
+      then
+        failed "$(printf "Failed during: %s" "$(shell_join "$@")")"
+      fi
+    }
+
+    execute_sudo() {
+      local -a args=("$@")
+      if have_sudo_access
+      then
+        if [[ -n "${SUDO_ASKPASS-}" ]]
+        then
+          args=("-A" "${args[@]}")
+        fi
+        ohai "/usr/bin/sudo" "${args[@]}"
+        execute "/usr/bin/sudo" "${args[@]}"
+      else
+        ohai "${args[@]}"
+        execute "${args[@]}"
+      fi
+    }
+  passed "raise_to_sudo_and_user_home()"
   load_execute_boot_basic_with_sudo() {
-		local -i _DEBUG=${DEBUG:-0}
+	local -i _DEBUG=${DEBUG:-0}
+    passed "load_execute_boot_basic_with_sudo() " 
+    echo "0. sudologic $0:$LINENO           SUDO_COMMAND:${SUDO_COMMAND:-}"
+    echo "0. sudologic $0:$LINENO               SUDO_GRP:${SUDO_GRP:-}"
+    echo "0. sudologic $0:$LINENO               SUDO_UID:${SUDO_UID:-}"
+    echo "0. sudologic $0:$LINENO               SUDO_GID:${SUDO_GID:-}"
+    echo "0. sudologic $0:$LINENO              SUDO_USER:${SUDO_USER:-}"
+    export SUDO_USER
+    echo "0. sudologic $0:$LINENO         SUDO_USER Bash:$(bash -c "cd ~${SUDO_USER:-}" )"
+    echo "0. sudologic $0:$LINENO                   USER:${USER:-}"
+    echo "0. sudologic $0:$LINENO              USER_HOME:${USER_HOME:-}"
+    echo "0. sudologic $0:$LINENO THISSCRIPTCOMPLETEPATH:${THISSCRIPTCOMPLETEPATH:-}"
+    echo "0. sudologic $0:$LINENO         THISSCRIPTNAME:${THISSCRIPTNAME:-}"
     # shellcheck disable=SC2030
     if ( typeset -p "SUDO_USER"  &>/dev/null ) ; then
     {
+        echo "...$0:$LINENO if export sudologic identified USER_HOME:${USER_HOME:-}"
       export USER_HOME
       # typeset -rg USER_HOME=$(getent passwd $SUDO_USER | cut -d: -f6)  # Get the caller's of sudo home dir Just Linux
       # shellcheck disable=SC2046
       # shellcheck disable=SC2031
       if ! ( env | grep "USER_HOME" &>/dev/null ) ; then
       {
-          typeset USER_HOME="$(echo -n $(bash -c "cd ~${SUDO_USER} && pwd"))"  # Get the caller's of sudo home dir LINUX and MAC
+          typeset USER_HOME="$(echo -n $(bash -c "cd ~${SUDO_USER:-} && pwd"))"  # Get the caller's of sudo home dir LINUX and MAC
       }
       fi
+        echo "...$0:$LINENO if export sudologic identified USER_HOME:${USER_HOME:-}"
+        echo "...$0:$LINENO if export sudologic identified USER_HOME:${SUDO_USER:-}"
+        echo "...$0:$LINENO if export sudologic identified USER_HOME:${USER:-}"
+        # exit
     }
     else
     {
+       echo "... "$(basename "$0")" $0:$LINENO else sudologic identified USER_HOME:${USER_HOME:-}"
       local USER_HOME=$HOME
+       echo "... $0:$LINENO else sudologic identified USER_HOME:${USER_HOME:-}"
     }
     fi
     # shellcheck disable=SC1090
-    echo "... sudologic identified USER_HOME:$USER_HOME"
+  
     local -r provider="$USER_HOME/_/clis/execute_command_intuivo_cli/execute_boot_basic.sh"
+    echo "... $0:$LINENO provider:$provider"
     local _err=0 bootbasicsource
-    if [   -e "${provider}"  ] ; then
+    if [[   -e "${provider}"  ]] ; then
+      echo "... $0:$LINENO if provider:$provider"      
       if (( _DEBUG )) ; then
         echo "$0 execute_command_intuivo_cli/struct_testing load_execute_boot_basic_with_sudo() Loading locally"
       fi
@@ -5225,6 +5340,7 @@ function raise_to_sudo_and_user_home() {
       _err=$?
       [ $_err -gt 0 ] &&  echo -e "\n \n  ERROR! Loading execute_boot_basic.sh. running 'source locally' returned error did not download or is empty err:$_err  \n \n  " && exit 1
     else
+      echo "... $0:$LINENO else provider:$provider"      
       if ( command -v curl >/dev/null 2>&1; )  ; then
         if (( _DEBUG )) ; then
           echo "$0 execute_command_intuivo_cli/struct_testing load_execute_boot_basic_with_sudo() curl Loading execute_boot_basic.sh from the net using curl "
@@ -5251,7 +5367,11 @@ function raise_to_sudo_and_user_home() {
       echo "$0 execute_command_intuivo_cli/struct_testing load_execute_boot_basic_with_sudo() Temp execute_boot_basic.sh location ${_temp_dir}/execute_boot_basic_source"
     fi
     echo "2. sudologic execute_boot_basic.sh Temp location ${_temp_dir}/execute_boot_basic_source"
-    source "${_temp_dir}/execute_boot_basic_source"
+
+    # execute_sudo source "${_temp_dir}/execute_boot_basic_source"
+    # execute_sudo "${_temp_dir}/execute_boot_basic_source"
+    \. "${_temp_dir}/execute_boot_basic_source"
+    # exit
     _err=$?
     [ $_err -gt 0 ] &&  echo -e "\n \n  ERROR! Loading execute_boot_basic.sh. Occured while running 'source' err:$_err  \n \n  " && exit 1
     if  ! typeset -f on_int >/dev/null 2>&1; then

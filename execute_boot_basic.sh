@@ -234,9 +234,10 @@ boostrap_intuivo_bash_app(){
     # Project  /  script / test function test if loaded should exist
     local -r _scripts=$(grep -v "^#" <<<"
 # task_intuivo_cli/execute_as_sudo.sh:execute_as_sudo
-task_intuivo_cli/add_error_trap.sh:_trap_on_error
+# task_intuivo_cli/add_error_trap.sh:colorize
 execute_command_intuivo_cli/execute_command:_execute_command_worker
 execute_command_intuivo_cli/struct_testing:passed
+task_intuivo_cli/add_error_trap.sh:_trap_on_error
 " )
     (( _DEBUG )) && echo "------_scripts:: $_scripts"
     while read -r _one; do
@@ -421,6 +422,7 @@ execute_command_intuivo_cli/struct_testing:passed
     unset _tmp_file
     unset _function_test
 		unset _DEBUG
+    passed "# end function boostrap_intuivo_bash_app()"
     # unset _scripts # unset: _scripts: cannot unset: readonly variable ..is normal behavoir or bash as of now
     # unset _provider  # unset: _scripts: cannot unset: readonly variable ..is normal behavoir or bash as of now
     return 0
