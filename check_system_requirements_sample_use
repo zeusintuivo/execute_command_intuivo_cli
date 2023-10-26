@@ -112,7 +112,7 @@ oath_security_to="
     #Otherwise set "reading" "$oath_security_from" inside "apps/oauthserver/config/security.yml" to  "$oath_security_to"
 
 
-    set -ux
+    #set -ux
     echo other:"$OTHERWISE"
     ls -la "apps/oauthserver/config/security.yml"
     set +xu
