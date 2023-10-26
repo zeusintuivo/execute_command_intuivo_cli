@@ -1497,12 +1497,12 @@ function _run_command(){
   # shellcheck disable=SC2031
   if ( is_defined_and_not_empty SUDO_USER "${SUDO_USER}" && is_defined_and_not_empty SUDO_UID "${SUDO_UID}"  ) ; then
   {
-    _node_run_command="$(su - "${SUDO_USER}" -c 'cd '"${CALLERPWD}"' ; '"${*}"'' 2>&1)"  # stout and stderr both get
+    _node_run_command="$(su - "${SUDO_USER}" -c 'cd '"${CALLERPWD:-}"' ; '"${*:-}"'' 2>&1)"  # stout and stderr both get
     _err=$?
   }
   else
   {
-    _node_run_command="$(cd "${CALLERPWD}" || true ; "${*}" 2>&1)"  # stout and stderr both get
+    _node_run_command="$(cd "${CALLERPWD:-}" || true ; "${*:-}" 2>&1)"  # stout and stderr both get
     _err=$?
   }
   fi
