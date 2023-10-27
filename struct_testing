@@ -610,7 +610,7 @@ CERO="\033[01;0m"
             #            ensure bsondump or " Cancel export"
             #
             TESTING="that command ${CYAN}${1}${LIGHTYELLOW} exists in the path or can be reached from command line."
-            if ! command -v "${1}" >/dev/null 2>&1;  then # Command Does not-exist
+            if ! su - "${SUDO_USER}" -c "command -v \"${1}\"" >/dev/null 2>&1;  then # Command Does not-exist
             {
               failed "${TESTING}"
               [[ -n "${3+x}"  ]] && enhance_message "${3}"
