@@ -2884,7 +2884,7 @@ function _ensure_touch_dir_and_file() {
               if ( ( command -v apt >/dev/null 2>&1; ) && ( command -v dpkg >/dev/null 2>&1; ) ) ; then
               {
                 if (( DEBUG )) ; then
-                  Comment struct_testing:$LINENO $FUNCNAME[0] "apt search using dpkg"
+                  Comment struct_testing:$LINENO "${FUNCNAME[0]}" "apt search using dpkg"
                 fi
                 # REF: https://www.cyberciti.biz/faq/find-out-if-package-is-installed-in-linux/
                 if query=$(dpkg-query -W -f='${Status} ${Version}\n' "$one_required"  2>&1) ; then
@@ -3005,24 +3005,16 @@ function _ensure_touch_dir_and_file() {
               elif ( command -v brew >/dev/null 2>&1; ) ; then
               {
                 # _run_command brew install ${missing}
+               
                 if (( DEBUG )) ; then
-                  Comment struct_testing:$LINENO $FUNCNAME[0] "/opt/homebrew/bin/brew install"
+                  Comment struct_testing:$LINENO $FUNCNAME[0] " /usr/local/opt/homebrew/bin/brew install"
                   echo "brew install "
                 fi
                 export ARCHFLAGS="-arch $(uname -m)"
-                if [[ -e /opt/homebrew/bin/brew ]] ; then
-                {
-                    Comment "ARCHFLAGS=\"-arch $(uname -m)\" su - \"${SUDO_USER}\" -c  \"/opt/homebrew/bin/brew install ${missing} \" "
-                    install_result=$(ARCHFLAGS="-arch $(uname -m)" su - "${SUDO_USER}" -c  "/opt/homebrew/bin/brew install ${missing} " 2>&1) # capture all input and output
-                    err_buff=$?
-                }
-                else
-                {
-                    Comment "ARCHFLAGS=\"-arch $(uname -m)\" su - \"${SUDO_USER}\" -c  \"brew install ${missing} \" "
-                    install_result=$(ARCHFLAGS="-arch $(uname -m)" su - "${SUDO_USER}" -c  "brew install ${missing} " 2>&1) # capture all input and output
-                    err_buff=$?
-                }
-                fi
+                su - "${SUDO_USER}" -c "/opt/homebrew/bin/brew install ${missing} "
+
+                su - "${SUDO_USER}" -c "brew install ${missing} "
+                err_buff=$?
                 if (( DEBUG )) ; then
                   Comment struct_testing:$LINENO $FUNCNAME[0] install_result="${install_result}"
                   Comment struct_testing:$LINENO $FUNCNAME[0] err_buff="${err_buff}"
