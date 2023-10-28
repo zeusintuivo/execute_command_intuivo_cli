@@ -316,7 +316,7 @@ CERO="\033[01;0m"
                 (( _error_count-- ))
                 local -i _counter=0
                 local -i _counter_offset=0
-                echo -e " ☠ ${LIGHTPINK} ERROR STACK TRACE: ${len}  ${RESET}"  >&2
+                echo -e " ☠ ${LIGHTPINK} ERROR STACK TRACE: ${_error_count}  ${RESET}"  >&2
                 # echo -e "0000${BRIGHT_BLUE87} ${BASH_SOURCE[0]}:${BASH_LINENO[0]} \t\t  ${FUNCNAME[0]}() ${RESET}"  >&2
                 echo -e "${BRIGHT_BLUE87} ${__caller_script_name}:${__caller_line} \t\t  ${FUNCNAME[1]}() ${RESET}"  >&2
                 for (( _counter=1; _counter<${_error_count}; _counter++ )); do
@@ -473,6 +473,7 @@ CERO="\033[01;0m"
           # [ -n "${CAN_I_RUN_SUDO+x}" ] && echo "CAN_I_RUN_SUDO 12"
           # [ -n "${SUDO_USER+x}" ] && echo "SUDO_USER 111"
           # ( declare -p "HOME" ) && echo "HOME 2"
+          local -i _DEBUG=${DEBUG:-0}
           local _err_arriving=$?
 #          typeset -r TESTING="that variable is listed and: ${CYAN}${1}${LIGHTYELLOW} and has value: ${RESET}<${YELLOW_OVER_DARKBLUE}${2}${RESET}>"
           if [ ${_err_arriving} -gt 0 ] ; then
@@ -483,13 +484,13 @@ CERO="\033[01;0m"
           }
           fi
           local -i _seemsempty_=0
-          if (( DEBUG )) ; then
+          if (( _DEBUG )) ; then
             echo -e "${FUNCNAME[0]}"
             echo "x${1}x" -assume existing variable for this part
             echo "x${2}x" -assume existing variable for this part
           fi
           [[ "x${2}x" = "xx" ]] && _seemsempty_=1
-          if (( DEBUG )) ; then
+          if (( _DEBUG )) ; then
             if [[ "x${2}x" = "xx" ]] ; then
               echo seems empty
             fi
@@ -517,7 +518,7 @@ CERO="\033[01;0m"
           (( _seemsempty_ )) && exit 1
           if (( typeset -p "${1}"  &>/dev/null ) &&  [ -n "${2+x}" ]) ; then
           {
-              if (( DEBUG )) ; then
+              if (( _DEBUG )) ; then
                 echo -e "${LIGHTGREEN} ✔ ${LIGHTYELLOW} ${TESTING} has passed "
               fi
               return 0
@@ -609,7 +610,7 @@ CERO="\033[01;0m"
             #            ensure bsondump or " Cancel export"
             #
             TESTING="that command ${CYAN}${1}${LIGHTYELLOW} exists in the path or can be reached from command line."
-            if ! command -v "${1}" >/dev/null 2>&1;  then # Command Does not-exist
+            if ! su - "${SUDO_USER}" -c "command -v \"${1}\"" >/dev/null 2>&1;  then # Command Does not-exist
             {
               failed "${TESTING}"
               [[ -n "${3+x}"  ]] && enhance_message "${3}"
@@ -621,61 +622,61 @@ CERO="\033[01;0m"
         } # end ensure
 
         function Installing() {
-            echo -e "${GREEN} Installing ${RED}${1}${GREEN}, ${RED}${2} ${GREEN}${3} ${CYAN}${4}, ${RED}${5} ${GREEN}${6} ${CYAN}${*:7} ${GREEN}.${RESET}"
+            echo -e "${GREEN} Installing ${RED}${1-}${GREEN}, ${RED}${2-} ${GREEN}${3-} ${CYAN}${4-}, ${RED}${5-} ${GREEN}${6-} ${CYAN}${*:-7} ${GREEN}.${RESET}"
         } # end Installing
         alias installing=Installing
 
         function Downloading() {
-            echo -e "${GREEN} Downloading ${RED}${1}${GREEN}, ${RED}${2} ${GREEN}${3} ${CYAN}${4}, ${RED}${5} ${GREEN}${6} ${CYAN}${*:7} ${GREEN}.${RESET}"
+            echo -e "${GREEN} Downloading ${RED}${1-}${GREEN}, ${RED}${2-} ${GREEN}${3-} ${CYAN}${4-}, ${RED}${5-} ${GREEN}${6-} ${CYAN}${*:-7} ${GREEN}.${RESET}"
         } # end Downloading
         alias downloading=Downloading
 
         function Loading() {
-            echo -e "${CYAN} Loading ${GREEN}${1}${GRAY241}, ${RED}${2} ${GREEN}${3} ${CYAN}${4}, ${RED}${5} ${GREEN}${6} ${CYAN}${*:7} ${GREEN}.${RESET}"
+            echo -e "${CYAN} Loading ${GREEN}${1-}${GRAY241}, ${RED}${2-} ${GREEN}${3-} ${CYAN}${4-}, ${RED}${5-} ${GREEN}${6-} ${CYAN}${*:-7} ${GREEN}.${RESET}"
         } # end Loading
         alias loading=Loading
 
         function Creating() {
-            echo -e "${DARK_BLUE_OVER_PEACH} Creating ${YELLOW_OVER_DARKBLUE}${1}${GREEN}, ${LIGHTPINK_OVER_DARKBLUE}${2} ${GREEN}${3} ${CYAN}${4}, ${RED}${5} ${GREEN}${6} ${CYAN}${*:7} ${GREEN}.${RESET}"
+            echo -e "${DARK_BLUE_OVER_PEACH} Creating ${YELLOW_OVER_DARKBLUE}${1-}${GREEN}, ${LIGHTPINK_OVER_DARKBLUE}${2-} ${GREEN}${3-} ${CYAN}${4-}, ${RED}${5-} ${GREEN}${6-} ${CYAN}${*:-7} ${GREEN}.${RESET}"
         } # end Loading
         alias creating=Creating
 
         function Skipping() {
-            echo -e "${DARK_BLUE_OVER_PEACH} Skipping ${YELLOW_OVER_DARKBLUE}${1}${GREEN}, ${LIGHTPINK_OVER_DARKBLUE}${2} ${GREEN}${3} ${CYAN}${4}, ${RED}${5} ${GREEN}${6} ${CYAN}${*:7} ${GREEN}.${RESET}"
+            echo -e "${DARK_BLUE_OVER_PEACH} Skipping ${YELLOW_OVER_DARKBLUE}${1-}${GREEN}, ${LIGHTPINK_OVER_DARKBLUE}${2-} ${GREEN}${3-} ${CYAN}${4-}, ${RED}${5-} ${GREEN}${6-} ${CYAN}${*:-7} ${GREEN}.${RESET}"
         } # end Loading
         alias skipping=Skipping
 
         function Updating() {
-            echo -e "${ORANGE} Updating ${BRIGHT_BLUE87}${1}${GREEN}, ${YELLOW226}${2} ${GREEN}${3} ${CYAN}${4}, ${RED}${5} ${GREEN}${6} ${CYAN}${*:7} ${GREEN}.${RESET}"
+            echo -e "${ORANGE} Updating ${BRIGHT_BLUE87}${1-}${GREEN}, ${YELLOW226}${2-} ${GREEN}${3-} ${CYAN}${4-}, ${RED}${5-} ${GREEN}${6-} ${CYAN}${*:-7} ${GREEN}.${RESET}"
         } # end Loading
         alias updating=Updating
 
         function Testing() {
-            echo -e "${CYAN} Testing ${PURPLE}${1}${GREEN}, ${RED}${2} ${GREEN}${3} ${CYAN}${4}, ${RED}${5} ${GREEN}${6} ${CYAN}${*:7} ${GREEN}.${RESET}"
+            echo -e "${CYAN} Testing ${PURPLE}${1-}${GREEN}, ${RED}${2-} ${GREEN}${3-} ${CYAN}${4-}, ${RED}${5-} ${GREEN}${6-} ${CYAN}${*:-7} ${GREEN}.${RESET}"
         } # end Testing
         alias testing=Testing
 
         function Configuring() {
-            echo -e "${GREEN} Configuring ${RED}${1}${GREEN}, ${RED}${2} ${GREEN}${3} ${CYAN}${4}, ${RED}${5} ${GREEN}${6} ${CYAN}${*:7} ${GREEN}.${RESET}"
+            echo -e "${GREEN} Configuring ${RED}${1-}${GREEN}, ${RED}${2-} ${GREEN}${3-} ${CYAN}${4-}, ${RED}${5-} ${GREEN}${6-} ${CYAN}${*:-7} ${GREEN}.${RESET}"
         } # end Configuring
         alias configuring=Configuring
 
         function Setting() {
-            echo -e "${GREEN} Setting ${RED}${1}${GREEN}, ${RED}${2} ${GREEN}${3} ${CYAN}${4}, ${RED}${5} ${GREEN}${6} ${CYAN}${*:7} ${GREEN}.${RESET}"
+            echo -e "${GREEN} Setting ${RED}${1-}${GREEN}, ${RED}${2-} ${GREEN}${3-} ${CYAN}${4-}, ${RED}${5-} ${GREEN}${6-} ${CYAN}${*:-7} ${GREEN}.${RESET}"
         } # end Setting
         alias setting=Setting
 
         function Checking() {
-            echo -e "${GREEN} Checking ${RED}${1}${GREEN}, ${RED}${2} ${GREEN}${3} ${CYAN}${4}, ${RED}${5} ${GREEN}${6} ${CYAN}${*:7} ${GREEN}.${RESET}"
+            echo -e "${GREEN} Checking ${RED}${1-}${GREEN}, ${RED}${2-} ${GREEN}${3-} ${CYAN}${4-}, ${RED}${5-} ${GREEN}${6-} ${CYAN}${*:-7} ${GREEN}.${RESET}"
         } # end Checking
         alias checking=Checking
 
         function Final() {
-            echo -e "${GREEN} Setting ${RED}${1}${GREEN}, ${RED}${2} ${GREEN}${3} ${CYAN}${4}, ${RED}${5} ${GREEN}${6} ${CYAN}${*:7} ${GREEN}.${RESET}"
+            echo -e "${GREEN} Setting ${RED}${1-}${GREEN}, ${RED}${2-} ${GREEN}${3-} ${CYAN}${4-}, ${RED}${5-} ${GREEN}${6-} ${CYAN}${*:-7} ${GREEN}.${RESET}"
         } # end Final
 
         function Showing() {
-            echo -e "${ORANGE} ø  ${PURPLE}${1}${ORANGE} ${CYAN}${2} ${DARKBLUE}${3} ${PURPLE_BLUE}${4} ${BRIGHT_BLUE87}${5} ${GREEN}${6} ${RED}${*:7} ${GREEN}.${RESET}"
+            echo -e "${ORANGE} ø  ${PURPLE}${1-}${ORANGE} ${CYAN}${2-} ${DARKBLUE}${3-} ${PURPLE_BLUE}${4-} ${BRIGHT_BLUE87}${5-} ${GREEN}${6-} ${RED}${*:-7} ${GREEN}.${RESET}"
             "${@}"
         } # end Showing
         alias showing=Showing
@@ -751,6 +752,15 @@ CERO="\033[01;0m"
             echo  -e "${PURPLE}${CYAN}+---${DARKBLUE} ${LIGHTYELLOW} ${msg1} ${CYAN} ${msg2} ${RESET}"
         }
         alias comment=Comment
+
+        function Working() {
+            trap 'exit 1' ERR
+            local msg1="$1"
+            local msg2=$(echo "${*}" | cüt "${1}"  ;)
+            # local msg2=$(echo "${*}" | sed 's/'"""${msg1}"""'//g'  ;)
+            echo  -e "\n\n${PURPLE}π‘“……… ${CYAN} ${msg1} ${DARKBLUE} ${msg2} ${LIGHTYELLOW}  ${CYAN} ${RESET}\n\n"
+        }
+        alias working=Working
 
         function not() {
             local order="empty"  # Tasjgjgggg
@@ -1487,12 +1497,12 @@ function _run_command(){
   # shellcheck disable=SC2031
   if ( is_defined_and_not_empty SUDO_USER "${SUDO_USER}" && is_defined_and_not_empty SUDO_UID "${SUDO_UID}"  ) ; then
   {
-    _node_run_command="$(su - "${SUDO_USER}" -c 'cd '"${CALLERPWD}"' ; '"${*}"'' 2>&1)"  # stout and stderr both get
+    _node_run_command="$(su - "${SUDO_USER}" -c 'cd '"${CALLERPWD:-}"' ; '"${*:-}"'' 2>&1)"  # stout and stderr both get
     _err=$?
   }
   else
   {
-    _node_run_command="$(cd "${CALLERPWD}" || true ; "${*}" 2>&1)"  # stout and stderr both get
+    _node_run_command="$(cd "${CALLERPWD:-}" || true ; "${*:-}" 2>&1)"  # stout and stderr both get
     _err=$?
   }
   fi
@@ -1956,42 +1966,42 @@ function _run_command(){
         } # end is_service_running
 
         function type_function_exists() {
-          # local DEBUG=1
+          local -i _DEBUG=${DEBUG:-0}
           if ( is_defined_and_not_empty SUDO_USER "${SUDO_USER}" && is_defined_and_not_empty SUDO_UID "${SUDO_UID}"  ) ; then
           {
-              (( DEBUG )) && echo "type_function_exists:SUDO DEFINED"
-              if [[ "$(( type "${*}" > /dev/null 2>&1 ) && echo "hola" )" == *"hola"* ]] ; then
+              (( _DEBUG )) && echo "type_function_exists:SUDO DEFINED"
+              if [[ "$( ( type "${*}" > /dev/null 2>&1 ) && echo "hola" )" == *"hola"* ]] ; then
               #if [[ "$(( ( su - $SUDO_USER -c 'type '"${*}"' >/dev/null 2>&1' ) ) && echo "hola" )" == *"hola"* ]] ; then
               #if ( su - $SUDO_USER -c 'type '"${*}"' >/dev/null 2>&1' ) ; then
               {
-                (( DEBUG )) && echo "type_function_exists:TYPE is installed ${*} "
+                (( _DEBUG )) && echo "type_function_exists:TYPE is installed ${*} "
                 return 0
               }
               fi
-              (( DEBUG )) && echo "type_function_exists:TYPE is not installed ${*} "
-              (( DEBUG )) && echo "type_function_exists:trying with command ${*} "
-              if [[ "$(( ( su - $SUDO_USER -c 'command -v '"${*}"' >/dev/null 2>&1' ) ) && echo "hola" )" == *"hola"* ]] ; then
+              (( _DEBUG )) && echo "type_function_exists:TYPE is not installed ${*} "
+              (( _DEBUG )) && echo "type_function_exists:trying with command ${*} "
+              if [[ "$( ( ( su - $SUDO_USER -c 'command -v '"${*}"' >/dev/null 2>&1' ) ) && echo "hola" )" == *"hola"* ]] ; then
               {
-                (( DEBUG )) && echo "type_function_exists:COMMAND is installed ${*} "
+                (( _DEBUG )) && echo "type_function_exists:COMMAND is installed ${*} "
                 return 0
               }
               fi
-              (( DEBUG )) && echo "type_function_exists:TYPE abd COMMAND fail to find installed or available ${*} "
+              (( _DEBUG )) && echo "type_function_exists:TYPE abd COMMAND fail to find installed or available ${*} "
               return 1
           }
           fi
-          (( DEBUG )) && echo "type_function_exists:SUDO NOT DEFINED"
+          (( _DEBUG )) && echo "type_function_exists:SUDO NOT DEFINED"
           # if [[ "$(( type wget > /dev/null 2>&1 ) && echo "hola" )" == *"hola"* ]] ; then  echo "has" ; else  echo "has not" ; fi
           # [[ "$(( type wgot > /dev/null 2>&1 ) && echo "hola" )" == *"hola"* ]] && echo "has"
-          if [[ $(( type "${*}" > /dev/null 2>&1 ) && echo "hola" ) == *"hola"* ]] ; then
+          if [[ $( ( type "${*}" > /dev/null 2>&1 ) && echo "hola" ) == *"hola"* ]] ; then
           # if ( type "${*}" > /dev/null 2>&1 ) ; then
           {
-            (( DEBUG )) && echo "type_function_exists:TYPE is installed ${*} "
+            (( _DEBUG )) && echo "type_function_exists:TYPE is installed ${*} "
             return 0
           }
           fi
-          (( DEBUG )) && echo "type_function_exists:TYPE is not installed ${*} "
-          (( DEBUG )) && echo "( type nvm > /dev/null 2>&1 )"
+          (( _DEBUG )) && echo "type_function_exists:TYPE is not installed ${*} "
+          (( _DEBUG )) && echo "( type nvm > /dev/null 2>&1 )"
           return 1
         } # type_function_exists
 
@@ -2054,7 +2064,7 @@ export is_not_installed
                 {
                     if [[ -n "$SERVICE_NAME" ]] ; then  # is not empty
                     {
-                        TESTING="that: ${CYAN}${SERVICE_NAME}${GREEN} is installed"
+                        TESTING="that: ${CYAN}${SERVICE_NAME}${GREEN} is installed and executable from command line"
                         if !  is_installed "${SERVICE_NAME}"; then
                         {
                             failed "${TESTING}" # assumed else
@@ -2789,11 +2799,16 @@ fi
             #
 
             # room for detecting Linux and OS systems
-            local OS="${1}"
+            local OS="${1:-}"
+            if [[ -z "${2:-}" ]] ; then
+            {
+              return 0
+            }
+            fi
             local missing=""
             local one_required=""
             local install_this=""
-            local required=$(grep -vE '^#'<<<$(grep -vE '^\s+#'<<<"${2}"))
+            local required=$(grep -vE '^#'<<<$(grep -vE '^\s+#'<<<"${2:-}"))
             local packages=""
             local query=""
             local install_result=""
@@ -2838,7 +2853,9 @@ fi
               {
                 install_this="$( echo "${one_required}" | cut -d@ -f2- )"
                 one_required="$( echo "${one_required}" | cut -d@ -f1 )"
-              } else {
+              } 
+              else
+              {
                 install_this="${one_required}"
               }
               fi
@@ -2846,14 +2863,18 @@ fi
               if [[ -z "${one_required}" ]] ; then
               {
                 continue
-              } else {
+              } 
+              else
+              {
                 one_required=$(echo -n ${one_required} | sed -e 's/^[[:space:]]*//' ) # trim_start_space
               }
               fi
               if [[ -z "${install_this}" ]] ; then
               {
                 install_this=$(echo -n ${one_required} | sed -e 's/^[[:space:]]*//' ) # trim_spaces
-              } else {
+              } 
+              else
+              {
                 install_this=$(echo -n ${install_this} | sed -e 's/^[[:space:]]*//' ) # trim_spaces
               }
               fi
@@ -2955,7 +2976,7 @@ fi
             if [[ -n "${missing}" ]] ; then
             {
               if (( DEBUG )) ; then
-                echo "There are missing"
+                Comment struct_testing:$LINENO $FUNCNAME[0] "There are missing"
               fi
               missing=$(echo -n ${missing} | sed -e 's/^[[:space:]]*//' ) # trim_start_space
               echo -e " ${CYAN} Installing missing packages: ${YELLOW} ${missing} ${RESET} ."
@@ -2994,7 +3015,7 @@ fi
             }
             fi
             # echo $install_result;
-            if [[ ! -z "${install_result}" ]] ; then #  && handle_error "${install_result}"
+            if [[ -n "${install_result}" ]] ; then #  && handle_error "${install_result}"
             {
                 if (( DEBUG )) ; then
                   echo "errors install"
@@ -4261,7 +4282,7 @@ function _download_linux() {
 
     # WGETRC=${_temp_dir}/wgetrc  wget "${WGETCOMMAND}" # 2>/dev/null"
     _assure_success
-    echo "${msg}"
+    echo "${msg:-}"
     echo -e "\033[7m*** Download Wget executed completed.\033[0m"
     rm -f ${_temp_dir}/wgetrc
     file_does_not_exist_with_spaces ${_temp_dir}/wgetrc
@@ -4885,6 +4906,7 @@ function _do_not_downloadtwice(){
   # _do_not_downloadtwice "${TARGET_URL}" "${DOWNLOADFOLDER}"  "${CODENAME}"
   #
   #
+	local -i _VERBOSE=${VERBOSE:-0}
   local TARGET_URL="${1}"
   enforce_parameter_with_value 1 TARGET_URL "${TARGET_URL}" "https://download.teamviewer.com/download/linux/teamviewer.x86_64.rpm"
   local DOWNLOADFOLDER="${2}"
@@ -4893,7 +4915,8 @@ function _do_not_downloadtwice(){
   file_exists_with_spaces "${DOWNLOADFOLDER}"
   local CODENAME="${3}"
   enforce_parameter_with_value 3 CODENAME "${CODENAME}" "teamviewer.x86_64.rpm"
-  (( VERBOSE )) && echo  _do_not_downloadtwice "${TARGET_URL}" "${DOWNLOADFOLDER}"  "${CODENAME}"
+
+	(( _VERBOSE )) && echo  _do_not_downloadtwice "${TARGET_URL}" "${DOWNLOADFOLDER}"  "${CODENAME}"
 
   if it_exists_with_spaces "${DOWNLOADFOLDER}/${CODENAME}" ; then
   {
@@ -4902,8 +4925,8 @@ function _do_not_downloadtwice(){
   else
   {
     cd "${DOWNLOADFOLDER}"
-    (( VERBOSE )) && pwd
-    (( VERBOSE )) && echo  _download "${TARGET_URL}" "${DOWNLOADFOLDER}"  "${CODENAME}"
+    (( _VERBOSE )) && pwd
+    (( _VERBOSE )) && echo  _download "${TARGET_URL}" "${DOWNLOADFOLDER}"  "${CODENAME}"
     _download "${TARGET_URL}" "${DOWNLOADFOLDER}"  "${CODENAME}"
     file_exists_with_spaces "${DOWNLOADFOLDER}/${CODENAME}"
   }
@@ -5143,7 +5166,101 @@ function raise_to_sudo_and_user_home() {
   #  [ $? -gt 0 ] && failed to sudo_it raise_to_sudo_and_user_home
   #   enforce_variable_with_value USER_HOME "${USER_HOME}"
   #
-  load_execute_boot_basic_with_sudo(){
+
+    unset HAVE_SUDO_ACCESS # unset this from the environment
+
+    have_sudo_access() {
+      if [[ ! -x "/usr/bin/sudo" ]]
+      then
+        return 1
+      fi
+
+      local -a SUDO=("/usr/bin/sudo")
+      if [[ -n "${SUDO_ASKPASS-}" ]]
+      then
+        SUDO+=("-A")
+      elif [[ -n "${NONINTERACTIVE-}" ]]
+      then
+        SUDO+=("-n")
+      fi
+
+      if [[ -z "${HAVE_SUDO_ACCESS-}" ]]
+      then
+        if [[ -n "${NONINTERACTIVE-}" ]]
+        then
+          "${SUDO[@]}" -l mkdir &>/dev/null
+        else
+          "${SUDO[@]}" -v && "${SUDO[@]}" -l mkdir &>/dev/null
+        fi
+        HAVE_SUDO_ACCESS="$?"
+      fi
+
+      if [[ "$(uname)" == "Darwin" ]] && [[ "${HAVE_SUDO_ACCESS}" -ne 0 ]]
+      then
+        failed "Need sudo access on macOS (e.g. the user ${USER} needs to be an Administrator)!"
+      fi
+
+      return "${HAVE_SUDO_ACCESS}"
+    }
+    # string formatters
+    if [[ -t 1 ]]
+    then
+      tty_escape() { printf "\033[%sm" "$1"; }
+    else
+      tty_escape() { :; }
+    fi
+    tty_mkbold() { tty_escape "1;$1"; }
+    tty_underline="$(tty_escape "4;39")"
+    tty_blue="$(tty_mkbold 34)"
+    tty_red="$(tty_mkbold 31)"
+    tty_bold="$(tty_mkbold 39)"
+    tty_reset="$(tty_escape 0)"
+
+
+    shell_join() {
+      local arg
+      printf "%s" "$1"
+      shift
+      for arg in "$@"
+      do
+        printf " "
+        printf "%s" "${arg// /\ }"
+      done
+    }
+
+
+
+    ohai() {
+      printf "${tty_blue}==>${tty_bold} %s${tty_reset}\n" "$(shell_join "$@")"
+    }
+
+    execute() {
+      if ! "$@"
+      then
+        failed "$(printf "Failed during: %s" "$(shell_join "$@")")"
+      fi
+    }
+
+    execute_sudo() {
+      local -a args=("$@")
+      if have_sudo_access
+      then
+        if [[ -n "${SUDO_ASKPASS-}" ]]
+        then
+          args=("-A" "${args[@]}")
+        fi
+        ohai "/usr/bin/sudo" "${args[@]}"
+        execute "/usr/bin/sudo" "${args[@]}"
+      else
+        ohai "${args[@]}"
+        execute "${args[@]}"
+      fi
+    }
+  passed "raise_to_sudo_and_user_home()"
+  load_execute_boot_basic_with_sudo() {
+	local -i _DEBUG=${DEBUG:-0}
+    passed "load_execute_boot_basic_with_sudo() " 
+    export SUDO_USER
     # shellcheck disable=SC2030
     if ( typeset -p "SUDO_USER"  &>/dev/null ) ; then
     {
@@ -5153,7 +5270,7 @@ function raise_to_sudo_and_user_home() {
       # shellcheck disable=SC2031
       if ! ( env | grep "USER_HOME" &>/dev/null ) ; then
       {
-          typeset USER_HOME="$(echo -n $(bash -c "cd ~${SUDO_USER} && pwd"))"  # Get the caller's of sudo home dir LINUX and MAC
+          typeset USER_HOME="$(echo -n $(bash -c "cd ~${SUDO_USER:-} && pwd"))"  # Get the caller's of sudo home dir LINUX and MAC
       }
       fi
     }
@@ -5176,14 +5293,14 @@ function raise_to_sudo_and_user_home() {
       [ $_err -gt 0 ] &&  echo -e "\n \n  ERROR! Loading execute_boot_basic.sh. running 'source locally' returned error did not download or is empty err:$_err  \n \n  " && exit 1
     else
       if ( command -v curl >/dev/null 2>&1; )  ; then
-        if (( DEBUG )) ; then
+        if (( _DEBUG )) ; then
           echo "$0 execute_command_intuivo_cli/struct_testing load_execute_boot_basic_with_sudo() curl Loading execute_boot_basic.sh from the net using curl "
         fi
         bootbasicsource="""$(curl https://raw.githubusercontent.com/zeusintuivo/execute_command_intuivo_cli/master/execute_boot_basic.sh  -so -   2>/dev/null )"""  #  2>/dev/null suppress only curl download messages, but keep curl output for variable
         _err=$?
         [ $_err -gt 0 ] &&  echo -e "\n \n  ERROR! Loading execute_boot_basic.sh. running 'curl' returned error did not download or is empty err:$_err  \n \n  " && exit 1
       elif ( command -v wget >/dev/null 2>&1; ) ; then
-        if (( DEBUG )) ; then
+        if (( _DEBUG )) ; then
           echo "$0 execute_command_intuivo_cli/struct_testing load_execute_boot_basic_with_sudo() wget Loading execute_boot_basic.sh from the net using wget "
         fi
         bootbasicsource="""$(wget --quiet --no-check-certificate  https://raw.githubusercontent.com/zeusintuivo/execute_command_intuivo_cli/master/execute_boot_basic.sh -O -   2>/dev/null )"""  #  2>/dev/null suppress only wget download messages, but keep wget output for variable
@@ -5197,7 +5314,7 @@ function raise_to_sudo_and_user_home() {
     [[ -z "${bootbasicsource}" ]] && echo -e "\n \n  ERROR! Loading execute_boot_basic.sh  bootbasicsource did not download or is empty " && exit 1
     local _temp_dir="$(mktemp -d 2>/dev/null || mktemp -d -t 'execute_boot_basic_source')"
     echo "${bootbasicsource}">"${_temp_dir}/execute_boot_basic_source"
-    if (( DEBUG )) ; then
+    if (( _DEBUG )) ; then
       echo "$0 execute_command_intuivo_cli/struct_testing load_execute_boot_basic_with_sudo() Temp execute_boot_basic.sh location ${_temp_dir}/execute_boot_basic_source"
     fi
     echo "2. sudologic execute_boot_basic.sh Temp location ${_temp_dir}/execute_boot_basic_source"
@@ -5233,7 +5350,8 @@ function enforce_node_is_version(){
   # Sample use:
   # enforce_node_is_version  "12.20.1"
   #
-  if (( DEBUG )) ; then
+	local -i _DEBUG=${DEBUG:-0}
+  if (( _DEBUG )) ; then
     echo "  Checking for node version to be ${1}"
   fi
   local msg
@@ -5245,7 +5363,7 @@ function enforce_node_is_version(){
     failed "expected ${TESTING} but got <$(node --version)> "
   }
   fi
-  if (( DEBUG )) ; then
+  if (( _DEBUG )) ; then
     passed "${TESTING}"
   fi
   return 0
@@ -5255,7 +5373,8 @@ function enforce_vpn_is_on(){
   # Sample use:
   # enforce_vpn_is_on  "diginet"
   #
-  (( DEBUG )) && echo "  Checking for connection to ${1}"
+	local -i _DEBUG=${DEBUG:-0}
+  (( _DEBUG )) && echo "  Checking for connection to ${1}"
   local msg
   msg=$(/usr/bin/nmcli c show --active | /bin/grep vpn | /bin/grep "${1}" 2>&1; )
   _err=$?
@@ -5265,7 +5384,7 @@ function enforce_vpn_is_on(){
     failed "${TESTING}"
   }
   fi
-  (( DEBUG )) && passed "${TESTING}"
+  (( _DEBUG )) && passed "${TESTING}"
   return 0
 } # end enforce_vpn_is_on
 
@@ -5308,9 +5427,10 @@ function enforce_web_is_reachable(){
   local msg
   msg=$(curl -I --connect-timeout 5 --max-time 10 "${_domain}" 2>&1; )
   _err=$?
-  local DEBUG=1
-  (( DEBUG )) && echo enforce_web_is_reachable curl -I --connect-timeout 5  --max-time 10 "${1}"
-  (( DEBUG )) && echo enforce_web_is_reachable curl exit code $_err
+	local -i _DEBUG=${DEBUG:-1}
+  #local DEBUG=1
+  (( _DEBUG )) && echo enforce_web_is_reachable curl -I --connect-timeout 5  --max-time 10 "${1}"
+  (( _DEBUG )) && echo enforce_web_is_reachable curl exit code $_err
   local TESTING="web address ${BRIGHT_BLUE87}««${RED}${1}${BRIGHT_BLUE87}»»${LIGHTYELLOW} is reachable"
   if [ $_err -gt 0 ] ; then
   {
@@ -5369,10 +5489,11 @@ function enforce_ip_resolves(){
 function _remove_dmgs_app_if_exists() {
   # Sample use
   #       _remove_dmgs_app_if_exists "${APPDIR}"
+	local -i _DEBUG=${DEBUG:-0}
   local APPDIR="${1}"
   [[ -n "${APPDIR}" ]] && APPDIR="$(basename "${1}")"
   DEBUG=1
-  if (( DEBUG )) ; then
+  if (( _DEBUG )) ; then
   {
     echo "        APPDIR 1: <${1}>"
     echo "  APPDIR after  : <${APPDIR}>"
@@ -5459,10 +5580,11 @@ function _process_dmgs_dmg_or_zip() {
 function _trust_dmgs_application() {
   # Sample use
   #  _trust_dmgs_application "${APPDIR}"
+	local -i _DEBUG=${DEBUG:-0}
   local APPDIR="${1}"
   [[ -n "${APPDIR}" ]] && APPDIR="$(basename "${1}")"
   DEBUG=1
-  if (( DEBUG )) ; then
+  if (( _DEBUG )) ; then
   {
     echo "        APPDIR 1: <${1}>"
     echo "  APPDIR after  : <${APPDIR}>"
@@ -5607,8 +5729,9 @@ function _install_dmgs_list(){
   # Pending how to do pkg automatic?   # 1Password.pkg|https://c.1password.com/dist/1P/mac7/1Password-7.7.pkg
   local installlist one  target_name target_url target_app app_name # extension
   installlist="${*}"
-  DEBUG=1
-  if (( DEBUG )) ; then
+  #DEBUG=1
+	local -i _DEBUG=${DEBUG:-1}
+  if (( _DEBUG )) ; then
   {
     echo "        installlist 1: <${*}>"
     echo "  installlist after  : <${installlist}>"
