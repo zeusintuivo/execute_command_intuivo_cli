@@ -5,8 +5,6 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="1d8fb495-4ee1-43a8-9c53-2d75c09dbb23" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/execute_command_intuivo_cli.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/execute_command_intuivo_cli.iml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/struct_testing" beforeDir="false" afterPath="$PROJECT_DIR$/struct_testing" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -60,7 +58,7 @@
       <updated>1668873189462</updated>
       <workItem from="1668873192932" duration="1659000" />
       <workItem from="1670070251724" duration="794000" />
-      <workItem from="1698489837749" duration="460000" />
+      <workItem from="1698489837749" duration="1059000" />
     </task>
     <servers />
   </component>
