@@ -5268,7 +5268,7 @@ function raise_to_sudo_and_user_home() {
     }
   passed "raise_to_sudo_and_user_home()"
   load_execute_boot_basic_with_sudo() {
-	local -i _DEBUG=${DEBUG:-0}
+    local -i _DEBUG=${DEBUG:-0}
     passed "load_execute_boot_basic_with_sudo() " 
     export SUDO_USER
     # shellcheck disable=SC2030
@@ -5293,8 +5293,8 @@ function raise_to_sudo_and_user_home() {
     echo "... sudologic identified USER_HOME:$USER_HOME"
     local -r provider="$USER_HOME/_/clis/execute_command_intuivo_cli/execute_boot_basic.sh"
     local _err=0 bootbasicsource
-    if [   -e "${provider}"  ] ; then
-      if (( DEBUG )) ; then
+    if [[   -e "${provider}"  ]] ; then
+      if (( _DEBUG )) ; then
         echo "$0 execute_command_intuivo_cli/struct_testing load_execute_boot_basic_with_sudo() Loading locally"
       fi
       bootbasicsource="""$(<"${provider}")"""
