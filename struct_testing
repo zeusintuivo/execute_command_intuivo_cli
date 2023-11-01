@@ -513,19 +513,19 @@ CERO="\033[01;0m"
             # echo bye
             # exit 0
           fi
-          (( _seemsempty_ )) && echo -e "${RED} 𝞦 enforce_variable_with_value \\n${BASH_SOURCE[1]}:${BASH_LINENO[1]} ${FUNCNAME[-0]}(...) \\n${BASH_SOURCE[1]}:${BASH_LINENO[0]} ${FUNCNAME[1]}(...) \\n ${LIGHTYELLOW} ${TESTING} has failed "
-          (( _seemsempty_ )) && failed "${TESTING}"
+          (( _seemsempty_ )) && echo -e "${RED:-} 𝞦 enforce_variable_with_value \\n${BASH_SOURCE[1]}:${BASH_LINENO[1]} ${FUNCNAME[-0]}(...) \\n${BASH_SOURCE[1]}:${BASH_LINENO[0]} ${FUNCNAME[1]}(...) \\n ${LIGHTYELLOW:-} ${TESTING:-} has failed "
+          (( _seemsempty_ )) && failed "${TESTING:-}"
           (( _seemsempty_ )) && exit 1
           if (( typeset -p "${1}"  &>/dev/null ) &&  [ -n "${2+x}" ]) ; then
           {
               if (( _DEBUG )) ; then
-                echo -e "${LIGHTGREEN} ✔ ${LIGHTYELLOW} ${TESTING} has passed "
+                echo -e "${LIGHTGREEN:-} ✔ ${LIGHTYELLOW:-} ${TESTING:-} has passed "
               fi
               return 0
           }
           fi
-          echo -e "${RED} 𝞦 enforce_variable_with_value \\n${BASH_SOURCE[1]}:${BASH_LINENO[1]} ${FUNCNAME[-0]}(...) \\n${BASH_SOURCE[1]}:${BASH_LINENO[0]} ${FUNCNAME[1]}(...) \\n ${LIGHTYELLOW} ${TESTING} has failed "
-          failed "${TESTING}"
+          echo -e "${RED:-} 𝞦 enforce_variable_with_value \\n${BASH_SOURCE[1]}:${BASH_LINENO[1]} ${FUNCNAME[-0]}(...) \\n${BASH_SOURCE[1]}:${BASH_LINENO[0]} ${FUNCNAME[1]}(...) \\n ${LIGHTYELLOW:-} ${TESTING:-} has failed "
+          failed "${TESTING:-}"
           exit 1
         } # end enforce_variable_with_value
 
