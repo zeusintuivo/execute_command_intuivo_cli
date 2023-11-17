@@ -5981,9 +5981,22 @@ function _process_dmgs_dmg_or_zip() {
   {
     echo Attaching dmg downloaded
     hdiutil attach "${DOWNLOADFOLDER}/${CODENAME}"
+    echo " "
+    echo struct_testing:$LINENO  ls "/Volumes" 
+    echo " "
     ls "/Volumes"
-    directory_exists_with_spaces "/Volumes/${UNZIPDIR}"
-    directory_exists_with_spaces "/Volumes/${UNZIPDIR}/${APPDIR}"
+    if directory_exists_with_spaces "/Volumes/${UNZIPDIR}" ; then
+    {
+      warning ${APPDIR} failed to check mount  "/Volumes/${UNZIPDIR}"
+      return 1
+    }
+    fi
+    if directory_exists_with_spaces "/Volumes/${UNZIPDIR}/${APPDIR}" ; then
+    {
+      warning ${APPDIR} failed to check mount  "/Volumes/${UNZIPDIR}/${APPDIR}"
+      return 1
+    }
+    fi
     echo "sudo  cp -R \"/Volumes/${UNZIPDIR}/${APPDIR}\" \"/Applications/\""
     cp -R "/Volumes/${UNZIPDIR}/${APPDIR}" "/Applications/"
     hdiutil detach "/Volumes/${UNZIPDIR}"
