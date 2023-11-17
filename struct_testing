@@ -1419,6 +1419,97 @@ CERO="\033[01;0m"
             return 1   # implied else
         } # end is_defined_and_not_empty
 
+            function ensure_apt_dpkg_in_linux() {
+                # Sample use
+                # 
+                #     ensure_apt_dpkg_in_linux
+                #
+                enforce_variable_with_value OSTYPE "${OSTYPE}"
+                case "${OSTYPE}" in
+                  (darwin*) failed "apt and dpkg in mac! is weird. Platform $OSTYPE using apt and dpkg is not supported " ;;
+                  (cygwin*) failed "apt and dpkg in cywin! is weird. Platform $OSTYPE using apt and dpkg is not supported " ;;
+                  (linux*) passed "Looks like a linux!" ;;
+                  (msys*) failed "apt and dpkg in msys! is weird. Platform $OSTYPE using apt and dpkg is not supported "  ;;
+                  (*) failed "Platform $OSTYPE not supported"
+                  return 1 ;;
+                esac
+                return 0
+            } # end ensure_apt_dpkg_in_linux
+
+
+            function ensure_brew_in_linux_mac() {
+                # Sample use
+                # 
+                #     ensure_brew_in_linux_mac
+                #
+                enforce_variable_with_value OSTYPE "${OSTYPE}"
+                case "${OSTYPE}" in
+                  (darwin*) passed "Looks like a mac! is there homebrew? " && Checking if homebrew installed;;
+                  (cygwin*) failed "Brew for Platform $OSTYPE is not supported " ;;
+                  (linux*) passed "Looks like a linux! is there linuxbrew?" && Checking if linuxbrew installed;;
+                  (msys*) failed "Brew for Platform $OSTYPE is not supported " ;;
+                  (*) failed "Platform $OSTYPE not supported"
+                  return 1 ;;
+                esac
+                return 0
+            } # end ensure_brew_in_linux_mac
+
+
+            function ensure_rpm_dnf_in_linux() {
+                # Sample use
+                # 
+                #     ensure_rpm_dnf_in_linux
+                #
+                enforce_variable_with_value OSTYPE "${OSTYPE}"
+                case "${OSTYPE}" in
+                  (darwin*) failed "rmp and dnf in mac! is weird. Platform $OSTYPE using rmp and dnf is not supported " ;;
+                  (cygwin*) failed "rmp and dnf in cywin! is weird. Platform $OSTYPE using rmp and dnf is not supported " ;;
+                  (linux*) passed "Looks like a linux!" ;;
+                  (msys*) failed "rmp and dnf in msys! is weird. Platform $OSTYPE using rmp and dnf is not supported "  ;;
+                  (*) failed "Platform $OSTYPE not supported"
+                  return 1 ;;
+                esac
+                return 0
+            } # end ensure_rpm_dnf_in_linux
+
+
+            function ensure_apt_and_dnf_do_not_mix() {
+                # Sample use
+                # 
+                #     ensure_apt_and_dnf_do_not_mix
+                #
+                if ( ( command -v apt >/dev/null 2>&1; ) && ( command -v dnf >/dev/null 2>&1; ) ) ; then
+                {
+                    enforce_variable_with_value OSTYPE "${OSTYPE}"
+                    case "${OSTYPE}" in
+                      (darwin*) failed "apt and dnf in mac! is weird. Platform $OSTYPE using apt and dnf is not supported " ;;
+                      (cygwin*) failed "apt and dnf in cywin! is weird. Platform $OSTYPE using apt and dnf is not supported " ;;
+                      (linux*) failed "apt and dnf in same Linux! is weird. Platform $OSTYPE using apt and dnf is not supported " ;;
+                      (msys*) failed "apt and dnf in msys! is weird. Platform $OSTYPE using apt and dnf is not supported "  ;;
+                      (*) failed "apt and dnf in $OSTYPE! is weird. Platform $OSTYPE using apt and dnf is not supported "
+                      failed "apt and dnf in $OSTYPE! is weird. Platform $OSTYPE using apt and dnf is not supported "
+                      return 1 ;;
+                    esac
+                }
+                fi
+
+                if ( ( command -v apt >/dev/null 2>&1; ) && ( command -v rpm >/dev/null 2>&1; ) ) ; then
+                {
+                    enforce_variable_with_value OSTYPE "${OSTYPE}"
+                    case "${OSTYPE}" in
+                      (darwin*) failed "apt and rpm in mac! is weird. Platform $OSTYPE using apt and rpm is not supported " ;;
+                      (cygwin*) failed "apt and rpm in cywin! is weird. Platform $OSTYPE using apt and rpm is not supported " ;;
+                      (linux*) failed "apt and rpm in same Linux! is weird. Platform $OSTYPE using apt and rpm is not supported " ;;
+                      (msys*) failed "apt and rpm in msys! is weird. Platform $OSTYPE using apt and rpm is not supported "  ;;
+                      (*) failed "apt and rpm in $OSTYPE! is weird. Platform $OSTYPE using apt and rpm is not supported "
+                      return 1 ;;
+                    esac
+                }
+                fi
+                return 0
+            } # end ensure_apt_and_dnf_do_not_mix
+
+
 
         function ensure_is_defined_and_not_empty(){
             # Sample use
@@ -2294,28 +2385,229 @@ function _ensure_touch_dir_and_file() {
   file_exists_with_spaces "${launchfile_default}"
 } # end _ensure_touch_dir_and_file
 
+
+        function _find_location_brew_files() {
+          # Sample 
+          #
+          # 
+          trap  '_trap_on_error $0 "${?}" LINENO BASH_LINENO FUNCNAME BASH_COMMAND $FUNCNAME $BASH_LINENO $LINENO   $BASH_COMMAND'  ERR
+          local _sub_directory="${1:-}"
+          enforce_parameter_with_value           1        _sub_directory     "${_sub_directory:-}"     "var/postgresql@12 | "
+
+          Checking "location of brew ${_sub_directory} "
+          local _result=""
+          local _brew_variations="
+                   ${USER_HOME}/bin/${_sub_directory}
+                   /opt/homebrew/${_sub_directory}
+                   /home/linuxbrew/.linuxbrew/${_sub_directory}
+                   /usr/local/${_sub_directory}
+                   /usr/${_sub_directory}
+                   /${_sub_directory}
+                   ${USER_HOME}/_/software/${_sub_directory}
+                   /root/${_sub_directory}
+          "
+          local one=""
+          while read -r one ; do 
+          {
+            [[ -z "${one}" ]] && continue
+            if it_exists_with_spaces  "${one}" ; then 
+            {
+              _result="${one}"
+              break
+            }
+            fi
+          }
+          done <<< "${_brew_variations}"
+
+          [[ -z "${_result}" ]] && return 1
+          echo -n "${_result}"
+          return 0    
+        } # end _find_location_brew_files
+
+
+        function _try_more_times_find() {
+          # Sample usage:
+          #     local -i _err=0
+          #     local _msg=""
+          #     _msg="$(_try_more_times_find "
+          #                     var/${__pg}
+          #                     var/postgres
+          #                     var/postgresql
+          #                            ")"
+          #     _err=$?
+          #     if [ $_err -gt 0 ] ; then # failed
+          #     {
+          #       echo "${_msg}"
+          #       failed "to find brw var"
+          #     }
+          #     fi
+          #       
+          #     _target_brew_base_pg="$(echo -n "${_msg}" | tail -1)"
+          #        
+          #     passed found of var "${__pg} = ${_target_brew_base_pg}"
+          #
+          #
+          trap  '_trap_on_error $0 "${?}" LINENO BASH_LINENO FUNCNAME BASH_COMMAND $FUNCNAME $BASH_LINENO $LINENO   $BASH_COMMAND'  ERR
+          local _possibles="${*:-}"
+          enforce_parameter_with_value           1        _possibles     "${_possibles:-}"     "
+                  var/postgresql@12
+                  var/postgres
+                  var/postgresql
+           "
+
+          local _result=""
+          local -i counter=1
+          local one=""
+          while read -r one ; do 
+          {
+            [[ -z "${one}" ]] && continue
+            _result="$(_find_location_brew_files "${one}" )"
+            _err=$?
+            if [ $_err -eq 0 ] ; then 
+            {
+              break
+            }
+            fi
+            echo "${_result}"
+            warning  "try ${counter} one Could not find/determine location of ${one}"
+            counter=$(( counter + 1 ))
+          }
+          done <<< "${_possibles}"
+
+          if [ $_err -gt 0 ] ; then 
+          {
+            return 1
+          }
+          fi
+          echo -n "${_result}"
+          return 0
+        } # end _try_more_times_find
+
+
+
+        function _find_executable_for() {
+          local _executable_test="${1:-}" 
+          enforce_parameter_with_value           1:-        _possibles     "${_executable_test:-}"     "nothing|brew"
+          if [[ "${_executable_test:-}" == "nothing" ]] ; then
+          {
+            _executable_test=""
+          }
+          fi
+          local _argumentexecutable_test="${2:-}" 
+          if [[ "${_argumentexecutable_test:-}" == "nothing" ]] ; then
+          {
+            _argumentexecutable_test=""
+          }
+          fi
+          if [[ -z "${_executable_test}" ]] ; then
+          {
+            _argumentexecutable_test=""
+          }
+          fi
+          enforce_parameter_with_value           2:-        _possibles     "${_argumentexecutable_test:-}"     "nothing|--prefix"
+          local _possibles="${*:3}"
+          enforce_parameter_with_value           *:3++        _possibles     "${_possibles:-}"     "
+                  bin/brew
+                  brew
+          "
+          local -i _err=0
+          local _try_returned_echo=""
+          _try_returned_echo="$(_try_more_times_find "${_possibles}")"
+          _err=$?
+          if [ $_err -gt 0 ] ; then # failed
+          {
+            echo "${_try_returned_echo}"
+            failed "to find any ${_executable_test} of ${_possibles}"
+          }
+          fi
+          local _target_found=""
+          _target_found="$(echo -n "${_try_returned_echo:-}" | tail -1)"
+          passed "found ${_executable_test} of ${_possibles} one = ${_target_found:-}"
+          if [[ -n "${_target_found:-}" ]] ; then 
+          {
+            Checking "if ${_executable_test} is responds to command -v ${_executable_test} since \$_target_found  var is empty"
+            if ( su - "${SUDO_USER}" -c "command -v ${_executable_test}" >/dev/null 2>&1; )  ; then
+            {
+              if [[ -z "${_argumentexecutable_test:-}" ]] ; then
+              {
+                _target_found="$(su - "${SUDO_USER}" -c "${_executable_test}")"
+              }
+              else 
+              {
+                _target_found="$(su - "${SUDO_USER}" -c "${_executable_test} ${_argumentexecutable_test}")"
+              }
+              fi
+            }
+            fi
+          }
+          fi
+          enforce_variable_with_value _target_found "${_target_found}"
+  
+          if [[ -n "${_target_found:-}" ]] ; then 
+          {
+            echo "${_target_found}"
+            return 0
+          }
+          fi
+          failed "Not found ${_executable_test} ${_argumentexecutable_test} or of ${_possibles} "
+          return 1
+          # if ( command -v ${_target_found} >/dev/null 2>&1; ) ; then
+          # {
+          # }
+          # fi
+        } # end _find_executable_for 
+
+
+
         function _if_not_is_installed(){
+            local -i _err
+            _err=0
             local -i ret
-            local msg
+            local _msg_info_list
             ret=0
+
+            ensure_apt_and_dnf_do_not_mix
+            _err=$?
+            if [ $_err -gt 0 ] ; then # failed
+            {
+                failed "_if_not_is_installed ensure_apt_and_dnf_do_not_mix"
+            }
+            fi
             if ( ( command -v apt >/dev/null 2>&1; ) && ( command -v dpkg >/dev/null 2>&1; ) ) ; then
             {
-                msg="$(apt info $1  >/dev/null 2>&1)"
+                ensure_apt_dpkg_in_linux
+                _msg_info_list="$(apt info $1  >/dev/null 2>&1)"
+                ret=$?
             }
             elif ( ( command -v rpm >/dev/null 2>&1; ) && ( command -v dnf >/dev/null 2>&1; ) ) ; then
             {
-                msg="$(dnf info $1  >/dev/null 2>&1)"
+                ensure_rpm_dnf_in_linux
+                _msg_info_list="$(dnf info $1  >/dev/null 2>&1)"
+                ret=$?
             }
-            elif ( command -v brew >/dev/null 2>&1; ) ; then
+            else 
             {
-                msg="$(su - "${SUDO_USER}" -c "/opt/homebrew/bin/brew info $1  >/dev/null 2>&1")"
+                ensure_brew_in_linux_mac
+                local _target_bin_brew=""
+                _target_bin_brew="$(_find_executable_for "brew" "--prefix"  "bin/brew")"
+                _err=$?
+                if [ $_err -gt 0 ] ; then # failed
+                {
+                  echo "${_target_bin_brew}"
+                  failed "to find brew"
+                }
+                fi
+                _target_bin_brew="$(echo -n "${_target_bin_brew}" | tail -1)"
+                enforce_variable_with_value _target_bin_brew "${_target_bin_brew}"
+
+                _msg_info_list="$(su - "${SUDO_USER}" -c "${_target_bin_brew} info $1  >/dev/null 2>&1")"
+                ret=$?
             }
             fi
-            ret=$?
             [ $ret -gt 0 ] && return 1
-            [[ "$msg" == *"No such"* ]] && return 1
-            [[ "$msg" == *"nicht gefunden"* ]] && return 1
-            [[ "$msg" == *"Error"*   ]] && return 1
+            [[ "$_msg_info_list" == *"No such"* ]] && return 1
+            [[ "$_msg_info_list" == *"nicht gefunden"* ]] && return 1
+            [[ "$_msg_info_list" == *"Error"*   ]] && return 1
             return 0
         } # end _if_not_is_installed
 
@@ -2824,8 +3116,20 @@ fi
             local install_result=""
             local err_buff=0
             # local DEBUG=1
+
+             ensure_apt_and_dnf_do_not_mix
+            _err=$?
+            if [ $_err -gt 0 ] ; then # failed
+            {
+              failed "_if_not_is_installed ensure_apt_and_dnf_do_not_mix"
+            }
+            fi
+
+
+
             if ( ( command -v rpm >/dev/null 2>&1; ) && ( command -v dnf >/dev/null 2>&1; ) ); then
             {
+                ensure_rpm_dnf_in_linux
                 if (( DEBUG )) ; then
                   echo "rpm read packages"
                 fi
@@ -2835,14 +3139,30 @@ fi
             }
             elif ( ( command -v apt >/dev/null 2>&1; ) && ( command -v dpkg >/dev/null 2>&1; ) ) ; then
             {
+                ensure_apt_dpkg_in_linux
                 packages=$(dpkg -l | egrep "$one_required" | cut -d' ' -f3 2>&1)
             }
-            elif ( command -v brew >/dev/null 2>&1; ) ; then
+            else # brew
             {
+                local -i _err=0
+                ensure_brew_in_linux_mac
+                local _target_bin_brew=""
+                _target_bin_brew="$(_find_executable_for "brew" "--prefix"  "bin/brew")"
+                _err=$?
+                if [ $_err -gt 0 ] ; then # failed
+                {
+                  echo "${_target_bin_brew}"
+                  failed "to find brew"
+                }
+                fi
+                _target_bin_brew="$(echo -n "${_target_bin_brew}" | tail -1)"
+                enforce_variable_with_value _target_bin_brew "${_target_bin_brew}"
+
+
                 if (( DEBUG )) ; then
                   echo "BREW list formulas"
                 fi                # query=$(/opt/homebrew/bin/brew list --formula 2>&1)
-                query=$(su - "${SUDO_USER}" -c "/opt/homebrew/bin/brew list --formula" 2>&1)
+                query=$(su - "${SUDO_USER}" -c "${_target_bin_brew} list --formula" 2>&1)
                 echo "$query"
                 # query=$(_run_command "/opt/homebrew/bin/brew list --formula"  2>&1)
             }
@@ -2949,33 +3269,48 @@ fi
                 }
                 fi
               }
-              elif ( command -v /opt/homebrew/bin/brew >/dev/null 2>&1; ) ; then
+              else # brew   just query results 
               {
-                if (( DEBUG )) ; then
-                  echo "/opt/homebrew/bin/brew"
-                fi
-                # CHECK_INSTALLED=$(brew ls --versions "${one_required}")
-                # CHECK_INSTALLED=$(/opt/homebrew/bin/brew ls --versions "${one_required}")
-                # query=$(brew list --formula 2>&1)
-                # one_required="nano"
-                # query=$(su - "${SUDO_USER}" -c "brew list --formula" 2>&1)
-                # query=$(_run_command "brew list --formula"  2>&1)
-                # ( echo "${query}" | grep -q  "^zsh$" )  && echo "installed"
-                # [[ "$( echo "${query}" | grep   "^unar$" )" == "unar" ]] && echo "installed"
-                # ( echo "${query}" | grep -q  "^${one_required}$" ) && echo "installed"
-                if  ( echo "${query}" | grep -q  "^${one_required}$" ) ; then
-                {
-                    passed " ${GREEN} $one_required ${YELLOW} INSTALLED${RESET} ."
-                }
-                else
-                {
-                    echo -e " ${RED}  NEED TO INSTALL ${YELLOW} $one_required${RESET} ${RED}..."
-                    # echo -e "${YELLOW} Installing ${one_required}  ${CERO}"
-                    missing="${missing} ${install_this}"
-                    # su - "${SUDO_USER}" -c "brew install \"${install_this}\" "
-                    # _run_command "brew install \"${install_this}\" "
-                }
-                fi
+                  local -i _err=0
+                  ensure_brew_in_linux_mac
+                  local _target_bin_brew=""
+                  _target_bin_brew="$(_find_executable_for "brew" "--prefix"  "bin/brew")"
+                  _err=$?
+                  if [ $_err -gt 0 ] ; then # failed
+                  {
+                    echo "${_target_bin_brew}"
+                    failed "to find brew"
+                  }
+                  fi
+                  _target_bin_brew="$(echo -n "${_target_bin_brew}" | tail -1)"
+                  enforce_variable_with_value _target_bin_brew "${_target_bin_brew}"
+                
+                  if (( DEBUG )) ; then
+                    echo "${_target_bin_brew}"
+                  fi
+                  # CHECK_INSTALLED=$(brew ls --versions "${one_required}")
+                  # CHECK_INSTALLED=$(/opt/homebrew/bin/brew ls --versions "${one_required}")
+                  # query=$(brew list --formula 2>&1)
+                  # one_required="nano"
+                  # query=$(su - "${SUDO_USER}" -c "brew list --formula" 2>&1)
+                  # query=$(_run_command "brew list --formula"  2>&1)
+                  # ( echo "${query}" | grep -q  "^zsh$" )  && echo "installed"
+                  # [[ "$( echo "${query}" | grep   "^unar$" )" == "unar" ]] && echo "installed"
+                  # ( echo "${query}" | grep -q  "^${one_required}$" ) && echo "installed"
+                  if  ( echo "${query}" | grep -q  "^${one_required}$" ) ; then
+                  {
+                      passed " ${GREEN} $one_required ${YELLOW} INSTALLED${RESET} ."
+                  }
+                  else
+                  {
+                      echo -e " ${RED}  NEED TO INSTALL ${YELLOW} $one_required${RESET} ${RED}..."
+                      # echo -e "${YELLOW} Installing ${one_required}  ${CERO}"
+                      missing="${missing} ${install_this}"
+                      # su - "${SUDO_USER}" -c "brew install \"${install_this}\" "
+                      # _run_command "brew install \"${install_this}\" "
+                  }
+                  fi
+                
               }
               fi
             }
@@ -3009,17 +3344,39 @@ fi
                 fi
                 err_buff=$?
               }
-              elif ( command -v brew >/dev/null 2>&1; ) ; then
+              else
               {
-                # _run_command brew install ${missing}
-                if (( DEBUG )) ; then
-                  echo "/opt/homebrew/bin/brew install"
-                  echo "brew install"
+                  local -i _err=0
+                  ensure_brew_in_linux_mac
+                  local _target_bin_brew=""
+                  _target_bin_brew="$(_find_executable_for "brew" "--prefix"  "bin/brew")"
+                  _err=$?
+                  if [ $_err -gt 0 ] ; then # failed
+                  {
+                    echo "${_target_bin_brew}"
+                    failed "to find brew"
+                  }
+                  fi
+                  _target_bin_brew="$(echo -n "${_target_bin_brew}" | tail -1)"
+                  enforce_variable_with_value _target_bin_brew "${_target_bin_brew}"
+                 
+                if ( command -v "${_target_bin_brew}" >/dev/null 2>&1; ) ; then
+                {
+                  # _run_command brew install ${missing}
+                  if (( DEBUG )) ; then
+                    echo "brew install"
+                    echo "${_target_bin_brew} install"
+                  fi
+                  # install=$(/opt/homebrew/bin/brew install "${missing}")
+                  su - "${SUDO_USER}" -c "${_target_bin_brew} install ${missing} "
+                  err_buff=$?
+                  # su - "${SUDO_USER}" -c "brew install ${missing} "
+                }
+                else 
+                {
+                  failed "to find get command -v ${_target_bin_brew} to respond"
+                }
                 fi
-                su - "${SUDO_USER}" -c "/opt/homebrew/bin/brew install ${missing} "
-
-                su - "${SUDO_USER}" -c "brew install ${missing} "
-                err_buff=$?
               }
               fi
             }
@@ -3039,11 +3396,11 @@ fi
                   local REPLACERED="\\\\033[01;31m"
                   local REPLACECYAN="\\\\033[01;36m"
                   local display_install_result=$(echo -e "${install_result}" | sed "s/\(FAILED\|failed\|additional\ disk\|Failed\|ERROR\|Error\|error\|cannot\|continue\|logged\|inspection\|not\|exit\|more\|details\)/${REPLACERED}\1${REPLACECYAN}/g")
-                  failed "${RESET} \n .... \n ... ${display_install_result} \n ... \n ..."
                   [[ "${install_result}" == *"Could not resolve"* ]] && echo -e "${BRIGHT_BLUE87} It appears YOU HAVE ${YELLOW226}NO INTERNET CONNECTION \o_0/ ${RESET}"
                   [[ "${install_result}" == *"Repository not found"* ]] && echo -e "${BRIGHT_BLUE87} It appears YOU HAVE ${YELLOW226}NO ACCESS TO THIS FOR YOU ${RED} ${GIT_USER_NAME} ${RESET}"
                   [[ "${install_result}" == *"Could not read from"* ]] && echo -e "${BRIGHT_BLUE87} It appears it exists but you are ${RED}NOT ${YELLOW226} ALLOWED ${RED} ${GIT_USER_NAME} ${YELLOW226}!!! ${RESET}"
                   [[ "${install_result}" == *"additional disk"* ]] && echo -e "${BRIGHT_BLUE87} It appears .. ${RED}There is no space  ${YELLOW226}!!! !!!  ${RED}\\${BRIGHT_BLUE87}o${RED}_${BRIGHT_BLUE87}0${RED}/ ${RESET}"
+                  failed "${RESET} \n .... \n ... ${display_install_result} \n ... \n ..."
                 }
                 fi
 
