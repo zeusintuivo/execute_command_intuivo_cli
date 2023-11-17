@@ -2535,7 +2535,7 @@ function _ensure_touch_dir_and_file() {
 
         function _find_executable_for() {
           local _executable_test="${1:-}" 
-          enforce_parameter_with_value           1:-        _possibles     "${_executable_test:-}"     "nothing|brew"
+          enforce_parameter_with_value           1        _possibles     "${_executable_test:-}"     "nothing|brew"
           if [[ "${_executable_test:-}" == "nothing" ]] ; then
           {
             _executable_test=""
@@ -2552,9 +2552,9 @@ function _ensure_touch_dir_and_file() {
             _argumentexecutable_test=""
           }
           fi
-          enforce_parameter_with_value           2:-        _possibles     "${_argumentexecutable_test:-}"     "nothing|--prefix"
+          enforce_parameter_with_value           2        _possibles     "${_argumentexecutable_test:-}"     "nothing|--prefix"
           local _possibles="${*:3}"
-          enforce_parameter_with_value           *:3++        _possibles     "${_possibles:-}"     "
+          enforce_parameter_with_value           3        _possibles     "${_possibles:-}"     "
                   bin/brew
                   brew
           "
