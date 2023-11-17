@@ -5985,6 +5985,7 @@ function _process_dmgs_dmg_or_zip() {
     echo struct_testing:$LINENO  ls "/Volumes" 
     echo " "
     ls "/Volumes"
+    echo " "
     if ! it_exists "/Volumes/${UNZIPDIR}" ; then
     {
       warning ${APPDIR} failed to check mount  "/Volumes/${UNZIPDIR}"
