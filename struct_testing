@@ -3370,7 +3370,7 @@ fi
                 fi
                 err_buff=$?
               }
-              else
+              else # brew install 
               {
                   local -i _err=0
                   ensure_brew_in_linux_mac
@@ -3386,23 +3386,23 @@ fi
                   _target_bin_brew="$(echo -n "${_target_bin_brew}" | tail -1)"
                   enforce_variable_with_value _target_bin_brew "${_target_bin_brew}"
                  
-                if ( command -v "${_target_bin_brew}" >/dev/null 2>&1; ) ; then
-                {
-                  # _run_command brew install ${missing}
-                  if (( DEBUG )) ; then
-                    echo "brew install"
-                    echo "${_target_bin_brew} install"
+                  if ( command -v "${_target_bin_brew}" >/dev/null 2>&1; ) ; then
+                  {
+                    # _run_command brew install ${missing}
+                    if (( DEBUG )) ; then
+                      echo "brew install"
+                      echo "${_target_bin_brew} install"
+                    fi
+                    # install=$(/opt/homebrew/bin/brew install "${missing}")
+                    su - "${SUDO_USER}" -c "${_target_bin_brew} install ${missing} "
+                    err_buff=$?
+                    # su - "${SUDO_USER}" -c "brew install ${missing} "
+                  }
+                  else 
+                  {
+                    failed "to find get command -v ${_target_bin_brew} to respond"
+                  }
                   fi
-                  # install=$(/opt/homebrew/bin/brew install "${missing}")
-                  su - "${SUDO_USER}" -c "${_target_bin_brew} install ${missing} "
-                  err_buff=$?
-                  # su - "${SUDO_USER}" -c "brew install ${missing} "
-                }
-                else 
-                {
-                  failed "to find get command -v ${_target_bin_brew} to respond"
-                }
-                fi
               }
               fi
             }
