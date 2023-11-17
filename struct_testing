@@ -753,15 +753,30 @@ CERO="\033[01;0m"
    #    [ $_err -eq 0 ] &&  # yes
    #    [ $_err -gt 0 ] &&  # no
    #    [ $_err -gt 0 ] && return 1 # no
-   while true; do
+   # 
+   #       if yes_or_no ; then
+   #    {
+   #      _err=0
+   #    }
+   #    else
+   #    {
+   #      _err=1
+   #    }
+   #    fi
+   #
+   #  [ $_err -eq 0 ] &&  # yes
+   #  [ $_err -gt 0 ] &&  # no
+   local yn=''
+   while [[ ${yn} == "" ]] ; do
    {
-     read -p "$* [y/n]: " yn
+     read -p "$* [y/n]: " -t 8  yn
      case $yn in
-       [Yy]*) return 0  ;;
+       [Yy]*) return 0  ; break ;;
        [Nn]*) echo "Aborted" ; return  1 ;;
      esac
    }
    done
+   return 0
  } # end yes_or_no	
 
         function Message() {
