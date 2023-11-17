@@ -2534,6 +2534,7 @@ function _ensure_touch_dir_and_file() {
 
 
         function _find_executable_for() {
+          DEBUG=1
           local _executable_test="${1:-}" 
           enforce_parameter_with_value           1        _possibles     "${_executable_test:-}"     "nothing|brew"
           if [[ "${_executable_test:-}" == "nothing" ]] ; then
