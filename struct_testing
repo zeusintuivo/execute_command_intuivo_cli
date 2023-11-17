@@ -746,10 +746,13 @@ CERO="\033[01;0m"
 
  function yes_or_no() {
    # Sample use
-   # echo -e "${PURPLE_BLUE} === Question ? ${RESET}"
-   # yes_or_no
-   # _err=$?
-   # [ $_err -gt 0 ] && return 1 # no
+   #    local -i _err=0
+   #    echo -e "${PURPLE_BLUE} === Question ? ${RESET}"
+   #    yes_or_no
+   #    _err=$?
+   #    [ $_err -eq 0 ] &&  # yes
+   #    [ $_err -gt 0 ] &&  # no
+   #    [ $_err -gt 0 ] && return 1 # no
    while true; do
    {
      read -p "$* [y/n]: " yn
@@ -1610,7 +1613,7 @@ function _run_command(){
   #     exec 3>&1 1>>${changelogfile} 2>&1  # How to write output to both console and file REF: https://stackoverflow.com/questions/18460186/writing-outputs-to-log-file-and-console
 
   local _node_run_command=''
-  echo -e "${PURPLE} ❓ ${CYAN}${*}"
+  echo -e "${PURPLE} struct_testing:$LINENO _run_command ❓ ${CYAN}${*}"
   # shellcheck disable=SC2031
   if ( is_defined_and_not_empty SUDO_USER "${SUDO_USER}" && is_defined_and_not_empty SUDO_UID "${SUDO_UID}"  ) ; then
   {
@@ -2423,14 +2426,18 @@ function _ensure_touch_dir_and_file() {
           Checking "location of brew ${_sub_directory} "
           local _result=""
           local _brew_variations="
+                   ${USER_HOME}/.pyenv/shims/${_sub_directory}
+                   ${USER_HOME}/.pyenv/bin/${_sub_directory}
+                   ${USER_HOME}/.rbenv/shims/${_sub_directory}
+                   ${USER_HOME}/.rbenv/bin/${_sub_directory}                   ${USER_HOME}/_/software/${_sub_directory}
+                   /root/${_sub_directory}
                    ${USER_HOME}/bin/${_sub_directory}
                    /opt/homebrew/${_sub_directory}
                    /home/linuxbrew/.linuxbrew/${_sub_directory}
                    /usr/local/${_sub_directory}
                    /usr/${_sub_directory}
                    /${_sub_directory}
-                   ${USER_HOME}/_/software/${_sub_directory}
-                   /root/${_sub_directory}
+
           "
           local one=""
           while read -r one ; do 
@@ -3391,7 +3398,7 @@ fi
                     # _run_command brew install ${missing}
                     if (( DEBUG )) ; then
                       echo "brew install"
-                      echo "${_target_bin_brew} install"
+                      echo "${_target_bin_brew} install ....${missing}"
                     fi
                     # install=$(/opt/homebrew/bin/brew install "${missing}")
                     su - "${SUDO_USER}" -c "${_target_bin_brew} install ${missing} "
