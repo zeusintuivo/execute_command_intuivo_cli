@@ -733,7 +733,7 @@ CERO="\033[01;0m"
                 # nothing here
               fi
             )
-        }
+        } # end cüt
 
         function Question() {
             trap 'exit 1' ERR
@@ -2533,7 +2533,9 @@ function _ensure_touch_dir_and_file() {
 
 
 
-        function _find_executable_for() {
+  function _find_executable_for() {
+          trap  '_trap_on_error $0 "${?}" LINENO BASH_LINENO FUNCNAME BASH_COMMAND $FUNCNAME $BASH_LINENO $LINENO   $BASH_COMMAND'  ERR
+
           local _executable_test="${1:-}" 
           enforce_parameter_with_value           1:-        _executable_test     "${_executable_test:-}"     "nothing|brew"
           if [[ "${_executable_test:-}" == "nothing" ]] ; then
@@ -2571,7 +2573,7 @@ function _ensure_touch_dir_and_file() {
           local _target_found=""
           _target_found="$(echo -n "${_try_returned_echo:-}" | tail -1)"
           passed "found ${_executable_test} of ${_possibles} one = ${_target_found:-}"
-          if [[ -n "${_target_found:-}" ]] ; then 
+          if [[ -z "${_target_found:-}" ]] ; then 
           {
             Checking "if ${_executable_test} is responds to command -v ${_executable_test} since \$_target_found  var is empty"
             if ( su - "${SUDO_USER}" -c "command -v ${_executable_test}" >/dev/null 2>&1; )  ; then
@@ -2604,8 +2606,7 @@ function _ensure_touch_dir_and_file() {
           # }
           # fi
         } # end _find_executable_for 
-
-
+        
 
         function _if_not_is_installed(){
             local -i _err
