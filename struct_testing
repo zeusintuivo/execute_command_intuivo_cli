@@ -745,7 +745,7 @@ CERO="\033[01;0m"
         alias question=Question
 
  function yes_or_no() {
-   # Sample use
+   # Sample use yes_or_no yes_no
    #    local -i _err=0
    #    echo -e "${PURPLE_BLUE} === Question ? ${RESET}"
    #    yes_or_no
