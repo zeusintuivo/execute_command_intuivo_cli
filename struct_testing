@@ -919,6 +919,7 @@ CERO="\033[01;0m"
             }
             fi
         } # end does_not_exist_with_spaces
+        alias ensure_does_not_exist_with_spaces=does_not_exist_with_spaces
 
         function directory_does_not_exist() {
             does_not_exist "$@"
@@ -1022,6 +1023,7 @@ CERO="\033[01;0m"
             fi
             return 1 # it does not exists
         } # end it_exists_with_spaces
+
         function it_does_not_exist_with_spaces() {
             # Sample usage
             #
@@ -1052,6 +1054,7 @@ CERO="\033[01;0m"
             fi
             return 0 # it exists
         } # end it_exists_with_spaces
+
         function file_exists() {
             # Sample usage
             #
@@ -1088,6 +1091,8 @@ CERO="\033[01;0m"
             unset TESTING
             return 1
         } # end file_exists
+        alias ensure_file_exists=file_exists
+
         function directory_exists_with_spaces() {
             # Sample usage
             #
@@ -1123,6 +1128,8 @@ CERO="\033[01;0m"
             }
             fi
         } # end directory_exists_with_spaces
+        alias ensure_directory_exists_with_spaces=directory_exists_with_spaces
+
         # directory_exists_with_spaces "$HOME/Downloads/"
         function file_exists_with_spaces() {
             # Sample usage
@@ -1155,6 +1162,7 @@ CERO="\033[01;0m"
             }
             fi
         } # end file_exists_with_spaces
+        alias ensure_file_exists_with_spaces=file_exists_with_spaces
 
         function softlink_exists() {
             # Sample usage
@@ -1259,6 +1267,7 @@ CERO="\033[01;0m"
             fi # not empty links
             return 1
         } # end softlink_exists
+        alias ensure_softlink_exists=softlink_exists
 
         function ensure_unlink() {
             if [ -s """${*}""" ] ; then
@@ -1370,6 +1379,107 @@ CERO="\033[01;0m"
             fi # not empty links
             return 1
         } # end softlink_exists_with_spaces
+        alias ensure_softlink_exists_with_spaces=softlink_exists_with_spaces
+
+        function it_softlink_exists_with_spaces() {
+            # Sample usage
+            #
+            #     if it_softlink_exists_with_spaces "/Applications/Google\ Chrome.app/Contents/Profile/NativeMessagingHosts" ; then
+            #     if it_softlink_exists_with_spaces "~/Library/Application\ Support/Google/Chrome/NativeMessagingHosts" ; then
+            #
+            local FOUND_LINK_TARGET
+            local ONE_LINK_ORDER
+            local _LINKS="${*}"
+            if [ -n "${_LINKS-x}" ] ; then # if its set and not empty
+            {
+                ONE_LINK_ORDER="${_LINKS}"
+                    # if not empty
+                    if [ -n "${ONE_LINK_ORDER}" ] ; then
+                    {
+                        local CHECK_TARGET_TOO="NO"
+                        local ONE_LINK_LOCATION="${ONE_LINK_ORDER}"
+                        local ONE_LINK_TARGET=""
+
+                        [[ "${ONE_LINK_ORDER}" == *">"* ]] && CHECK_TARGET_TOO="YES"
+                        if [[ "${CHECK_TARGET_TOO}" == "YES" ]] ; then
+                        {
+                            ONE_LINK_LOCATION=$(cut -d'>' -f1 <<< "${ONE_LINK_ORDER}")
+                            ONE_LINK_TARGET=$(cut -d'>' -f2 <<< "${ONE_LINK_ORDER}")
+                        }
+                        fi
+                        passed "${ONE_LINK_ORDER}"
+                        # AS a NOTE ~/  <-- will fail always
+                        # SO ~/.pyenv <-- will fail always
+                        # But /home/user/.pyenv  <-- will pass
+                        # OR Users/administrator/.pyenv  in mac <-- will pass
+                        # ONE_LINK_LOCATION="/Users/administrator/.nix-profile"
+                        local TESTING="that softlink ${CYAN}${ONE_LINK_LOCATION}${LIGHTYELLOW} exists"
+                        if [[ -L "${ONE_LINK_LOCATION}" ]] ; then
+                        {
+                            # is a softlink
+                            passed "${TESTING}"
+
+                            # Test pointing
+                            if [[ "${CHECK_TARGET_TOO}" == "YES" && ! -z "${ONE_LINK_TARGET}" ]] ; then
+                            {
+                                TESTING="${PURPLE} +-- and that softlink ${CYAN}${ONE_LINK_LOCATION}${LIGHTYELLOW} points to ${CYAN}${ONE_LINK_TARGET}${GREEN} location \n"
+                                FOUND_LINK_TARGET=$(ls -l ${ONE_LINK_LOCATION} | cut -d'>' -f2 | trim) # Find target symlink
+                                if [[ "${FOUND_LINK_TARGET}" == "${ONE_LINK_TARGET}" ]] ; then
+                                {
+                                    # points to right location
+                                    passed "${TESTING}"
+
+                                    TESTING="that softlink ${CYAN}${ONE_LINK_LOCATION}${LIGHTYELLOW} is not broken"
+                                    local empty_means_not_broken=$(find ${ONE_LINK_LOCATION} -type l ! -exec test -e {} \; -print  2>&1 | xargs -I {} ls -la "{}")
+                                    if [[ -z "${empty_means_not_broken}" ]] ; then
+                                    {
+                                        # points to right location
+                                        TESTING=""
+                                        passed "${TESTING}"
+                                        return 0
+                                    }
+                                    elif  [[ "${empty_means_not_broken}" == *"No such file or directory"* ]] ; then
+                                    {
+                                        TESTING="but softlink ${CYAN}${ONE_LINK_LOCATION}${LIGHTYELLOW} is was not created"
+                                        warning "failed ${TESTING}"
+                                        return 1
+                                    }
+                                    elif  [[ "${empty_means_not_broken}" == *"Permission denied"* ]] ; then
+                                    {
+                                        TESTING="but softlink ${CYAN}${ONE_LINK_LOCATION}${LIGHTYELLOW}. Permission denied. Check Target -> ${ONE_LINK_TARGET} is accesible."
+                                        warning "failed ${TESTING}"
+                                        return 1
+                                    } else {
+                                        warning "failed ${TESTING}"
+                                        return 1
+                                    }
+                                    fi
+                                }
+                                else
+                                {
+                                    TESTING+="${GREEN}     +++ expected${LIGHTYELLOW}:${CYAN}${ONE_LINK_TARGET}${LIGHTYELLOW}:${RED}${RESET} --- actual:${FOUND_LINK_TARGET}:"
+                                    warning "failed ${TESTING}"
+                                    return 1
+                                }
+                                fi
+                            }
+                            fi # TACHECK_TARGET_TOO is correct
+
+                        }
+                        else
+                        {
+                            warning "failed ${TESTING}"
+                            return 1
+                        }
+                        fi # ONE_LINK_LOCATION Exists
+                    }
+                    fi # not empty one link
+
+            }
+            fi # not empty links
+            warning "not empty links. it_softlink_exists_with_spaces received empty string to check as softlink"
+            return 1
+        } # end it_softlink_exists_with_spaces
 
         function check_equality() {
             # Sample usage
@@ -3150,7 +3260,7 @@ fi
             #
 
             # room for detecting Linux and OS systems
-            local OS="${1:-}"
+            local _OS="${1:-}"
             if [[ -z "${2:-}" ]] ; then
             {
               return 0
@@ -3165,18 +3275,25 @@ fi
             local install_result=""
             local err_buff=0
             # local DEBUG=1
+           
+            if [[ ${_OS:-} == "brew" ]] ; then
+			      {
+				      Installing ":goto brew installer"
+				    }
+					  else
+						{
+						  ensure_apt_and_dnf_do_not_mix
+              _err=$?
+              if [ $_err -gt 0 ] ; then # failed
+              {
+                failed "_if_not_is_installed ensure_apt_and_dnf_do_not_mix"
+              }
+              fi
+						}
+						fi
 
-             ensure_apt_and_dnf_do_not_mix
-            _err=$?
-            if [ $_err -gt 0 ] ; then # failed
-            {
-              failed "_if_not_is_installed ensure_apt_and_dnf_do_not_mix"
-            }
-            fi
 
-
-
-            if ( ( command -v rpm >/dev/null 2>&1; ) && ( command -v dnf >/dev/null 2>&1; ) ); then
+            if [[ ${_OS:-} != "brew" ]] && ( ( command -v rpm >/dev/null 2>&1; ) && ( command -v dnf >/dev/null 2>&1; ) ); then
             {
                 ensure_rpm_dnf_in_linux
                 if (( DEBUG )) ; then
@@ -3186,12 +3303,12 @@ fi
                 # (( DEBUG )) && echo "\n rpm \n \n $packages \n \n rpm"
 
             }
-            elif ( ( command -v apt >/dev/null 2>&1; ) && ( command -v dpkg >/dev/null 2>&1; ) ) ; then
+            elif [[ ${_OS:-} != "brew" ]] && ( ( command -v apt >/dev/null 2>&1; ) && ( command -v dpkg >/dev/null 2>&1; ) ) ; then
             {
                 ensure_apt_dpkg_in_linux
                 packages=$(dpkg -l | egrep "$one_required" | cut -d' ' -f3 2>&1)
             }
-            else # brew
+			 		  else # brew
             {
                 local -i _err=0
                 ensure_brew_in_linux_mac
@@ -3257,7 +3374,7 @@ fi
                 install_this=$(echo -n ${install_this} | sed -e 's/^[[:space:]]*//' ) # trim_spaces
               }
               fi
-              if ( ( command -v apt >/dev/null 2>&1; ) && ( command -v dpkg >/dev/null 2>&1; ) ) ; then
+              if [[ ${_OS:-} != "brew" ]] && ( ( command -v apt >/dev/null 2>&1; ) && ( command -v dpkg >/dev/null 2>&1; ) ) ; then
               {
                 if (( DEBUG )) ; then
                   echo "apt search using dpkg"
@@ -3283,7 +3400,7 @@ fi
                 }
                 fi
               }
-              elif ( ( command -v rpm >/dev/null 2>&1; ) && ( command -v dnf >/dev/null 2>&1; ) ) ; then
+              elif [[ ${_OS:-} != "brew" ]] && ( ( command -v rpm >/dev/null 2>&1; ) && ( command -v dnf >/dev/null 2>&1; ) ) ; then
               {
                 if (( DEBUG )) ; then
                   echo "rpm search loaded packages $one_required"
@@ -3305,7 +3422,7 @@ fi
                     fi
                     passed " ${GREEN} $one_required ${YELLOW} INSTALLED${RESET} ."
                 }
-                else
+                else # still in rpm here
                 {
                     if (( DEBUG )) ; then
                       echo "rpm failed"
@@ -3374,7 +3491,7 @@ fi
               fi
               missing=$(echo -n ${missing} | sed -e 's/^[[:space:]]*//' ) # trim_start_space
               echo -e " ${CYAN} Installing missing packages: ${YELLOW} ${missing} ${RESET} ."
-              if ( ( command -v apt >/dev/null 2>&1; )  && ( command -v dpkg >/dev/null 2>&1; ) ); then
+              if [[ ${_OS:-} != "brew" ]] && ( ( command -v apt >/dev/null 2>&1; )  && ( command -v dpkg >/dev/null 2>&1; ) ); then
               {
                 if (( DEBUG )) ; then
                   echo "apt install"
@@ -3382,7 +3499,7 @@ fi
                 install_result=$(sudo apt install ${missing} -yfq   2>&1) # capture all input and output
                 err_buff=$?
               }
-              elif ( ( command -v rpm >/dev/null 2>&1; ) && ( command -v dnf >/dev/null 2>&1; ) ) ; then
+              elif [[ ${_OS:-} != "brew" ]] && ( ( command -v rpm >/dev/null 2>&1; ) && ( command -v dnf >/dev/null 2>&1; ) ) ; then
               {
                 if (( DEBUG )) ; then
                   echo "dnf install ${missing}"
