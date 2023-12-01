@@ -3333,21 +3333,21 @@ fi
                 # query=$(_run_command "/opt/homebrew/bin/brew list --formula"  2>&1)
             }
             fi
-            for one_required in ${required}; do
+            for one_required in ${required}; do # using array[@] in bash
             {
-              if [[ -z "${one_required}" ]] ; then
+              if [[ -z "${one_required}" ]] ;  then # continue skip if empty
               {
                 continue
               }
               fi
-              if ( echo "${one_required}" | grep -q "^[[:space:]]*#" ) ; then
+              if ( echo "${one_required}" | grep -q "^[[:space:]]*#" ) ; then  # continue  skip if starts with a # character
               {
                 continue
               }
               fi
-              if ( echo "${one_required}" | grep -q "@" ) ; then
+              if ( echo "${one_required}" | grep -q "@" ) ; then # split if contains char @
               {
-                install_this="$( echo "${one_required}" | cut -d@ -f2- )"
+                install_this="$( echo "${one_required}" | cut -d@ -f2- )" 
                 one_required="$( echo "${one_required}" | cut -d@ -f1 )"
               } 
               else
@@ -3356,22 +3356,22 @@ fi
               }
               fi
 
-              if [[ -z "${one_required}" ]] ; then
+              if [[ -z "${one_required}" ]] ; then  # continue skip if empty after split also extra check or else was empty check
               {
                 continue
               } 
               else
               {
-                one_required=$(echo -n ${one_required} | sed -e 's/^[[:space:]]*//' ) # trim_start_space
+                one_required=$(echo -n ${one_required} | sed -e 's/^[[:space:]]*//' ) # trim_start_space before //
               }
               fi
               if [[ -z "${install_this}" ]] ; then
               {
-                install_this=$(echo -n ${one_required} | sed -e 's/^[[:space:]]*//' ) # trim_spaces
+                install_this=$(echo -n ${one_required} | sed -e 's/^[[:space:]]*//' ) # trim_spaces before //
               } 
               else
               {
-                install_this=$(echo -n ${install_this} | sed -e 's/^[[:space:]]*//' ) # trim_spaces
+                install_this=$(echo -n ${install_this} | sed -e 's/^[[:space:]]*//' ) # trim_spaces before //
               }
               fi
               if [[ ${_OS:-} != "brew" ]] && ( ( command -v apt >/dev/null 2>&1; ) && ( command -v dpkg >/dev/null 2>&1; ) ) ; then
