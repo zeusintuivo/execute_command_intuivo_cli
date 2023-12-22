@@ -753,7 +753,7 @@ CERO="\033[01;0m"
    #    [ $_err -eq 0 ] &&  # yes
    #    [ $_err -gt 0 ] &&  # no
    #    [ $_err -gt 0 ] && return 1 # no
-   # 
+   #
    #       if yes_or_no ; then
    #    {
    #      _err=0
@@ -777,7 +777,7 @@ CERO="\033[01;0m"
    }
    done
    return 0
- } # end yes_or_no	
+ } # end yes_or_no
 
         function Message() {
             trap 'exit 1' ERR
@@ -1575,7 +1575,7 @@ CERO="\033[01;0m"
 
             function ensure_apt_dpkg_in_linux() {
                 # Sample use
-                # 
+                #
                 #     ensure_apt_dpkg_in_linux
                 #
                 enforce_variable_with_value OSTYPE "${OSTYPE}"
@@ -1593,7 +1593,7 @@ CERO="\033[01;0m"
 
             function ensure_brew_in_linux_mac() {
                 # Sample use
-                # 
+                #
                 #     ensure_brew_in_linux_mac
                 #
                 enforce_variable_with_value OSTYPE "${OSTYPE}"
@@ -1611,7 +1611,7 @@ CERO="\033[01;0m"
 
             function ensure_rpm_dnf_in_linux() {
                 # Sample use
-                # 
+                #
                 #     ensure_rpm_dnf_in_linux
                 #
                 enforce_variable_with_value OSTYPE "${OSTYPE}"
@@ -1629,7 +1629,7 @@ CERO="\033[01;0m"
 
             function ensure_apt_and_dnf_do_not_mix() {
                 # Sample use
-                # 
+                #
                 #     ensure_apt_and_dnf_do_not_mix
                 #
                 if ( ( command -v apt >/dev/null 2>&1; ) && ( command -v dnf >/dev/null 2>&1; ) ) ; then
@@ -2541,9 +2541,9 @@ function _ensure_touch_dir_and_file() {
 
 
         function _find_location_brew_files() {
-          # Sample 
+          # Sample
           #
-          # 
+          #
           trap  '_trap_on_error $0 "${?}" LINENO BASH_LINENO FUNCNAME BASH_COMMAND $FUNCNAME $BASH_LINENO $LINENO   $BASH_COMMAND'  ERR
           local _sub_directory="${1:-}"
           enforce_parameter_with_value           1        _sub_directory     "${_sub_directory:-}"     "var/postgresql@12 | "
@@ -2565,10 +2565,10 @@ function _ensure_touch_dir_and_file() {
 
           "
           local one=""
-          while read -r one ; do 
+          while read -r one ; do
           {
             [[ -z "${one}" ]] && continue
-            if it_exists_with_spaces  "${one}" ; then 
+            if it_exists_with_spaces  "${one}" ; then
             {
               _result="${one}"
               break
@@ -2579,7 +2579,7 @@ function _ensure_touch_dir_and_file() {
 
           [[ -z "${_result}" ]] && return 1
           echo -n "${_result}"
-          return 0    
+          return 0
         } # end _find_location_brew_files
 
 
@@ -2599,9 +2599,9 @@ function _ensure_touch_dir_and_file() {
           #       failed "to find brw var"
           #     }
           #     fi
-          #       
+          #
           #     _target_brew_base_pg="$(echo -n "${_msg}" | tail -1)"
-          #        
+          #
           #     passed found of var "${__pg} = ${_target_brew_base_pg}"
           #
           #
@@ -2616,12 +2616,12 @@ function _ensure_touch_dir_and_file() {
           local _result=""
           local -i counter=1
           local one=""
-          while read -r one ; do 
+          while read -r one ; do
           {
             [[ -z "${one}" ]] && continue
             _result="$(_find_location_brew_files "${one}" )"
             _err=$?
-            if [ $_err -eq 0 ] ; then 
+            if [ $_err -eq 0 ] ; then
             {
               break
             }
@@ -2632,7 +2632,7 @@ function _ensure_touch_dir_and_file() {
           }
           done <<< "${_possibles}"
 
-          if [ $_err -gt 0 ] ; then 
+          if [ $_err -gt 0 ] ; then
           {
             return 1
           }
@@ -2646,14 +2646,14 @@ function _ensure_touch_dir_and_file() {
   function _find_executable_for() {
           trap  '_trap_on_error $0 "${?}" LINENO BASH_LINENO FUNCNAME BASH_COMMAND $FUNCNAME $BASH_LINENO $LINENO   $BASH_COMMAND'  ERR
 
-          local _executable_test="${1:-}" 
+          local _executable_test="${1:-}"
           enforce_parameter_with_value           1:-        _executable_test     "${_executable_test:-}"     "nothing|brew"
           if [[ "${_executable_test:-}" == "nothing" ]] ; then
           {
             _executable_test=""
           }
           fi
-          local _argumentexecutable_test="${2:-}" 
+          local _argumentexecutable_test="${2:-}"
           if [[ "${_argumentexecutable_test:-}" == "nothing" ]] ; then
           {
             _argumentexecutable_test=""
@@ -2683,7 +2683,7 @@ function _ensure_touch_dir_and_file() {
           local _target_found=""
           _target_found="$(echo -n "${_try_returned_echo:-}" | tail -1)"
           passed "found ${_executable_test} of ${_possibles} one = ${_target_found:-}"
-          if [[ -z "${_target_found:-}" ]] ; then 
+          if [[ -z "${_target_found:-}" ]] ; then
           {
             Checking "if ${_executable_test} is responds to command -v ${_executable_test} since \$_target_found  var is empty"
             if ( su - "${SUDO_USER}" -c "command -v ${_executable_test}" >/dev/null 2>&1; )  ; then
@@ -2692,7 +2692,7 @@ function _ensure_touch_dir_and_file() {
               {
                 _target_found="$(su - "${SUDO_USER}" -c "${_executable_test}")"
               }
-              else 
+              else
               {
                 _target_found="$(su - "${SUDO_USER}" -c "${_executable_test} ${_argumentexecutable_test}")"
               }
@@ -2702,8 +2702,8 @@ function _ensure_touch_dir_and_file() {
           }
           fi
           enforce_variable_with_value _target_found "${_target_found}"
-  
-          if [[ -n "${_target_found:-}" ]] ; then 
+
+          if [[ -n "${_target_found:-}" ]] ; then
           {
             echo "${_target_found}"
             return 0
@@ -2715,8 +2715,8 @@ function _ensure_touch_dir_and_file() {
           # {
           # }
           # fi
-        } # end _find_executable_for 
-        
+        } # end _find_executable_for
+
 
         function _if_not_is_installed(){
             local -i _err
@@ -2744,7 +2744,7 @@ function _ensure_touch_dir_and_file() {
                 _msg_info_list="$(dnf info $1  >/dev/null 2>&1)"
                 ret=$?
             }
-            else 
+            else
             {
                 ensure_brew_in_linux_mac
                 local _target_bin_brew=""
@@ -3010,8 +3010,8 @@ fi
             {
 							if [[ "${bulk}" == *"error-devel"* ]] ; then
 							{
-								passed "Looked like error but perhaps is not 
-								${RESET}${bulk}  
+								passed "Looked like error but perhaps is not
+								${RESET}${bulk}
 								"
 							}
 						  else
@@ -3275,7 +3275,7 @@ fi
             local install_result=""
             local err_buff=0
             # local DEBUG=1
-           
+
             if [[ ${_OS:-} == "brew" ]] ; then
 			      {
 				      Installing ":goto brew installer"
@@ -3321,7 +3321,7 @@ fi
                   failed "to find brew"
                 }
                 fi
-                _target_bin_brew="$(echo -n "${_target_bin_brew}" | tail -1)"
+                _target_bin_brew="$(tail -1 <<< "${_target_bin_brew}" )"
                 enforce_variable_with_value _target_bin_brew "${_target_bin_brew}"
 
 
@@ -3340,16 +3340,16 @@ fi
                 continue
               }
               fi
-              if ( echo "${one_required}" | grep -q "^[[:space:]]*#" ) ; then  # continue  skip if starts with a # character
+              if ( grep -q "^[[:space:]]*#" <<<  "${one_required}" ) ; then  # continue  skip if starts with a # character
               {
                 continue
               }
               fi
-              if ( echo "${one_required}" | grep -q "@" ) ; then # split if contains char @
+              if ( grep -q "@" <<< "${one_required}" ) ; then # split if contains char @
               {
-                install_this="$( echo "${one_required}" | cut -d@ -f2- )" 
-                one_required="$( echo "${one_required}" | cut -d@ -f1 )"
-              } 
+                install_this="$( cut -d@ -f2-  <<< "${one_required}" )"
+                one_required="$( cut -d@ -f1   <<< "${one_required}" )"
+              }
               else
               {
                 install_this="${one_required}"
@@ -3359,7 +3359,7 @@ fi
               if [[ -z "${one_required}" ]] ; then  # continue skip if empty after split also extra check or else was empty check
               {
                 continue
-              } 
+              }
               else
               {
                 one_required=$(echo -n ${one_required} | sed -e 's/^[[:space:]]*//' ) # trim_start_space before //
@@ -3368,7 +3368,7 @@ fi
               if [[ -z "${install_this}" ]] ; then
               {
                 install_this=$(echo -n ${one_required} | sed -e 's/^[[:space:]]*//' ) # trim_spaces before //
-              } 
+              }
               else
               {
                 install_this=$(echo -n ${install_this} | sed -e 's/^[[:space:]]*//' ) # trim_spaces before //
@@ -3435,7 +3435,7 @@ fi
                 }
                 fi
               }
-              else # brew   just query results 
+              else # brew   just query results
               {
                   local -i _err=0
                   ensure_brew_in_linux_mac
@@ -3450,7 +3450,7 @@ fi
                   fi
                   _target_bin_brew="$(echo -n "${_target_bin_brew}" | tail -1)"
                   enforce_variable_with_value _target_bin_brew "${_target_bin_brew}"
-                
+
                   if (( DEBUG )) ; then
                     echo "${_target_bin_brew}"
                   fi
@@ -3476,7 +3476,7 @@ fi
                       # _run_command "brew install \"${install_this}\" "
                   }
                   fi
-                
+
               }
               fi
             }
@@ -3510,7 +3510,7 @@ fi
                 fi
                 err_buff=$?
               }
-              else # brew install 
+              else # brew install
               {
                   local -i _err=0
                   ensure_brew_in_linux_mac
@@ -3525,7 +3525,7 @@ fi
                   fi
                   _target_bin_brew="$(echo -n "${_target_bin_brew}" | tail -1)"
                   enforce_variable_with_value _target_bin_brew "${_target_bin_brew}"
-                 
+
                   if ( command -v "${_target_bin_brew}" >/dev/null 2>&1; ) ; then
                   {
                     # _run_command brew install ${missing}
@@ -3538,7 +3538,7 @@ fi
                     err_buff=$?
                     # su - "${SUDO_USER}" -c "brew install ${missing} "
                   }
-                  else 
+                  else
                   {
                     failed "to find get command -v ${_target_bin_brew} to respond"
                   }
@@ -5156,7 +5156,7 @@ function determine_os_and_fire_action() {
       {
         FUNCTION_TO_CALL="_darwin__$(uname -m)"
         PARAMETERS="$@"
-        warning "ERROR to determine "$(uname)" architecture (uname -m)  for: <$(uname -m)>"  
+        warning "ERROR to determine "$(uname)" architecture (uname -m)  for: <$(uname -m)>"
       }
       fi
   elif [[ "$(expr substr $(uname -s) 1 5)" == "Linux" ]] ; then
@@ -5792,7 +5792,7 @@ function raise_to_sudo_and_user_home() {
   passed "raise_to_sudo_and_user_home()"
   load_execute_boot_basic_with_sudo() {
     local -i _DEBUG=${DEBUG:-0}
-    passed "load_execute_boot_basic_with_sudo() " 
+    passed "load_execute_boot_basic_with_sudo() "
     export SUDO_USER
     # shellcheck disable=SC2030
     if ( typeset -p "SUDO_USER"  &>/dev/null ) ; then
@@ -6100,7 +6100,7 @@ function _process_dmgs_dmg_or_zip() {
     echo Attaching dmg downloaded
     hdiutil attach "${DOWNLOADFOLDER}/${CODENAME}"
     echo " "
-    echo struct_testing:$LINENO  ls "/Volumes" 
+    echo struct_testing:$LINENO  ls "/Volumes"
     echo " "
     ls "/Volumes"
     echo " "
@@ -6201,7 +6201,7 @@ function _install_dmgs_dmg__64() {
   }
   fi
 
-  if ( ! _check_size_bigger_than 1000 "${DOWNLOADFOLDER}/${CODENAME}" ) ; then 
+  if ( ! _check_size_bigger_than 1000 "${DOWNLOADFOLDER}/${CODENAME}" ) ; then
   {
     return 0
   }
@@ -6217,18 +6217,18 @@ function _install_dmgs_dmg__64() {
 } # end _install_dmgs_dmg__64
 
 function _check_size_bigger_than() {
-  # Sample use 
-  #  if ( ! _check_size_bigger_than 1000 "${DOWNLOADFOLDER}/${CODENAME}" ) ; then 
+  # Sample use
+  #  if ( ! _check_size_bigger_than 1000 "${DOWNLOADFOLDER}/${CODENAME}" ) ; then
   #  {
   #    return 0
   #  }
   #  fi
-  # 
+  #
   local -i size=0
   local -i than=${1:1000}
   local _file="${2}"
   enforce_parameter_with_value 2 _file "${_file}" "/home/user/work/filename.html"
-  
+
   size=$(du "${_file}" | cut -d/ -f1)
   if [ ${size} -lt ${than} ] ; then
   {
