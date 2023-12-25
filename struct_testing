@@ -1598,13 +1598,13 @@ CERO="\033[01;0m"
                 #
                 enforce_variable_with_value OSTYPE "${OSTYPE}"
                 case "${OSTYPE}" in
-                  (darwin*) passed "Looks like a mac! is there homebrew? " && Checking if homebrew installed;;
+                  (darwin*) passed "Looks like a mac! is there homebrew? " && Checking "if homebrew installed";;
                   (cygwin*) failed "Brew for Platform $OSTYPE is not supported " ;;
-                  (linux*) passed "Looks like a linux! is there linuxbrew?" && Checking if linuxbrew installed;;
+                  (linux*) passed "Looks like a linux! is there linuxbrew?" && Checking "if linuxbrew installed";;
                   (msys*) failed "Brew for Platform $OSTYPE is not supported " ;;
                   (*) failed "Platform $OSTYPE not supported"
                   return 1 ;;
-                esac
+							  esac
                 return 0
             } # end ensure_brew_in_linux_mac
 
@@ -4012,9 +4012,8 @@ ${VERSION_EXTRACT_COMMAND}"
                 }
                 else
                 {
-                    echo "nop"
-                     sudo -u "${USER_TO_INSTALL}" -i -- echo "command was ${ONE_COMMAND}"
-
+                  echo "nop"
+                  sudo -u "${USER_TO_INSTALL}" -i -- echo "command was ${ONE_COMMAND}"
                 }
                 fi
               }
@@ -5128,12 +5127,13 @@ function determine_os_and_fire_action() {
   # If will fail is the function has not been implemented with Error message
   # of the function that is missing like _archlinux__64
   local FUNCTION_TO_CALL=""
-  local PARAMETERS=""
+  local PARAMETERS="${*:-}"
   local -i DEBUG=0
   # Check operating systems
   # echo  ${@}
   if [[ "$(uname)" == "Darwin" ]] ; then
-      if (( DEBUG )) ; then
+  {
+		if (( DEBUG )) ; then
         echo "Darwin"
       fi
       # Do something under Mac OS X platform
@@ -5159,8 +5159,10 @@ function determine_os_and_fire_action() {
         warning "ERROR to determine "$(uname)" architecture (uname -m)  for: <$(uname -m)>"
       }
       fi
-  elif [[ "$(expr substr $(uname -s) 1 5)" == "Linux" ]] ; then
-    if (( DEBUG )) ; then
+  }
+	elif [[ "$(expr substr $(uname -s) 1 5)" == "Linux" ]] ; then
+	{
+		if (( DEBUG )) ; then
       echo "Linux"
     fi
     # Do something under GNU/Linux platform
@@ -5230,9 +5232,9 @@ function determine_os_and_fire_action() {
         fi
     }
     fi
-    if [[ -z "$DISTRO" ]]; then  # if empty
+    if [[ -z "$DISTRO" ]] ; then  # if empty
     {
-        failed to determine DISTRO for this linux. uname -a, cat /etc/os-release, lsb_release -i
+        failed "to determine DISTRO for this linux. uname -a, cat /etc/os-release, lsb_release -i"
     }
     fi
 
@@ -5266,9 +5268,10 @@ function determine_os_and_fire_action() {
     unset UNAME
     unset DISTRO
     unset ID
-
+  }
   elif [[ "$(expr substr $(uname -s) 1 10)" == "MINGW32_NT" ]] ; then
-    # Do something under Windows NT platform
+  {
+		# Do something under Windows NT platform
     if [[ "$(uname -i)" == "x86_64" ]] ; then
     {
       FUNCTION_TO_CALL='_mingw__64'
@@ -5281,25 +5284,44 @@ function determine_os_and_fire_action() {
     }
     fi
     # nothing here
+	}
+	elif [[ "$(expr substr $(uname -s) 1 10)" == "MINGW64_NT" ]] ; then
+  {
+		# Do something under Windows NT platform
+    if [[ "$(uname -i)" == "x86_64" ]] ; then
+    {
+      FUNCTION_TO_CALL='_mingw__64'
+      PARAMETERS="$*"
+    }
+    elif [[ "$(uname -i)" == "i686"   ]] ; then
+    {
+      FUNCTION_TO_CALL='_mingw__32'
+      PARAMETERS="$*"
+    }
+    fi
+    # nothing here
+	}
   else
-    failed system not recognized
-  fi
+	{
+		failed "system not recognized"
+	}
+	fi
   if [[ -z "${FUNCTION_TO_CALL}" ]]; then  # if empty
   {
      failed "ERROR to determine FUNCTION_TO_CALL for this OS. uname -a, cat /etc/os-release, lsb_release -i <${FUNCTION_TO_CALL}>"
   }
   else
   {
-        if function_is_defined "${FUNCTION_TO_CALL}" ; then
-        {
-           "${FUNCTION_TO_CALL}" "${PARAMETERS}"
-            _assure_success
-        }
-        else
-        {
-           failed to find function for this OS or DISTRO:  "${FUNCTION_TO_CALL}" "${PARAMETERS}"
-           _assure_success
-        }
+    if function_is_defined "${FUNCTION_TO_CALL}" ; then
+    {
+      "${FUNCTION_TO_CALL}" "${PARAMETERS}"
+      _assure_success
+    }
+    else
+    {
+      failed "to find function for this OS or DISTRO: ${FUNCTION_TO_CALL} ${PARAMETERS}"
+      _assure_success
+    }
     fi
 
   }
@@ -5355,7 +5377,7 @@ function _backup_current(){
      local folder_date=$(date +"%Y%m%d")
      if  it_exists_with_spaces "${__dir}_${folder_date}" ; then
      {
-       warning A backup already exists for today "${ret}:${msg} \n ... adding time"
+       warning "A backup already exists for today ${ret}:${msg} \n ... adding time"
        folder_date=$(date +"%Y%m%d%H%M")
      }
      fi
