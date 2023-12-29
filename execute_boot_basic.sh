@@ -43,7 +43,7 @@
 #     return 0
 # } # end load_execute_boot_basic_with_sudo
 
-# load_execute_boot_basic_with_sudo
+# load_execute_boot_basic_with_sudo "${*:-}"
 # _err=$?
 # if [ $_err -ne 0 ] ;  then
 # {
@@ -81,7 +81,7 @@
 #   # ...
 #   return 0 # remember to always return 0 to good, 1 or not/0 for fail
 # } # end check_system_requirements
-# check_system_requirements
+# check_system_requirements "${*:-}"
 
 # How to use: // end
 
@@ -165,9 +165,9 @@ load_execute_as_sudo(){
     echo "$provider" Loaded Now checking..
     return 0
 } # end execute_as_sudo
-load_execute_as_sudo
+load_execute_as_sudo "${*:-}"
 
-execute_as_sudo
+execute_as_sudo "${*:-}"
 _err=$?
 if [ $_err -ne 0 ] ;  then
 {
@@ -427,7 +427,7 @@ task_intuivo_cli/add_error_trap.sh:_trap_on_error
     # unset _provider  # unset: _scripts: cannot unset: readonly variable ..is normal behavoir or bash as of now
     return 0
 } # end function boostrap_intuivo_bash_app
-boostrap_intuivo_bash_app
+boostrap_intuivo_bash_app "${*:-}"
 
 # shellcheck disable=SC2031
 (( temporalDEBUG )) && echo "$SUDO_USER" || true

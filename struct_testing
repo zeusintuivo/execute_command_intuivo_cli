@@ -5314,12 +5314,13 @@ function determine_os_and_fire_action() {
   {
     if function_is_defined "${FUNCTION_TO_CALL}" ; then
     {
-      "${FUNCTION_TO_CALL}" "${PARAMETERS}"
+			passed "${FUNCTION_TO_CALL}" "${PARAMETERS:-THISSCRIPTPARAMS}"
+      "${FUNCTION_TO_CALL}" "${PARAMETERS:-THISSCRIPTPARAMS}"
       _assure_success
     }
     else
     {
-      failed "to find function for this OS or DISTRO: ${FUNCTION_TO_CALL} ${PARAMETERS}"
+      failed "to find function for this OS or DISTRO: ${FUNCTION_TO_CALL} ${PARAMETERS:-THISSCRIPTPARAMS}"
       _assure_success
     }
     fi
