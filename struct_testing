@@ -5109,6 +5109,33 @@ function get_architecture(){
   return 0
 } # end get_architecture
 
+function _get_redhat_style_version_number_maybe(){
+  # Sample use:
+  #     local target_name="fedora"
+  #     local _redhat_style_version_number_maybe=$(_get_redhat_style_version_number_maybe)
+  #     FUNCTION_TO_CALL=$(get_architecture "${target_name}${_redhat_style_version_number_maybe}")
+  #
+  local _response=""
+  local -i linuxversion=$(cut -d= -f2 <<< $(grep VERSION_ID= <<< $(cat /etc/*-release) ) )
+  if [ ${linuxversion} -gt 0 ] ;  then
+  {
+    local -i testnumber=0
+    testnumber=$(( linuxversion + 1 ))
+    testnumber=$(( testnumber - 1 ))
+    if [ ${testnumber} -eq ${linuxversion} ] ; then 
+    {
+      _response=${linuxversion}
+      echo -n "_${_response}"
+      return 0 
+    }
+    fi
+  }
+  fi
+  echo -n "${_response}"
+  return 1
+
+} # end _get_redhat_style_version_number_maybe
+
 function determine_os_and_fire_action() {
   # Interface
   # How to use
@@ -5126,6 +5153,7 @@ function determine_os_and_fire_action() {
   # remember to pass the  """${*}""" for the parameters to pass
   # If will fail is the function has not been implemented with Error message
   # of the function that is missing like _archlinux__64
+  local FUNCTION_TO_CALL_WITH_VERSION=""
   local FUNCTION_TO_CALL=""
   local PARAMETERS="${*:-}"
   local -i DEBUG=0
@@ -5217,17 +5245,17 @@ function determine_os_and_fire_action() {
       # If available, use /etc/os-release to identify distribution
         if [ -f /etc/os-release ]; then
         {
-        source /etc/os-release
-                # file_exists "/etc/os-release"
-                _assure_success
-                # source /etc/os-release
-                # $ echo $ID
-                # fedora
-                # $ echo $VERSION_ID
-                # 17
-                # $ echo $VERSION
-                # 17 (Beefy Miracle)
-                DISTRO=$ID
+          source /etc/os-release
+          # file_exists "/etc/os-release"
+          _assure_success
+          # source /etc/os-release
+          # $ echo $ID
+          # fedora
+          # $ echo $VERSION_ID
+          # 17
+          # $ echo $VERSION
+          # 17 (Beefy Miracle)
+          DISTRO=$ID
         }
         fi
     }
@@ -5240,23 +5268,35 @@ function determine_os_and_fire_action() {
 
     if [[ "$DISTRO" == *"edora"* ]]; then
     {
-      FUNCTION_TO_CALL=$(get_architecture "fedora")
+      local target_name="fedora"
+      local _redhat_style_version_number_maybe=$(_get_redhat_style_version_number_maybe)
+      FUNCTION_TO_CALL_WITH_VERSION=$(get_architecture "${target_name}${_redhat_style_version_number_maybe}")
+      FUNCTION_TO_CALL=$(get_architecture "${target_name}")
       PARAMETERS="$@"
     }
     elif [[ "$DISTRO" == *"untu"* ]]; then
     {
       # ubuntu lsb_release -i | sed 's/Distributor\ ID://g' = \tUbuntu\n
-      FUNCTION_TO_CALL=$(get_architecture "ubuntu")
+      local target_name="ubuntu"
+      local _redhat_style_version_number_maybe=$(_get_redhat_style_version_number_maybe)
+      FUNCTION_TO_CALL_WITH_VERSION=$(get_architecture "${target_name}${_redhat_style_version_number_maybe}")
+      FUNCTION_TO_CALL=$(get_architecture "${target_name}")
       PARAMETERS="$@"
     }
     elif [[ "$DISTRO" == *"bian"* ]]; then
     {
-      FUNCTION_TO_CALL=$(get_architecture "debian")
+      local target_name="debian"
+      local _redhat_style_version_number_maybe=$(_get_redhat_style_version_number_maybe)
+      FUNCTION_TO_CALL_WITH_VERSION=$(get_architecture "${target_name}${_redhat_style_version_number_maybe}")
+      FUNCTION_TO_CALL=$(get_architecture "${target_name}")
       PARAMETERS="$@"
     }
     else
     {
-      FUNCTION_TO_CALL=$(get_architecture "${DISTRO}")
+      local target_name="${DISTRO}"
+      local _redhat_style_version_number_maybe=$(_get_redhat_style_version_number_maybe)
+      FUNCTION_TO_CALL_WITH_VERSION=$(get_architecture "${target_name}${_redhat_style_version_number_maybe}")
+      FUNCTION_TO_CALL=$(get_architecture "${target_name}")
       PARAMETERS="$@"
     }
     fi
@@ -5274,11 +5314,19 @@ function determine_os_and_fire_action() {
 		# Do something under Windows NT platform
     if [[ "$(uname -i)" == "x86_64" ]] ; then
     {
+      # local target_name="${DISTRO}"
+      # local _redhat_style_version_number_maybe=$(_get_redhat_style_version_number_maybe)
+      # FUNCTION_TO_CALL_WITH_VERSION=$(get_architecture "${target_name}${_redhat_style_version_number_maybe}")
+      # FUNCTION_TO_CALL=$(get_architecture "${target_name}")
       FUNCTION_TO_CALL='_mingw__64'
       PARAMETERS="$*"
     }
     elif [[ "$(uname -i)" == "i686"   ]] ; then
     {
+      # local target_name="${DISTRO}"
+      # local _redhat_style_version_number_maybe=$(_get_redhat_style_version_number_maybe)
+      # FUNCTION_TO_CALL_WITH_VERSION=$(get_architecture "${target_name}${_redhat_style_version_number_maybe}")
+      # FUNCTION_TO_CALL=$(get_architecture "${target_name}")
       FUNCTION_TO_CALL='_mingw__32'
       PARAMETERS="$*"
     }
@@ -5290,11 +5338,19 @@ function determine_os_and_fire_action() {
 		# Do something under Windows NT platform
     if [[ "$(uname -i)" == "x86_64" ]] ; then
     {
+      # local target_name="${DISTRO}"
+      # local _redhat_style_version_number_maybe=$(_get_redhat_style_version_number_maybe)
+      # FUNCTION_TO_CALL_WITH_VERSION=$(get_architecture "${target_name}${_redhat_style_version_number_maybe}")
+      # FUNCTION_TO_CALL=$(get_architecture "${target_name}")
       FUNCTION_TO_CALL='_mingw__64'
       PARAMETERS="$*"
     }
     elif [[ "$(uname -i)" == "i686"   ]] ; then
     {
+      # local target_name="${DISTRO}"
+      # local _redhat_style_version_number_maybe=$(_get_redhat_style_version_number_maybe)
+      # FUNCTION_TO_CALL_WITH_VERSION=$(get_architecture "${target_name}${_redhat_style_version_number_maybe}")
+      # FUNCTION_TO_CALL=$(get_architecture "${target_name}")
       FUNCTION_TO_CALL='_mingw__32'
       PARAMETERS="$*"
     }
@@ -5312,16 +5368,48 @@ function determine_os_and_fire_action() {
   }
   else
   {
-    if function_is_defined "${FUNCTION_TO_CALL}" ; then
+    if function_is_defined "${FUNCTION_TO_CALL_WITH_VERSION}" ; then
     {
 			passed "${FUNCTION_TO_CALL}" "${PARAMETERS:-THISSCRIPTPARAMS}"
       "${FUNCTION_TO_CALL}" "${PARAMETERS:-THISSCRIPTPARAMS}"
       _assure_success
     }
-    else
+    else 
     {
-      failed "to find function for this OS or DISTRO: ${FUNCTION_TO_CALL} ${PARAMETERS:-THISSCRIPTPARAMS}"
-      _assure_success
+      warning "could not find function with version for this OS or DISTRO: ${FUNCTION_TO_CALL_WITH_VERSION}"
+      Installing "would look at adding this:
+function ${FUNCTION_TO_CALL_WITH_VERSION}(){
+  trap \"echo Error:\$?\" ERR INT
+  local _parameters=\"\${*}\"
+  local -i _err=0
+} # end ${FUNCTION_TO_CALL_WITH_VERSION}
+"
+      
+      Checking "if we can find a nonversion function: ${FUNCTION_TO_CALL}"
+      if function_is_defined "${FUNCTION_TO_CALL}" ; then
+      {		
+        passed "${FUNCTION_TO_CALL}" "${PARAMETERS:-THISSCRIPTPARAMS}"
+        "${FUNCTION_TO_CALL}" "${PARAMETERS:-THISSCRIPTPARAMS}"
+        _assure_success
+      }
+      else
+      {
+        warning "could not find function for this OS or DISTRO: ${FUNCTION_TO_CALL}"
+        Installing "would look at adding this:
+function ${FUNCTION_TO_CALL}(){
+  trap \"echo Error:\$?\" ERR INT
+  local _parameters=\"\${*}\"
+  local -i _err=0
+} # end ${FUNCTION_TO_CALL}
+"
+
+        failed "to find function for this OS or DISTRO: ${FUNCTION_TO_CALL} ${PARAMETERS:-THISSCRIPTPARAMS}
+        Cannot proceed until you add this function above missing
+        "
+        _assure_success
+      }
+      fi
+
     }
     fi
 
