@@ -5118,7 +5118,8 @@ function _get_debian_style_version_number_maybe(){
 	trap '>&2 echo -e "${RED}" && echo "ERROR failed $0:$LINENO struct_testing _get_debian_style_version_number_maybe()  " && >&1 echo -n "" && return 1' ERR
 	local -i _err=0
   local _response=""
-  local -i linuxversion=$(cut -d'"' -f2 <<< $(grep VERSION_ID= <<< $(cat /etc/*-release) ) )
+  local -i linuxversion=0
+	linuxversion=$(cut -d. -f1 <<< $(cut -d'"' -f2 <<< $(grep VERSION_ID= <<< $(cat /etc/*-release) ) ) )
 	_err=$?
   if [ ${_err} -eq 0 ] && [ ${linuxversion} -gt 0 ] ;  then
   {
