@@ -5109,15 +5109,50 @@ function get_architecture(){
   return 0
 } # end get_architecture
 
+function _get_debian_style_version_number_maybe(){
+  # Sample use:
+  #     local target_name="ubuntu"
+  #     local _debian_style_version_number_maybe=$(_get_debian_style_version_number_maybe)
+  #     FUNCTION_TO_CALL=$(get_architecture "${target_name}${_debian_style_version_number_maybe}")
+  #
+	trap '>&2 echo -e "${RED}" && echo "ERROR failed $0:$LINENO struct_testing _get_debian_style_version_number_maybe()  " && >&1 echo -n "" && return 1' ERR
+	local -i _err=0
+  local _response=""
+  local -i linuxversion=$(cut -d'"' -f2 <<< $(grep VERSION_ID= <<< $(cat /etc/*-release) ) )
+	_err=$?
+  if [ ${_err} -eq 0 ] && [ ${linuxversion} -gt 0 ] ;  then
+  {
+    local -i testnumber=0
+    testnumber=$(( linuxversion + 1 ))
+    testnumber=$(( testnumber - 1 ))
+    if [ ${testnumber} -eq ${linuxversion} ] ; then 
+    {
+      _response=${linuxversion}
+      echo -n "_${_response}"
+      return 0 
+    }
+    fi
+  }
+  fi
+  echo -n "${_response}"
+  return 1
+
+} # end _get_debian_style_version_number_maybe
+
 function _get_redhat_style_version_number_maybe(){
   # Sample use:
   #     local target_name="fedora"
   #     local _redhat_style_version_number_maybe=$(_get_redhat_style_version_number_maybe)
   #     FUNCTION_TO_CALL=$(get_architecture "${target_name}${_redhat_style_version_number_maybe}")
   #
+	#
+	trap '>&2 echo -e "${RED}" && echo "ERROR failed $0:$LINENO struct_testing _get_redhat_style_version_number_maybe()  " && >&1 echo -n "" && return 1' ERR
+	local -i _err=0
   local _response=""
-  local -i linuxversion=$(cut -d= -f2 <<< $(grep VERSION_ID= <<< $(cat /etc/*-release) ) )
-  if [ ${linuxversion} -gt 0 ] ;  then
+  local -i linuxversion=0
+	linuxversion=$(cut -d= -f2 <<< $(grep VERSION_ID= <<< $(cat /etc/*-release) ) )
+	_err=$?
+  if [ ${_err} -eq 0 ] && [ ${linuxversion} -gt 0 ] ;  then
   {
     local -i testnumber=0
     testnumber=$(( linuxversion + 1 ))
@@ -5270,7 +5305,12 @@ function determine_os_and_fire_action() {
     {
       local target_name="fedora"
       local _redhat_style_version_number_maybe=$(_get_redhat_style_version_number_maybe)
-      FUNCTION_TO_CALL_WITH_VERSION=$(get_architecture "${target_name}${_redhat_style_version_number_maybe}")
+			_err=$?
+      if [ ${_err} -eq 0 ] ; then			
+			{ 
+				FUNCTION_TO_CALL_WITH_VERSION=$(get_architecture "${target_name}${_redhat_style_version_number_maybe}")
+			}
+			fi
       FUNCTION_TO_CALL=$(get_architecture "${target_name}")
       PARAMETERS="$@"
     }
@@ -5278,16 +5318,26 @@ function determine_os_and_fire_action() {
     {
       # ubuntu lsb_release -i | sed 's/Distributor\ ID://g' = \tUbuntu\n
       local target_name="ubuntu"
-      local _redhat_style_version_number_maybe=$(_get_redhat_style_version_number_maybe)
-      FUNCTION_TO_CALL_WITH_VERSION=$(get_architecture "${target_name}${_redhat_style_version_number_maybe}")
+      local _debian_style_version_number_maybe=$(_get_debian_style_version_number_maybe)
+			_err=$?
+      if [ ${_err} -eq 0 ] ; then
+      {
+        FUNCTION_TO_CALL_WITH_VERSION=$(get_architecture "${target_name}${_debian_style_version_number_maybe}")
+			}
+			fi
       FUNCTION_TO_CALL=$(get_architecture "${target_name}")
       PARAMETERS="$@"
     }
     elif [[ "$DISTRO" == *"bian"* ]]; then
     {
       local target_name="debian"
-      local _redhat_style_version_number_maybe=$(_get_redhat_style_version_number_maybe)
-      FUNCTION_TO_CALL_WITH_VERSION=$(get_architecture "${target_name}${_redhat_style_version_number_maybe}")
+      local _debian_style_version_number_maybe=$(_get_debian_style_version_number_maybe)
+			_err=$?
+      if [ ${_err} -eq 0 ] ; then
+      {
+        FUNCTION_TO_CALL_WITH_VERSION=$(get_architecture "${target_name}${_debian_style_version_number_maybe}")
+      }
+			fi
       FUNCTION_TO_CALL=$(get_architecture "${target_name}")
       PARAMETERS="$@"
     }
@@ -5295,7 +5345,12 @@ function determine_os_and_fire_action() {
     {
       local target_name="${DISTRO}"
       local _redhat_style_version_number_maybe=$(_get_redhat_style_version_number_maybe)
-      FUNCTION_TO_CALL_WITH_VERSION=$(get_architecture "${target_name}${_redhat_style_version_number_maybe}")
+			_err=$?
+      if [ ${_err} -eq 0 ] ; then
+      {
+        FUNCTION_TO_CALL_WITH_VERSION=$(get_architecture "${target_name}${_redhat_style_version_number_maybe}")
+      }
+			fi
       FUNCTION_TO_CALL=$(get_architecture "${target_name}")
       PARAMETERS="$@"
     }
