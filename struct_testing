@@ -5234,6 +5234,38 @@ function _get_redhat_style_version_number_maybe(){
   return 1
 } # end _get_redhat_style_version_number_maybe
 
+function _get_mac_style_release_number_maybe(){
+  # Sample use:
+  #     local target_name="darwin"
+  #     local _mac_style_version_number_maybe=$(_get_mac_style_release_number_maybe)
+  #     FILE_TO_CALL=$(get_linux_architecture "${target_name}${_mac_style_version_number_maybe}")
+  #
+  #
+  trap '>&2 echo -e "${RED}" && echo "ERROR failed $0:$LINENO struct_testing _get_mac_style_release_number_maybe()  " && >&1 echo -n "" && return 1' ERR
+  local -i _err=0
+  local _response=""
+  local -i macversion=0
+  macversion=$(cut -d. -f1 <<< $( uname -r ) )
+  # macversion=$(sw_vers | grep ProductVersion | cut -d: -f2 | xargs | cut -d. -f1,2 | sed 's/\./_/g' )
+  _err=$?
+  if [ ${_err} -eq 0 ] && [ ${macversion} -gt 0 ] ;  then
+  {
+    local -i testnumber=0
+    testnumber=$(( macversion + 1 ))
+    testnumber=$(( testnumber - 1 ))
+    if [ ${testnumber} -eq ${macversion} ] ; then
+    {
+      _response=${macversion}
+      echo -n "_${_response}"
+      return 0
+    }
+    fi
+  }
+  fi
+  echo -n "${_response}"
+  return 1
+} # end _get_mac_style_release_number_maybe
+
 function _get_mac_style_version_number_maybe(){
   # Sample use:
   #     local target_name="darwin"
