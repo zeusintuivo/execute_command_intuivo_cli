@@ -4988,6 +4988,7 @@ function function_is_defined() {
                   if [[ -z "${ONE_FUNCTION}" ]] ; then
 										continue
 									fi
+warning "struct_testing:$LINENO ${ONE_FUNCTION} "
                   if [ -n "$(LC_ALL=C type -t "${ONE_FUNCTION}")" ] && [ "$(LC_ALL=C type -t "${ONE_FUNCTION}")" = function ]; then
                   {
                     return 0 # function exists
