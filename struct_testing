@@ -250,6 +250,7 @@ function HOW_TO_LOAD_JUST_ONE_SCRIPT_ONLINE_ALWAYS_STRUCT_USING_WGET() {
 #
 # STRUCT TESTING - START
 #
+alias egrep='grep -E --color=auto --exclude-dir={.bzr,CVS,.git,.hg,.svn,.idea,.tox}'
 
 RED="\033[01;31m"
 DARKERRED="\033[38;5;1m"
