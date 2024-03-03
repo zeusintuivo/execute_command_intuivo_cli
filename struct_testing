@@ -17,10 +17,10 @@ function sample_use_verify_mongo() {
     fi
 
     echo -e "${GREEN} Verify mongo version"
-    CURRENT_VERSION=$(mongo --version  | egrep -E "MongoDB shell version" | head -1  | cut -d' ' -f4 | cut -d'v' -f2)
+    CURRENT_VERSION=$(mongo --version  | grep -E "MongoDB shell version" | head -1  | cut -d' ' -f4 | cut -d'v' -f2)
     check_equality "${CURRENT_VERSION}=${MONGO_VERSION}"
     echo -e "${GREEN} Verify mongod version"
-    MONGOD_VERSION=$(mongod --version | egrep -E "db version" | head -1 | cut -d'v' -f3)
+    MONGOD_VERSION=$(mongod --version | grep -E "db version" | head -1 | cut -d'v' -f3)
     check_equality "${MONGOD_VERSION}=${MONGO_VERSION}"
 
     TESTING=" verify that MongoDB has started ${CYAN}successfully${LIGHTYELLOW}"
@@ -3307,7 +3307,7 @@ fi
             elif [[ ${_OS:-} != "brew" ]] && ( ( command -v apt >/dev/null 2>&1; ) && ( command -v dpkg >/dev/null 2>&1; ) ) ; then
             {
                 ensure_apt_dpkg_in_linux
-                packages=$(dpkg -l | egrep -E "$one_required" | cut -d' ' -f3 2>&1)
+                packages=$(dpkg -l | grep -E "$one_required" | cut -d' ' -f3 2>&1)
             }
              else # brew
             {
@@ -3416,7 +3416,7 @@ fi
                 fi
                 if     ( echo "${packages}" | grep "$one_required" >/dev/null 2>&1; ) \
                     && ( echo "${packages}" | grep "$one_required"| grep "^$one_required" >/dev/null 2>&1; ) \
-                    && ( echo "${packages}" | egrep -E "$one_required"| grep "^$one_required" | cut -d'-' -f1  >/dev/null 2>&1; ) ; then
+                    && ( echo "${packages}" | grep -E "$one_required"| grep "^$one_required" | cut -d'-' -f1  >/dev/null 2>&1; ) ; then
                 {
                     if (( DEBUG )) ; then
                       echo "rpm passed"
@@ -3606,7 +3606,7 @@ fi
             for one_required in ${required}; do
             {
                 # REF: https://www.cyberciti.biz/faq/find-out-if-package-is-installed-in-linux/
-                packages=$(dpkg -l | egrep -E  "$one_required" | cut -d' ' -f3 2>&1)
+                packages=$(dpkg -l | grep -E  "$one_required" | cut -d' ' -f3 2>&1)
                 query=$(dpkg-query -W -f='${Status} ${Version}\n' "$one_required"  2>&1)
                 #if [[ "${query}" == "install ok"* ]] && ( is_included "$one_required" "${packages}" ); then
                 if [[ "${query}" == "install ok"* ]] ; then
@@ -3685,7 +3685,7 @@ fi
             {
               if ( ( command -v apt >/dev/null 2>&1; ) && ( command -v dpkg >/dev/null 2>&1; ) ) ; then
               {
-                dpkg -l | egrep -E "$one_required" &>/dev/null
+                dpkg -l | grep -E "$one_required" &>/dev/null
                 if [ $? == 0 ]; then
                 {
                     echo -e " ${RED}  NEED TO REMOVE ${YELLOW} $one_required${RESET} ."
@@ -3699,7 +3699,7 @@ fi
               }
               elif ( ( command -v rpm >/dev/null 2>&1; ) && ( command -v dnf >/dev/null 2>&1; ) ) ; then
               {
-                rpm -qa | egrep -E  "$one_required" &>/dev/null
+                rpm -qa | grep -E  "$one_required" &>/dev/null
                 if [ $? == 0 ]; then
                 {
                     echo -e " ${RED}  NEED TO REMOVE ${YELLOW} $one_required${RESET} ."
