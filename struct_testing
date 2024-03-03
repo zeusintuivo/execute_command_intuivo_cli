@@ -4952,17 +4952,18 @@ function function_is_defined_with_spaces() {
             #          if  function_is_defined_with_spaces "/root/.zshrc ; then      it makes more sense to make it this way
             #
             local ONE_FUNCTION FUNCTIONS="${@}"
-            if [ ! -z "${FILES-x}" ] ; then # if its set and not empty
+            if [[ -n "${FILES-x}" ]] ; then # if its set and not empty
             {
                 while read -r ONE_FUNCTION; do
-                # if not empty
-                if [ ! -z "${ONE_FUNCTION}" ] ; then
-                    if [ -n "$(LC_ALL=C type -t "${ONE_FUNCTION}")" ] && [ "$(LC_ALL=C type -t "${ONE_FUNCTION}")" = function ]; then
-                    {
-                        return 0 # function exists
-                    }
-                    fi
-                fi
+                  # if not empty
+                  if [[ -z "${ONE_FUNCTION}" ]] ; then
+									  continue
+									fi
+                  if [ -n "$(LC_ALL=C type -t "${ONE_FUNCTION}")" ] && [ "$(LC_ALL=C type -t "${ONE_FUNCTION}")" = function ]; then
+                  {
+                    return 0 # function exists
+                  }
+                  fi
                 done <<< "${FUNCTIONS}"
                 return 1 # function does not exists
             }
@@ -4979,18 +4980,19 @@ function function_is_defined() {
             #          if  function_is_defined "$FUNCTION_TO_CALL" ; then      it makes more sense to make it this way
             #
             local ONE_FUNCTION FUNCTIONS="${@}"
-            if [ ! -z "${FILES-x}" ] ; then # if its set and not empty
+            if [[ -n "${FILES-x}" ]] ; then # if its set and not empty
             {
                 FUNCTIONS=$(switch_spaces_to_newlines <<< "${@}")
                 while read -r ONE_FUNCTION; do
-                # if not empty
-                if [ ! -z "${ONE_FUNCTION}" ] ; then
-                if [ -n "$(LC_ALL=C type -t "${ONE_FUNCTION}")" ] && [ "$(LC_ALL=C type -t "${ONE_FUNCTION}")" = function ]; then
-                    {
-                        return 0 # function exists
-                    }
-                    fi
-                fi
+                  # if not empty
+                  if [[ -z "${ONE_FUNCTION}" ]] ; then
+										continue
+									fi
+                  if [ -n "$(LC_ALL=C type -t "${ONE_FUNCTION}")" ] && [ "$(LC_ALL=C type -t "${ONE_FUNCTION}")" = function ]; then
+                  {
+                    return 0 # function exists
+                  }
+                  fi
                 done <<< "${FUNCTIONS}"
                 return 1 # function does not exists
             }
@@ -4998,7 +5000,6 @@ function function_is_defined() {
             unset ONE_FUNCTION
             unset FUNCTIONS
             unset TESTING
-
 } # end function_is_defined
 
 function function_exists() {
@@ -5011,29 +5012,26 @@ function function_exists() {
             #                      Function2"
             #
             local TESTING ONE_FUNCTION FUNCTIONS="${@}"
-            if [ ! -z "${FUNTIONS-x}" ] ; then # if its set and not empty
+            if [[ -n "${FUNTIONS-x}" ]] ; then # if its set and not empty
             {
                 FUNCTIONS=$(switch_spaces_to_newlines <<< "${@}")
                 while read -r ONE_FUNCTION; do
-                if [ ! -z "${ONE_FUNCTION}" ] ; then # if not empty
-                    TESTING="that function ${CYAN}${ONE_FUNCTION}${LIGHTYELLOW} exists"
-                    if function_is_defined "${ONE_FUNCTION}" ; then
-                    {
-                        passed "${TESTING}"
-                    }
-                    else
-                    {
-                        failed "${TESTING}"
-                    }
-                    fi
-                fi
+                  if [[ -z "${ONE_FUNCTION}" ]] ; then # if not empty
+									  continue
+									fi
+                  TESTING="that function ${CYAN}${ONE_FUNCTION}${LIGHTYELLOW} exists"
+                  if function_is_defined "${ONE_FUNCTION}" ; then
+                  {
+                    passed "${TESTING}"
+                  }
+									fi
+                  failed "${TESTING}"
                 done <<< "${FUNCTIONS}"
             }
             fi
         unset ONE_FUNCTION
         unset FUNCTIONS
         unset TESTING
-
 } # end function_exists
 
 # function_exists ls
@@ -5050,22 +5048,20 @@ function function_exists_with_spaces() {
             #                      Function2"
             #
             local TESTING ONE_FUNCTION FUNCTIONS="${@}"
-            if [ ! -z "${FUNTIONS-x}" ] ; then # if its set and not empty
+            if [[ -n "${FUNTIONS-x}" ]] ; then # if its set and not empty
             {
-                while read -r ONE_FUNCTION; do
-                if [ ! -z "${ONE_FUNCTION}" ] ; then # if not empty
-                    TESTING="that function ${CYAN}${ONE_FUNCTION}${LIGHTYELLOW} exists"
-                    if function_is_defined_with_spaces "${ONE_FUNCTION}" ; then
-                    {
-                        passed "${TESTING}"
-                    }
-                    else
-                    {
-                        failed "${TESTING}"
-                    }
-                    fi
-                fi
-            done <<< "${FUNCTIONS}"
+              while read -r ONE_FUNCTION; do
+                  if [[ -z "${ONE_FUNCTION}" ]] ; then # if not empty
+										continue
+									fi
+                  TESTING="that function ${CYAN}${ONE_FUNCTION}${LIGHTYELLOW} exists"
+                  if function_is_defined_with_spaces "${ONE_FUNCTION}" ; then
+                  {
+                    passed "${TESTING}"
+                  }
+                  fi
+                  failed "${TESTING}"
+              done <<< "${FUNCTIONS}"
             }
             fi
             unset ONE_FUNCTION
@@ -5561,7 +5557,7 @@ function determine_os_and_fire_action() {
     if function_is_defined "${FUNCTION_TO_CALL_WITH_VERSION}" ; then
     {
       passed "${FUNCTION_TO_CALL_WITH_VERSION}" "${PARAMETERS:-}" "${THISSCRIPTPARAMS:-}"
-      "${FUNCTION_TO_CALL_WITH_VERSION}" "${PARAMETERS:-}" "${THISSCRIPTPARAMS:-}"
+      ${FUNCTION_TO_CALL_WITH_VERSION} "${PARAMETERS:-}" "${THISSCRIPTPARAMS:-}"
       _assure_success
     }
     else
@@ -5579,7 +5575,7 @@ function ${FUNCTION_TO_CALL_WITH_VERSION}(){
       if function_is_defined "${FUNCTION_TO_CALL}" ; then
       {
         passed "${FUNCTION_TO_CALL}" "${PARAMETERS:-}" "${THISSCRIPTPARAMS:-}"
-        "${FUNCTION_TO_CALL}" "${PARAMETERS:-}" "${THISSCRIPTPARAMS:-}"
+        ${FUNCTION_TO_CALL} "${PARAMETERS:-}" "${THISSCRIPTPARAMS:-}"
         _assure_success
       }
       else
