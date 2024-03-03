@@ -4988,7 +4988,7 @@ function function_is_defined() {
                   if [[ -z "${ONE_FUNCTION}" ]] ; then
 										continue
 									fi
-warning "struct_testing:$LINENO ${ONE_FUNCTION} "
+# warning "struct_testing:$LINENO ${ONE_FUNCTION} "
                   if [ -n "$(LC_ALL=C type -t "${ONE_FUNCTION}")" ] && [ "$(LC_ALL=C type -t "${ONE_FUNCTION}")" = function ]; then
                   {
                     return 0 # function exists
@@ -5094,7 +5094,7 @@ function get_linux_architecture(){
   else
   {
     return_function_to_call="_${system_nick}__$(uname -i)"
-    warning "struct_testing:$LINENO ERROR to determine "$(uname -a)" architecture (uname -i)  for: <${return_function_to_call}>"
+    # warning "struct_testing:$LINENO ERROR to determine "$(uname -a)" architecture (uname -i)  for: <${return_function_to_call}>"
   }
   fi
   if [ -z ${return_function_to_call} ] || [[ "${return_function_to_call}" =~ 'nknown' ]] ; then
