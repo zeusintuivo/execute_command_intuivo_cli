@@ -5560,8 +5560,8 @@ function determine_os_and_fire_action() {
   {
     if function_is_defined "${FUNCTION_TO_CALL_WITH_VERSION}" ; then
     {
-      passed "${FUNCTION_TO_CALL_WITH_VERSION}" "${PARAMETERS:-THISSCRIPTPARAMS}"
-      "${FUNCTION_TO_CALL_WITH_VERSION}" "${PARAMETERS:-THISSCRIPTPARAMS}"
+      passed "${FUNCTION_TO_CALL_WITH_VERSION}" "${PARAMETERS:-}" "${THISSCRIPTPARAMS:-}"
+      "${FUNCTION_TO_CALL_WITH_VERSION}" "${PARAMETERS:-}" "${THISSCRIPTPARAMS:-}"
       _assure_success
     }
     else
@@ -5578,8 +5578,8 @@ function ${FUNCTION_TO_CALL_WITH_VERSION}(){
       Checking "if we can find a nonversion function: ${FUNCTION_TO_CALL}"
       if function_is_defined "${FUNCTION_TO_CALL}" ; then
       {
-        passed "${FUNCTION_TO_CALL}" "${PARAMETERS:-THISSCRIPTPARAMS}"
-        "${FUNCTION_TO_CALL}" "${PARAMETERS:-THISSCRIPTPARAMS}"
+        passed "${FUNCTION_TO_CALL}" "${PARAMETERS:-}" "${THISSCRIPTPARAMS:-}"
+        "${FUNCTION_TO_CALL}" "${PARAMETERS:-}" "${THISSCRIPTPARAMS:-}"
         _assure_success
       }
       else
@@ -5593,7 +5593,7 @@ function ${FUNCTION_TO_CALL}(){
 } # end ${FUNCTION_TO_CALL}
 "
 
-        failed "to find function for this OS or DISTRO: ${FUNCTION_TO_CALL} ${PARAMETERS:-THISSCRIPTPARAMS}
+        failed "to find function for this OS or DISTRO: ${FUNCTION_TO_CALL} ${PARAMETERS:-} ${THISSCRIPTPARAMS:-}
         Cannot proceed until you add this function above missing
         "
         _assure_success
