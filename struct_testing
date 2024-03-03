@@ -5097,7 +5097,7 @@ function get_linux_architecture(){
   else
   {
     return_function_to_call="_${system_nick}__$(uname -i)"
-    warning "ERROR to determine "$(uname -a)" architecture (uname -i)  for: <${return_function_to_call}>"
+    warning "struct_testing:$LINENO ERROR to determine "$(uname -a)" architecture (uname -i)  for: <${return_function_to_call}>"
   }
   fi
   if [ -z ${return_function_to_call} ] || [[ "${return_function_to_call}" =~ 'nknown' ]] ; then
@@ -5147,7 +5147,7 @@ function get_mac_architecture(){
   else
   {
     return_function_to_call="_${system_nick}__$(uname -m)"
-    warning "ERROR to determine "$(uname -a)" architecture (uname -m)  for: <${return_function_to_call}>"
+    warning "struct_testing:$LINENO ERROR to determine "$(uname -a)" architecture (uname -m)  for: <${return_function_to_call}>"
   }
   fi
   if [ -z ${return_function_to_call} ] || [[ "${return_function_to_call}" =~ 'nknown' ]] ; then
@@ -5554,7 +5554,7 @@ function determine_os_and_fire_action() {
   fi
   if [[ -z "${FUNCTION_TO_CALL}" ]]; then  # if empty
   {
-     failed "ERROR to determine FUNCTION_TO_CALL for this OS. uname -a, cat /etc/os-release, lsb_release -i <${FUNCTION_TO_CALL}>"
+     failed "struct_testing:$LINENO ERROR to determine FUNCTION_TO_CALL for this OS. uname -a, cat /etc/os-release, lsb_release -i <${FUNCTION_TO_CALL}>"
   }
   else
   {
@@ -5566,7 +5566,7 @@ function determine_os_and_fire_action() {
     }
     else
     {
-      warning "could not find function with version for this OS or DISTRO: ${FUNCTION_TO_CALL_WITH_VERSION}"
+      warning "struct_testing:$LINENO  could not find function with version for this OS or DISTRO: ${FUNCTION_TO_CALL_WITH_VERSION}"
       Installing "would look at adding this:
 function ${FUNCTION_TO_CALL_WITH_VERSION}(){
   trap \"echo Error:\$?\" ERR INT
@@ -5575,7 +5575,7 @@ function ${FUNCTION_TO_CALL_WITH_VERSION}(){
 } # end ${FUNCTION_TO_CALL_WITH_VERSION}
 "
 
-      Checking "if we can find a nonversion function: ${FUNCTION_TO_CALL}"
+      Checking "struct_testing:$LINENO  if we can find a nonversion function: ${FUNCTION_TO_CALL}"
       if function_is_defined "${FUNCTION_TO_CALL}" ; then
       {
         passed "${FUNCTION_TO_CALL}" "${PARAMETERS:-}" "${THISSCRIPTPARAMS:-}"
@@ -5584,7 +5584,7 @@ function ${FUNCTION_TO_CALL_WITH_VERSION}(){
       }
       else
       {
-        warning "could not find function for this OS or DISTRO: ${FUNCTION_TO_CALL}"
+        warning "struct_testing:$LINENO  could not find function for this OS or DISTRO: ${FUNCTION_TO_CALL}"
         Installing "would look at adding this:
 function ${FUNCTION_TO_CALL}(){
   trap \"echo Error:\$?\" ERR INT
@@ -5593,7 +5593,7 @@ function ${FUNCTION_TO_CALL}(){
 } # end ${FUNCTION_TO_CALL}
 "
 
-        failed "to find function for this OS or DISTRO: ${FUNCTION_TO_CALL} ${PARAMETERS:-} ${THISSCRIPTPARAMS:-}
+        failed "struct_testing:$LINENO  to find function for this OS or DISTRO: ${FUNCTION_TO_CALL} ${PARAMETERS:-} ${THISSCRIPTPARAMS:-}
         Cannot proceed until you add this function above missing
         "
         _assure_success
