@@ -5566,10 +5566,16 @@ function determine_os_and_fire_action() {
     {
       warning "struct_testing:$LINENO  could not find function with version for this OS or DISTRO: ${FUNCTION_TO_CALL_WITH_VERSION}"
       Installing "would look at adding this:
-function ${FUNCTION_TO_CALL_WITH_VERSION}(){
-  trap \"echo Error:\$?\" ERR INT
-  local _parameters=\"\${*}\"
+${FUNCTION_TO_CALL_WITH_VERSION}() {
+  trap \"echo Error:\$\?\" ERR INT
+  local _parameters=\"\${*-}\"
   local -i _err=0
+	_err=\$\?
+  if [ \${_err} -gt 0 ] ; then
+  {
+		failed \"while running callsomething above _err:\${_err}\"
+  }
+  fi
 } # end ${FUNCTION_TO_CALL_WITH_VERSION}
 "
 
@@ -5584,10 +5590,17 @@ function ${FUNCTION_TO_CALL_WITH_VERSION}(){
       {
         warning "struct_testing:$LINENO  could not find function for this OS or DISTRO: ${FUNCTION_TO_CALL}"
         Installing "would look at adding this:
-function ${FUNCTION_TO_CALL}(){
-  trap \"echo Error:\$?\" ERR INT
-  local _parameters=\"\${*}\"
+${FUNCTION_TO_CALL}() {
+  trap \"echo Error:\$\?\" ERR INT
+  local _parameters=\"\${*-}\"
   local -i _err=0
+	callsomething \"\${_parameters-}\"
+	_err=\$\?
+  if [ \${_err} -gt 0 ] ; then
+  {
+		failed \"while running callsomething above _err:\${_err}\"
+  }
+  fi
 } # end ${FUNCTION_TO_CALL}
 "
 
