@@ -2555,7 +2555,8 @@ function _ensure_touch_dir_and_file() {
                    ${USER_HOME}/.pyenv/shims/${_sub_directory}
                    ${USER_HOME}/.pyenv/bin/${_sub_directory}
                    ${USER_HOME}/.rbenv/shims/${_sub_directory}
-                   ${USER_HOME}/.rbenv/bin/${_sub_directory}                   ${USER_HOME}/_/software/${_sub_directory}
+                   ${USER_HOME}/.rbenv/bin/${_sub_directory}
+									 ${USER_HOME}/_/software/${_sub_directory}
                    /root/${_sub_directory}
                    ${USER_HOME}/bin/${_sub_directory}
                    /opt/homebrew/${_sub_directory}
