@@ -4492,14 +4492,19 @@ function _find_downloads_folder(){
   fi
   if [ -n "${DOWNLOADFOLDER}" ] ; then
   {
-    if it_exists_with_spaces "${DOWNLOADFOLDER}" ; then
+    if >&2 it_exists_with_spaces "${DOWNLOADFOLDER}" ; then
     {
-      cd "${DOWNLOADFOLDER}"
+      if ! >&2 cd "${DOWNLOADFOLDER}" ; then
+			{
+				>&2 echo "Error accessing folder <cd failed>  struct_testing:$LINENO $0 function _find_downloads_folder() variable DOWNLOADFOLDER:${DOWNLOADFOLDER}" 
+				return 1
+			}
+			fi
       echo -n "${DOWNLOADFOLDER}"
       return 0
     }
     fi
-  }
+  } 
   fi
 
 
@@ -4532,19 +4537,38 @@ function _find_downloads_folder(){
       exit 1
     }
     fi
-    # finally check we got a value
+    # Finally check we got a value
     enforce_variable_with_value DOWNLOADFOLDER "${DOWNLOADFOLDER}"
-    cd "${DOWNLOADFOLDER}"
+    if ! >&2 cd "${DOWNLOADFOLDER}" ; then
+    {
+		  >&2 echo "Error accessing folder <cd failed>  struct_testing:$LINENO $0 function _find_downloads_folder() variable DOWNLOADFOLDER:${DOWNLOADFOLDER}" 
+		  return 1
+		}
+		fi
     echo -n "${DOWNLOADFOLDER}"
-  }
+    return 0
+	}
   else
   {
     local _temp_dir="$(mktemp -d 2>/dev/null || mktemp -d -t 'tempdownloads')"
-    cd "${_temp_dir}"
+		_err=$?
+    if [ -z "${_temp_dir}" ] || [ ${_err} -gt 0 ] ; then
+    {
+      return 1  # here one is for error
+      exit 1
+    }
+    fi
+    if ! >&2 cd "${_temp_dir}" ; then
+    {
+		  >&2 echo "Error accessing folder <cd failed>  struct_testing:$LINENO $0 function _find_downloads_folder() variable _temp_dir:${_temp_dir}" 
+		  return 1
+		}
+		fi
     echo -n "${_temp_dir}"
+		return 0
    }
   fi
-  return 0
+  return 1
 } # end _find_downloads_folder
 
 function _download_win() {
@@ -5752,7 +5776,8 @@ function _do_not_downloadtwice(){
   # _do_not_downloadtwice "${TARGET_URL}" "${DOWNLOADFOLDER}"  "${CODENAME}"
   #
   #
-  local -i _VERBOSE=${VERBOSE:-0}
+  local -i _err=$?
+	local -i _VERBOSE=${VERBOSE:-0}
   local TARGET_URL="${1}"
   enforce_parameter_with_value 1 TARGET_URL "${TARGET_URL}" "https://download.teamviewer.com/download/linux/teamviewer.x86_64.rpm"
   local DOWNLOADFOLDER="${2}"
@@ -5770,11 +5795,25 @@ function _do_not_downloadtwice(){
   }
   else
   {
-    cd "${DOWNLOADFOLDER}"
+    if ! >&2 cd "${DOWNLOADFOLDER}" ; then
+    {
+		  >&2 echo "Error accessing folder <cd failed>  struct_testing:$LINENO $0 function _do_not_downloadtwice() variable DOWNLOADFOLDER:${DOWNLOADFOLDER}" 
+		  return 1
+		}
+		fi
+    echo -n "${DOWNLOADFOLDER}"
     (( _VERBOSE )) && pwd
     (( _VERBOSE )) && echo  _download "${TARGET_URL}" "${DOWNLOADFOLDER}"  "${CODENAME}"
     _download "${TARGET_URL}" "${DOWNLOADFOLDER}"  "${CODENAME}"
-    file_exists_with_spaces "${DOWNLOADFOLDER}/${CODENAME}"
+    _err=$?
+    wait
+    if [ ${_err} -gt 0 ] ; then
+    {
+			>&2 echo "Error in download process struct_testing:$LINENO $0 function _do_not_downloadtwice() calling _download() "
+      return 1  # here one is for error
+    }
+    fi  
+		file_exists_with_spaces "${DOWNLOADFOLDER}/${CODENAME}"
   }
   fi
 } # end _do_not_downloadtwice
