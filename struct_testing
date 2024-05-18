@@ -4496,7 +4496,7 @@ function _find_downloads_folder(){
     {
       if ! >&2 cd "${DOWNLOADFOLDER}" ; then
 			{
-				>&2 echo "Error accessing folder <cd failed>  struct_testing:$LINENO $0 function _find_downloads_folder() variable DOWNLOADFOLDER:${DOWNLOADFOLDER}" 
+				>&2 echo "Error accessing folder <cd failed>  struct_testing:$LINENO $0 function _find_downloads_folder() variable DOWNLOADFOLDER:„${DOWNLOADFOLDER}”" 
 				return 1
 			}
 			fi
@@ -4541,7 +4541,7 @@ function _find_downloads_folder(){
     enforce_variable_with_value DOWNLOADFOLDER "${DOWNLOADFOLDER}"
     if ! >&2 cd "${DOWNLOADFOLDER}" ; then
     {
-		  >&2 echo "Error accessing folder <cd failed>  struct_testing:$LINENO $0 function _find_downloads_folder() variable DOWNLOADFOLDER:${DOWNLOADFOLDER}" 
+		  >&2 echo "Error accessing folder <cd failed>  struct_testing:$LINENO $0 function _find_downloads_folder() variable DOWNLOADFOLDER:„${DOWNLOADFOLDER}”" 
 		  return 1
 		}
 		fi
@@ -4631,14 +4631,20 @@ function _download_mac() {
     download_folder="${2}"
   }
   fi
-  echo "     target url 1:<${target_url}>"
+  Comment "     target url 1:<${target_url}>"
   [ -z "${target_url}" ] && echo "empty"
-  echo "download folder 2:<${download_folder}>"
+  Comment "download folder 2:<${download_folder}>"
   [ -z "${target_url}" ] && echo "empty"
-  echo "  download file 3:<${3}>"
+  Comment "  download file 3:<${3}>"
   #   file_exists_with_spaces "${download_folder}"
   directory_exists_with_spaces "${download_folder}"
-  cd "${download_folder}"
+  if ! >&2 cd "${download_folder}" ; then
+  {
+    >&2 Comment "Error accessing folder <cd failed>  struct_testing:$LINENO $0 function _download_mac() variable download_folder:„${download_folder}”" 
+    return 1
+  }
+	fi
+ 
   #   [ -z "${3}" ] && echo "empty"
   #   echo
   # echo "# arguments called with ---->  ${@}     "
@@ -4665,8 +4671,8 @@ function _download_mac() {
 set -ex
     # curl -LO  -k -s --url  "${target_url}" 2>/dev/null   # suppress only wget download messages, but keep wget output for variable
     curl -kLO "${target_url}" 2>/dev/null   # suppress only wget download messages, but keep wget output for variable
-      echo $?
-      ls -la
+    echo $?
+    ls -la
 set +ex
     wait
   }
@@ -4741,12 +4747,12 @@ function _download_linux() {
       download_folder="${2}"
   }
   fi
-  echo "     target url 1:<${1}>"
-  [ -z "${1}" ] && echo "empty"
-  echo "download folder 2:<${download_folder}>"
-  [ -z "${2}" ] && echo "empty"
-  echo "  download file 3:<${3}>"
-  #   file_exists_with_spaces "${download_folder}"
+  Comment "$0:$LINENO $FUNCNAME      target url 1:<${1}>"
+  [ -z "${1}" ] && Comment "$0:$LINENO $FUNCNAME empty"
+  Comment "$0:$LINENO $FUNCNAME download folder 2:<${download_folder}>"
+  [ -z "${2}" ] && Comment "$0:$LINENO $FUNCNAME empty"
+  Comment "$0:$LINENO $FUNCNAME   download file 3:<${3}>"
+  #   file_exists_with_spaces "${download_folder }"
   directory_exists_with_spaces "${download_folder}"
     #   [ -z "${3}" ] && echo "empty"
     #   echo
@@ -5592,13 +5598,13 @@ function determine_os_and_fire_action() {
       warning "struct_testing:$LINENO  could not find function with version for this OS or DISTRO: ${FUNCTION_TO_CALL_WITH_VERSION}"
       Installing "would look at adding this:
 ${FUNCTION_TO_CALL_WITH_VERSION}() {
-  trap \"echo Error:\$\?\" ERR INT
+  trap \"echo Error:\$?\" ERR INT
   local _parameters=\"\${*-}\"
   local -i _err=0
-	_err=\$\?
+  _err=\$?
   if [ \${_err} -gt 0 ] ; then
   {
-		failed \"while running callsomething above _err:\${_err}\"
+    failed \"struct_testing:\$LINENO \$0:\$LINENO while running callsomething above _err:\${_err}\"
   }
   fi
 } # end ${FUNCTION_TO_CALL_WITH_VERSION}
@@ -5616,14 +5622,14 @@ ${FUNCTION_TO_CALL_WITH_VERSION}() {
         warning "struct_testing:$LINENO  could not find function for this OS or DISTRO: ${FUNCTION_TO_CALL}"
         Installing "would look at adding this:
 ${FUNCTION_TO_CALL}() {
-  trap \"echo Error:\$\?\" ERR INT
+  trap \"echo Error:\$?\" ERR INT
   local _parameters=\"\${*-}\"
   local -i _err=0
 	callsomething \"\${_parameters-}\"
-	_err=\$\?
+  _err=\$?
   if [ \${_err} -gt 0 ] ; then
   {
-		failed \"while running callsomething above _err:\${_err}\"
+    failed \"struct_testing:\$LINENO \$0:\$LINENO  while running callsomething above _err:\${_err}\"
   }
   fi
 } # end ${FUNCTION_TO_CALL}
@@ -5781,7 +5787,7 @@ function _do_not_downloadtwice(){
   local TARGET_URL="${1}"
   enforce_parameter_with_value 1 TARGET_URL "${TARGET_URL}" "https://download.teamviewer.com/download/linux/teamviewer.x86_64.rpm"
   local DOWNLOADFOLDER="${2}"
-  Comment "DOWNLOADFOLDER:„${DOWNLOADFOLDER}”"
+  Comment "struct_testing:$LINENO $0 function _do_not_downloadtwice DOWNLOADFOLDER:„${DOWNLOADFOLDER}”"
   enforce_parameter_with_value 2 DOWNLOADFOLDER "${DOWNLOADFOLDER}" "$USER_HOME/Downloads"
   file_exists_with_spaces "${DOWNLOADFOLDER}"
   local CODENAME="${3}"
@@ -5797,7 +5803,7 @@ function _do_not_downloadtwice(){
   {
     if ! >&2 cd "${DOWNLOADFOLDER}" ; then
     {
-		  >&2 echo "Error accessing folder <cd failed>  struct_testing:$LINENO $0 function _do_not_downloadtwice() variable DOWNLOADFOLDER:${DOWNLOADFOLDER}" 
+		  >&2 Comment "Error accessing folder <cd failed>  struct_testing:$LINENO $0 function _do_not_downloadtwice() variable DOWNLOADFOLDER:„${DOWNLOADFOLDER}”" 
 		  return 1
 		}
 		fi
@@ -5809,7 +5815,7 @@ function _do_not_downloadtwice(){
     wait
     if [ ${_err} -gt 0 ] ; then
     {
-			>&2 echo "Error in download process struct_testing:$LINENO $0 function _do_not_downloadtwice() calling _download() "
+			>&2 Comment "Error in download process struct_testing:$LINENO $0 function _do_not_downloadtwice() calling _download() "
       return 1  # here one is for error
     }
     fi  
