@@ -76,7 +76,7 @@ function sample_use_verify_mongo() {
     #/_/version-manager/package.json                  # Patch mongoo-manager form nodejs
 
     #  softlink_exists "/root/.pyenv>/home/vagrant/.pyenv"
-    #  check_to_be_installed "sysfsutils" "fix for transparent_hugepage"
+    #  check_if_package_is_installed "sysfsutils" "fix for transparent_hugepage"
     #
 
 }
@@ -2120,50 +2120,7 @@ function _run_command(){
         #testself_expect #&> /dev/null # stdln to hide command output in bash
         # testself_expect 2>&1 >/dev/null #  capture onlly sterr error output
 
-        function check_to_be_installed() {
-            # Sample usage
-            #
-            # ...  you want to APT-GET install  ... sysfsutils
-            # ...  and you want to say          ... fix for transparent_hugepage
-            #
-            #  check_to_be_installed "sysfsutils" "fix for transparent_hugepage"
-            #
-            local package="$1"
-            local message="$2"
-            local CHECK_INSTALLED=""
-            if ( ( command -v apt >/dev/null 2>&1; ) && ( command -v dpkg >/dev/null 2>&1; ) ) ; then
-            {
-              CHECK_INSTALLED=$(dpkg -s "${package}")
-              if [[ "${CHECK_INSTALLED}" == *"Package: ${package}"* ]] ; then
-              {
-                echo -e "${GREEN} PACKAGE: ${message}  ${package} is there  ${CERO}"
-              }
-              else
-              {
-                echo -e "${YELLOW} Installing ${message}   ${CERO}"
-                sudo apt install "${package}" -y
-              }
-              fi
-            }
-            elif ( ( command -v rpm >/dev/null 2>&1; ) && ( command -v dnf >/dev/null 2>&1; ) ) ; then
-            {
-              CHECK_INSTALLED=$(rpm -qa|grep -i "${package}")
-              if [[ "${CHECK_INSTALLED}" == *"Package: ${package}"* ]] ; then
-              {
-                echo -e "${GREEN} PACKAGE: ${message}  ${package} is there  ${CERO}"
-              }
-              else
-              {
-                echo -e "${YELLOW} Installing ${message}   ${CERO}"
-                sudo dnf install "${package}" -y
-              }
-              fi
-
-            }
-            fi
-        } # end check_to_be_installed
-
-        function is_service_response_not_this_fail() {
+					function is_service_response_not_this_fail() {
             #Sample use
             # ( command -v nginx >/dev/null 2>&1; ) && sudo service nginx start
             #
@@ -6377,9 +6334,118 @@ function enforce_ip_resolves(){
   passed "${TESTING}"
 } # end enforce_ip_resolves
 
+function check_if_package_is_installed() {
+            # Sample usage
+            #
+            # ...  you want to APT-GET install  ... sysfsutils
+            # ...  and you want to say          ... fix for transparent_hugepage
+            #
+            #  check_if_package_is_installed  "sysfsutils" "fix for transparent_hugepage"
+            #
+            local package="$1"
+            local message="$2"
+            local CHECK_INSTALLED=""
+            if ( ( command -v apt-get >/dev/null 2>&1; ) && ( command -v dpkg >/dev/null 2>&1; ) ) ; then
+            {
+              CHECK_INSTALLED=$(dpkg -s "${package}")
+              if [[ "${CHECK_INSTALLED}" == *"Package: ${package}"* ]] ; then
+              {
+                echo -e "${GREEN} PACKAGE: ${message}  ${package} is there  ${CERO}"
+                return 0
+              }
+              else
+              {
+                echo -e "${YELLOW} Package is not there ${message}   ${CERO}"
+                return 1
+              }
+              fi
+            }
+            elif ( ( command -v apt >/dev/null 2>&1; ) && ( command -v dpkg >/dev/null 2>&1; ) ) ; then
+            {
+              CHECK_INSTALLED=$(dpkg -s "${package}")
+              if [[ "${CHECK_INSTALLED}" == *"Package: ${package}"* ]] ; then
+              {
+                echo -e "${GREEN} PACKAGE: ${message}  ${package} is there  ${CERO}"
+                return 0
+              }
+              else
+              {
+                echo -e "${YELLOW} Package is not there ${message}   ${CERO}"
+                return 1
+              }
+              fi
+            }
+            elif ( ( command -v rpm >/dev/null 2>&1; ) && ( command -v dnf >/dev/null 2>&1; ) ) ; then
+            {
+              CHECK_INSTALLED=$(rpm -qa|grep -i "${package}")
+              if [[ "${CHECK_INSTALLED}" == *"Package: ${package}"* ]] ; then
+              {
+                echo -e "${GREEN} PACKAGE: ${message}  ${package} is there  ${CERO}"
+                return 0
+              }
+              else
+              {
+                echo -e "${YELLOW} Package is not there ${message}   ${CERO}"
+                return 1
+              }
+              fi
+
+            }
+            fi
+            failed "I don't know how to check for this package existance I tried apt-get apt dnf did no exist ${CERO}"
+            return 1
+} # end check_if_package_is_installed
+
+function _remove_package() {
+            # Sample usage
+            #
+            #  _remove_package  "sysfsutils" "fix for transparent_hugepage"
+            #
+            local package="$1"
+            local message="$2"
+            if ( ( command -v apt-get >/dev/null 2>&1; ) && ( command -v dpkg >/dev/null 2>&1; ) ) ; then
+            {
+                echo -e "${YELLOW} Removing UNInstalling ${message}   ${CERO}"
+                apt-get uninstall "${package}" -y
+            }
+            elif ( ( command -v apt >/dev/null 2>&1; ) && ( command -v dpkg >/dev/null 2>&1; ) ) ; then
+            {
+                echo -e "${YELLOW} Removing UNInstalling ${message}   ${CERO}"
+                apt uninstall "${package}" -y
+            }
+            elif ( ( command -v rpm >/dev/null 2>&1; ) && ( command -v dnf >/dev/null 2>&1; ) ) ; then
+            {
+                echo -e "${YELLOW} Installing ${message}   ${CERO}"
+                dnf remove "${package}" -y
+            }
+            fi
+            failed "to remove package I don't know how to remove  here I tried existence of apt-get apt dnf did no exist ${CERO}"
+            return 1
+} # end _remove_package
+
+
+function _remove_package_if_it_exists() {
+  #
+  # Sample use
+  #       _remove_package_if_it_exists "${_app_name}" "${_description}"
+  #       _remove_package_if_it_exists "skype" "old skype version"
+  #
+  local -i _DEBUG=${DEBUG:-0}
+  local _app_name="${1}"
+  local _description="${2}"
+  if check_if_package_is_installed "${_app_name}" "${_description}" ; then
+  {
+    _remove_package "${_app_name}"
+  }
+  fi
+
+} # end _remove_package_if_it_exists
+
 function _remove_dmgs_app_if_exists() {
+  #
   # Sample use
   #       _remove_dmgs_app_if_exists "${APPDIR}"
+  #
   local -i _DEBUG=${DEBUG:-0}
   local APPDIR="${1}"
   [[ -n "${APPDIR}" ]] && APPDIR="$(basename "${1}")"
@@ -6400,6 +6466,7 @@ function _remove_dmgs_app_if_exists() {
   fi
   return 0
 } # end _remove_dmgs_app_if_exists
+
 function _process_dmgs_dmg_or_zip() {
   # Sample use
   #     _process_dmgs_dmg_or_zip "${extension}" "${DOWNLOADFOLDER}" "${CODENAME}" "${APPDIR}" "${UNZIPDIR}"
@@ -6706,7 +6773,7 @@ function _install_dmgs_list(){
         #  directory_exists "/home/vagrant/.pyenv"
         #  file_exists "/home/vagrant/.zshrc"
         #  softlink_exists "/root/.pyenv>/home/vagrant/.pyenv"
-        #  check_to_be_installed "sysfsutils" "fix for transparent_hugepage"
+        #  check_if_package_is_installed  "sysfsutils" "fix for transparent_hugepage"
         #
         #  CURRENT_VERSION=$(cat /home/vagrant/.pyenv/version)
         #  check_equality "${CURRENT_VERSION}=${PYTHON_VERSION}"
