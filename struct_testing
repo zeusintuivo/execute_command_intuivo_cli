@@ -317,16 +317,20 @@ CERO="\033[01;0m"
                 (( _error_count-- ))
                 local -i _counter=0
                 local -i _counter_offset=0
-                echo -e " ☠ ${LIGHTPINK} ERROR STACK TRACE: ${_error_count}  ${RESET}"  >&2
-                # echo -e "0000${BRIGHT_BLUE87} ${BASH_SOURCE[0]}:${BASH_LINENO[0]} \t\t  ${FUNCNAME[0]}() ${RESET}"  >&2
+                echo -e " ☠ ${LIGHTPINK} WARNING STACK TRACE: ${_error_count}  ${RESET}"  >&2
+# function _on_error() {
+                echo " \n${BASH_SOURCE[0]}:${BASH_LINENO[0]}\n${FUNCNAME[1]}() $(caller)\nnano +${BASH_LINENO[0]} ${BASH_SOURCE[0]}:\nvim  +${BASH_LINENO[0]} ${BASH_SOURCE[0]}"
+# } # end _on_error
+
+#echo -e "0000${BRIGHT_BLUE87} ${BASH_SOURCE[0]}:${BASH_LINENO[0]} \t\t  ${FUNCNAME[0]}() ${RESET}"  >&2
                 echo -e "${BRIGHT_BLUE87} ${__caller_script_name}:${__caller_line} \t\t  ${FUNCNAME[1]}() ${RESET}"  >&2
                 for (( _counter=1; _counter<${_error_count}; _counter++ )); do
-                    (( _counter_offset=_counter + 1 ))
+                    _counter_offset=$(( _counter + 1 ))
                     # echo -e "${BASHCOMMAND[$_counter_offset]}"
                     echo -e "${BRIGHT_BLUE87} ${BASH_SOURCE[$_counter_offset]}:${BASH_LINENO[$_counter]} \t\t ${FUNCNAME[$_counter_offset]}() ${RESET}"  >&2
                 done
                 echo -e "$0:${BASH_LINENO[1]} ${FUNCNAME[1]}()"
-                echo -e "${RED} 𝞦 ${LIGHTYELLOW} ${ARGS} ${RESET}"
+                echo -e "${ORANGE} ▲ ${RED}[${ORANGE}WARNING${RED}] ${LIGHTYELLOW} ${ARGS} ${RESET}"
             }
             fi
         } # end Warning
