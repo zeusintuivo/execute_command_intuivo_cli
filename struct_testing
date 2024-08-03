@@ -302,7 +302,7 @@ CERO="\033[01;0m"
             exit 69;
         }
 
-        function warning() {
+        function Warning() {
             typeset -a ARGS="${@}"
             if [[ -n "${ARGS-x}" ]] ; then # if its set and not empty
             {
@@ -329,8 +329,10 @@ CERO="\033[01;0m"
                 echo -e "${RED} 𝞦 ${LIGHTYELLOW} ${ARGS} ${RESET}"
             }
             fi
-        }
-        alias Warning=warning
+        } # end Warning
+				function warning(){
+					Warning "${@}"
+				} # end warning
 
         function failed() {
             # echo -e "${BASH_SOURCE[0]}:${BASH_LINENO[0]} \t\t  ${FUNCNAME[0]}() ${RESET}"  >&1
