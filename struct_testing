@@ -4754,7 +4754,7 @@ function _download_linux() {
   echo -e "\033[01;7m*** Downloading file to temp location...\033[0m"
 
   if ( command -v wget >/dev/null 2>&1; ) ; then
-    ensure wget or "Wget is required"
+    # ensure wget or "Wget is required"
     # # REF: about :> http://unix.stackexchange.com/questions/37507/what-does-do-here
     _trap_try_start
     local _temp_dir="$(mktemp -d 2>/dev/null || mktemp -d -t '_download_linux')"
