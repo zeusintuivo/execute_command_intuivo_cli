@@ -4710,7 +4710,7 @@ function _download_linux() {
   #   echo "This page does not exist."
   # fi
 
-
+  local -i _err=0
   local thisscriptname=$(dirname "struct_testing")
   _trap_try_start
   local target_url="${1}"
@@ -4747,9 +4747,9 @@ function _download_linux() {
   fi
 
 
-  local download_file="${3}" || ""
+  local download_file="${3-}"  # || ""
 
-  _trap_catch_check
+  # _trap_catch_check
   # wget --directory-prefix="${USER_HOME}/Downloads/" --quiet --no-check-certificate "${target_url}" 2>/dev/null
   echo -e "\033[01;7m*** Downloading file to temp location...\033[0m"
 
@@ -4759,11 +4759,13 @@ function _download_linux() {
     _trap_try_start
     local _temp_dir="$(mktemp -d 2>/dev/null || mktemp -d -t '_download_linux')"
     :> ${_temp_dir}/wgetrc   # here :> equals to Equivalent to the following: cat /dev/null > wgetrc which Nulls out the file called "wgetrc" in the current directory. As in creates an empty file "wgetrc" if one doesn't exist or overwrites one with nothing if it does.
-    _trap_catch_check
+    _err=$?
+    _trap_catch_check ${_err}
     file_exists_with_spaces ${_temp_dir}/wgetrc
     _trap_try_start
     echo "noclobber=off" >> ${_temp_dir}/wgetrc
-    _trap_catch_check
+    _err=$?
+    _trap_catch_check ${_err}
     echo "dirstruct=off" >> ${_temp_dir}/wgetrc
     # echo "verbose=off" >> ${_temp_dir}/wgetrc     # NOTE Can't be verbose and quiet at the same time.--quiet
     echo "verbose=on" >> ${_temp_dir}/wgetrc     # NOTE Can't be verbose and quiet at the same time.--quiet
@@ -4802,14 +4804,16 @@ function _download_linux() {
        cd "${download_folder}"
        _trap_try_start
        wget --max-redirect=10 --mirror --directory-prefix="${download_folder}" -O "${download_file}" --no-check-certificate "${target_url}" # 2>/dev/null"
-       _trap_catch_check
+       _err=$?
+       _trap_catch_check ${_err}
     }
     elif  ( typeset -p "SUDO_USER"  &>/dev/null ) ; then
     {
       _trap_try_start
       echo -e RUNNING:\nsu - "$SUDO_USER" -c 'cd "'"${download_folder}"'" && wget --max-redirect=10 --mirror --directory-prefix="'"${download_folder}"'" -O "'"${download_file}"'" --no-check-certificate '"${target_url}"' && pwd ' # 2>/dev/null"
       su - "$SUDO_USER" -c 'cd "'"${download_folder}"'" && wget --max-redirect=10 --mirror --directory-prefix="'"${download_folder}"'" -O "'"${download_file}"'" --no-check-certificate '"${target_url}"' && pwd ' # 2>/dev/null"
-      _trap_catch_check
+      _err=$?
+      _trap_catch_check ${_err}
     }
     fi
     # ( typeset -p "SUDO_USER"  &>/dev/null ) ||  wget --max-redirect=10 --mirror  --no-check-certificate "${target_url}" # 2>/dev/null"
@@ -4818,7 +4822,7 @@ function _download_linux() {
     # ( typeset -p "SUDO_USER"  &>/dev/null ) &&  su - $SUDO_USER -c 'wget --max-redirect=10 --mirror  --no-check-certificate '"${target_url}"' ' # 2>/dev/null"
 
     # WGETRC=${_temp_dir}/wgetrc  wget "${WGETCOMMAND}" # 2>/dev/null"
-    _assure_success
+    _assure_success $?
     echo "${msg:-}"
     echo -e "\033[7m*** Download Wget executed completed.\033[0m"
     rm -f ${_temp_dir}/wgetrc
@@ -4840,7 +4844,7 @@ function _download_linux() {
 
 
 function _assure_success() {
-  if [ $? != 0 ] ; then
+  if [ $? -gt 0 ] || [ $1 -gt 0 ] ; then
     failed -e "\033[38;5;1m Something went wrong \033[0m"
     exit 1
   fi
@@ -4854,7 +4858,7 @@ function _trap_try_start() {
 function _trap_catch_check() {
   declare -i ret=$?
   local child
-  if [ $ret -gt 0 ] ; then
+  if [ $ret -gt 0 ] || [ ${1} -gt 0 ] ; then
   {
     child=$!
     wait $child
@@ -4867,14 +4871,16 @@ function _trap_catch_check() {
 
 function _action_runner() {
   local action
+  local -i _err=0
   while read -r action ; do
   {
     if [[ ! -z "${action}" ]] ; then # if not empty
     {
       _trap_try_start
       echo "${action}"
-      "${action}"
-      _trap_catch_check
+      exec "${action}"
+      _err=$?
+      _trap_catch_check ${_err}
     }
     fi
   }
@@ -4882,6 +4888,7 @@ function _action_runner() {
 } # end _action_runner
 
 function _try_runner() {
+  local -i _err=0
   local body=$(_function_body "${1}")
   function_exists "${1}"
   while read -r action ; do
@@ -4890,8 +4897,9 @@ function _try_runner() {
     {
       _trap_try_start
       echo "${action}"
-      "${action}"
-      _trap_catch_check
+      exec "${action}"
+      _err=$?
+      _trap_catch_check ${_err}
     }
     fi
   }
@@ -4924,19 +4932,23 @@ function _function_body() {
 }
 
 function _try_body() {
+  local -i _err=0
   local body=$(_function_body "${1}")
   _trap_try_start
   echo "${body}"
-  "${body}"
-  _trap_catch_check
+  exec "${body}"
+  _err=$?
+  _trap_catch_check ${_err}
 }
 
 function _try() {
+  local -i _err=0
   local body="${@}"
   _trap_try_start
   echo -e "\033[01;7m***${body}\033[0m***"
   local msg="${body}"
-  declare -i ret=_trap_catch_check
+  _err=$?
+  declare -i ret=$(_trap_catch_check ${_err})
   echo "${msg}"
   unset body
   unset msg
@@ -5419,7 +5431,8 @@ function determine_os_and_fire_action() {
         {
           source /etc/os-release
           # file_exists "/etc/os-release"
-          _assure_success
+          _err=$?
+	  _assure_success ${_err}
           # source /etc/os-release
           # $ echo $ID
           # fedora
@@ -5564,7 +5577,8 @@ function determine_os_and_fire_action() {
     {
       passed "${FUNCTION_TO_CALL_WITH_VERSION}" "${PARAMETERS:-}" "${THISSCRIPTPARAMS:-}"
       ${FUNCTION_TO_CALL_WITH_VERSION} "${PARAMETERS:-}" "${THISSCRIPTPARAMS:-}"
-      _assure_success
+      _err=$?
+      _assure_success ${_err}
     }
     else
     {
@@ -5588,7 +5602,8 @@ ${FUNCTION_TO_CALL_WITH_VERSION}() {
       {
         passed "${FUNCTION_TO_CALL}" "${PARAMETERS:-}" "${THISSCRIPTPARAMS:-}"
         ${FUNCTION_TO_CALL} "${PARAMETERS:-}" "${THISSCRIPTPARAMS:-}"
-        _assure_success
+	_err=$?
+        _assure_success ${_err}
       }
       else
       {
@@ -5611,7 +5626,8 @@ ${FUNCTION_TO_CALL}() {
         failed "struct_testing:$LINENO  to find function for this OS or DISTRO: ${FUNCTION_TO_CALL} ${PARAMETERS:-} ${THISSCRIPTPARAMS:-}
         Cannot proceed until you add this function above missing
         "
-        _assure_success
+	_err=$?
+        _assure_success ${_err}
       }
       fi
 
@@ -5620,9 +5636,10 @@ ${FUNCTION_TO_CALL}() {
 
   }
   fi
-  _assure_success
+  _assure_success $?
   unset FUNCTION_TO_CALL
   unset PARAMETERS
+  return ${_err}
 } # end determine_os_and_fire_action
 
 function _move_to_target_dir() {
@@ -5756,7 +5773,7 @@ function _do_not_downloadtwice(){
   #
   #
   local -i _err=$?
-	local -i _VERBOSE=${VERBOSE:-0}
+  local -i _VERBOSE=${VERBOSE:-0}
   local TARGET_URL="${1}"
   enforce_parameter_with_value 1 TARGET_URL "${TARGET_URL}" "https://download.teamviewer.com/download/linux/teamviewer.x86_64.rpm"
   local DOWNLOADFOLDER="${2}"
@@ -5842,7 +5859,7 @@ function _install_apt() {
     file_exists_with_spaces "${DOWNLOADFOLDER}/${CODENAME}"
     local TARGET_DOWNLOAD_PATH="${DOWNLOADFOLDER}/${CODENAME}"
     enforce_parameter_with_value COMPOSITE TARGET_DOWNLOAD_PATH "${TARGET_DOWNLOAD_PATH}" "$USER_HOME/Downloads/teamviewer.amd64.deb"
-
+    local -i _err=0
     if  it_exists_with_spaces "${TARGET_DOWNLOAD_PATH}" ; then
     {
       echo Attempting to install "${TARGET_DOWNLOAD_PATH}"
@@ -5855,18 +5872,20 @@ function _install_apt() {
     ensure dpkg or "Canceling Install. Could not find dpkg command to execute install"
     ensure apt or "Canceling Install. Could not find apt command to execute install"
     _trap_try_start # _trap_catch_check
-    local msg=$(apt install -y "${TARGET_DOWNLOAD_PATH}")
-    _trap_catch_check
+    local msg=""
+    msg=$(apt install -y "${TARGET_DOWNLOAD_PATH}")
+    _err=$?
+    _trap_catch_check ${_err}
     echo "${msg}"
     if [[ "${msg}" == *"not an dpkg package"* ]] ; then
     {
-        Warning Package appearts broken, downloading again
+      Warning Package appearts broken, downloading again
       _download "${TARGET_URL}" "${DOWNLOADFOLDER}"  "${CODENAME}"
       _install_apt "${TARGET_URL}" "${DOWNLOADFOLDER}"  "${CODENAME}"
     }
     elif [[ "${msg}" == *"libQt5WebKit.so.5"* ]] && [[ "${msg}" == *"is needed"* ]] && (( ! LOOP )) ; then
     {
-          echo "Suggested Fix "
+      echo "Suggested Fix "
       echo "# when error error: Failed dependencies:
             #        libQt5Svg.so.5()(64bit) is needed by "${CODENAME}"
             # then correct with
@@ -5880,7 +5899,7 @@ function _install_apt() {
     }
     elif [[ "${msg}" == *"libQt5WebKit.so.5"* ]] && [[ "${msg}" == *"is needed"* ]] && (( LOOP )) ; then
     {
-          echo "Suggested Fix "
+      echo "Suggested Fix "
       echo "# when error error: Failed dependencies:
             #        libQt5Svg.so.5()(64bit) is needed by "${CODENAME}"
             # then correct with
@@ -5934,7 +5953,7 @@ function _install_rpm() {
     file_exists_with_spaces "${DOWNLOADFOLDER}/${CODENAME}"
     local TARGET_DOWNLOAD_PATH="${DOWNLOADFOLDER}/${CODENAME}"
     enforce_parameter_with_value COMPOSITE TARGET_DOWNLOAD_PATH "${TARGET_DOWNLOAD_PATH}" "$USER_HOME/Downloads/teamviewer.x86_64.rpm"
-
+    local -i _err=0
     if  it_exists_with_spaces "${TARGET_DOWNLOAD_PATH}" ; then
     {
       echo Attempting to install "${TARGET_DOWNLOAD_PATH}"
@@ -5947,18 +5966,20 @@ function _install_rpm() {
     ensure rpm or "Canceling Install. Could not find rpm command to execute install"
     ensure dnf or "Canceling Install. Could not find dnf command to execute install"
     _trap_try_start # _trap_catch_check
-    local msg=$(dnf install -y "${TARGET_DOWNLOAD_PATH}")
-    _trap_catch_check
+    local msg=""
+    msg=$(dnf install -y "${TARGET_DOWNLOAD_PATH}")
+    _err=$?
+    _trap_catch_check ${_err}
     echo "${msg}"
     if [[ "${msg}" == *"not an rpm package"* ]] ; then
     {
-        Warning Package appearts broken, downloading again
+      Warning Package appearts broken, downloading again
       _download "${TARGET_URL}" "${DOWNLOADFOLDER}"  "${CODENAME}"
       _install_rpm "${TARGET_URL}" "${DOWNLOADFOLDER}"  "${CODENAME}"
     }
     elif [[ "${msg}" == *"libQt5WebKit.so.5"* ]] && [[ "${msg}" == *"is needed"* ]] && (( ! LOOP )) ; then
     {
-          echo "Suggested Fix "
+      echo "Suggested Fix "
       echo "# when error error: Failed dependencies:
             #        libQt5Svg.so.5()(64bit) is needed by "${CODENAME}"
             # then correct with
@@ -5972,7 +5993,7 @@ function _install_rpm() {
     }
     elif [[ "${msg}" == *"libQt5WebKit.so.5"* ]] && [[ "${msg}" == *"is needed"* ]] && (( LOOP )) ; then
     {
-          echo "Suggested Fix "
+      echo "Suggested Fix "
       echo "# when error error: Failed dependencies:
             #        libQt5Svg.so.5()(64bit) is needed by "${CODENAME}"
             # then correct with
