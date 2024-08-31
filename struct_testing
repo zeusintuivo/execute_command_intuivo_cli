@@ -5972,7 +5972,7 @@ function _install_rpm() {
     _err=$?
     _trap_catch_check ${_err}
     echo "${msg}"
-    if [[ "${msg}" == *"not an rpm package"* ]] || [[ "${msg}" == *"cannot be installed"* ]] ; then
+    if  [[ "${msg}" == *"Can not load RPM file"* ]] || [[ "${msg}" == *"not an rpm package"* ]] || [[ "${msg}" == *"cannot be installed"* ]] ; then
     {
       Warning Package appearts broken, downloading again
       rm -rf "${TARGET_DOWNLOAD_PATH}"
