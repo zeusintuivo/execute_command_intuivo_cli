@@ -5968,13 +5968,14 @@ function _install_rpm() {
     ensure dnf or "Canceling Install. Could not find dnf command to execute install"
     _trap_try_start # _trap_catch_check
     local msg=""
-    msg=$(dnf install -y "${TARGET_DOWNLOAD_PATH}")
+    msg=$(exec dnf install -y "${TARGET_DOWNLOAD_PATH}")
     _err=$?
     _trap_catch_check ${_err}
     echo "${msg}"
-    if [[ "${msg}" == *"not an rpm package"* ]] ; then
+    if [[ "${msg}" == *"not an rpm package"* ]] || [[ "${msg}" == *"cannot be installed"* ]] ; then
     {
       Warning Package appearts broken, downloading again
+      rm -rf "${TARGET_DOWNLOAD_PATH}"
       _download "${TARGET_URL}" "${DOWNLOADFOLDER}"  "${CODENAME}"
       _install_rpm "${TARGET_URL}" "${DOWNLOADFOLDER}"  "${CODENAME}"
     }
