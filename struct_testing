@@ -334,8 +334,8 @@ CERO="\033[01;0m"
             }
             fi
         } # end Warning
-        
-	function warning(){
+
+  function warning(){
           Warning "${@}"
         } # end warning
 
@@ -2137,7 +2137,7 @@ function _run_command(){
         #testself_expect #&> /dev/null # stdln to hide command output in bash
         # testself_expect 2>&1 >/dev/null #  capture onlly sterr error output
 
-					function is_service_response_not_this_fail() {
+          function is_service_response_not_this_fail() {
             #Sample use
             # ( command -v nginx >/dev/null 2>&1; ) && sudo service nginx start
             #
@@ -2530,7 +2530,7 @@ function _ensure_touch_dir_and_file() {
                    ${USER_HOME}/.pyenv/bin/${_sub_directory}
                    ${USER_HOME}/.rbenv/shims/${_sub_directory}
                    ${USER_HOME}/.rbenv/bin/${_sub_directory}
-									 ${USER_HOME}/_/software/${_sub_directory}
+                   ${USER_HOME}/_/software/${_sub_directory}
                    /root/${_sub_directory}
                    ${USER_HOME}/bin/${_sub_directory}
                    /opt/homebrew/${_sub_directory}
@@ -4469,16 +4469,16 @@ function _find_downloads_folder(){
     if >&2 it_exists_with_spaces "${DOWNLOADFOLDER}" ; then
     {
       if ! >&2 cd "${DOWNLOADFOLDER}" ; then
-			{
-				>&2 echo "Error accessing folder <cd failed>  struct_testing:$LINENO $0 function _find_downloads_folder() variable DOWNLOADFOLDER:„${DOWNLOADFOLDER}”" 
-				return 1
-			}
-			fi
+      {
+        >&2 echo "Error accessing folder <cd failed>  struct_testing:$LINENO $0 function _find_downloads_folder() variable DOWNLOADFOLDER:„${DOWNLOADFOLDER}”"
+        return 1
+      }
+      fi
       echo -n "${DOWNLOADFOLDER}"
       return 0
     }
     fi
-  } 
+  }
   fi
 
 
@@ -4515,17 +4515,17 @@ function _find_downloads_folder(){
     enforce_variable_with_value DOWNLOADFOLDER "${DOWNLOADFOLDER}"
     if ! >&2 cd "${DOWNLOADFOLDER}" ; then
     {
-		  >&2 echo "Error accessing folder <cd failed>  struct_testing:$LINENO $0 function _find_downloads_folder() variable DOWNLOADFOLDER:„${DOWNLOADFOLDER}”" 
-		  return 1
-		}
-		fi
+      >&2 echo "Error accessing folder <cd failed>  struct_testing:$LINENO $0 function _find_downloads_folder() variable DOWNLOADFOLDER:„${DOWNLOADFOLDER}”"
+      return 1
+    }
+    fi
     echo -n "${DOWNLOADFOLDER}"
     return 0
-	}
+  }
   else
   {
     local _temp_dir="$(mktemp -d 2>/dev/null || mktemp -d -t 'tempdownloads')"
-		_err=$?
+    _err=$?
     if [ -z "${_temp_dir}" ] || [ ${_err} -gt 0 ] ; then
     {
       return 1  # here one is for error
@@ -4534,12 +4534,12 @@ function _find_downloads_folder(){
     fi
     if ! >&2 cd "${_temp_dir}" ; then
     {
-		  >&2 echo "Error accessing folder <cd failed>  struct_testing:$LINENO $0 function _find_downloads_folder() variable _temp_dir:${_temp_dir}" 
-		  return 1
-		}
-		fi
+      >&2 echo "Error accessing folder <cd failed>  struct_testing:$LINENO $0 function _find_downloads_folder() variable _temp_dir:${_temp_dir}"
+      return 1
+    }
+    fi
     echo -n "${_temp_dir}"
-		return 0
+    return 0
    }
   fi
   return 1
@@ -4614,11 +4614,11 @@ function _download_mac() {
   directory_exists_with_spaces "${download_folder}"
   if ! >&2 cd "${download_folder}" ; then
   {
-    >&2 Comment "Error accessing folder <cd failed>  struct_testing:$LINENO $0 function _download_mac() variable download_folder:„${download_folder}”" 
+    >&2 Comment "Error accessing folder <cd failed>  struct_testing:$LINENO $0 function _download_mac() variable download_folder:„${download_folder}”"
     return 1
   }
-	fi
- 
+  fi
+
   #   [ -z "${3}" ] && echo "empty"
   #   echo
   # echo "# arguments called with ---->  ${@}     "
@@ -4975,8 +4975,8 @@ function function_is_defined_with_spaces() {
                 while read -r ONE_FUNCTION; do
                   # if not empty
                   if [[ -z "${ONE_FUNCTION}" ]] ; then
-									  continue
-									fi
+                    continue
+                  fi
                   if [ -n "$(LC_ALL=C type -t "${ONE_FUNCTION}")" ] && [ "$(LC_ALL=C type -t "${ONE_FUNCTION}")" = function ]; then
                   {
                     return 0 # function exists
@@ -5004,8 +5004,8 @@ function function_is_defined() {
                 while read -r ONE_FUNCTION; do
                   # if not empty
                   if [[ -z "${ONE_FUNCTION}" ]] ; then
-										continue
-									fi
+                    continue
+                  fi
 # warning "struct_testing:$LINENO ${ONE_FUNCTION} "
                   if [ -n "$(LC_ALL=C type -t "${ONE_FUNCTION}")" ] && [ "$(LC_ALL=C type -t "${ONE_FUNCTION}")" = function ]; then
                   {
@@ -5036,14 +5036,14 @@ function function_exists() {
                 FUNCTIONS=$(switch_spaces_to_newlines <<< "${@}")
                 while read -r ONE_FUNCTION; do
                   if [[ -z "${ONE_FUNCTION}" ]] ; then # if not empty
-									  continue
-									fi
+                    continue
+                  fi
                   TESTING="that function ${CYAN}${ONE_FUNCTION}${LIGHTYELLOW} exists"
                   if function_is_defined "${ONE_FUNCTION}" ; then
                   {
                     passed "${TESTING}"
                   }
-									fi
+                  fi
                   failed "${TESTING}"
                 done <<< "${FUNCTIONS}"
             }
@@ -5071,8 +5071,8 @@ function function_exists_with_spaces() {
             {
               while read -r ONE_FUNCTION; do
                   if [[ -z "${ONE_FUNCTION}" ]] ; then # if not empty
-										continue
-									fi
+                    continue
+                  fi
                   TESTING="that function ${CYAN}${ONE_FUNCTION}${LIGHTYELLOW} exists"
                   if function_is_defined_with_spaces "${ONE_FUNCTION}" ; then
                   {
@@ -5411,10 +5411,21 @@ function determine_os_and_fire_action() {
       }
       else # Otherwise, use release info file
       {
-        if (( DEBUG )) ; then
-          echo "RELEASE Option: 3"
+        if ( command -v lsb_release >/dev/null 2>&1; ); then
+        {
+          if (( DEBUG )) ; then
+            echo "RELEASE Option: 1"
+          fi
+          DISTRO=$(lsb_release -i | cut -d: -f2 | sed s/'^\t'// | head -1)
+        }
+        else
+        {
+          if (( DEBUG )) ; then
+            echo "RELEASE Option: 3"
+          fi
+          DISTRO=$(ls -d /etc/[A-Za-z]*[_-][rv]e[lr]* | grep -v "lsb" | cut -d'/' -f3 | cut -d'-' -f1 | cut -d'_' -f1 | head -1)
+        }
         fi
-        DISTRO=$(ls -d /etc/[A-Za-z]*[_-][rv]e[lr]* | grep -v "lsb" | cut -d'/' -f3 | cut -d'-' -f1 | cut -d'_' -f1 | head -1)
       }
       fi
     }
@@ -5433,7 +5444,7 @@ function determine_os_and_fire_action() {
           source /etc/os-release
           # file_exists "/etc/os-release"
           _err=$?
-	  _assure_success ${_err}
+    _assure_success ${_err}
           # source /etc/os-release
           # $ echo $ID
           # fedora
@@ -5589,10 +5600,11 @@ ${FUNCTION_TO_CALL_WITH_VERSION}() {
   trap \"echo Error:\$?\" ERR INT
   local _parameters=\"\${*-}\"
   local -i _err=0
+  callsomething \"\${_parameters-}\"
   _err=\$?
   if [ \${_err} -gt 0 ] ; then
   {
-    failed \"struct_testing:\$LINENO \$0:\$LINENO while running callsomething above _err:\${_err}\"
+    failed \"\$0:\$LINENO while running callsomething above _err:\${_err}\"
   }
   fi
 } # end ${FUNCTION_TO_CALL_WITH_VERSION}
@@ -5603,7 +5615,7 @@ ${FUNCTION_TO_CALL_WITH_VERSION}() {
       {
         passed "${FUNCTION_TO_CALL}" "${PARAMETERS:-}" "${THISSCRIPTPARAMS:-}"
         ${FUNCTION_TO_CALL} "${PARAMETERS:-}" "${THISSCRIPTPARAMS:-}"
-	_err=$?
+  _err=$?
         _assure_success ${_err}
       }
       else
@@ -5614,11 +5626,11 @@ ${FUNCTION_TO_CALL}() {
   trap \"echo Error:\$?\" ERR INT
   local _parameters=\"\${*-}\"
   local -i _err=0
-	callsomething \"\${_parameters-}\"
+  callsomething \"\${_parameters-}\"
   _err=\$?
   if [ \${_err} -gt 0 ] ; then
   {
-    failed \"struct_testing:\$LINENO \$0:\$LINENO  while running callsomething above _err:\${_err}\"
+    failed \"\$0:\$LINENO  while running callsomething above _err:\${_err}\"
   }
   fi
 } # end ${FUNCTION_TO_CALL}
@@ -5627,7 +5639,7 @@ ${FUNCTION_TO_CALL}() {
         failed "struct_testing:$LINENO  to find function for this OS or DISTRO: ${FUNCTION_TO_CALL} ${PARAMETERS:-} ${THISSCRIPTPARAMS:-}
         Cannot proceed until you add this function above missing
         "
-	_err=$?
+  _err=$?
         _assure_success ${_err}
       }
       fi
@@ -5794,10 +5806,10 @@ function _do_not_downloadtwice(){
   {
     if ! >&2 cd "${DOWNLOADFOLDER}" ; then
     {
-		  >&2 Comment "Error accessing folder <cd failed>  struct_testing:$LINENO $0 function _do_not_downloadtwice() variable DOWNLOADFOLDER:„${DOWNLOADFOLDER}”" 
-		  return 1
-		}
-		fi
+      >&2 Comment "Error accessing folder <cd failed>  struct_testing:$LINENO $0 function _do_not_downloadtwice() variable DOWNLOADFOLDER:„${DOWNLOADFOLDER}”"
+      return 1
+    }
+    fi
     echo -n "${DOWNLOADFOLDER}"
     (( _VERBOSE )) && pwd
     (( _VERBOSE )) && echo  _download "${TARGET_URL}" "${DOWNLOADFOLDER}"  "${CODENAME}"
@@ -5806,11 +5818,11 @@ function _do_not_downloadtwice(){
     wait
     if [ ${_err} -gt 0 ] ; then
     {
-			>&2 Comment "Error in download process struct_testing:$LINENO $0 function _do_not_downloadtwice() calling _download() "
+      >&2 Comment "Error in download process struct_testing:$LINENO $0 function _do_not_downloadtwice() calling _download() "
       return 1  # here one is for error
     }
-    fi  
-		file_exists_with_spaces "${DOWNLOADFOLDER}/${CODENAME}"
+    fi
+    file_exists_with_spaces "${DOWNLOADFOLDER}/${CODENAME}"
   }
   fi
 } # end _do_not_downloadtwice
