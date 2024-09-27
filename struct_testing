@@ -4845,7 +4845,9 @@ function _download_linux() {
 
 
 function _assure_success() {
-  if [ $? -gt 0 ] || [ $1 -gt 0 ] ; then
+	local -i _err=${?:-0}
+	local -i _param=${1:-0}
+  if [ ${_err} -gt 0 ] || [ ${_param} -gt 0 ] ; then
     failed -e "\033[38;5;1m Something went wrong \033[0m"
     exit 1
   fi
