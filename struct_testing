@@ -789,8 +789,8 @@ CERO="\033[01;0m"
 
         function Information() {
             trap 'exit 1' ERR
-            local msg1="$1"
-            local msg2=$(echo "${*}" | cüt "${1}"  ;)
+            local msg1="${1:-0}"
+            local msg2=$(echo "${*}" | cüt "${msg1}"  ;)
             # local msg2=$(echo "${*}" | sed 's/'"""${msg1}"""'//g'  ;)
             echo  -e "${PURPLE}${PURPLE}+---${ORANGE} ${msg1} ${CYAN} ${msg2} ${RESET}"
         }
@@ -799,8 +799,8 @@ CERO="\033[01;0m"
 
         function Message() {
             trap 'exit 1' ERR
-            local msg1="$1"
-            local msg2=$(echo "${*}" | cüt "${1}"  ;)
+            local msg1="${1:-0}"
+            local msg2=$(echo "${*}" | cüt "${msg1}"  ;)
             # local msg2=$(echo "${*}" | sed 's/'"""${msg1}"""'//g'  ;)
             echo  -e "${PURPLE}${PURPLE}+-- ${LIGHTYELLOW} ${msg1} ${CYAN} ${msg2} ${RESET}"
         }
@@ -808,8 +808,8 @@ CERO="\033[01;0m"
 
         function Comment() {
             trap 'exit 1' ERR
-            local msg1="$1"
-            local msg2=$(echo "${*}" | cüt "${1}"  ;)
+            local msg1="${1:-0}"
+            local msg2=$(echo "${*}" | cüt "${msg1}"  ;)
             # local msg2=$(echo "${*}" | sed 's/'"""${msg1}"""'//g'  ;)
             echo  -e "${PURPLE}${CYAN}+---${DARKBLUE} ${LIGHTYELLOW} ${msg1} ${CYAN} ${msg2} ${RESET}"
         }
@@ -817,8 +817,8 @@ CERO="\033[01;0m"
 
         function Working() {
             trap 'exit 1' ERR
-            local msg1="$1"
-            local msg2=$(echo "${*}" | cüt "${1}"  ;)
+            local msg1="${1:-0}"
+            local msg2=$(echo "${*}" | cüt "${msg1}"  ;)
             # local msg2=$(echo "${*}" | sed 's/'"""${msg1}"""'//g'  ;)
             echo  -e "\n\n${PURPLE}π‘“……… ${CYAN} ${msg1} ${DARKBLUE} ${msg2} ${LIGHTYELLOW}  ${CYAN} ${RESET}\n\n"
         }
