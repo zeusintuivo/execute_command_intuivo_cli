@@ -4859,9 +4859,10 @@ function _trap_try_start() {
 }
 
 function _trap_catch_check() {
-  declare -i ret=$?
+  declare -i _ret=${?:-0}
+	declare -i _param=${1:-0}
   local child
-  if [ $ret -gt 0 ] || [ ${1} -gt 0 ] ; then
+  if [ ${_ret} -gt 0 ] || [ ${_param} -gt 0 ] ; then
   {
     child=$!
     wait $child
