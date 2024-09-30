@@ -303,7 +303,7 @@ CERO="\033[01;0m"
         }
 
         function Warning() {
-            typeset -a ARGS="${@}"
+            typeset -a ARGS="${*}"
             if [[ -n "${ARGS-x}" ]] ; then # if its set and not empty
             {
                 # echo -e "${BRIGHT_BLUE87} ${BASH_SOURCE}:${BASH_LINENO[0]} ${FUNCNAME[0]}()"
@@ -343,7 +343,7 @@ CERO="\033[01;0m"
             # echo -e "${BASH_SOURCE[0]}:${BASH_LINENO[0]} \t\t  ${FUNCNAME[0]}() ${RESET}"  >&1
             # echo -e "${BASH_SOURCE[1]}:${BASH_LINENO[1]} \t\t  ${FUNCNAME[1]}() ${RESET}"  >&1
             # echo -e "${BASH_SOURCE[2]}:${BASH_LINENO[2]} \t\t  ${FUNCNAME[2]}() ${RESET}"  >&1
-            warning "${@}  ${RED} has failed! "
+            warning "${*}  ${RED} has failed! "
             kill_execution
         }
 
@@ -354,7 +354,7 @@ CERO="\033[01;0m"
           # DEBUG=1
           local TESTING="enforce_parameter_with_options function ${FUNCNAME[1]} param at position ${RESET}<${YELLOW_OVER_DARKBLUE}${1}${RESET}${LIGHTYELLOW}> alias for <${CYAN}${2}${LIGHTYELLOW}> to have one of these values ${RESET}<${YELLOW_OVER_DARKBLUE}${4}${RESET}>"
           (( DEBUG )) && echo -e "${FUNCNAME[0]}"
-          (( DEBUG )) && echo ${@} -assume existing variable for this part
+          (( DEBUG )) && echo "${*} -assume existing variable for this part"
           (( DEBUG )) && ( typeset -p "${1}"  &>/dev/null  ) && echo "1 defined 1"
           (( DEBUG )) && ( typeset -p "${2}"  &>/dev/null  ) && echo "2 defined 2"
           (( DEBUG )) && [ -n "${3+x}" ]  && echo "3 defined 3"
@@ -370,7 +370,7 @@ CERO="\033[01;0m"
           if ( typeset -p "${2}"  &>/dev/null ) &&  [ -n "${3+x}" ] ; then
           {
             local one=""
-            local -i found=0
+            # local -i found=0
             while read -r one ; do
             {
               (( DEBUG )) && echo "checking value ${FUNCNAME[1]} ${3}  ${one} "
@@ -379,14 +379,14 @@ CERO="\033[01;0m"
                 (( DEBUG )) && echo "one is "
                 if [[ "${3}" == "${one}" ]] ; then
                 {
-                  found=1
+                  # found=1
                   break;
                 }
                 fi
               }
               fi
             }
-            done <<< $(switch_spaces_to_newlines <<< "${@}")
+            done <<< "$(switch_spaces_to_newlines <<< "${@}")"
             # done <<< "${4}"
             (( DEBUG )) && echo -e "${LIGHTGREEN} ✔ ${LIGHTYELLOW} ${TESTING} has passed "
             #(( found )) &&
@@ -407,9 +407,9 @@ CERO="\033[01;0m"
           # if parameter_with_value 1 URL "${URL}" "https://www.website.com/product/" ; then
           # if ( parameter_with_value 3 PATTERN "${PATTERN}" "BCompareOSX*.*.*.*.zip" ) ; then
           # Tests for the function
-          local TESTING="parameter_with_value function ${FUNCNAME[1]} expects value at position <"${1}"> expect value <"${2}"> to look like or can be are <"${4}">"
+          local TESTING="parameter_with_value function ${FUNCNAME[1]} expects value at position <\"${1}\"> expect value <\"${2}\"> to look like or can be are <\"${4}\">"
           (( DEBUG )) && echo -e "${FUNCNAME[0]}"
-          (( DEBUG )) && echo ${@} -assume existing variable for this part
+          (( DEBUG )) && echo "${*} -assume existing variable for this part"
           (( DEBUG )) && ( typeset -p "${1}"  &>/dev/null  ) && echo "1 defined 1"
           (( DEBUG )) && ( typeset -p "${2}"  &>/dev/null  ) && echo "2 defined 2"
           (( DEBUG )) && [ -n "${3+x}" ]  && echo "3 defined 3"
@@ -483,12 +483,12 @@ CERO="\033[01;0m"
           # ( declare -p "HOME" ) && echo "HOME 2"
           local -i _DEBUG=${DEBUG:-0}
           local _err_arriving=$?
-#          typeset -r TESTING="that variable is listed and: ${CYAN}${1}${LIGHTYELLOW} and has value: ${RESET}<${YELLOW_OVER_DARKBLUE}${2}${RESET}>"
+          # typeset -r TESTING="that variable is listed and: ${CYAN}${1}${LIGHTYELLOW} and has value: ${RESET}<${YELLOW_OVER_DARKBLUE}${2}${RESET}>"
           if [ ${_err_arriving} -gt 0 ] ; then
           {
-             warning _err_arriving:${_err_arriving}
-             warning failed $0 $*
-             failed "${TESTING}" ${RED} Stopped executing becuase it arrived with \$_ERR not Zero
+             warning "_err_arriving:${_err_arriving}"
+             warning "failed $0 ${*-}"
+             failed "${TESTING} ${RED} Stopped executing becuase it arrived with \$_ERR not Zero"
           }
           fi
           local -i _seemsempty_=0
@@ -524,12 +524,18 @@ CERO="\033[01;0m"
           (( _seemsempty_ )) && echo -e "${RED:-} 𝞦 enforce_variable_with_value \\n${BASH_SOURCE[1]}:${BASH_LINENO[1]} ${FUNCNAME[-0]}(...) \\n${BASH_SOURCE[1]}:${BASH_LINENO[0]} ${FUNCNAME[1]}(...) \\n ${LIGHTYELLOW:-} ${TESTING:-} has failed "
           (( _seemsempty_ )) && failed "${TESTING:-}"
           (( _seemsempty_ )) && exit 1
-          if (( typeset -p "${1}"  &>/dev/null ) &&  [ -n "${2+x}" ]) ; then
+          if ( typeset -p "${1}"  &>/dev/null ) ; then
           {
+            if [ -n "${2+x}" ] ; then
+            {
               if (( _DEBUG )) ; then
+              {
                 echo -e "${LIGHTGREEN:-} ✔ ${LIGHTYELLOW:-} ${TESTING:-} has passed "
+              }
               fi
               return 0
+            }
+            fi
           }
           fi
           echo -e "${RED:-} 𝞦 enforce_variable_with_value \\n${BASH_SOURCE[1]}:${BASH_LINENO[1]} ${FUNCNAME[-0]}(...) \\n${BASH_SOURCE[1]}:${BASH_LINENO[0]} ${FUNCNAME[1]}(...) \\n ${LIGHTYELLOW:-} ${TESTING:-} has failed "
@@ -960,7 +966,15 @@ CERO="\033[01;0m"
         } # end file_does_not_exist_with_spaces
 
         function it_does_not_exist(){
-            return ! it_exists $@
+          if it_exists "${@}" ; then
+          {
+            return 1
+          }
+          else
+          {
+            return 0
+          }
+          fi
         } # end it_does_not_exist
 
         function it_exists() {
@@ -3014,12 +3028,15 @@ fi
 
         function vercomp() {
             # REF: https://stackoverflow.com/questions/4023830/how-to-compare-two-strings-in-dot-separated-version-format-in-bash
-            if [[ $1 == $2 ]]
-            then
-                return 0
+            if [[ "${1}" == "${2}" ]] ; then
+            {
+              return 0
+            }
             fi
             local IFS=.
-            local i ver1=($1) ver2=($2)
+            local -i i
+            local ver1=("${1}")
+            local ver2=("${2}")
             # fill empty fields in ver1 with zeros
             for ((i=${#ver1[@]}; i<${#ver2[@]}; i++))
             do
@@ -3338,16 +3355,16 @@ fi
               }
               else
               {
-                one_required=$(echo -n ${one_required} | sed -e 's/^[[:space:]]*//' ) # trim_start_space before //
+                one_required=$(echo -n "${one_required}" | sed -e 's/^[[:space:]]*//' ) # trim_start_space before //
               }
               fi
               if [[ -z "${install_this}" ]] ; then
               {
-                install_this=$(echo -n ${one_required} | sed -e 's/^[[:space:]]*//' ) # trim_spaces before //
+                install_this=$(echo -n "${one_required}" | sed -e 's/^[[:space:]]*//' ) # trim_spaces before //
               }
               else
               {
-                install_this=$(echo -n ${install_this} | sed -e 's/^[[:space:]]*//' ) # trim_spaces before //
+                install_this=$(echo -n "${install_this}" | sed -e 's/^[[:space:]]*//' ) # trim_spaces before //
               }
               fi
               if [[ ${_OS:-} != "brew" ]] && ( ( command -v apt >/dev/null 2>&1; ) && ( command -v dpkg >/dev/null 2>&1; ) ) ; then
@@ -3463,16 +3480,16 @@ fi
             if [[ -n "${missing}" ]] ; then
             {
               if (( DEBUG )) ; then
-                Comment struct_testing:$LINENO $FUNCNAME[0] "There are missing"
+                Comment "struct_testing:$LINENO ${FUNCNAME[0]} There are missing"
               fi
-              missing=$(echo -n ${missing} | sed -e 's/^[[:space:]]*//' ) # trim_start_space
+              missing=$(echo -n "${missing}" | sed -e 's/^[[:space:]]*//' ) # trim_start_space
               echo -e " ${CYAN} Installing missing packages: ${YELLOW} ${missing} ${RESET} ."
               if [[ ${_OS:-} != "brew" ]] && ( ( command -v apt >/dev/null 2>&1; )  && ( command -v dpkg >/dev/null 2>&1; ) ); then
               {
                 if (( DEBUG )) ; then
                   echo "apt install"
                 fi
-                install_result=$(exec apt install ${missing} -yfq   2>&1) # capture all input and output
+                install_result=$(exec apt install "${missing}" -yfq   2>&1) # capture all input and output
                 err_buff=$?
               }
               elif [[ ${_OS:-} != "brew" ]] && ( ( command -v rpm >/dev/null 2>&1; ) && ( command -v dnf >/dev/null 2>&1; ) ) ; then
@@ -4845,8 +4862,8 @@ function _download_linux() {
 
 
 function _assure_success() {
-	local -i _err=${?:-0}
-	local -i _param=${1:-0}
+  local -i _err=${?:-0}
+  local -i _param=${1:-0}
   if [ ${_err} -gt 0 ] || [ ${_param} -gt 0 ] ; then
     failed -e "\033[38;5;1m Something went wrong \033[0m"
     exit 1
@@ -4860,7 +4877,7 @@ function _trap_try_start() {
 
 function _trap_catch_check() {
   declare -i _ret=${?:-0}
-	declare -i _param=${1:-0}
+  declare -i _param=${1:-0}
   local child
   if [ ${_ret} -gt 0 ] || [ ${_param} -gt 0 ] ; then
   {
@@ -5600,7 +5617,7 @@ function determine_os_and_fire_action() {
       warning "struct_testing:$LINENO  could not find function with version for this OS or DISTRO: ${FUNCTION_TO_CALL_WITH_VERSION}"
       Installing "would look at adding this:
 ${FUNCTION_TO_CALL_WITH_VERSION}() {
-  trap \"echo Error:\$?\" ERR INT
+  trap 'echo Error:\$?' ERR INT
   local _parameters=\"\${*-}\"
   local -i _err=0
   callsomething \"\${_parameters-}\"
@@ -5626,7 +5643,7 @@ ${FUNCTION_TO_CALL_WITH_VERSION}() {
         warning "struct_testing:$LINENO  could not find function for this OS or DISTRO: ${FUNCTION_TO_CALL}"
         Installing "would look at adding this:
 ${FUNCTION_TO_CALL}() {
-  trap \"echo Error:\$?\" ERR INT
+  trap 'echo Error:\$?' ERR INT
   local _parameters=\"\${*-}\"
   local -i _err=0
   callsomething \"\${_parameters-}\"
@@ -6555,7 +6572,7 @@ function _process_dmgs_dmg_or_zip() {
     if it_exists_with_spaces "${DOWNLOADFOLDER}/${APPDIR}" ; then
     {
       echo Removing previous found unzipped
-      rm -rf "${DOWNLOADFOLDER}/${APPDIR}"
+      rm -rf "${DOWNLOADFOLDER}/${APPDIR:?}"
     }
     fi
     cd "${DOWNLOADFOLDER}"
@@ -6671,7 +6688,7 @@ function _install_dmgs_dmg__64() {
   _do_not_downloadtwice "${TARGET_URL}" "${DOWNLOADFOLDER}"  "${CODENAME}"
   if _remove_dmgs_app_if_exists "${APPDIR}" ; then
   {
-    passed ${ORANGE} WARNING! ${YELLOW_OVER_DARKBLUE} failed to remove ${YELLOW_OVER_GRAY241}"${APPDIR}"${RESET}
+    passed "${ORANGE} WARNING! ${YELLOW_OVER_DARKBLUE} failed to remove ${YELLOW_OVER_GRAY241}${APPDIR}${RESET}"
   }
   fi
   if [[ "${UNZIPDIR}" == '.' ]] ; then
@@ -6776,7 +6793,7 @@ function _install_dmgs_list(){
       target_name="$(echo "${one}" | cut -d'|' -f1)"
       # extension="$(echo "${target_name}" | rev | cut -d'.' -f 1 | rev)"
       target_app="$(echo "${one}" | cut -d'|' -f2)"
-      app_name="$(echo "$(basename "${target_app}")")"
+      app_name="$(basename "${target_app}")"
       target_url="$(echo "${one}" | cut -d'|' -f3-)"
       if [[ -n "${target_name}" ]] ; then
       {
