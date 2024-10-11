@@ -966,6 +966,17 @@ CERO="\033[01;0m"
         } # end file_does_not_exist_with_spaces
 
         function it_does_not_exist(){
+          # Sample usage:
+          #     if ( it_does_not_exist "holafile" ) ; then
+          #     {
+          #       echo "Correct behavior it does not exists holafile"
+          #     }
+          #     else
+          #     {
+          #       echo "File does exist"
+          #     }
+          #     fi
+
           if it_exists "${@}" ; then
           {
             return 1
@@ -3262,7 +3273,8 @@ fi
             local missing=""
             local one_required=""
             local install_this=""
-            local required=$(grep -vE '^#'<<<$(grep -vE '^\s+#'<<<"${2:-}"))
+            local required
+            required="$(grep -vE '^#'<<<"$(grep -vE '^\s+#'<<<"${2:-}")")"
             local packages=""
             local query=""
             local install_result=""
@@ -3301,7 +3313,11 @@ fi
                 ensure_apt_dpkg_in_linux
                 packages=$(dpkg -l | grep -E "$one_required" | cut -d' ' -f3 2>&1)
             }
-             else # brew
+					  elif [[ ${_OS:-} != "brew" ]] && ( ( command -v pacman >/dev/null 2>&1; )) ; then
+            {
+							packages=$(pacman -Q | grep -E "$one_required" | awk '{print $1}'  2>&1)
+            }
+            else # brew
             {
                 local -i _err=0
                 ensure_brew_in_linux_mac
@@ -3985,15 +4001,15 @@ echo -e \"
 ${one_line}
 EOF
     echo "sudo -u ${USER_TO_INSTALL} -i -- command -v ${ONE_COMMAND}"
-                if ( is_installed ${ONE_COMMAND} ) ; then
+                if ( is_installed "${ONE_COMMAND}" ) ; then
                 {
                     echo "yup"
                   [ -z "${ONE_TEST}" ] && ONE_TEST="command ${ONE_COMMAND} --version"
                   ONE_VERSION=""
-                  [[ "${FILTER_THIS}" == "x" ]] && ONE_VERSION=$(sudo -u ${USER_TO_INSTALL}  -i -- eval """${ONE_TEST}""" 2>&1 | extract_version  |  remove_letters | head -1)
-                  [[ "${FILTER_THIS}" == "=" ]] && ONE_VERSION=$(sudo -u ${USER_TO_INSTALL}  -i -- eval """${ONE_TEST}""" 2>&1 | head -1 )
+                  [[ "${FILTER_THIS}" == "x" ]] && ONE_VERSION=$(sudo -u i"${USER_TO_INSTALL}"  -i -- eval """${ONE_TEST}""" 2>&1 | extract_version  |  remove_letters | head -1)
+                  [[ "${FILTER_THIS}" == "=" ]] && ONE_VERSION=$(sudo -u "${USER_TO_INSTALL}"  -i -- eval """${ONE_TEST}""" 2>&1 | head -1 )
                   ONE_WHICH=""
-                  [[ "${FILTER_THIS}" != "=" ]] && ONE_WHICH="$(sudo -u ${USER_TO_INSTALL} -i -- which ${ONE_COMMAND} 2>&1 | head -1 )"
+                  [[ "${FILTER_THIS}" != "=" ]] && ONE_WHICH="$(sudo -u "${USER_TO_INSTALL}" -i -- which "${ONE_COMMAND}" 2>&1 | head -1 )"
                   ONE_VERSION=$(add_right_padding  "${ONE_VERSION}" ${MIDDLE__LONGEST} " ")
                   README_TABLE="${README_TABLE}
 ${ONE_TITLE}| ${ONE_VERSION} | ${ONE_WHICH}"
