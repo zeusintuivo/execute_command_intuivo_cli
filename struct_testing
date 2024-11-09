@@ -2791,10 +2791,11 @@ function _ensure_touch_dir_and_file() {
             #    passed "passwords policy already set to {1,}"
             # }
             # fi
+                    local -i _DEBUG=${DEBUG:-0}
                     local -i ret
                     local msg
                     ret=0
-                    if (( DEBUG )) ; then
+                    if (( _DEBUG )) ; then
                     {
                       echo "1if"
                     }
@@ -2804,14 +2805,14 @@ function _ensure_touch_dir_and_file() {
                      return 1
                     }
                     fi
-                    if (( DEBUG )) ; then
+                    if (( _DEBUG )) ; then
                     {
                       (cat -n "$1" )
                     }
                     fi
                     msg=$(cat "$1" 2>&1)
                     ret=$?
-                    if (( DEBUG )) ; then
+                    if (( _DEBUG )) ; then
                     {
                       echo "2if"
                       echo "${msg}"
@@ -2822,31 +2823,31 @@ function _ensure_touch_dir_and_file() {
                       return 1
                     }
                     fi
-                    if (( DEBUG )) ; then
+                    if (( _DEBUG )) ; then
                     {
                       echo "3if"
                     }
                     fi
                     [[ "$msg" == *"No such"* ]] && return 1
-                    if (( DEBUG )) ; then
+                    if (( _DEBUG )) ; then
                     {
                       echo "4if"
                     }
                     fi
                     [[ "$msg" == *"nicht gefunden"* ]] && return 1
-                    if (( DEBUG )) ; then
+                    if (( _DEBUG )) ; then
                     {
                       echo "5if"
                     }
                     fi
                     [[ "$msg" == *"Permission denied"* ]] && return 1
-                    if (( DEBUG )) ; then
+                    if (( _DEBUG )) ; then
                     {
                       echo "6if"
                     }
                     fi
                     ret=0
-                    if (( DEBUG )) ; then
+                    if (( _DEBUG )) ; then
                     {
                       echo 'echo "$msg" | grep "$2"'
                       echo 'echo "$msg" | grep "$2"'
@@ -2864,20 +2865,20 @@ function _ensure_touch_dir_and_file() {
                      #                       ret=1
                      #                   }
                      #                   fi
-                    if (( DEBUG )) ; then
+                    if (( _DEBUG )) ; then
                     {
                       echo "7if $ret"
                     }
                     fi
                     [ $ret -eq 0 ] && return 0     # Found
                     [ $ret -gt 0 ] && return 1    # Not Found
-                    if (( DEBUG )) ; then
+                    if (( _DEBUG )) ; then
                     {
                       echo "8if"
                     }
                     fi
                     [[ "$msg" == *"No such"* ]] && return 1
-                    if (( DEBUG )) ; then
+                    if (( _DEBUG )) ; then
                     {
                       echo "9 if"
                     }
@@ -2921,9 +2922,9 @@ if it_exists_with_spaces "${USER_HOME}/.bashrc" ; then
     failed "self test bad .bashrc should not have PETERPIZZA word"
   }
   fi
-  if ! _if_contains  "${USER_HOME}/.bashrc" "then" ; then
+  if ! _if_contains  "${USER_HOME}/.bashrc" "export" ; then
   {
-    failed ".bashrc should have the then word"
+    failed ".bashrc should have the export word"
   }
   fi
   # echo hola
@@ -3073,6 +3074,7 @@ fi
         } # end vercomp
 
         function testvercomp() {
+            local -i _DEBUG=${DEBUG:-0}
             vercomp $1 $2
             case $? in
                 0) op='=';;
@@ -3081,10 +3083,10 @@ fi
             esac
             if [[ $op != $3 ]]
             then
-                (( DEBUG )) && echo "struct_testing.testvercomp() FAIL: Expected '$3', Actual '$op', Arg1 '$1', Arg2 '$2'"
+                (( _DEBUG )) && echo "struct_testing.testvercomp() FAIL: Expected '$3', Actual '$op', Arg1 '$1', Arg2 '$2'"
                 return 1
             else
-                (( DEBUG )) && echo "struct_testing.testvercomp() Pass: '$1 $op $2'"
+                (( _DEBUG )) && echo "struct_testing.testvercomp() Pass: '$1 $op $2'"
                 return 0
             fi
             # Tests
@@ -3119,13 +3121,14 @@ fi
         } # end testvercomp
 
         function to_lowercase() {
+            local -i _DEBUG=${DEBUG:-0}
             local _words="${*}"
-            (( DEBUG )) && echo "${*}"
+            (( _DEBUG )) && echo "${*}"
             enforce_parameter_with_value 1** _words "${_words}" "HERE IS SOME TEXT"
             # local env_bash_version=$(extract_version  <<< $(/usr/bin/env bash --version) | head -1)
             local env_bash_version=$(extract_version  <<< $(echo $BASH_VERSION) | head -1)
             [ -z "${BASH_VERSION}" ] && env_bash_version=$(extract_version  <<< $(/usr/bin/env bash --version) | head -1)
-            (( DEBUG )) && echo "bash version", $env_bash_version
+            (( _DEBUG )) && echo "bash version", $env_bash_version
             [ -z "${1}" ] && return 1  # no argument passed
             if ( testvercomp $env_bash_version 4 ">" ) ; then
             {
@@ -3270,6 +3273,7 @@ fi
               return 0
             }
             fi
+            local -i _DEBUG=${DEBUG:-0}
             local missing=""
             local one_required=""
             local install_this=""
@@ -3301,7 +3305,7 @@ fi
             if [[ ${_OS:-} != "brew" ]] && ( ( command -v rpm >/dev/null 2>&1; ) && ( command -v dnf >/dev/null 2>&1; ) ); then
             {
                 ensure_rpm_dnf_in_linux
-                if (( DEBUG )) ; then
+                if (( _DEBUG )) ; then
                   echo "rpm read packages"
                 fi
                 packages=$(rpm -qa)
@@ -3334,7 +3338,7 @@ fi
                 enforce_variable_with_value _target_bin_brew "${_target_bin_brew}"
 
 
-                if (( DEBUG )) ; then
+                if (( _DEBUG )) ; then
                   echo "BREW list formulas"
                 fi                # query=$(/opt/homebrew/bin/brew list --formula 2>&1)
                 query=$(su - "${SUDO_USER}" -c "${_target_bin_brew} list --formula" 2>&1)
@@ -3385,7 +3389,7 @@ fi
               fi
               if [[ ${_OS:-} != "brew" ]] && ( ( command -v apt >/dev/null 2>&1; ) && ( command -v dpkg >/dev/null 2>&1; ) ) ; then
               {
-                if (( DEBUG )) ; then
+                if (( _DEBUG )) ; then
                   echo "apt search using dpkg"
                 fi
                 # REF: https://www.cyberciti.biz/faq/find-out-if-package-is-installed-in-linux/
@@ -3403,7 +3407,7 @@ fi
                 {
                     echo -e " ${RED}  NEED TO INSTALL ${YELLOW} $one_required${RESET} ${RED}...${query}"
                     missing="${missing} ${install_this}"
-                    if (( DEBUG )) ; then
+                    if (( _DEBUG )) ; then
                       echo  "${install_this}"
                     fi
                 }
@@ -3411,7 +3415,7 @@ fi
               }
               elif [[ ${_OS:-} != "brew" ]] && ( ( command -v rpm >/dev/null 2>&1; ) && ( command -v dnf >/dev/null 2>&1; ) ) ; then
               {
-                if (( DEBUG )) ; then
+                if (( _DEBUG )) ; then
                   echo "rpm search loaded packages $one_required"
                   echo "rpm --------1"
                   echo "${packages}" | grep "$one_required"
@@ -3426,19 +3430,19 @@ fi
                     && ( echo "${packages}" | grep "$one_required"| grep "^$one_required" >/dev/null 2>&1; ) \
                     && ( echo "${packages}" | grep -E "$one_required"| grep "^$one_required" | cut -d'-' -f1  >/dev/null 2>&1; ) ; then
                 {
-                    if (( DEBUG )) ; then
+                    if (( _DEBUG )) ; then
                       echo "rpm passed"
                     fi
                     passed " ${GREEN} $one_required ${YELLOW} INSTALLED${RESET} ."
                 }
                 else # still in rpm here
                 {
-                    if (( DEBUG )) ; then
+                    if (( _DEBUG )) ; then
                       echo "rpm failed"
                     fi
                     echo -e " ${RED}  NEED TO INSTALL ${YELLOW} $one_required${RESET} ${RED}...${query}"
                     missing="${missing} ${install_this}"
-                    if (( DEBUG )) ; then
+                    if (( _DEBUG )) ; then
                       echo  "${install_this}"
                     fi
                 }
@@ -3460,7 +3464,7 @@ fi
                   _target_bin_brew="$(echo -n "${_target_bin_brew}" | tail -1)"
                   enforce_variable_with_value _target_bin_brew "${_target_bin_brew}"
 
-                  if (( DEBUG )) ; then
+                  if (( _DEBUG )) ; then
                     echo "${_target_bin_brew}"
                   fi
                   # CHECK_INSTALLED=$(brew ls --versions "${one_required}")
@@ -3495,14 +3499,14 @@ fi
             # Check Requirements OS Ubuntu 14.04 REF: https://wiki.postgresql.org/wiki/Compile_and_Install_from_source_code#Ubuntu
             if [[ -n "${missing}" ]] ; then
             {
-              if (( DEBUG )) ; then
+              if (( _DEBUG )) ; then
                 Comment "struct_testing:$LINENO ${FUNCNAME[0]} There are missing"
               fi
               missing=$(echo -n "${missing}" | sed -e 's/^[[:space:]]*//' ) # trim_start_space
               echo -e " ${CYAN} Installing missing packages: ${YELLOW} ${missing} ${RESET} ."
               if [[ ${_OS:-} != "brew" ]] && ( ( command -v apt >/dev/null 2>&1; )  && ( command -v dpkg >/dev/null 2>&1; ) ); then
               {
-                if (( DEBUG )) ; then
+                if (( _DEBUG )) ; then
                   echo "apt install"
                 fi
                 install_result=$(exec apt install "${missing}" -yfq   2>&1) # capture all input and output
@@ -3510,11 +3514,11 @@ fi
               }
               elif [[ ${_OS:-} != "brew" ]] && ( ( command -v rpm >/dev/null 2>&1; ) && ( command -v dnf >/dev/null 2>&1; ) ) ; then
               {
-                if (( DEBUG )) ; then
+                if (( _DEBUG )) ; then
                   echo "dnf install ${missing}"
                 fi
                 install_result=$(exec dnf install ${missing} -y  2>&1) # capture all input and output
-                if (( DEBUG )) ; then
+                if (( _DEBUG )) ; then
                   echo "dnf install_result"
                 fi
                 err_buff=$?
@@ -3538,7 +3542,7 @@ fi
                   if ( command -v "${_target_bin_brew}" >/dev/null 2>&1; ) ; then
                   {
                     # _run_command brew install ${missing}
-                    if (( DEBUG )) ; then
+                    if (( _DEBUG )) ; then
                       echo "brew install"
                       echo "${_target_bin_brew} install ....${missing}"
                     fi
@@ -3559,7 +3563,7 @@ fi
             # echo $install_result;
             if [[ -n "${install_result}" ]] ; then #  && handle_error "${install_result}"
             {
-                if (( DEBUG )) ; then
+                if (( _DEBUG )) ; then
                   echo "errors install"
                 fi
                 local error_happened=""
@@ -4203,8 +4207,8 @@ complete -o nospace -F _wp_complete wp
             #           Note ESCape all !, ", $ with \ like \!, \", \$
             #           Call .each
             #           .each  "${ACTIONS}"   "${ITEMS}"
-            local local_actions="${1}"
-            local local_items="${2}"
+            local local_actions="${1-}"
+            local local_items="${2-}"
             local one_item
             local one_action
             local action
@@ -4212,32 +4216,34 @@ complete -o nospace -F _wp_complete wp
             local ret
             while read -r one_item; do
             {
-                if [ ! -z "${one_item}" ] ; then  # if not empty
+              if [[  -n "${one_item}" ]] ; then  # if not empty
+              {
+                while read -r one_action; do
                 {
-                      while read -r one_action; do
-                      {
-                            if [ ! -z "${one_action}" ] ; then  # if not empty
-                            {
-                                  # replace value inside string substitution expresion bash
-                                  trap _term SIGTERM
-                                  action="${one_action/\{\#\}/${one_item}}"
-                                  action="${action/\{\#\}/${one_item}}"
-                                  action="${action/\{\#\}/${one_item}}"
-                                  eval """${action}"""
-                                  ret=$?
-                                  if [ $ret -gt 0 ] ; then
-                                  {
-                                    child=$!
-                                    wait $child
-                                    warning "${YELLOW}Error SIGNAL_RETURN(${RED}${ret}${YELLOW}) executing: \n${action}"
-                                  }
-                                  fi
-                            }
-                            fi
-                      }
-                      done <<< "${local_actions}"
+                  if [ ! -z "${one_action}" ] ; then  # if not empty
+                  {
+                    # replace value inside string substitution expresion bash
+                    trap _term SIGTERM
+                    action="${one_action/\{\#\}/${one_item}}"
+                    action="${action/\{\#\}/${one_item}}"
+                    action="${action/\{\#\}/${one_item}}"
+                    eval """${action}"""
+                    # child=$! 
+		    ret=$?
+		    wait
+                    if [ $ret -gt 0 ] ; then
+                    {
+                      # wait $child
+		      wait
+                      warning "${YELLOW}Error SIGNAL_RETURN(${RED}${ret}${YELLOW}) executing: \n${action}"
+                    }
+                    fi
+                  }
+                  fi
                 }
-                fi
+                done <<< "${local_actions}"
+              }
+              fi
             }
             done <<< "${local_items}"
         } # end .each
@@ -5386,13 +5392,14 @@ function determine_os_and_fire_action() {
   local FUNCTION_TO_CALL_WITH_VERSION=""
   local FUNCTION_TO_CALL=""
   local PARAMETERS="${*:-}"
-  local -i DEBUG=0
+  local -i _DEBUG=${DEBUG:-0}
+  # local -i DEBUG=0
   local -i _err=0
   # Check operating systems
   # echo  ${@}
   if [[ "$(uname)" == "Darwin" ]] ; then
   {
-    if (( DEBUG )) ; then
+    if (( _DEBUG )) ; then
       echo "Darwin"
     fi
     # Do something under Mac OS X platform
@@ -5411,13 +5418,13 @@ function determine_os_and_fire_action() {
   }
   elif [[ "$(expr substr $(uname -s) 1 5)" == "Linux" ]] ; then
   {
-    if (( DEBUG )) ; then
+    if (( _DEBUG )) ; then
       echo "Linux"
     fi
     # Do something under GNU/Linux platform
     # Determine OS platform
     local UNAME=$(uname | tr "[:upper:]" "[:lower:]")
-    if (( DEBUG )) ; then
+    if (( _DEBUG )) ; then
       echo "UNAME: $UNAME"
     fi
     local DISTRO=""
@@ -5431,14 +5438,14 @@ function determine_os_and_fire_action() {
       {
         if ( command -v lsb_release >/dev/null 2>&1; ); then
         {
-          if (( DEBUG )) ; then
+          if (( _DEBUG )) ; then
             echo "RELEASE Option: 1"
           fi
           DISTRO=$(lsb_release -i | cut -d: -f2 | sed s/'^\t'// | head -1)
         }
         else
         {
-          if (( DEBUG )) ; then
+          if (( _DEBUG )) ; then
             echo "RELEASE Option: 2"
           fi
           DISTRO=$(ls -d /etc/[A-Za-z]*[_-][rv]e[lr]* | grep -v "lsb" | cut -d'/' -f3 | cut -d'-' -f1 | cut -d'_' -f1 | head -1)
@@ -5449,14 +5456,14 @@ function determine_os_and_fire_action() {
       {
         if ( command -v lsb_release >/dev/null 2>&1; ); then
         {
-          if (( DEBUG )) ; then
+          if (( _DEBUG )) ; then
             echo "RELEASE Option: 1"
           fi
           DISTRO=$(lsb_release -i | cut -d: -f2 | sed s/'^\t'// | head -1)
         }
         else
         {
-          if (( DEBUG )) ; then
+          if (( _DEBUG )) ; then
             echo "RELEASE Option: 3"
           fi
           DISTRO=$(ls -d /etc/[A-Za-z]*[_-][rv]e[lr]* | grep -v "lsb" | cut -d'/' -f3 | cut -d'-' -f1 | cut -d'_' -f1 | head -1)
@@ -5466,12 +5473,12 @@ function determine_os_and_fire_action() {
       fi
     }
     fi
-    if (( DEBUG )) ; then
+    if (( _DEBUG )) ; then
       echo "DISTRO:$DISTRO"
     fi
     if [[ -z "$DISTRO" ]]; then  # if empty
     {
-      if (( DEBUG )) ; then
+      if (( _DEBUG )) ; then
         echo "DISTRO empty"
       fi
       # If available, use /etc/os-release to identify distribution
@@ -5553,7 +5560,7 @@ function determine_os_and_fire_action() {
       PARAMETERS="$@"
     }
     fi
-    if (( DEBUG )) ; then
+    if (( _DEBUG )) ; then
       echo "FUNCTION_TO_CALL: $FUNCTION_TO_CALL"
       echo "uname -i: $(uname -i)"
     fi
