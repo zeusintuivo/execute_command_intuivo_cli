@@ -352,16 +352,17 @@ CERO="\033[01;0m"
           # enforce_parameter_with_options 2 PLATFORM "${PLATFORM}" "mac windows linux"
           # Tests for the function
           # DEBUG=1
+					local -i _DEBUG=${DEBUG:-0}
           local TESTING="enforce_parameter_with_options function ${FUNCNAME[1]} param at position ${RESET}<${YELLOW_OVER_DARKBLUE}${1}${RESET}${LIGHTYELLOW}> alias for <${CYAN}${2}${LIGHTYELLOW}> to have one of these values ${RESET}<${YELLOW_OVER_DARKBLUE}${4}${RESET}>"
-          (( DEBUG )) && echo -e "${FUNCNAME[0]}"
-          (( DEBUG )) && echo "${*} -assume existing variable for this part"
-          (( DEBUG )) && ( typeset -p "${1}"  &>/dev/null  ) && echo "1 defined 1"
-          (( DEBUG )) && ( typeset -p "${2}"  &>/dev/null  ) && echo "2 defined 2"
-          (( DEBUG )) && [ -n "${3+x}" ]  && echo "3 defined 3"
-          (( DEBUG )) && [ -n "${4+x}" ]  && echo "4 defined 4"
-          (( DEBUG )) && ( typeset -p "${2}"  &>/dev/null ) &&  [ -n "${3+x}" ]  && echo "2 declared,defined and with value not empty 3"
-          (( DEBUG )) && ( ( typeset -p "${2}"  &>/dev/null  ) || echo "2 not defined 2")
-          (( DEBUG )) && ( ! typeset -p "${2}"  &>/dev/null  ) && echo "2 not defined 3"
+          (( _DEBUG )) && echo -e "${FUNCNAME[0]}"
+          (( _DEBUG )) && echo "${*} -assume existing variable for this part"
+          (( _DEBUG )) && ( typeset -p "${1}"  &>/dev/null  ) && echo "1 defined 1"
+          (( _DEBUG )) && ( typeset -p "${2}"  &>/dev/null  ) && echo "2 defined 2"
+          (( _DEBUG )) && [ -n "${3+x}" ]  && echo "3 defined 3"
+          (( _DEBUG )) && [ -n "${4+x}" ]  && echo "4 defined 4"
+          (( _DEBUG )) && ( typeset -p "${2}"  &>/dev/null ) &&  [ -n "${3+x}" ]  && echo "2 declared,defined and with value not empty 3"
+          (( _DEBUG )) && ( ( typeset -p "${2}"  &>/dev/null  ) || echo "2 not defined 2")
+          (( _DEBUG )) && ( ! typeset -p "${2}"  &>/dev/null  ) && echo "2 not defined 3"
           local -i _seemsempty_=0
           [[ "x${3}x" = "xx" ]] && _seemsempty_=1
           (( _seemsempty_ )) && echo -e "${RED} 𝞦 \\n${BASH_SOURCE}:${BASH_LINENO[1]} ${FUNCNAME[-0]}(...) \\n$0:${BASH_LINENO[0]} ${FUNCNAME[1]}(...) \\n ${LIGHTYELLOW} ${TESTING} has failed "
@@ -407,21 +408,22 @@ CERO="\033[01;0m"
           # if parameter_with_value 1 URL "${URL}" "https://www.website.com/product/" ; then
           # if ( parameter_with_value 3 PATTERN "${PATTERN}" "BCompareOSX*.*.*.*.zip" ) ; then
           # Tests for the function
-          local TESTING="parameter_with_value function ${FUNCNAME[1]} expects value at position <\"${1}\"> expect value <\"${2}\"> to look like or can be are <\"${4}\">"
-          (( DEBUG )) && echo -e "${FUNCNAME[0]}"
-          (( DEBUG )) && echo "${*} -assume existing variable for this part"
-          (( DEBUG )) && ( typeset -p "${1}"  &>/dev/null  ) && echo "1 defined 1"
-          (( DEBUG )) && ( typeset -p "${2}"  &>/dev/null  ) && echo "2 defined 2"
-          (( DEBUG )) && [ -n "${3+x}" ]  && echo "3 defined 3"
-          (( DEBUG )) && [ -n "${4+x}" ]  && echo "4 defined 4"
-          (( DEBUG )) && ( typeset -p "${2}"  &>/dev/null ) &&  [ -n "${3+x}" ]  && echo "2 declared,defined and with value not empty 3"
-          (( DEBUG )) && ( ( typeset -p "${2}"  &>/dev/null  ) || echo "2 not defined 2")
-          (( DEBUG )) && ( ! typeset -p "${2}"  &>/dev/null  ) && echo "2 not defined 3"
-          (( DEBUG )) && ( env | grep "${1}"  &>/dev/null  ) && echo "5 1 not in env "
-          (( DEBUG )) && [ -n "${2+x}" ]  && echo "2 failed empty 8"
-          (( DEBUG )) && [ -n "${2-x}" ]  && echo "2 failed empty 7"
-          (( DEBUG )) && [ -z "${2+x}" ]  && echo "2 failed empty 9"
-          (( DEBUG )) && [ -z "${2-x}" ]  && echo "2 failed empty 10"
+          local -i _DEBUG=${DEBUG:-0}
+					local TESTING="parameter_with_value function ${FUNCNAME[1]} expects value at position <\"${1}\"> expect value <\"${2}\"> to look like or can be are <\"${4}\">"
+          (( _DEBUG )) && echo -e "${FUNCNAME[0]}"
+          (( _DEBUG )) && echo "${*} -assume existing variable for this part"
+          (( _DEBUG )) && ( typeset -p "${1}"  &>/dev/null  ) && echo "1 defined 1"
+          (( _DEBUG )) && ( typeset -p "${2}"  &>/dev/null  ) && echo "2 defined 2"
+          (( _DEBUG )) && [ -n "${3+x}" ]  && echo "3 defined 3"
+          (( _DEBUG )) && [ -n "${4+x}" ]  && echo "4 defined 4"
+          (( _DEBUG )) && ( typeset -p "${2}"  &>/dev/null ) &&  [ -n "${3+x}" ]  && echo "2 declared,defined and with value not empty 3"
+          (( _DEBUG )) && ( ( typeset -p "${2}"  &>/dev/null  ) || echo "2 not defined 2")
+          (( _DEBUG )) && ( ! typeset -p "${2}"  &>/dev/null  ) && echo "2 not defined 3"
+          (( _DEBUG )) && ( env | grep "${1}"  &>/dev/null  ) && echo "5 1 not in env "
+          (( _DEBUG )) && [ -n "${2+x}" ]  && echo "2 failed empty 8"
+          (( _DEBUG )) && [ -n "${2-x}" ]  && echo "2 failed empty 7"
+          (( _DEBUG )) && [ -z "${2+x}" ]  && echo "2 failed empty 9"
+          (( _DEBUG )) && [ -z "${2-x}" ]  && echo "2 failed empty 10"
           local -i _seemsempty_=0
           [[ "x${3}x" = "xx" ]] && _seemsempty_=1
           (( _seemsempty_ )) && echo -e "${RED} 𝞦 \\n${BASH_SOURCE}:${BASH_LINENO[1]} ${FUNCNAME[-0]}(...) \\n$0:${BASH_LINENO[0]} ${FUNCNAME[1]}(...) \\n ${LIGHTYELLOW} ${TESTING} has failed "
@@ -4228,7 +4230,7 @@ complete -o nospace -F _wp_complete wp
                     action="${action/\{\#\}/${one_item}}"
                     action="${action/\{\#\}/${one_item}}"
                     eval """${action}"""
-                    # child=$! 
+                    # child=$!
 		    ret=$?
 		    wait
                     if [ $ret -gt 0 ] ; then
