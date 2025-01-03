@@ -778,65 +778,65 @@ mock_command() {
     echo -e "${BLANK_SPACE}${lightpurple}mock: ${lightblue}""""$@""""${reset}"
 }
 _say_error_and_exit_worker() {
-    echo -e "☠"  $(tput setaf 1) "$@" "!!!" $(tput sgr0)
+    echo -e "☠"  $(tput setaf 1) "${@:-}" "!!!" $(tput sgr0)
     exit 69;
 }
 _anounce_worker() {
-    echo -e "${BLANK_SPACE}${*} ${reset}";
+    echo -e "${BLANK_SPACE:-}${*:-} ${reset:-}";
 }
 
 anounce() {
-    _anounce_worker "${*}"
+    _anounce_worker "${*:-}"
 }
 
 announce() {
-    _anounce_worker "${*}"
+    _anounce_worker "${*:-}"
 }
 
 _say_worker() {
-    echo -e "${lightpurple} +-- ${lightblue} ${*} ${reset}";
+    echo -e "${lightpurple:-} +-- ${lightblue:-} ${*:-} ${reset:-}";
 
 }
 speak() {
   # Say is MAC only
-    say /usr/bin/say -v "${1}" $(echo "${*}" | sed 's'"${1}"'g') &
-    /usr/bin/say -v "${1}" $(echo "${*}" | sed 's'"${1}"'g') &
+    say /usr/bin/say -v "${1:-}" $(echo "${*:-}" | sed 's'"${1:-}"'g') &
+    /usr/bin/say -v "${1:-}" $(echo "${*:-}" | sed 's'"${1:-}"'g') &
     wait
 }
 say() {
-    _say_worker "${*}"
+    _say_worker "${*:-}"
 }
 
 _comment_worker() {
-    echo -e "${gray242}  ${*} ${reset}";
+    echo -e "${gray242:-}  ${*:-} ${reset:-}";
 }
 comment() {
-    _comment_worker "${*}"
+    _comment_worker "${*:-}"
 }
 
 debug() {
-    echo -e "${red} +-- ${lightblue} ${*} ${reset}";
+    echo -e "${red:-} +-- ${lightblue:-} ${*:-} ${reset:-}";
 }
 debug_and_exit() {
-    debug "${@}";
+    debug "${@:-}";
     exit 69;
 }
 list() {
-    echo -e "${lightpurple} · ${lightblue} ${*} ${reset}";
+    echo -e "${lightpurple:-} · ${lightblue:-} ${*:-} ${reset:-}";
 }
 heading() {
     echo " "
-    echo -e "   ${reset} ${*} ${reset}";
+    echo -e "   ${reset:-} ${*:-} ${reset:-}";
     echo " "
 }
 
 warn() {
-    echo -e "${orange208} • ${yellow214} ${*} ${reset}" | emphasis "delete";
+    echo -e "${orange208:-} • ${yellow214:-} ${*:-} ${reset:-}" | emphasis "delete";
 }
 is_help() {
-    if [ -n "${1}" ] && [[ "${1}" == "help" \
-    ||  "${1}" == "-h" ||  "${1}" == "-help" \
-    || "${1}" == "--help" || "${1}" == "\/\?"  ]]; then   # Not empty and help
+    if [[ -n "${1:-}" ]] && [[ "${1:-}" == "help" \
+    || "${1:-}" == "-h" ||  "${1:-}" == "-help" \
+    || "${1:-}" == "--help" || "${1:-}" == "\/\?"  ]]; then   # Not empty and help
     {
         return 0
     }
@@ -847,7 +847,7 @@ is_help() {
     fi
 }
 provide_help() {
-    if is_help "${1}"; then   # Not empty and help
+    if is_help "${1:-}"; then   # Not empty and help
     {
         echo "$DESCRIPTION"
         anounce Available commands
@@ -880,7 +880,7 @@ provide_description() {
 DESCRIPTION=$(provide_description)
 provide_help
 execute_command() {
-    _execute_command_worker  ${@}
+    _execute_command_worker  ${@:-}
 }
 
 #Skip mini functions for this scripts
