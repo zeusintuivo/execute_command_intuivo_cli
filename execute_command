@@ -6,7 +6,7 @@
 # Description: This is a wrapper to execute commands in bash in nice way.
 # It has become a whole programing testing environment to make better reading scripts for bash
 #
-
+export load_colors
 function load_colors {
     green="\\033[38;5;2m"
     red="\\033[38;5;1m"
@@ -324,7 +324,7 @@ highlight_commander() {
     local local_command_exists=0
 
     (( DEBUG )) && eval ${HERE}
-    exit 0 
+    exit 0
     #  && echo " reads 1 <${1}>"
     if [[ -n "${1+x}" ]] ; then
     {
@@ -606,7 +606,7 @@ _execute_command_worker() {
     # - ${@}
     # echo "${LAST_STRING}"
     # echo "$@"
-    # BLANK_SPACE is Global has a color 
+    # BLANK_SPACE is Global has a color
     (( DEBUG )) && eval "${HERE} 1"
     exit 0
     if [[ -n "${LAST_STRING}" ]] ; then   # Not empty
@@ -833,6 +833,9 @@ heading() {
 warn() {
     echo -e "${orange208:-} • ${yellow214:-} ${*:-} ${reset:-}" | emphasis "delete";
 }
+checking() {
+    echo -e "${orange208} • ${yellow214} ${*} ${reset}" | emphasis "delete";
+}
 is_help() {
     if [[ -n "${1:-}" ]] && [[ "${1:-}" == "help" \
     || "${1:-}" == "-h" ||  "${1:-}" == "-help" \
@@ -897,4 +900,3 @@ execute_command() {
 #
 #}
 #fi
-

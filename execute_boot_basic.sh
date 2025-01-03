@@ -43,7 +43,7 @@
 #     return 0
 # } # end load_execute_boot_basic_with_sudo
 
-# load_execute_boot_basic_with_sudo
+# load_execute_boot_basic_with_sudo "${*:-}"
 # _err=$?
 # if [ $_err -ne 0 ] ;  then
 # {
@@ -81,7 +81,7 @@
 #   # ...
 #   return 0 # remember to always return 0 to good, 1 or not/0 for fail
 # } # end check_system_requirements
-# check_system_requirements
+# check_system_requirements "${*:-}"
 
 # How to use: // end
 
@@ -90,7 +90,8 @@ typeset -i _err=0
 CYAN="\033[01;36m"
 BRIGHT_BLUE87="\033[38;5;87m"
 echo -e "${CYAN}"
-if (( DEBUG )) &&  ( typeset -p "THISSCRIPTCOMPLETEPATH"  &>/dev/null ) ; then
+typeset -i temporalDEBUG=${DEBUG:-0}
+if (( temporalDEBUG )) &&  ( typeset -p "THISSCRIPTCOMPLETEPATH"  &>/dev/null ) ; then
 {
   export THISSCRIPTCOMPLETEPATH
   typeset -r THISSCRIPTCOMPLETEPATH="$(pwd)/$(basename "$0")"
@@ -98,10 +99,11 @@ if (( DEBUG )) &&  ( typeset -p "THISSCRIPTCOMPLETEPATH"  &>/dev/null ) ; then
 fi
 
 load_execute_as_sudo(){
-    # DEBUG=1
+	  local _DEBUG=${DEBUG:-0}
+    # _DEBUG=1
     # Test home value part 1
-    (( DEBUG )) && echo "USER_HOME:${USER_HOME}  ? 1"
-    (( DEBUG )) && echo "-----HOME:${HOME}  ? 1"
+    (( _DEBUG )) && echo "USER_HOME:${USER_HOME}  ? 1"
+    (( _DEBUG )) && echo "-----HOME:${HOME}  ? 1"
     # if ( typeset -p "SUDO_USER"  &>/dev/null ) &&  [ -n "${2+x}" ] ; then
       # exit 0
       # export USER_HOME
@@ -110,23 +112,26 @@ load_execute_as_sudo(){
     # shellcheck disable=SC2030
     if ( ! typeset -p "SUDO_USER"  &>/dev/null ) ; then
       export USER_HOME
-      typeset -r USER_HOME=$HOME
+      typeset USER_HOME=$HOME
     fi
-    (( DEBUG )) && echo "USER_HOME:${USER_HOME}  ? 1"
-    (( DEBUG )) && echo "-----HOME:${HOME}  ? 1"
-    # DEBUG=0
+    (( _DEBUG )) && echo "USER_HOME:${USER_HOME}  ? 1"
+    (( _DEBUG )) && echo "-----HOME:${HOME}  ? 1"
+    # _DEBUG=0
 
     # Test home value part 2
     # echo "${USER_HOME}  ? 2"
     # echo "${HOME}  ? 2"
+    echo "... sudologic persisting USER_HOME:$USER_HOME"
     typeset provider="$USER_HOME/_/clis/task_intuivo_cli/execute_as_sudo.sh"
     # Test provider
     # wget --quiet --no-check-certificate  https://raw.githubusercontent.com/zeusintuivo/task_intuivo_cli/master/execute_as_sudo.sh -O -
     # curl https://raw.githubusercontent.com/zeusintuivo/task_intuivo_cli/master/execute_as_sudo.sh  -o -
     # echo "${provider}  ?"
     # shellcheck disable=SC1090
-    if [   -e "${provider}"  ] ; then
+    if [[   -e "${provider}"  ]] ; then
     {
+      local _temp_dir="$(mktemp -d 2>/dev/null || mktemp -d -t 'execute_as_sudo.sh')"
+      echo "3.0 sudologic execute_as_sudo.sh Sourced locally next line without temp location:$USER_HOME/_/clis/task_intuivo_cli/execute_as_sudo.sh"
       source "${provider}"
     }
     else
@@ -134,9 +139,11 @@ load_execute_as_sudo(){
       provider="https://raw.githubusercontent.com/zeusintuivo/task_intuivo_cli/master/execute_as_sudo.sh"
       if ( command -v wget >/dev/null 2>&1; ) ; then
         echo "   wget --quiet --no-check-certificate "${provider}" -O -"
+        echo "3.1 sudologic execute_as_sudo.sh Wget Attempting to eval without temp location:$USER_HOME/_/clis/task_intuivo_cli/execute_as_sudo.sh"
         eval """$(wget --quiet --no-check-certificate "${provider}" -O -  2>/dev/null )"""   # suppress only wget download mess$
       elif ( command -v curl >/dev/null 2>&1; ); then
         echo "   curl "${provider}" -o -"
+        echo "3.2 sudologic execute_as_sudo.sh Curl Attempting to eval next line without temp location:$USER_HOME/_/clis/task_intuivo_cli/execute_as_sudo.sh"
         eval """$(curl "${provider}" -o -  2>/dev/null )"""   # suppress only curl download messages, but keep curl output for $
       else
         echo -e "\n \n  ERROR! Could not download execute_boot_basic.sh. There is no wget or curl installed or reacheable \n \n "
@@ -146,7 +153,7 @@ load_execute_as_sudo(){
     fi
     if ( command -v execute_as_sudo >/dev/null 2>&1; ) ; then
     {
-      echo "$provider" Loaded Now checking..
+      (( _DEBUG )) && echo "$provider Loaded Now checking.."
       return 0
     }
     else
@@ -158,9 +165,9 @@ load_execute_as_sudo(){
     echo "$provider" Loaded Now checking..
     return 0
 } # end execute_as_sudo
-load_execute_as_sudo
+load_execute_as_sudo "${*:-}"
 
-execute_as_sudo
+execute_as_sudo "${*:-}"
 _err=$?
 if [ $_err -ne 0 ] ;  then
 {
@@ -168,6 +175,7 @@ if [ $_err -ne 0 ] ;  then
   exit $_err
 }
 fi
+echo "3.3 sudologic execute_boot_basic.sh Back again loading scripts procedure from list Attempting "
 
 # USER_HOME=$(getent passwd $SUDO_USER | cut -d: -f6)
 enforce_variable_with_value HOME "$HOME"
@@ -178,21 +186,21 @@ enforce_variable_with_value SUDO_COMMAND "$SUDO_COMMAND"
 # declare -rg USER_HOME=$(getent passwd $SUDO_USER | cut -d: -f6)
 enforce_variable_with_value USER_HOME "$USER_HOME"
 # shellcheck disable=SC2031
-(( DEBUG )) &&  echo "$SUDO_USER"
-(( DEBUG )) &&  env | grep SUDO
-echo -e "${CYAN} \__________Sudoed Correctly ${BRIGHT_BLUE87}✔️${CYAN}"
+(( temporalDEBUG )) &&  echo "$SUDO_USER"
+(( temporalDEBUG )) &&  env | grep SUDO
+(( temporalDEBUG )) && echo -e "execute_command_intuivo_cli/execute_boot_basic.sh ${CYAN} \__________Sudoed Correctly ${BRIGHT_BLUE87}✔️${CYAN}"
 # shellcheck disable=SC2031
-echo -e "${CYAN}                           ${LIGHTPINK} SUDO_USER ️${YELLOW_OVER_DARKBLUE} $SUDO_USER ${BRIGHT_BLUE87}✔️${CYAN}"
-echo -e "${CYAN}                           ${LIGHTPINK} USER_HOME ️${YELLOW_OVER_DARKBLUE} $USER_HOME ${BRIGHT_BLUE87} ✔️${CYAN}"
-echo -e "${provider} Loaded ${BRIGHT_BLUE87}✔️${CYAN}"
+(( temporalDEBUG )) && echo -e "execute_command_intuivo_cli/execute_boot_basic.sh ${CYAN}                           ${LIGHTPINK} SUDO_USER ️${YELLOW_OVER_DARKBLUE} $SUDO_USER ${BRIGHT_BLUE87}✔️${CYAN}"
+(( temporalDEBUG )) && echo -e "execute_command_intuivo_cli/execute_boot_basic.sh ${CYAN}                           ${LIGHTPINK} USER_HOME ️${YELLOW_OVER_DARKBLUE} $USER_HOME ${BRIGHT_BLUE87} ✔️${CYAN}"
+(( temporalDEBUG )) && echo -e "execute_command_intuivo_cli/execute_boot_basic.sh ${provider} Loaded ${BRIGHT_BLUE87}✔️${CYAN}"
 
 
 # exit 0
 # . ./execute_as_sudo.sh
 # THISSCRIPTCOMPLETEPATH="$(pwd)/$THISSCRIPTCOMPLETEPATH"
 # export THISSCRIPTCOMPLETEPATH=`basename "$0"`
-# DEBUG=1
- (( DEBUG )) && echo "THISSCRIPTCOMPLETEPATH:: $THISSCRIPTCOMPLETEPATH"
+# temporalDEBUG=1
+ (( temporalDEBUG )) && echo "THISSCRIPTCOMPLETEPATH:: $THISSCRIPTCOMPLETEPATH"
 function on_int() {
     echo -e " ☠ ${LIGHTPINK} KILL EXECUTION SIGNAL SEND ${RESET}"
     echo -e " ☠ ${YELLOW_OVER_DARKBLUE}  ${*} ${RESET}"
@@ -212,12 +220,13 @@ boostrap_intuivo_bash_app(){
     local _msg
     local _url=""
     local _execoncli=""
-    (( DEBUG )) && echo "----------HOME:: $USER_HOME"
+    local _DEBUG=${DEBUG:-0}
+    (( _DEBUG )) && echo "----------HOME:: $USER_HOME"
     local -r _filelocal="${USER_HOME}/_/clis"
     local _project=""
     local -r _fileremote="https://raw.githubusercontent.com/zeusintuivo"
-    [[ -d "${_filelocal}" ]] &&  local -r _provider="${_filelocal}"
-    [[ ! -d "${_filelocal}" ]] &&  local -r _provider="${_fileremote}"
+    local _provider="${_fileremote}"
+    [[   -d "${_filelocal}" ]] &&  _provider="${_filelocal}"
     local _one=""
     local _script=""
     local _tmp_file=""
@@ -225,17 +234,18 @@ boostrap_intuivo_bash_app(){
     # Project  /  script / test function test if loaded should exist
     local -r _scripts=$(grep -v "^#" <<<"
 # task_intuivo_cli/execute_as_sudo.sh:execute_as_sudo
-task_intuivo_cli/add_error_trap.sh:_trap_on_error
+# task_intuivo_cli/add_error_trap.sh:colorize
 execute_command_intuivo_cli/execute_command:_execute_command_worker
 execute_command_intuivo_cli/struct_testing:passed
+task_intuivo_cli/add_error_trap.sh:_trap_on_error
 " )
-    (( DEBUG )) && echo "------_scripts:: $_scripts"
+    (( _DEBUG )) && echo "------_scripts:: $_scripts"
     while read -r _one; do
     {
       [[ -z "${_one}" ]] && continue                         # if  empt loop again
       # ( declare -p "${_one}"  &>/dev/null )  && continue     # if not  empty and defined
-      (( DEBUG )) && echo "----------_one:: $_one"
-      (( DEBUG )) && echo "-----_provider:: $_provider"
+      (( _DEBUG )) && echo "----------_one:: $_one"
+      (( _DEBUG )) && echo "-----_provider:: $_provider"
 
       # First part read _one and distribute values
       if [[ "${_one}" == *"/"*  ]] ; then
@@ -248,16 +258,39 @@ execute_command_intuivo_cli/struct_testing:passed
           _script=$(echo "${_script}" | cut -d\: -f1  2>&1)
         }
         fi
-        (( DEBUG )) && echo "------_project:: $_project"
-        (( DEBUG )) && echo "-------_script:: $_script"
+        (( _DEBUG )) && echo "------_project:: $_project"
+        (( _DEBUG )) && echo "-------_script:: $_script"
         if [[ "${_provider}" == *"https://"*  ]] ; then
         {
           _url="${_provider}/${_project}/master/${_script}"
-        } else {
+        } 
+        else 
+        {
+          # 
+          # Take extra step the make sure 
+          # Full file path is accessible 
+          # Other wise default again to url 
+          # ... usually if  -d "${_filelocal}" detects _/clis folder 
+          # it assumes local load, but if _/clis exists but not the file inside
+          # we cased a bug, so here we fix that to make sure 
+          # filepath exists or default to url https again.
+          #
           _url="${_provider}/${_project}/${_script}"
+          if [[   -e "${_url}" ]] ; then
+          {
+            _url="${_provider}/${_project}/${_script}"
+          }
+          else
+          {
+            _provider="${_fileremote}"
+            _url="${_provider}/${_project}/master/${_script}"
+          }
+          fi  
         }
         fi
-      } else {
+      } 
+      else 
+      {
         if [[ "${_one}" == *:*  ]] ; then
         {
           _function_test=$(echo "${_one}" | cut -d: -f2  2>&1 )
@@ -267,86 +300,105 @@ execute_command_intuivo_cli/struct_testing:passed
         _url="${_provider}/${_one}"
       }
       fi
-      _tmp_file="/tmp/${_script}"
-      (( DEBUG )) && echo "-----_tmp_file:: $_tmp_file"
-      (( DEBUG )) && echo _function_test:: "$_function_test"
-      (( DEBUG )) && echo "----------_url:: $_url"
-
-      # Second part distributed values downloads
-      if [[ "${_provider}" == *"https://"*  ]] ; then
+      
+      (( _DEBUG )) && echo _function_test:: "$_function_test"
+      (( _DEBUG )) && echo "----------_url:: $_url"
+      # 
+      # Do not reload an extension or scrip that has already being loaded
+      #
+      if typeset -f "$_function_test" >/dev/null 2>&1; then
       {
-        (( DEBUG )) && echo "is https://"
-        if ( command -v wget >/dev/null 2>&1; ) ; then
-        {
-          echo -e "try:    wget --quiet --no-check-certificate "${_url}" -O -"
-          _execoncli="""$(wget --quiet --no-check-certificate  "${_url}" -O -  2>/dev/null )"""   # suppress only wget download messages, but keep wget output for variable
-          err=$?
-        }
-        elif ( command -v curl >/dev/null 2>&1; ); then
-        {
-          echo -e "try:    curl "${_url}" -o -"
-          _execoncli="""$(curl "${_url}" -o - 2>/dev/null )"""   # suppress only curl download messages, but keep curl output for variable
-          err=$?
-        }
-        else
-        {
-          echo -e "\n \n  ERROR! Could not download ${_script}. There is no wget or curl installed or reacheable \n \n "
-          exit 1;
-        }
-        fi
-        # _msg=$("${_execoncli}")
-        # err=$?
-        # if [ $err -ne 0 ] ;  then
-        # {
-        #  echo -e "\nERROR downloading ${_script}\n_url: ${_url}  \n_msg: ${_msg} \n_execoncli: ${_execoncli}  \n_err: ${_err} \n\n"
-        #  exit 1
-        # }
-        # fi
-        _msg=$(echo -n """${_execoncli}""" > "${_tmp_file}" 2>&1 )
-        err=$?
-        if [ $err -ne 0 ] ;  then
-        {
-          echo -e "\nERROR trying to write \n_tmpfile=${_tmp_file} \n_script: ${_one} \n_msg: ${_msg} \n_err: ${_err}  \n\n"
-          exit 1
-        }
-        fi
-        #  ++ sources
-        [[ ! -e "${_tmp_file}" ]]  && echo -e "\nERROR Local tmp File does not exists or cannot be accessed: \n${_tmp_file}" && exit 1
-        # shellcheck disable=SC1090
-        . "${_tmp_file}"
-        err=$?
-        if [ $err -ne 0 ] ;  then
-        {
-          # shellcheck disable=SC1090
-          _msg=$(. "${_tmp_file}" 2>&1 )
-          echo -e "\nERROR sourcing from file \n_tmpfile=${_tmp_file} \n_script: ${_one} \n_msg: ${_msg} \n_err: ${_err}  \n\n"
-          exit 1
-        }
-        fi
+        echo -e "skipping:   already loaded "$_function_test":"${_url}" "
       }
       else
       {
-        (( DEBUG )) && echo "-----is a file:: $_url "
-        [[ ! -e "$_url" ]]  && echo -e "\nERROR Local File does not exists  or cannot be accessed: \n ${_url}" && exit 1
-        (( DEBUG )) && echo "----file exits:: $_url"
-        # shellcheck disable=SC1090
-        . "${_url}"
-        # . /USER_HOME/zeus/_/clis/task_intuivo_cli/add_error_trap.sh
-        err=$?
-        # (( DEBUG )) && echo "---- source err: $_err"
-        if [ $err -ne 0 ] ;  then
+        #
+        # Second part distributed values downloads
+        #
+        local _temp_dir="$(mktemp -d 2>/dev/null || mktemp -d -t "${_script}_source")"
+        _tmp_file="${_temp_dir}/${_script}"
+        echo "3.4 sudologic  execute_boot_basic.sh Temp for ${_script} location in ${_tmp_file}"
+        (( _DEBUG )) && echo "-----_tmp_file:: $_tmp_file"
+
+        if [[ "${_provider}" == *"https://"*  ]] ; then
         {
+          (( _DEBUG )) && echo "is https://"
+          if ( command -v wget >/dev/null 2>&1; ) ; then
+          {
+            echo -e "try:    wget --quiet --no-check-certificate "${_url}" -O -"
+            _execoncli="""$(wget --quiet --no-check-certificate  "${_url}" -O -  2>/dev/null )"""   # suppress only wget download messages, but keep wget output for variable
+            err=$?
+          }
+          elif ( command -v curl >/dev/null 2>&1; ); then
+          {
+            echo -e "try:    curl "${_url}" -o -"
+            _execoncli="""$(curl "${_url}" -o - 2>/dev/null )"""   # suppress only curl download messages, but keep curl output for variable
+            err=$?
+          }
+          else
+          {
+            echo -e "\n \n  ERROR! Could not download ${_script}. There is no wget or curl installed or reacheable \n \n "
+            exit 1;
+          }
+          fi
+          # _msg=$("${_execoncli}")
+          # err=$?
+          # if [ $err -ne 0 ] ;  then
+          # {
+          #  echo -e "\nERROR downloading ${_script}\n_url: ${_url}  \n_msg: ${_msg} \n_execoncli: ${_execoncli}  \n_err: ${_err} \n\n"
+          #  exit 1
+          # }
+          # fi
+          _msg=$(echo -n """${_execoncli}""" > "${_tmp_file}" 2>&1 )
+          err=$?
+          if [ $err -ne 0 ] ;  then
+          {
+            echo -e "\nERROR trying to write \n_tmpfile=${_tmp_file} \n_script: ${_one} \n_msg: ${_msg} \n_err: ${_err}  \n\n"
+            exit 1
+          }
+          fi
+          #  ++ sources
+          [[ ! -e "${_tmp_file}" ]]  && echo -e "\nERROR Local tmp File does not exists or cannot be accessed: \n${_tmp_file}" && exit 1
           # shellcheck disable=SC1090
-          _msg=$(. "${_url}" 2>&1 )
-          echo -e "\nERROR sourcing from file \n_url=${_url} \n_script: ${_one} \n_msg: ${_msg} \n_err: ${_err}  \n\n"
-          exit 1
+          . "${_tmp_file}"
+          err=$?
+          if [ $err -ne 0 ] ;  then
+          {
+            # shellcheck disable=SC1090
+            _msg=$(. "${_tmp_file}" 2>&1 )
+            echo -e "\nERROR sourcing from file \n_tmpfile=${_tmp_file} \n_script: ${_one} \n_msg: ${_msg} \n_err: ${_err}  \n\n"
+            exit 1
+          }
+          fi
+        }
+        else
+        {
+          #
+          # Here url contains not a URL but a file path full name
+          #
+          (( _DEBUG )) && echo "-----is a file:: $_url "
+          [[ ! -e "$_url" ]]  && echo -e "\nERROR Local File does not exists  or cannot be accessed: \n ${_url}" && exit 1
+          (( _DEBUG )) && echo "----file exits:: $_url"
+          # shellcheck disable=SC1090
+          . "${_url}"
+          # . /USER_HOME/zeus/_/clis/task_intuivo_cli/add_error_trap.sh
+          err=$?
+          # (( _DEBUG )) && echo "---- source err: $_err"
+          if [ $err -ne 0 ] ;  then
+          {
+            # shellcheck disable=SC1090
+            _msg=$(. "${_url}" 2>&1 )
+            echo -e "\nERROR sourcing from file \n_url=${_url} \n_script: ${_one} \n_msg: ${_msg} \n_err: ${_err}  \n\n"
+            exit 1
+          }
+          fi
         }
         fi
-      }
-      fi
+      } 
+      fi # end already loaded  
       # Test function exitance if loaded propertly
       # type -f on_error
-      # (( DEBUG )) &&  echo "-------command:: $(command -v on_error )"
+      # (( _DEBUG )) &&  echo "-------command:: $(command -v on_error )"
       #  ( ( ! command -v passed >/dev/null 2>&1; ) && echo -e "\n \n  ERROR! Loading struct_testing \n \n " && exit 69; )
       if ( ( ! command -v "${_function_test}" >/dev/null 2>&1; ) && exit 69; ) ;  then
       {
@@ -355,7 +407,7 @@ execute_command_intuivo_cli/struct_testing:passed
       }
       else
       {
-        echo -e "${_url} Loaded Correctly ${BRIGHT_BLUE87}✔️${CYAN}"
+        (( _DEBUG )) && echo -e "execute_command_intuivo_cli/execute_boot_basic.sh ${_url} Loaded Correctly ${BRIGHT_BLUE87}✔️${CYAN}"
       }
       fi
     }
@@ -369,12 +421,16 @@ execute_command_intuivo_cli/struct_testing:passed
     unset _project
     unset _tmp_file
     unset _function_test
+		unset _DEBUG
+    passed "# end function boostrap_intuivo_bash_app()"
     # unset _scripts # unset: _scripts: cannot unset: readonly variable ..is normal behavoir or bash as of now
     # unset _provider  # unset: _scripts: cannot unset: readonly variable ..is normal behavoir or bash as of now
     return 0
 } # end function boostrap_intuivo_bash_app
-boostrap_intuivo_bash_app
+boostrap_intuivo_bash_app "${*:-}"
 
 # shellcheck disable=SC2031
-(( DEBUG )) && echo "$SUDO_USER" || true
-(( DEBUG )) && env | grep SUDO || true
+(( temporalDEBUG )) && echo "$SUDO_USER" || true
+(( temporalDEBUG )) && env | grep SUDO || true
+
+
