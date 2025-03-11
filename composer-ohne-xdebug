@@ -131,7 +131,7 @@ find_xdebug
                       echo "php --no-php-ini " ${OPTIONS} ${COMPOSER_EXECUTABLE_FULL_PATH}  "$1"
                       php --no-php-ini ${OPTIONS} ${COMPOSER_EXECUTABLE_FULL_PATH} "$1"
 
-                    elif [[ "$(expr substr $(uname -s) 1 5)" == "Linux" ]] ; then
+                    elif [[ "$(cut -c1-5 <<< "$(uname -s)")" == "Linux" ]] ; then
 
                       get_options
                       echo "php --no-php-ini " ${OPTIONS} ${COMPOSER_EXECUTABLE_FULL_PATH}  "$1"
@@ -140,7 +140,7 @@ find_xdebug
                       #php -n -dextension=json.so -dmemory_limit=9G ${COMPOSER_EXECUTABLE_FULL_PATH} install
                       #php -dmemory_limit=9G ${COMPOSER_EXECUTABLE_FULL_PATH} install
 
-                    elif [[ "$(expr substr $(uname -s) 1 10)" == "MINGW32_NT" ]] ; then
+                    elif [[ "$(cut -c1-10 <<< "$(uname -s)")" == "MINGW32_NT" ]] ; then
                       # Do something under Windows NT platform
                       #php ${COMPOSER_EXECUTABLE_FULL_PATH} "$1"
                       php -dmemory_limit=9G ${COMPOSER_EXECUTABLE_FULL_PATH} "$1"

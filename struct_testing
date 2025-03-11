@@ -739,11 +739,11 @@ CERO="\033[01;0m"
               if [[ "$(uname)" == "Darwin" ]] ; then
                 # Do something under Mac OS X platform
                 sed 's/'"""${SEEKING}"""'//g' ;
-              elif [[ "$(expr substr $(uname -s) 1 5)" == "Linux" ]] ; then
+              elif [[ "$(cut -c1-5 <<< "$(uname -s)")" == "Linux" ]] ; then
                 # Do something under GNU/Linux platform
                 sed 's/'"""${SEEKING}"""'//g'  ;
 
-              elif [[ "$(expr substr $(uname -s) 1 10)" == "MINGW32_NT" ]] ; then
+              elif [[ "$(cut -c1-10 <<< "$(uname -s)")" == "MINGW32_NT" ]] ; then
                 # Do something under Windows NT platform
                 sed 's/'"""${SEEKING}"""'//g' ;
                 # nothing here
@@ -4499,10 +4499,10 @@ function _find_downloads_folder(){
   if [[ "$(uname)" == "Darwin" ]] ; then
     # Do something under Mac OS X platform
     DOWNLOADFOLDER=/Users/"${SUDO_USER}"/Downloads
-  elif [[ "$(expr substr $(uname -s) 1 5)" == "Linux" ]] ; then
+  elif [[ "$(cut -c1-5 <<< "$(uname -s)")" == "Linux" ]] ; then
     # Do something under GNU/Linux platform
     DOWNLOADFOLDER=/home/"${SUDO_USER}"/Downloads
-  elif [[ "$(expr substr $(uname -s) 1 10)" == "MINGW32_NT" ]] ; then
+  elif [[ "$(cut -c1-10 <<< "$(uname -s)")" == "MINGW32_NT" ]] ; then
     # Do something under Windows NT platform
     DOWNLOADFOLDER=/C/Users/"${SUDO_USER}"/Downloads
     # nothing here
@@ -4721,10 +4721,10 @@ function _download() {
     if [[ "$(uname)" == "Darwin" ]] ; then
     # Do something under Mac OS X platform
       _download_mac "${@}"
-    elif [[ "$(expr substr $(uname -s) 1 5)" == "Linux" ]] ; then
+    elif [[ "$(cut -c1-5 <<< "$(uname -s)")" == "Linux" ]] ; then
     # Do something under GNU/Linux platform
       _download_linux "${@}"
-    elif [[ "$(expr substr $(uname -s) 1 10)" == "MINGW32_NT" ]] ; then
+    elif [[ "$(cut -c1-10 <<< "$(uname -s)")" == "MINGW32_NT" ]] ; then
     # Do something under Windows NT platform
       _download_win "${*}"
     # nothing here
@@ -5419,7 +5419,7 @@ function determine_os_and_fire_action() {
     FUNCTION_TO_CALL=$(get_mac_architecture "${target_name}")
     PARAMETERS="$@"
   }
-  elif [[ "$(expr substr $(uname -s) 1 5)" == "Linux" ]] ; then
+  elif [[ "$(cut -c1-5 <<< "$(uname -s)")" == "Linux" ]] ; then
   {
     if (( _DEBUG )) ; then
       echo "Linux"
@@ -5572,7 +5572,7 @@ function determine_os_and_fire_action() {
     unset DISTRO
     unset ID
   }
-  elif [[ "$(expr substr $(uname -s) 1 10)" == "MINGW32_NT" ]] ; then
+  elif [[ "$(cut -c1-10 <<< "$(uname -s)")" == "MINGW32_NT" ]] ; then
   {
     # Do something under Windows NT platform
     if [[ "$(uname -i)" == "x86_64" ]] ; then
@@ -5596,7 +5596,7 @@ function determine_os_and_fire_action() {
     fi
     # nothing here
   }
-  elif [[ "$(expr substr $(uname -s) 1 10)" == "MINGW64_NT" ]] ; then
+  elif [[ "$(cut -c1-10 <<< "$(uname -s)")" == "MINGW64_NT" ]] ; then
   {
     # Do something under Windows NT platform
     if [[ "$(uname -i)" == "x86_64" ]] ; then

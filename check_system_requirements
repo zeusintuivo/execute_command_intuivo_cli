@@ -522,11 +522,11 @@ current_os_system() {
     # Do something under Mac OS X platform
         [[ "$(uname -m)" == "x86_64" ]] && local_current_system="Mac 64 Bits"
         [[ "$(uname -m)" == "i686"   ]] && local_current_system="Mac 32 Bits"
-    elif [[ "$(expr substr $(uname -s) 1 5)" == "Linux" ]] ; then
+    elif [[ "$(cut -c1-5 <<< "$(uname -s)")" == "Linux" ]] ; then
     # Do something under GNU/Linux platform
         [[ "$(uname -i)" == "x86_64" ]] && local_current_system="Linux 64 Bits"
         [[ "$(uname -i)" == "i686"   ]] && local_current_system="Linux 32 Bits"
-    elif [[ "$(expr substr $(uname -s) 1 10)" == "MINGW32_NT" ]] ; then
+    elif [[ "$(cut -c1-10 <<< "$(uname -s)")" == "MINGW32_NT" ]] ; then
     # Do something under Windows NT platform
     local_current_system="Windows"
     # nothing here
