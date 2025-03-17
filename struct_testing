@@ -1626,10 +1626,10 @@ CERO="\033[01;0m"
                 #
                 enforce_variable_with_value OSTYPE "${OSTYPE}"
                 case "${OSTYPE}" in
-                  (darwin*) failed "apt and dpkg in mac! is weird. Platform $OSTYPE using apt and dpkg is not supported " ;;
-                  (cygwin*) failed "apt and dpkg in cywin! is weird. Platform $OSTYPE using apt and dpkg is not supported " ;;
+                  (darwin*) failed "apt and dawin in mac! is weird. Platform $OSTYPE using apt and darwin is not supported " ;;
+                  (cygwin*) failed "apt and dpkg in cywin! is weird. Platform $OSTYPE using apt and cywin is not supported " ;;
                   (linux*) passed "Looks like a linux!" ;;
-                  (msys*) failed "apt and dpkg in msys! is weird. Platform $OSTYPE using apt and dpkg is not supported "  ;;
+                  (msys*) failed "apt and dpkg in msys! is weird. Platform $OSTYPE using apt and msys is not supported "  ;;
                   (*) failed "Platform $OSTYPE not supported"
                   return 1 ;;
                 esac
@@ -1678,16 +1678,16 @@ CERO="\033[01;0m"
                 #
                 #     ensure_apt_and_dnf_do_not_mix
                 #
-                if ( ( command -v apt >/dev/null 2>&1; ) && ( command -v dnf >/dev/null 2>&1; ) ) ; then
+                if ( ( command -v apt-get >/dev/null 2>&1; ) && ( command -v dnf >/dev/null 2>&1; ) ) ; then
                 {
                     enforce_variable_with_value OSTYPE "${OSTYPE}"
                     case "${OSTYPE}" in
-                      (darwin*) failed "apt and dnf in mac! is weird. Platform $OSTYPE using apt and dnf is not supported " ;;
-                      (cygwin*) failed "apt and dnf in cywin! is weird. Platform $OSTYPE using apt and dnf is not supported " ;;
-                      (linux*) failed "apt and dnf in same Linux! is weird. Platform $OSTYPE using apt and dnf is not supported " ;;
-                      (msys*) failed "apt and dnf in msys! is weird. Platform $OSTYPE using apt and dnf is not supported "  ;;
-                      (*) failed "apt and dnf in $OSTYPE! is weird. Platform $OSTYPE using apt and dnf is not supported "
-                      failed "apt and dnf in $OSTYPE! is weird. Platform $OSTYPE using apt and dnf is not supported "
+                      (darwin*) failed "apt and dnf in mac! is weird. Platform $OSTYPE using apt-get and dnf is not supported " ;;
+                      (cygwin*) failed "apt and dnf in cywin! is weird. Platform $OSTYPE using apt-get and dnf is not supported " ;;
+                      (linux*) failed "apt and dnf in same Linux! is weird. Platform $OSTYPE using apt-get and dnf is not supported " ;;
+                      (msys*) failed "apt and dnf in msys! is weird. Platform $OSTYPE using apt-get and dnf is not supported "  ;;
+                      (*) failed "apt and dnf in $OSTYPE! is weird. Platform $OSTYPE using apt-get and dnf is not supported "
+                      failed "apt and dnf in $OSTYPE! is weird. Platform $OSTYPE using apt-get and dnf is not supported "
                       return 1 ;;
                     esac
                 }
@@ -2737,7 +2737,13 @@ function _ensure_touch_dir_and_file() {
                 failed "_if_not_is_installed ensure_apt_and_dnf_do_not_mix"
             }
             fi
-            if ( ( command -v apt >/dev/null 2>&1; ) && ( command -v dpkg >/dev/null 2>&1; ) ) ; then
+            if ( ( command -v apt-get >/dev/null 2>&1; ) && ( command -v dpkg >/dev/null 2>&1; ) ) ; then
+            {
+                ensure_apt_dpkg_in_linux
+                _msg_info_list="$(apt-get info $1  >/dev/null 2>&1)"
+                ret=$?
+            }
+            elif ( ( command -v apt >/dev/null 2>&1; ) && ( command -v dpkg >/dev/null 2>&1; ) ) ; then
             {
                 ensure_apt_dpkg_in_linux
                 _msg_info_list="$(apt info $1  >/dev/null 2>&1)"
@@ -3316,7 +3322,12 @@ fi
                 # (( _DEBUG )) && echo "\n rpm \n \n $packages \n \n rpm"
 
             }
-            elif [[ ${_OS:-} != "brew" ]] && ( ( command -v apt >/dev/null 2>&1; ) && ( command -v dpkg >/dev/null 2>&1; ) ) ; then
+            elif [[ ${_OS:-} != "brew" ]] && ( ( command -v apt-get >/dev/null 2>&1; ) && ( command -v dpkg >/dev/null 2>&1; ) ) ; then
+            {
+                ensure_apt_dpkg_in_linux
+                packages=$(dpkg -l | grep -E "$one_required" | cut -d' ' -f3 2>&1)
+            }
+	          elif [[ ${_OS:-} != "brew" ]] && ( ( command -v apt >/dev/null 2>&1; ) && ( command -v dpkg >/dev/null 2>&1; ) ) ; then
             {
                 ensure_apt_dpkg_in_linux
                 packages=$(dpkg -l | grep -E "$one_required" | cut -d' ' -f3 2>&1)
@@ -3391,7 +3402,33 @@ fi
                 install_this=$(echo -n "${install_this}" | sed -e 's/^[[:space:]]*//' ) # trim_spaces before //
               }
               fi
-              if [[ ${_OS:-} != "brew" ]] && ( ( command -v apt >/dev/null 2>&1; ) && ( command -v dpkg >/dev/null 2>&1; ) ) ; then
+              if [[ ${_OS:-} != "brew" ]] && ( ( command -v apt-get >/dev/null 2>&1; ) && ( command -v dpkg >/dev/null 2>&1; ) ) ; then
+              {
+                if (( _DEBUG )) ; then
+                  echo "apt search using dpkg"
+                fi
+                # REF: https://www.cyberciti.biz/faq/find-out-if-package-is-installed-in-linux/
+                if query=$(dpkg-query -W -f='${Status} ${Version}\n' "$one_required"  2>&1) ; then
+                {
+                    echo -e " ${CYAN}  CHECKING ${YELLOW} $one_required${RESET}"
+                }
+                fi
+                #if [[ "${query}" == "install ok"* ]] && ( is_included "$one_required" "${packages}" ); then
+                if [[ "${query}" == "install ok"* ]] ; then
+                {
+                    passed " ${GREEN} $one_required ${YELLOW} INSTALLED${RESET} ."
+                }
+                else
+                {
+                    echo -e " ${RED}  NEED TO INSTALL ${YELLOW} $one_required${RESET} ${RED}...${query}"
+                    missing="${missing} ${install_this}"
+                    if (( _DEBUG )) ; then
+                      echo  "${install_this}"
+                    fi
+                }
+                fi
+              }
+              elif [[ ${_OS:-} != "brew" ]] && ( ( command -v apt >/dev/null 2>&1; ) && ( command -v dpkg >/dev/null 2>&1; ) ) ; then
               {
                 if (( _DEBUG )) ; then
                   echo "apt search using dpkg"
@@ -3508,7 +3545,15 @@ fi
               fi
               missing=$(echo -n "${missing}" | sed -e 's/^[[:space:]]*//' ) # trim_start_space
               echo -e " ${CYAN} Installing missing packages: ${YELLOW} ${missing} ${RESET} ."
-              if [[ ${_OS:-} != "brew" ]] && ( ( command -v apt >/dev/null 2>&1; )  && ( command -v dpkg >/dev/null 2>&1; ) ); then
+              if [[ ${_OS:-} != "brew" ]] && ( ( command -v apt-get >/dev/null 2>&1; )  && ( command -v dpkg >/dev/null 2>&1; ) ); then
+              {
+                if (( _DEBUG )) ; then
+                  echo "apt install"
+                fi
+                install_result=$(exec apt-get install "${missing}" -yfq   2>&1) # capture all input and output
+                err_buff=$?
+              }
+              elif [[ ${_OS:-} != "brew" ]] && ( ( command -v apt >/dev/null 2>&1; )  && ( command -v dpkg >/dev/null 2>&1; ) ); then
               {
                 if (( _DEBUG )) ; then
                   echo "apt install"
@@ -3699,7 +3744,21 @@ fi
             local required=$(grep -vE '^#'<<<$(grep -vE '^\s+#'<<<"${2}"))
             for one_required in ${required}; do
             {
-              if ( ( command -v apt >/dev/null 2>&1; ) && ( command -v dpkg >/dev/null 2>&1; ) ) ; then
+              if ( ( command -v apt-get >/dev/null 2>&1; ) && ( command -v dpkg >/dev/null 2>&1; ) ) ; then
+              {
+                dpkg -l | grep -E "$one_required" &>/dev/null
+                if [ $? == 0 ]; then
+                {
+                    echo -e " ${RED}  NEED TO REMOVE ${YELLOW} $one_required${RESET} ."
+                    removing="${removing} ${one_required}"
+                }
+                else
+                {
+                    passed " ${GREEN} $one_required ${YELLOW} NOT PRESENT${RESET} ."
+                }
+                fi
+              }
+              elif ( ( command -v apt >/dev/null 2>&1; ) && ( command -v dpkg >/dev/null 2>&1; ) ) ; then
               {
                 dpkg -l | grep -E "$one_required" &>/dev/null
                 if [ $? == 0 ]; then
@@ -3734,10 +3793,17 @@ fi
 
             removing=$(echo ${removing} | sed -e 's/^[[:space:]]*//' | sed 's/^\ //g' | sed 's/^\t//g' ) # trim_start_space
 
-            if ( ( command -v apt >/dev/null 2>&1; ) && ( command -v dpkg >/dev/null 2>&1; ) ) ; then
+            if ( ( command -v apt-get >/dev/null 2>&1; ) && ( command -v dpkg >/dev/null 2>&1; ) ) ; then
             {
               [[ -n "${removing}" ]] && echo -e " ${CYAN} Apt-get removing packages: ${YELLOW} ${removing} ${RESET} ."
               [[ -n "${removing}" ]] && local remove_result=$(exec apt-get remove ${removing} -yfq   2>&1 && exec apt-get purge ${removing} -yfq   2>&1 && exec apt-get autoremove -yfq   2>&1) # capture all input and output
+              local err_buff=$?
+              [[ -n "${remove_result}" ]] && handle_error "${err_buff}" "${remove_result}"
+            }
+            elif ( ( command -v apt >/dev/null 2>&1; ) && ( command -v dpkg >/dev/null 2>&1; ) ) ; then
+            {
+              [[ -n "${removing}" ]] && echo -e " ${CYAN} Apt-get removing packages: ${YELLOW} ${removing} ${RESET} ."
+              [[ -n "${removing}" ]] && local remove_result=$(exec apt remove ${removing} -yfq   2>&1 && exec apt purge ${removing} -yfq   2>&1 && exec apt autoremove -yfq   2>&1) # capture all input and output
               local err_buff=$?
               [[ -n "${remove_result}" ]] && handle_error "${err_buff}" "${remove_result}"
             }
