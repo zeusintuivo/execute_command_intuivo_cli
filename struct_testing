@@ -352,7 +352,7 @@ CERO="\033[01;0m"
           # enforce_parameter_with_options 2 PLATFORM "${PLATFORM}" "mac windows linux"
           # Tests for the function
           # _DEBUG=1
-					local -i _DEBUG=${DEBUG:-0}
+          local -i _DEBUG=${DEBUG:-0}
           local TESTING="enforce_parameter_with_options function ${FUNCNAME[1]} param at position ${RESET}<${YELLOW_OVER_DARKBLUE}${1}${RESET}${LIGHTYELLOW}> alias for <${CYAN}${2}${LIGHTYELLOW}> to have one of these values ${RESET}<${YELLOW_OVER_DARKBLUE}${4}${RESET}>"
           (( _DEBUG )) && echo -e "${FUNCNAME[0]}"
           (( _DEBUG )) && echo "${*} -assume existing variable for this part"
@@ -409,7 +409,7 @@ CERO="\033[01;0m"
           # if ( parameter_with_value 3 PATTERN "${PATTERN}" "BCompareOSX*.*.*.*.zip" ) ; then
           # Tests for the function
           local -i _DEBUG=${DEBUG:-0}
-					local TESTING="parameter_with_value function ${FUNCNAME[1]} expects value at position <\"${1}\"> expect value <\"${2}\"> to look like or can be are <\"${4}\">"
+          local TESTING="parameter_with_value function ${FUNCNAME[1]} expects value at position <\"${1}\"> expect value <\"${2}\"> to look like or can be are <\"${4}\">"
           (( _DEBUG )) && echo -e "${FUNCNAME[0]}"
           (( _DEBUG )) && echo "${*} -assume existing variable for this part"
           (( _DEBUG )) && ( typeset -p "${1}"  &>/dev/null  ) && echo "1 defined 1"
@@ -1536,7 +1536,7 @@ CERO="\033[01;0m"
             #     check_equality $(cat ~/.pyenv/version)="2.7.11"
             #
             local -i _DEBUG=${DEBUG:-0}
-						(( _DEBUG )) && echo "FUNCNAME[0]: <${FUNCNAME[0]}>"
+            (( _DEBUG )) && echo "FUNCNAME[0]: <${FUNCNAME[0]}>"
             local -a ARGS="${@}"
             local LEFT_VALUE=""
             local RIGHT_VALUE=""
@@ -1882,7 +1882,7 @@ function _run_command(){
                 #| sed 's/'"="'/3QU4L51GN/g' \
                 #| sed 's/'"!"'/3XCL4M4T10N/g' \
             local -i _DEBUG=${DEBUG:-0}
-						(( _DEBUG )) && echo -e "0.${RED}${FUNCNAME[1]} that value ${RED},,${CYAN}${statement}${RED}''${RESET}"
+            (( _DEBUG )) && echo -e "0.${RED}${FUNCNAME[1]} that value ${RED},,${CYAN}${statement}${RED}''${RESET}"
             # exit 0
             local inputo=""
             inputo=$(echo """${statement}""" \
@@ -3327,14 +3327,14 @@ fi
                 ensure_apt_dpkg_in_linux
                 packages=$(dpkg -l | grep -E "$one_required" | cut -d' ' -f3 2>&1)
             }
-	          elif [[ ${_OS:-} != "brew" ]] && ( ( command -v apt >/dev/null 2>&1; ) && ( command -v dpkg >/dev/null 2>&1; ) ) ; then
+            elif [[ ${_OS:-} != "brew" ]] && ( ( command -v apt >/dev/null 2>&1; ) && ( command -v dpkg >/dev/null 2>&1; ) ) ; then
             {
                 ensure_apt_dpkg_in_linux
                 packages=$(dpkg -l | grep -E "$one_required" | cut -d' ' -f3 2>&1)
             }
-					  elif [[ ${_OS:-} != "brew" ]] && ( ( command -v pacman >/dev/null 2>&1; )) ; then
+            elif [[ ${_OS:-} != "brew" ]] && ( ( command -v pacman >/dev/null 2>&1; )) ; then
             {
-							packages=$(pacman -Q | grep -E "$one_required" | awk '{print $1}'  2>&1)
+              packages=$(pacman -Q | grep -E "$one_required" | awk '{print $1}'  2>&1)
             }
             else # brew
             {
@@ -4299,12 +4299,12 @@ complete -o nospace -F _wp_complete wp
                     action="${action/\{\#\}/${one_item}}"
                     eval """${action}"""
                     # child=$!
-		    ret=$?
-		    wait
+        ret=$?
+        wait
                     if [ $ret -gt 0 ] ; then
                     {
                       # wait $child
-		      wait
+          wait
                       warning "${YELLOW}Error SIGNAL_RETURN(${RED}${ret}${YELLOW}) executing: \n${action}"
                     }
                     fi
@@ -5998,9 +5998,25 @@ function _install_apt() {
     ensure apt or "Canceling Install. Could not find apt command to execute install"
     _trap_try_start # _trap_catch_check
     local msg=""
-    msg=$(apt install -y "${TARGET_DOWNLOAD_PATH}")
+    local doing_apt_get="apt"
+             if ( ( command -v apt-get >/dev/null 2>&1; ) && ( command -v dpkg >/dev/null 2>&1; ) ) ; then
+            {
+                ensure_apt_dpkg_in_linux
+    doing_apt_get="apt-get"
+    msg=$(apt-get install -y "${TARGET_DOWNLOAD_PATH}")
     _err=$?
     _trap_catch_check ${_err}
+
+            }
+            elif ( ( command -v apt >/dev/null 2>&1; ) && ( command -v dpkg >/dev/null 2>&1; ) ) ; then
+            {
+                ensure_apt_dpkg_in_linux
+     msg=$(apt install -y "${TARGET_DOWNLOAD_PATH}")
+    _err=$?
+    _trap_catch_check ${_err}
+
+            }
+            fi
     echo "${msg}"
     if [[ "${msg}" == *"not an dpkg package"* ]] ; then
     {
@@ -6016,10 +6032,10 @@ function _install_apt() {
             # then correct with
             # fix with
             # then fix with
-            # exec apt install -y qt5-devel qt-creator qt5-qtbase qt5-qtbase-devel
+            # exec ${doing_apt_get} install -y qt5-devel qt-creator qt5-qtbase qt5-qtbase-devel
             # dpkg again"
       Attempting to fix
-      apt install -y qt5-devel qt-creator qt5-qtbase qt5-qtbase-devel
+      ${doing_apt_get} install -y qt5-devel qt-creator qt5-qtbase qt5-qtbase-devel
       _install_apt "${TARGET_URL}" "${DOWNLOADFOLDER}"  "${CODENAME}" 1
     }
     elif [[ "${msg}" == *"libQt5WebKit.so.5"* ]] && [[ "${msg}" == *"is needed"* ]] && (( LOOP )) ; then
@@ -6030,7 +6046,7 @@ function _install_apt() {
             # then correct with
             # fix with
             # then fix with
-            # exec apt install -y qt5-devel qt-creator qt5-qtbase qt5-qtbase-devel
+            # exec ${doing_apt_get} install -y qt5-devel qt-creator qt5-qtbase qt5-qtbase-devel
             # I could not install it automatically
             # dpkg again"
       failed "ERROR MSG:\n ${msg}"
@@ -6324,7 +6340,7 @@ function raise_to_sudo_and_user_home() {
     fi
     [[ -z "${bootbasicsource}" ]] && echo -e "\n \n  ERROR! Loading execute_boot_basic.sh  bootbasicsource did not download or is empty " && exit 1
     local _temp_dir=""
-		_temp_dir="$(mktemp -d 2>/dev/null || mktemp -d -t 'execute_boot_basic_source')"
+    _temp_dir="$(mktemp -d 2>/dev/null || mktemp -d -t 'execute_boot_basic_source')"
     echo "${bootbasicsource}">"${_temp_dir}/execute_boot_basic_source"
     if (( _DEBUG )) ; then
       echo "$0 execute_command_intuivo_cli/struct_testing load_execute_boot_basic_with_sudo() Temp execute_boot_basic.sh location ${_temp_dir}/execute_boot_basic_source"
@@ -6433,9 +6449,9 @@ function enforce_web_is_reachable(){
   # enforce_web_is_reachable  "cms.artbox.one"
   #
   local _url="${1}"
-	local -i _err=0
+  local -i _err=0
   local _domain=""
-	_domain=$(extract_domainname "${_url}")
+  _domain=$(extract_domainname "${_url}")
   enforce_variable_with_value _domain "${_domain}"
   echo "  Checking for connection to ${_domain}"
   local msg
@@ -6594,8 +6610,8 @@ function _package_list_installer() {
   # Sample use
   # trap  '_trap_on_error $0 "${?}" LINENO BASH_LINENO FUNCNAME BASH_COMMAND $FUNCNAME $BASH_LINENO $LINENO   $BASH_COMMAND'  ERR
   local package
-	local packages=""
-	packages="${*-}"
+  local packages=""
+  packages="${*-}"
   trap 'echo -e "${RED}" && echo "ERROR failed $0:$LINENO _package_list_installer " && echo -e "${RESET}" && return 0' ERR
 
   if ! install_requirements "linux" "${packages}" ; then
@@ -6631,7 +6647,7 @@ function _git_clone() {
   local _target="${2}"
   Checking "${SUDO_USER}" "${_target}"
   local _cwd=""
-	_cwd="$(pwd)"
+  _cwd="$(pwd)"
   Checking "_cwd:${_cwd}"
   if  it_exists_with_spaces "${_target}" ; then # && it_exists_with_spaces "${_target}/.git" ; then
   {
@@ -6673,7 +6689,7 @@ function _git_clone() {
       warning Could not git clone "${_source}" "${_target}"
     }
     else
-		{
+    {
       if git branch --set-upstream-to=origin/master master ; then
       {
         warning "Could not do git branch --set-upstream-to=origin/master master"
@@ -6689,7 +6705,7 @@ function _git_clone() {
         warning "Could not git config pull.rebase false"
       }
       fi
-		}
+    }
     fi
   }
   fi
@@ -6857,7 +6873,7 @@ function _install_dmgs_dmg__64() {
   #
   local CODENAME="${1}"
   local extension=""
-	extension="$(echo "${CODENAME}" | rev | cut -d'.' -f 1 | rev)"
+  extension="$(echo "${CODENAME}" | rev | cut -d'.' -f 1 | rev)"
   local APPDIR="${2}"
   local TARGET_URL="${3}"
   # CODENAME="$(basename "${TARGET_URL}" )"
@@ -6869,7 +6885,7 @@ function _install_dmgs_dmg__64() {
   # local UNZIPDIR="$(echo -en "${APPDIR}" | sed 's/.app//g')"
   # echo "$(pwd)"
   local UNZIPDIR=""
-	UNZIPDIR="$(dirname  "${APPDIR}")"
+  UNZIPDIR="$(dirname  "${APPDIR}")"
   local APPDIR="${APPDIR##*/}"    # same as  $(basename "${APPDIR}")
   #local APPDIR=$(basename "${APPDIR}")
   # local APPDIR="$(echo -en "${CODENAME}" | sed 's/.dmg//g'| sed 's/-//g').app"
