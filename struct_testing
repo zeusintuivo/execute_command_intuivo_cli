@@ -101,8 +101,9 @@ function HOW_TO_LOAD_SEVERAL_FILES() {
             if [ -n "${ONE_SCRIPT}" ] ; then         # if not empty
             {
                 URL="${provider}${ONE_SCRIPT}"
+				        # shellcheck disable=SC1090
                 [   -d "${cached_directory}" ] && source "$URL"
-                [ ! -d "${cached_directory}" ] &&eval """$(wget --quiet --no-check-certificate $URL  -O -  2>/dev/null )"""   # suppress only wget download messages, but keep wget output for variable
+                [ ! -d "${cached_directory}" ] &&eval """$(wget --quiet --no-check-certificate "$URL"  -O -  2>/dev/null )"""   # suppress only wget download messages, but keep wget output for variable
                 echo "$URL Loaded"
             }
             fi
@@ -135,7 +136,7 @@ function HOW_TO_LOAD_SEVERAL_FILES() {
             if [[ -n "${ONE_SCRIPT}" ]] ; then         # if not empty
             {
                 URL="${provider}${ONE_SCRIPT}"
-                eval """$(curl $URL  2>/dev/null )"""  # suppress only curl download messages, but keep curl output for variable
+                eval """$(curl -sSkL "$URL"  2>/dev/null )"""  # suppress only curl download messages, but keep curl output for variable
                 echo "$URL Loaded"
             }
             fi
@@ -159,6 +160,7 @@ function HOW_TO_LOAD_JUST_ONE_SCRIPT_LOCAL_AND_ONLINE_EXECUTE_COMMAND() {
     #Sample short call for loading execute command
     load_execute_command_curl() {
         local provider="$HOME/_/clis/execute_command_intuivo_cli/execute_command"
+				# shellcheck disable=SC1090
         [   -e "${provider}"  ] && source "${provider}" && echo "Loading Execute Command locally"
         command -v anounce_command >/dev/null 2>&1 && echo "                              \.. loading succeeded " && return 0
         ( [ ! -e "${provider}"  ] || ( ! command -v anounce_command >/dev/null 2>&1 ) ) && echo "Loading Execute Command from the net " && eval """$(curl https://raw.githubusercontent.com/zeusintuivo/execute_command_intuivo_cli/master/execute_command -o -  2>/dev/null )"""   # suppress only curl download messages, but keep curl output for variable
@@ -175,6 +177,7 @@ function HOW_TO_LOAD_JUST_ONE_SCRIPT_LOCAL_AND_ONLINE_STRUCT_USING_CURL() {
     # Sample short call for loading struct_testing
     load_struct_testing_curl() {
         local provider="$HOME/_/clis/execute_command_intuivo_cli/struct_testing"
+				# shellcheck disable=SC1090
         [   -e "${provider}"  ] && source "${provider}" && echo "Loading Struct Testing locally"
         command -v passed >/dev/null 2>&1 && echo "                              \.. loading succeeded " && return 0
         ( [ ! -e "${provider}"  ] || ( ! command -v passed >/dev/null 2>&1 ) ) && echo "Loading Struct Testing from the net " && eval """$(curl https://raw.githubusercontent.com/zeusintuivo/execute_command_intuivo_cli/master/struct_testing -o -  2>/dev/null )"""   # suppress only curl download messages, but keep curl output for variable
@@ -192,6 +195,7 @@ function HOW_TO_LOAD_JUST_ONE_SCRIPT_LOCAL_AND_ONLINE_STRUCT_USING_WGET() {
     #Sample short call for loading struct_testing
     load_struct_testing_wget() {
         local provider="$HOME/_/clis/execute_command_intuivo_cli/struct_testing"
+				# shellcheck disable=SC1090
         [   -e "${provider}"  ] && source "${provider}" && echo "Loading Struct Testing locally"
         command -v passed >/dev/null 2>&1 && echo "                              \.. loading succeeded " && return 0
         ( [ ! -e "${provider}"  ] || ( ! command -v passed >/dev/null 2>&1 ) ) && echo "Loading Struct Testing from the net " && eval """$(wget --quiet --no-check-certificate  https://raw.githubusercontent.com/zeusintuivo/execute_command_intuivo_cli/master/struct_testing -O -  2>/dev/null )"""   # suppress only wget download messages, but keep wget output for variable
@@ -217,9 +221,6 @@ function HOW_TO_LOAD_JUST_ONE_SCRIPT_ONLINE_ALWAYS_STRUCT_USING_WGET() {
 
 }
 # end HOW_TO_LOAD_JUST_ONE_SCRIPT_ONLINE_ALWAYS_STRUCT_USING_WGET
-
-
-
 
 
  ######  ######## ########  ##     ##  ######  ########
@@ -253,16 +254,19 @@ function HOW_TO_LOAD_JUST_ONE_SCRIPT_ONLINE_ALWAYS_STRUCT_USING_WGET() {
 alias egrep='grep -E --color=auto --exclude-dir={.bzr,CVS,.git,.hg,.svn,.idea,.tox}'
 
 RED="\033[01;31m"
+# shellcheck disable=SC2034
 DARKERRED="\033[38;5;1m"
 #RED="\033[38;5;1m"
 ORANGE="\033[38;5;202m"
 
+# shellcheck disable=SC2034
 WHITE="\033[38;5;15m"
+# shellcheck disable=SC2034
 WHITEBOLD="\033[01;37m"
 YELLOW="\033[01;33m"
 YELLOW226="\033[38;5;226m"
 
-
+# shellcheck disable=SC2034
 GRAY="\033[38;5;8m"
 GRAY241="\033[38;5;241m"
 GRAYEDOUT="\033[01;30m"
@@ -281,6 +285,7 @@ BRIGHT_BLUE87="\033[38;5;87m"
 
 YELLOW_OVER_DARKBLUE="\033[38;5;220m\033[48;5;20m"
 YELLOW_OVER_GRAY241="\033[38;5;220m\033[48;5;241m"
+# shellcheck disable=SC2034
 YELLOW_OVER_DARKBLUE2="\033[38;5;11m\033[48;5;18m"
 LIGHTPINK_OVER_DARKBLUE="\033[38;5;204m\033[48;5;21m"
 DARK_BLUE_OVER_PEACH="\033[38;5;20m\033[48;5;208m"
@@ -290,7 +295,7 @@ RESET="\033[0m"
 CERO="\033[01;0m"
 
         function passed() {
-            typeset -a ARGS="${@}"
+            typeset ARGS="${*}"
             if [[ -n "${ARGS-x}" ]] ; then # if its set and not empty
             {
                 echo -e "${LIGHTGREEN} ✔ ${LIGHTYELLOW} ${ARGS}  ${RESET}"
@@ -303,14 +308,17 @@ CERO="\033[01;0m"
         }
 
         function Warning() {
-            typeset -a ARGS="${*}"
+            typeset ARGS="${*}"
             if [[ -n "${ARGS-x}" ]] ; then # if its set and not empty
             {
-                # echo -e "${BRIGHT_BLUE87} ${BASH_SOURCE}:${BASH_LINENO[0]} ${FUNCNAME[0]}()"
-                # echo -e "${BRIGHT_BLUE87} ${BASH_SOURCE}:${BASH_LINENO[-1]} ${FUNCNAME[-1]}()"
-                local __caller=$(caller)
-                local -i __caller_line=$(echo "${__caller}" | cut -d' ' -f1)
-                local __caller_script_name=$(echo "${__caller}" | cut -d' ' -f2)
+                # echo -e "${BRIGHT_BLUE87} ${BASH_SOURCE[0]}:${BASH_LINENO[0]} ${FUNCNAME[0]}()"
+                # echo -e "${BRIGHT_BLUE87} ${BASH_SOURCE[0]}:${BASH_LINENO[-1]} ${FUNCNAME[-1]}()"
+                local __caller=""
+								__caller=$(caller)
+                local -i __caller_line=0
+								__caller_line=$(echo "${__caller}" | cut -d' ' -f1)
+                local __caller_script_name=""
+								__caller_script_name=$(echo "${__caller}" | cut -d' ' -f2)
 
                 local __bash_source=""
                 local -i _error_count=${#BASH_LINENO[@]}
@@ -324,7 +332,7 @@ CERO="\033[01;0m"
 
 #echo -e "0000${BRIGHT_BLUE87} ${BASH_SOURCE[0]}:${BASH_LINENO[0]} \t\t  ${FUNCNAME[0]}() ${RESET}"  >&2
                 echo -e "${BRIGHT_BLUE87} ${__caller_script_name}:${__caller_line} \t\t  ${FUNCNAME[1]}() ${RESET}"  >&2
-                for (( _counter=1; _counter<${_error_count}; _counter++ )); do
+                for (( _counter=1; _counter < _error_count ; _counter++ )); do
                     _counter_offset=$(( _counter + 1 ))
                     # echo -e "${BASHCOMMAND[$_counter_offset]}"
                     echo -e "${BRIGHT_BLUE87} ${BASH_SOURCE[$_counter_offset]}:${BASH_LINENO[$_counter]} \t\t ${FUNCNAME[$_counter_offset]}() ${RESET}"  >&2
@@ -347,12 +355,674 @@ CERO="\033[01;0m"
             kill_execution
         }
 
+#-----
+
+###  /////// HERE ///////
+###  /////// HERE ///////
+###  /////// HERE ///////
+###  /////// HERE ///////
+###  /////// HERE ///////
+###  /////// HERE ///////
+###  /////// HERE ///////
+###  /////// HERE ///////
+###  /////// HERE ///////
+###  /////// HERE ///////
+###  /////// HERE ///////
+###  /////// HERE ///////
+###  /////// HERE ///////
+###  /////// HERE ///////
+
+function get_linux_architecture(){
+  # How to use
+  #    FUNCTION_TO_CALL=$(get_linux_architecture "debian")
+  # > _debian__64
+  # > _debian__32
+  #    FUNCTION_TO_CALL=$(get_linux_architecture "${DISTRO}")
+  #
+  local system_nick="${1}"
+  local return_function_to_call=""
+  if [[ "$(uname -i)" == "x86_64" ]] ; then
+  {
+    return_function_to_call="_${system_nick}__64"
+  }
+  elif [[ "$(uname -i)" == "i686"   ]] ; then
+  {
+    return_function_to_call="_${system_nick}__32"
+  }
+  elif [[ "$(uname -i)" == "arm64"   ]] ; then
+  {
+    return_function_to_call="_${system_nick}__arm64"
+  }
+  elif [[ "$(uname -i)" == "aarch64"   ]] ; then
+  {
+    return_function_to_call="_${system_nick}__aarch64"
+  }
+  else
+  {
+    return_function_to_call="_${system_nick}__$(uname -i)"
+    # warning "struct_testing:$LINENO ERROR to determine "$(uname -a)" architecture (uname -i)  for: <${return_function_to_call}>"
+  }
+  fi
+  if [[ -z "${return_function_to_call}" ]] || [[ "${return_function_to_call}" =~ 'nknown' ]] ; then
+  {
+    if [[ "$(uname -a)" =~  'x86_64' ]] ; then
+    {
+      return_function_to_call="_${system_nick}__64"
+    }
+    elif [[ "$(uname -a)" =~  'i686' ]] ; then
+    {
+      return_function_to_call="_${system_nick}__32"
+    }
+    elif [[ "$(uname -a)" =~  'arm64' ]] ; then
+    {
+      return_function_to_call="_${system_nick}__arm64"
+    }
+    elif [[ "$(uname -a)" =~ "aarch64"   ]] ; then
+    {
+      return_function_to_call="_${system_nick}__arm64"
+    }
+    else
+    {
+      return_function_to_call="_${system_nick}__$(uname -i)"
+      >&2 echo -e "${RED}" && echo "$0:$LINENO  ERROR failed to determine \"$(uname -a)\" architecture $(uname -i)  for: <${return_function_to_call}>"
+      return 1
+    }
+    fi
+  }
+  fi
+  >&2 echo -e "${CYAN} DEBUG $0:$LINENO found name: <${return_function_to_call}> ${RESET} "
+  echo -n "${return_function_to_call}"
+  return 0
+} # end get_linux_architecture
+
+function get_mac_architecture(){
+  # How to use
+  #    FUNCTION_TO_CALL=$(get_mac_architecture "darwin")
+  # > _darwin__64
+  # > _darwin__32
+  #    FUNCTION_TO_CALL=$(get_mac_architecture "${DISTRO}")
+  #
+  local system_nick="${1}"
+  local return_function_to_call=""
+  if [[ "$(uname -m)" == "x86_64" ]] ; then
+  {
+    return_function_to_call="_${system_nick}__64"
+  }
+  elif [[ "$(uname -m)" == "i686"   ]] ; then
+  {
+    return_function_to_call="_${system_nick}__32"
+  }
+  elif [[ "$(uname -m)" == "arm64"   ]] ; then
+  {
+    return_function_to_call="_${system_nick}__arm64"
+  }
+  elif [[ "$(uname -m)" == "aarch64"   ]] ; then
+  {
+    return_function_to_call="_${system_nick}__aarch64"
+  }
+  else
+  {
+    return_function_to_call="_${system_nick}__$(uname -m)"
+    >&2 echo -e "${RED}" && echo "$0:$LINENO  ERROR to determine \"$(uname -a)\" architecture (uname -m)  for: <${return_function_to_call}>"
+  }
+  fi
+  if [[ -z "${return_function_to_call}" ]] || [[ "${return_function_to_call}" =~ 'nknown' ]] ; then
+  {
+      if [[ "$(uname -a)" =~  'x86_64' ]] ; then
+      {
+       return_function_to_call="_${system_nick}__64"
+      }
+      elif [[ "$(uname -a)" =~  'i686' ]] ; then
+      {
+       return_function_to_call="_${system_nick}__32"
+      }
+      elif [[ "$(uname -a)" =~  'arm64' ]] ; then
+      {
+        return_function_to_call="_${system_nick}__arm64"
+      }
+      elif [[ "$(uname -a)" =~ "aarch64"   ]] ; then
+      {
+        return_function_to_call="_${system_nick}__aarch64"
+      }
+      else
+      {
+        return_function_to_call="_${system_nick}__$(uname -m)"
+        >&2 echo -e "${RED}" && echo "$0:$LINENO  ERROR to determine \"$(uname -a)\" architecture (uname -m)  for: <${return_function_to_call}>"
+      }
+      fi
+  }
+  fi
+  echo -n "${return_function_to_call}"
+  return 0
+} # end get_mac_architecture
+
+function _get_debian_style_version_number_maybe(){
+  # Sample use:
+  #     local target_name="ubuntu"
+  #     local _debian_style_version_number_maybe=$(_get_debian_style_version_number_maybe)
+  #     FUNCTION_TO_CALL=$(get_linux_architecture "${target_name}${_debian_style_version_number_maybe}")
+  #
+  trap '>&2 echo -e "${RED}" && echo "ERROR failed $0:$LINENO struct_testing _get_debian_style_version_number_maybe()  " && >&1 echo -n "" && return 1' ERR
+  local -i _err=0
+  local _response=""
+  local linuxversion=0
+  local -i linux_numeric_try=0
+  # 20250504 linuxversion=$(cut -d. -f1 <<< $(cut -d'"' -f2 <<< $(grep VERSION_ID= <<< $(cat /etc/*-release) ) ) )
+	linuxversion=$(cut -d. -f1 <<< "$(cut -d'"' -f2 <<< "$(cut -d= -f2 <<< "$(grep VERSION_ID= <<< "$(cat /etc/*-release)" )" | xargs )")" )
+  linux_numeric_try=${linuxversion}
+  _err=$?
+  if [ ${_err} -eq 0 ] && [ ${linux_numeric_try} -gt 0 ] ;  then
+  {
+    local -i testnumber=0
+    testnumber=$(( linux_numeric_try + 1 ))
+    testnumber=$(( testnumber - 1 ))
+    if [ ${testnumber} -eq ${linux_numeric_try} ] ; then
+    {
+      _response=${linux_numeric_try}
+      echo -n "_${_response}"
+      return 0
+    }
+    fi
+  }
+  fi
+  echo -n "${_response}"
+  return 1
+} # end _get_debian_style_version_number_maybe
+
+function _get_redhat_style_version_number_maybe(){
+  # Sample use:
+  #     local target_name="fedora"
+  #     local _redhat_style_version_number_maybe=$(_get_redhat_style_version_number_maybe)
+  #     FUNCTION_TO_CALL=$(get_linux_architecture "${target_name}${_redhat_style_version_number_maybe}")
+  #
+  #
+  trap '>&2 echo -e "${RED}" && echo "ERROR failed $0:$LINENO struct_testing _get_redhat_style_version_number_maybe()  " && >&1 echo -n "" && return 1' ERR
+  local -i _err=0
+  local _response=""
+  local linuxversion=0
+  local -i linux_numeric_try=0
+	linuxversion=$(cut -d. -f1 <<< "$(cut -d'"' -f2 <<< "$(cut -d= -f2 <<< "$(grep VERSION_ID= <<< "$(cat /etc/*-release)" )" | xargs )")" )
+  linux_numeric_try=${linuxversion}
+  _err=$?
+  if [ ${_err} -eq 0 ] && [ ${linux_numeric_try} -gt 0 ] ;  then
+  {
+    local -i testnumber=0
+    testnumber=$(( linux_numeric_try + 1 ))
+    testnumber=$(( testnumber - 1 ))
+    if [ ${testnumber} -eq ${linux_numeric_try} ] ; then
+    {
+      _response=${linux_numeric_try}
+      echo -n "_${_response}"
+      return 0
+    }
+    fi
+  }
+  fi
+	echo -n "${_response}"
+  return 1
+} # end _get_redhat_style_version_number_maybe
+
+function _get_mac_style_release_number_maybe(){
+  # Sample use:
+  #     local target_name="darwin"
+  #     local _mac_style_version_number_maybe=$(_get_mac_style_release_number_maybe)
+  #     FILE_TO_CALL=$(get_linux_architecture "${target_name}${_mac_style_version_number_maybe}")
+  #
+  #
+  trap '>&2 echo -e "${RED}" && echo "ERROR failed $0:$LINENO struct_testing _get_mac_style_release_number_maybe()  " && >&1 echo -n "" && return 1' ERR
+  local -i _err=0
+  local _response=""
+  local -i macversion=0
+  macversion=$(cut -d. -f1 <<< "$( uname -r )" )
+  # macversion=$(sw_vers | grep ProductVersion | cut -d: -f2 | xargs | cut -d. -f1,2 | sed 's/\./_/g' )
+  _err=$?
+  if [ ${_err} -eq 0 ] && [ ${macversion} -gt 0 ] ;  then
+  {
+    local -i testnumber=0
+    testnumber=$(( macversion + 1 ))
+    testnumber=$(( testnumber - 1 ))
+    if [ ${testnumber} -eq ${macversion} ] ; then
+    {
+      _response=${macversion}
+      echo -n "_${_response}"
+      return 0
+    }
+    fi
+  }
+  fi
+  echo -n "${_response}"
+  return 1
+} # end _get_mac_style_release_number_maybe
+
+function _get_mac_style_version_number_maybe(){
+  # Sample use:
+  #     local target_name="darwin"
+  #     local _mac_style_version_number_maybe=$(_get_mac_style_version_number_maybe)
+  #     FILE_TO_CALL=$(get_linux_architecture "${target_name}${_mac_style_version_number_maybe}")
+  #
+  #
+  trap '>&2 echo -e "${RED}" && echo "ERROR failed $0:$LINENO struct_testing _get_mac_style_version_number_maybe()  " && >&1 echo -n "" && return 1' ERR
+  local -i _err=0
+  local _response=""
+  local -i macversion1=0
+  local -i macversion2=0
+  local macversion=0
+  # macversion=$(cut -d. -f1 <<< $( uname -r ) )
+  macversion1=$(sw_vers | grep ProductVersion | cut -d: -f2 | xargs | cut -d. -f1 | sed 's/\./_/g' )
+  _err=$?
+  if [ ${_err} -eq 0 ] && [ ${macversion1} -gt 0 ] ;  then
+  {
+    local -i testnumber=0
+    testnumber=$(( macversion1 + 1 ))
+    testnumber=$(( testnumber - 1 ))
+    if [ ${testnumber} -eq ${macversion1} ] ; then
+    {
+      macversion2=$(sw_vers | grep ProductVersion | cut -d: -f2 | xargs | cut -d. -f2 | sed 's/\./_/g' )
+      _err=$?
+      if [ ${_err} -eq 0 ] && [ ${macversion2} -gt 0 ] ;  then
+      {
+        local -i testnumber=0
+        testnumber=$(( macversion2 + 1 ))
+        testnumber=$(( testnumber - 1 ))
+        if [ ${testnumber} -eq ${macversion2} ] ; then
+        {
+          macversion="${macversion1}_${macversion2}"
+          _response=${macversion}
+          echo -n "_${_response}"
+          return 0
+        }
+        fi
+      }
+      fi
+    }
+    fi
+  }
+  fi
+
+  echo -n "${_response}"
+  return 1
+} # end _get_mac_style_version_number_maybe
+
+
+function determine_os_and_fire_action() {
+  # Interface
+  # How to use
+  # First implement the target functions
+  #              _fedora__64(){ }
+  #              _fedora__32(){ }
+  #              _ubuntu__64(){ }
+  #              _ubuntu__32(){ }
+  #              _mingw__64(){ }
+  #              _mingw__32(){ }
+  #              _darwin__64(){ }
+  #              _darwin__32(){ }
+  # Then call this function
+  #              determine_os_and_fire_action  """${*}"""
+  # remember to pass the  """${*}""" for the parameters to pass
+  # If will fail is the function has not been implemented with Error message
+  # of the function that is missing like _archlinux__64
+  local FUNCTION_TO_CALL_WITH_VERSION=""
+  local FUNCTION_TO_CALL=""
+  local PARAMETERS="${*:-}"
+  local -i _DEBUG=${DEBUG:-0}
+  local -i _err=0
+  # Check operating systems
+  # echo  ${@}
+  if [[ "$(uname)" == "Darwin" ]] ; then
+  {
+    if (( _DEBUG )) ; then
+          >&2 echo "Darwin"
+    fi
+    # Do something under Mac OS X platform
+    # FUNCTION_TO_CALL='_darwin__64'
+    # PARAMETERS="$@"
+    local target_name="darwin"
+    local _mac_style_version_number_maybe=""
+		_mac_style_version_number_maybe=$(_get_mac_style_version_number_maybe)
+    _err=$?
+    if [ ${_err} -eq 0 ] ; then
+    {
+      FUNCTION_TO_CALL_WITH_VERSION=$(get_mac_architecture "${target_name}${_mac_style_version_number_maybe}")
+    }
+    fi
+    FUNCTION_TO_CALL=$(get_mac_architecture "${target_name}")
+    PARAMETERS="${*}"
+  }
+  elif [[ "$(cut -c1-5 <<< "$(uname -s)")" == "Linux" ]] ; then
+  {
+    if (( _DEBUG )) ; then
+      >&2 echo "Linux"
+    fi
+    # Do something under GNU/Linux platform
+    # Determine OS platform
+    local UNAME=""
+     UNAME=$(uname | tr "[:upper:]" "[:lower:]")
+    if (( _DEBUG )) ; then
+      >&2 echo "UNAME: $UNAME"
+    fi
+    local DISTRO=""
+    local ID=""
+    local VERSION_ID=""
+    # If Linux, try to determine specific distribution
+    if [[ "$UNAME" == "linux" ]]; then
+    {
+      # If available, use LSB to identify distribution
+      if [[ -f /etc/lsb-release ]] || [[  -d /etc/lsb-release.d ]]; then
+      {
+        if ( command -v lsb_release >/dev/null 2>&1; ); then
+        {
+          if (( _DEBUG )) ; then
+            >&2 echo "RELEASE Option: 1"
+          fi
+          DISTRO=$(lsb_release -i | cut -d: -f2 | sed s/'^\t'// | head -1)
+        }
+        else
+        {
+          if (( _DEBUG )) ; then
+            >&2 echo "RELEASE Option: 2"
+          fi
+          DISTRO=$(ls -d /etc/[A-Za-z]*[_-][rv]e[lr]* | grep -v "lsb" | cut -d'/' -f3 | cut -d'-' -f1 | cut -d'_' -f1 | head -1)
+        }
+        fi
+      }
+      else # Otherwise, use release info file
+      {
+        if ( command -v lsb_release >/dev/null 2>&1; ); then
+        {
+          if (( _DEBUG )) ; then
+            echo "RELEASE Option: 1"
+          fi
+          DISTRO=$(lsb_release -i | cut -d: -f2 | sed s/'^\t'// | head -1)
+        }
+        else
+        {
+          if (( _DEBUG )) ; then
+            echo "RELEASE Option: 3"
+          fi
+          DISTRO=$(ls -d /etc/[A-Za-z]*[_-][rv]e[lr]* | grep -v "lsb" | cut -d'/' -f3 | cut -d'-' -f1 | cut -d'_' -f1 | head -1)
+        }
+        fi
+      }
+      fi
+    }
+    fi
+    if (( _DEBUG )) ; then
+      >&2 echo "DISTRO:$DISTRO"
+    fi
+    if [[ -z "$DISTRO" ]]; then  # if empty
+    {
+      if (( _DEBUG )) ; then
+        >&2 echo "DISTRO empty"
+      fi
+      # If available, use /etc/os-release to identify distribution
+        if [ -f /etc/os-release ]; then
+        {
+          source /etc/os-release
+          # file_exists "/etc/os-release"
+          _err=$?
+    _assure_success ${_err}
+          # source /etc/os-release
+          # $ echo $ID
+          # fedora
+          # $ echo $VERSION_ID
+          # 17
+          # $ echo $VERSION
+          # 17 (Beefy Miracle)
+          DISTRO=$ID
+        }
+        fi
+    }
+    fi
+    if [[ -z "$DISTRO" ]] ; then  # if empty
+    {
+        failed "to determine DISTRO for this linux. uname -a, cat /etc/os-release, lsb_release -i"
+    }
+    fi
+	# ---
+	#####  Fedora #####
+	#####  Fedora #####
+	#####  Fedora #####
+	#####  Fedora #####
+	#####  Fedora #####
+	#####  Fedora #####
+	#####  Fedora #####
+	#####  Fedora #####
+    if [[ "$DISTRO" == *"edora"* ]]; then
+    {
+      local target_name="fedora"
+      local _redhat_style_version_number_maybe=""
+			_redhat_style_version_number_maybe=$(_get_redhat_style_version_number_maybe)
+      _err=$?
+      if [ ${_err} -eq 0 ] ; then
+      {
+        FUNCTION_TO_CALL_WITH_VERSION=$(get_linux_architecture "${target_name}${_redhat_style_version_number_maybe}")
+      }
+      fi
+      FUNCTION_TO_CALL=$(get_linux_architecture "${target_name}")
+      PARAMETERS="${*}"
+    }
+	# ---
+	#####  Ubuntu #####
+	#####  Ubuntu #####
+	#####  Ubuntu #####
+	#####  Ubuntu #####
+	#####  Ubuntu #####
+	#####  Ubuntu #####
+	#####  Ubuntu #####
+	#####  Ubuntu #####
+    elif [[ "$DISTRO" == *"untu"* ]]; then
+    {
+      # ubuntu lsb_release -i | sed 's/Distributor\ ID://g' = \tUbuntu\n
+      local target_name="ubuntu"
+      local _debian_style_version_number_maybe=""
+			_debian_style_version_number_maybe=$(_get_debian_style_version_number_maybe)
+      _err=$?
+      if [ ${_err} -eq 0 ] ; then
+      {
+        FUNCTION_TO_CALL_WITH_VERSION=$(get_linux_architecture "${target_name}${_debian_style_version_number_maybe}")
+      }
+      fi
+      FUNCTION_TO_CALL=$(get_linux_architecture "${target_name}")
+      PARAMETERS="${*}"
+    }
+
+    elif [[ "$DISTRO" == *"bian"* ]]; then
+    {
+      local target_name="debian"
+      local _debian_style_version_number_maybe=""
+			_debian_style_version_number_maybe=$(_get_debian_style_version_number_maybe)
+      _err=$?
+      if [ ${_err} -eq 0 ] ; then
+      {
+        FUNCTION_TO_CALL_WITH_VERSION=$(get_linux_architecture "${target_name}${_debian_style_version_number_maybe}")
+      }
+      fi
+      FUNCTION_TO_CALL=$(get_linux_architecture "${target_name}")
+      PARAMETERS="${*}"
+    }
+    else
+    {
+      local target_name="${DISTRO}"
+      local _redhat_style_version_number_maybe=""
+			_redhat_style_version_number_maybe=$(_get_redhat_style_version_number_maybe)
+      _err=$?
+      if [ ${_err} -eq 0 ] ; then
+      {
+        FUNCTION_TO_CALL_WITH_VERSION=$(get_linux_architecture "${target_name}${_redhat_style_version_number_maybe}")
+      }
+      fi
+      FUNCTION_TO_CALL=$(get_linux_architecture "${target_name}")
+      PARAMETERS="${*}"
+    }
+    fi
+    if (( _DEBUG )) ; then
+      echo "FUNCTION_TO_CALL: $FUNCTION_TO_CALL"
+      echo "uname -i: $(uname -i)"
+    fi
+    # For everything else (or if above failed), just use generic identifier
+    unset UNAME
+    unset DISTRO
+    unset ID
+  }
+  elif
+  # shellcheck disable=SC2003
+  [[ "$(cut -c1-10 <<< "$(uname -s)" )" == "MINGW32_NT" ]] ; then
+  {
+    # Do something under Windows NT platform
+    if [[ "$(uname -i)" == "x86_64" ]] ; then
+    {
+      # local target_name="${DISTRO}"
+      # local _redhat_style_version_number_maybe=$(_get_redhat_style_version_number_maybe)
+      # FUNCTION_TO_CALL_WITH_VERSION=$(get_linux_architecture "${target_name}${_redhat_style_version_number_maybe}")
+      # FUNCTION_TO_CALL=$(get_linux_architecture "${target_name}")
+      FUNCTION_TO_CALL='_mingw__64'
+      PARAMETERS="$*"
+    }
+    elif [[ "$(uname -i)" == "i686"   ]] ; then
+    {
+      # local target_name="${DISTRO}"
+      # local _redhat_style_version_number_maybe=$(_get_redhat_style_version_number_maybe)
+      # FUNCTION_TO_CALL_WITH_VERSION=$(get_linux_architecture "${target_name}${_redhat_style_version_number_maybe}")
+      # FUNCTION_TO_CALL=$(get_linux_architecture "${target_name}")
+      FUNCTION_TO_CALL='_mingw__32'
+      PARAMETERS="$*"
+    }
+    fi
+    # nothing here
+  }
+  elif
+  # shellcheck disable=SC2003
+  [[ "$(cut -c1-10 <<< "$(uname -s)" )" == "MINGW64_NT" ]] ; then
+  {
+    # Do something under Windows NT platform
+    if [[ "$(uname -i)" == "x86_64" ]] ; then
+    {
+      # local target_name="${DISTRO}"
+      # local _redhat_style_version_number_maybe=$(_get_redhat_style_version_number_maybe)
+      # FUNCTION_TO_CALL_WITH_VERSION=$(get_linux_architecture "${target_name}${_redhat_style_version_number_maybe}")
+      # FUNCTION_TO_CALL=$(get_linux_architecture "${target_name}")
+      FUNCTION_TO_CALL='_mingw__64'
+      PARAMETERS="$*"
+    }
+    elif [[ "$(uname -i)" == "i686"   ]] ; then
+    {
+      # local target_name="${DISTRO}"
+      # local _redhat_style_version_number_maybe=$(_get_redhat_style_version_number_maybe)
+      # FUNCTION_TO_CALL_WITH_VERSION=$(get_linux_architecture "${target_name}${_redhat_style_version_number_maybe}")
+      # FUNCTION_TO_CALL=$(get_linux_architecture "${target_name}")
+      FUNCTION_TO_CALL='_mingw__32'
+      PARAMETERS="$*"
+    }
+    fi
+    # nothing here
+  }
+  else
+  {
+    failed "system not recognized"
+  }
+  fi
+  if [[ -z "${FUNCTION_TO_CALL}" ]]; then  # if empty
+  {
+     failed "struct_testing:$LINENO ERROR to determine FUNCTION_TO_CALL for this OS. uname -a, cat /etc/os-release, lsb_release -i <${FUNCTION_TO_CALL}>"
+  }
+  else
+  {
+    if function_is_defined "${FUNCTION_TO_CALL_WITH_VERSION}" ; then
+    {
+      passed "${FUNCTION_TO_CALL_WITH_VERSION}" "${PARAMETERS:-}" "${THISSCRIPTPARAMS:-}"
+      ${FUNCTION_TO_CALL_WITH_VERSION} "${PARAMETERS:-}" "${THISSCRIPTPARAMS:-}"
+      _err=$?
+      _assure_success ${_err}
+    }
+    else
+    {
+      warning "struct_testing:$LINENO  could not find function with version for this OS or DISTRO: ${FUNCTION_TO_CALL_WITH_VERSION}"
+      Installing "would look at adding this:
+${FUNCTION_TO_CALL_WITH_VERSION}() {
+  trap 'echo Error:\$?' ERR INT
+  local _parameters=\"\${*-}\"
+  local -i _err=0
+  callsomething \"\${_parameters-}\"
+  _err=\$?
+  if [ \${_err} -gt 0 ] ; then
+  {
+    failed \"\$0:\$LINENO while running callsomething above _err:\${_err}\"
+  }
+  fi
+} # end ${FUNCTION_TO_CALL_WITH_VERSION}
+"
+
+      Checking "struct_testing:$LINENO  if we can find a nonversion function: ${FUNCTION_TO_CALL}"
+      if function_is_defined "${FUNCTION_TO_CALL}" ; then
+      {
+        passed "${FUNCTION_TO_CALL}" "${PARAMETERS:-}" "${THISSCRIPTPARAMS:-}"
+        ${FUNCTION_TO_CALL} "${PARAMETERS:-}" "${THISSCRIPTPARAMS:-}"
+  _err=$?
+        _assure_success ${_err}
+      }
+      else
+      {
+        warning "struct_testing:$LINENO  could not find function for this OS or DISTRO: ${FUNCTION_TO_CALL}"
+        Installing "would look at adding this:
+${FUNCTION_TO_CALL}() {
+  trap 'echo Error:\$?' ERR INT
+  local _parameters=\"\${*-}\"
+  local -i _err=0
+  callsomething \"\${_parameters-}\"
+  _err=\$?
+  if [ \${_err} -gt 0 ] ; then
+  {
+    failed \"\$0:\$LINENO  while running callsomething above _err:\${_err}\"
+  }
+  fi
+} # end ${FUNCTION_TO_CALL}
+"
+
+        failed "struct_testing:$LINENO  to find function for this OS or DISTRO: ${FUNCTION_TO_CALL} ${PARAMETERS:-} ${THISSCRIPTPARAMS:-}
+        Cannot proceed until you add this function above missing
+        "
+				# shellcheck disable=SC2317
+        _err=$?
+				# shellcheck disable=SC2317
+        _assure_success ${_err}
+      }
+      fi
+
+    }
+    fi
+
+  }
+  fi
+  _assure_success $?
+  unset FUNCTION_TO_CALL
+  unset PARAMETERS
+  return ${_err}
+} # end determine_os_and_fire_action
+
+#-----
+
+###  /////// HERE ///////
+###  /////// HERE ///////
+###  /////// HERE ///////
+###  /////// HERE ///////
+###  /////// HERE ///////
+###  /////// HERE ///////
+###  /////// HERE ///////
+###  /////// HERE ///////
+###  /////// HERE ///////
+###  /////// HERE ///////
+###  /////// HERE ///////
+###  /////// HERE ///////
+###  /////// HERE ///////
+###  /////// HERE ///////
+
+
         function enforce_parameter_with_options(){
           # Sample use
           # enforce_parameter_with_options 2 PLATFORM "${PLATFORM}" "mac windows linux"
           # Tests for the function
           # _DEBUG=1
-					local -i _DEBUG=${DEBUG:-0}
+          local -i _DEBUG=${DEBUG:-0}
           local TESTING="enforce_parameter_with_options function ${FUNCNAME[1]} param at position ${RESET}<${YELLOW_OVER_DARKBLUE}${1}${RESET}${LIGHTYELLOW}> alias for <${CYAN}${2}${LIGHTYELLOW}> to have one of these values ${RESET}<${YELLOW_OVER_DARKBLUE}${4}${RESET}>"
           (( _DEBUG )) && echo -e "${FUNCNAME[0]}"
           (( _DEBUG )) && echo "${*} -assume existing variable for this part"
@@ -364,8 +1034,9 @@ CERO="\033[01;0m"
           (( _DEBUG )) && ( ( typeset -p "${2}"  &>/dev/null  ) || echo "2 not defined 2")
           (( _DEBUG )) && ( ! typeset -p "${2}"  &>/dev/null  ) && echo "2 not defined 3"
           local -i _seemsempty_=0
+			    # shellcheck disable=SC2268
           [[ "x${3}x" = "xx" ]] && _seemsempty_=1
-          (( _seemsempty_ )) && echo -e "${RED} 𝞦 \\n${BASH_SOURCE}:${BASH_LINENO[1]} ${FUNCNAME[-0]}(...) \\n$0:${BASH_LINENO[0]} ${FUNCNAME[1]}(...) \\n ${LIGHTYELLOW} ${TESTING} has failed "
+          (( _seemsempty_ )) && echo -e "${RED} 𝞦 \\n${BASH_SOURCE[0]}:${BASH_LINENO[1]} ${FUNCNAME[-0]}(...) \\n$0:${BASH_LINENO[0]} ${FUNCNAME[1]}(...) \\n ${LIGHTYELLOW} ${TESTING} has failed "
           (( _seemsempty_ )) && failed "${TESTING}"
           (( _seemsempty_ )) && exit 1
           if ( typeset -p "${2}"  &>/dev/null ) &&  [ -n "${3+x}" ] ; then
@@ -387,7 +1058,7 @@ CERO="\033[01;0m"
               }
               fi
             }
-            done <<< "$(switch_spaces_to_newlines <<< "${@}")"
+            done <<< "$(switch_spaces_to_newlines <<< "${*}")"
             # done <<< "${4}"
             (( _DEBUG )) && echo -e "${LIGHTGREEN} ✔ ${LIGHTYELLOW} ${TESTING} has passed "
             #(( found )) &&
@@ -395,8 +1066,9 @@ CERO="\033[01;0m"
           }
           else
           {
-            echo -e "${RED} 𝞦 \\n${BASH_SOURCE}:${BASH_LINENO[1]} ${FUNCNAME[-0]}(...) \\n$0:${BASH_LINENO[0]} ${FUNCNAME[1]}(...) \\n ${LIGHTYELLOW} ${TESTING} has failed "
+            echo -e "${RED} 𝞦 \\n${BASH_SOURCE[0]}:${BASH_LINENO[1]} ${FUNCNAME[-0]}(...) \\n$0:${BASH_LINENO[0]} ${FUNCNAME[1]}(...) \\n ${LIGHTYELLOW} ${TESTING} has failed "
             failed "${TESTING}"
+			      # shellcheck disable=SC2317
             exit 1
           }
           fi
@@ -409,7 +1081,7 @@ CERO="\033[01;0m"
           # if ( parameter_with_value 3 PATTERN "${PATTERN}" "BCompareOSX*.*.*.*.zip" ) ; then
           # Tests for the function
           local -i _DEBUG=${DEBUG:-0}
-					local TESTING="parameter_with_value function ${FUNCNAME[1]} expects value at position <\"${1}\"> expect value <\"${2}\"> to look like or can be are <\"${4}\">"
+          local TESTING="parameter_with_value function ${FUNCNAME[1]} expects value at position <\"${1}\"> expect value <\"${2}\"> to look like or can be are <\"${4}\">"
           (( _DEBUG )) && echo -e "${FUNCNAME[0]}"
           (( _DEBUG )) && echo "${*} -assume existing variable for this part"
           (( _DEBUG )) && ( typeset -p "${1}"  &>/dev/null  ) && echo "1 defined 1"
@@ -425,8 +1097,9 @@ CERO="\033[01;0m"
           (( _DEBUG )) && [ -z "${2+x}" ]  && echo "2 failed empty 9"
           (( _DEBUG )) && [ -z "${2-x}" ]  && echo "2 failed empty 10"
           local -i _seemsempty_=0
+			    # shellcheck disable=SC2268
           [[ "x${3}x" = "xx" ]] && _seemsempty_=1
-          (( _seemsempty_ )) && echo -e "${RED} 𝞦 \\n${BASH_SOURCE}:${BASH_LINENO[1]} ${FUNCNAME[-0]}(...) \\n$0:${BASH_LINENO[0]} ${FUNCNAME[1]}(...) \\n ${LIGHTYELLOW} ${TESTING} has failed "
+          (( _seemsempty_ )) && echo -e "${RED} 𝞦 \\n${BASH_SOURCE[0]}:${BASH_LINENO[1]} ${FUNCNAME[-0]}(...) \\n$0:${BASH_LINENO[0]} ${FUNCNAME[1]}(...) \\n ${LIGHTYELLOW} ${TESTING} has failed "
           (( _seemsempty_ )) && failed "${TESTING}"
           (( _seemsempty_ )) && exit 1
           if ( typeset -p "${2}"  &>/dev/null ) &&  [ -n "${3+x}" ] ; then
@@ -434,14 +1107,13 @@ CERO="\033[01;0m"
               (( _DEBUG )) && echo -e "${LIGHTGREEN} ✔ ${LIGHTYELLOW} ${TESTING} has passed "
               return 0
           }
-          else
-          {
-            echo -e "${RED} 𝞦 \\n${BASH_SOURCE}:${BASH_LINENO[1]} ${FUNCNAME[-0]}(...) \\n$0:${BASH_LINENO[0]} ${FUNCNAME[1]}(...) \\n ${LIGHTYELLOW} ${TESTING} has failed "
+				  fi
+          # else implicit
+					#
+            echo -e "${RED} 𝞦 \\n${BASH_SOURCE[0]}:${BASH_LINENO[1]} ${FUNCNAME[-0]}(...) \\n$0:${BASH_LINENO[0]} ${FUNCNAME[1]}(...) \\n ${LIGHTYELLOW} ${TESTING} has failed "
             failed "${TESTING}"
+			      # shellcheck disable=SC2317
             return 1
-          }
-          fi
-          return 0
         } # end parameter_with_value
 
         function enforce_parameter_with_value() {
@@ -449,19 +1121,18 @@ CERO="\033[01;0m"
           # enforce_parameter_with_value 1 URL "${URL}" "https://www.website.com/product/"
           # enforce_parameter_with_value 3 PATTERN "${PATTERN}" "BCompareOSX*.*.*.*.zip"
           # Tests for the function
-          local TESTING="enforce_parameter_with_value function ${FUNCNAME[1]} expects value at position <"${1}"> expect value <"${2}"> to look like or can be are <"${4}">"
+          local TESTING="enforce_parameter_with_value function ${FUNCNAME[1]} expects value at position <\"${1}\"> expect value <\"${2}\"> to look like or can be are <\"${4}\">"
           if ( parameter_with_value "${1}" "${2}"  "${3}" "${4}"  ) ; then
           {
             return 0
           }
-          else
-          {
-            echo -e "${RED} 𝞦 \\n${BASH_SOURCE}:${BASH_LINENO[1]} ${FUNCNAME[-0]}(...) \\n$0:${BASH_LINENO[0]} ${FUNCNAME[1]}(...) \\n ${LIGHTYELLOW} ${TESTING} has failed "
+				  fi
+          # else implicit
+					#
+            echo -e "${RED} 𝞦 \\n${BASH_SOURCE[0]}:${BASH_LINENO[1]} ${FUNCNAME[-0]}(...) \\n$0:${BASH_LINENO[0]} ${FUNCNAME[1]}(...) \\n ${LIGHTYELLOW} ${TESTING} has failed "
             failed "${TESTING}"
+			      # shellcheck disable=SC2317
             exit 1
-          }
-          fi
-          return 0
         } # end enforce_parameter_with_value
 
         function enforce_variable_with_value(){
@@ -499,9 +1170,11 @@ CERO="\033[01;0m"
             echo "x${1}x" -assume existing variable for this part
             echo "x${2}x" -assume existing variable for this part
           fi
-          [[ "x${2}x" = "xx" ]] && _seemsempty_=1
+			    # shellcheck disable=SC2268
+          [[ "x${2}x" == "xx" ]] && _seemsempty_=1
           if (( _DEBUG )) ; then
-            if [[ "x${2}x" = "xx" ]] ; then
+			      # shellcheck disable=SC2268
+            if [[ "x${2}x" == "xx" ]] ; then
               echo seems empty
             fi
             ( typeset -p "${1}"  &>/dev/null  ) && echo "1 defined 1"
@@ -542,6 +1215,7 @@ CERO="\033[01;0m"
           fi
           echo -e "${RED:-} 𝞦 enforce_variable_with_value \\n${BASH_SOURCE[1]}:${BASH_LINENO[1]} ${FUNCNAME[-0]}(...) \\n${BASH_SOURCE[1]}:${BASH_LINENO[0]} ${FUNCNAME[1]}(...) \\n ${LIGHTYELLOW:-} ${TESTING:-} has failed "
           failed "${TESTING:-}"
+				  # shellcheck disable=SC2317
           exit 1
         } # end enforce_variable_with_value
 
@@ -585,10 +1259,12 @@ CERO="\033[01;0m"
             # assert not empty $VALUE
             if [  -z "${1+x}" ] || [ -z "${2+x}" ] || [ -z "${3+x}" ] ; then # check if all parameters are set and not empty
             {
-                failed ${FUNCNAME[1]} requires to have 3 parameters :: ${FUNCNAME[1]} not empty \$VALUE ::
+                failed "${FUNCNAME[1]} requires to have 3 parameters :: ${FUNCNAME[1]} not empty \$VALUE ::"
             }
             fi
+				    # shellcheck disable=SC2034
             local not="${1}"
+				    # shellcheck disable=SC2034
             local empty="${2}"
             local value="${3}"
             TESTING="${FUNCNAME[0]} that value ${CYAN}${value}${LIGHTYELLOW} is not empty"
@@ -609,8 +1285,11 @@ CERO="\033[01;0m"
         function enhance_message() {
             local msg=""
             [[ -n "${1+x}"  ]] && msg="${1}"  ;  # check if a variable is set and not empty and reassign value
+						# shellcheck disable=SC2001
             msg=$(echo "${msg}" | sed  -e 's/ancel /anceling /g')
+						# shellcheck disable=SC2001
             msg=$(echo "${msg}" | sed  -e 's/uit /uiting /g')
+						# shellcheck disable=SC2001
             msg=$(echo "${msg}" | sed  -e 's/xit /xiting /g')
             echo "${msg}"
             [[ "${msg}" == *"anceling "* ]] && exit 69
@@ -629,7 +1308,9 @@ CERO="\033[01;0m"
             if ! su - "${SUDO_USER}" -c "command -v \"${1}\"" >/dev/null 2>&1;  then # Command Does not-exist
             {
               failed "${TESTING}"
+						  # shellcheck disable=SC2317
               [[ -n "${3+x}"  ]] && enhance_message "${3}"
+						  # shellcheck disable=SC2317
               return 1
             }
             fi
@@ -739,11 +1420,11 @@ CERO="\033[01;0m"
               if [[ "$(uname)" == "Darwin" ]] ; then
                 # Do something under Mac OS X platform
                 sed 's/'"""${SEEKING}"""'//g' ;
-              elif [[ "$(expr substr $(uname -s) 1 5)" == "Linux" ]] ; then
+              elif [[ "$(cut -c1-5 <<< "$(uname -s)")" == "Linux" ]] ; then
                 # Do something under GNU/Linux platform
                 sed 's/'"""${SEEKING}"""'//g'  ;
 
-              elif [[ "$(expr substr $(uname -s) 1 10)" == "MINGW32_NT" ]] ; then
+              elif [[ "$(cut -c1-10 <<< "$(uname -s)")" == "MINGW32_NT" ]] ; then
                 # Do something under Windows NT platform
                 sed 's/'"""${SEEKING}"""'//g' ;
                 # nothing here
@@ -754,7 +1435,8 @@ CERO="\033[01;0m"
         function Question() {
             trap 'exit 1' ERR
             local msg1="$1"
-            local msg2=$(echo "${*:-}" | cüt "${1:-}"  ;)
+            local msg2=""
+						msg2="$(echo "${*:-}" | cüt "${1:-}"  ;)"
             # local msg2=$(echo "${*:-}" | sed 's/'"""${msg1:-}"""'//g'  ;)
             echo  -e "${RED}+---${DARK_BLUE_OVER_PEACH}  ${msg1:-} ${CYAN} ${msg2:-} ${RESET}"
         }
@@ -785,9 +1467,9 @@ CERO="\033[01;0m"
    local yn=''
    while [[ -z ${yn:-}  ]] ; do
    {
-     read -p "[y/n]: " yn
+     read -rp "[y/n]: " yn
      case $yn in
-       [Yy]*) return 0  ; break ;;
+       [Yy]*) return 0   ;;
        [Nn]*) echo "Aborted" ; return  1 ;;
      esac
    }
@@ -798,7 +1480,8 @@ CERO="\033[01;0m"
         function Information() {
             trap 'exit 1' ERR
             local msg1="${1:-0}"
-            local msg2=$(echo "${*}" | cüt "${msg1}"  ;)
+            local msg2=""
+						msg2="$(echo "${*}" | cüt "${msg1}"  ;)"
             # local msg2=$(echo "${*}" | sed 's/'"""${msg1}"""'//g'  ;)
             echo  -e "${PURPLE}${PURPLE}+---${ORANGE} ${msg1} ${CYAN} ${msg2} ${RESET}"
         }
@@ -808,7 +1491,8 @@ CERO="\033[01;0m"
         function Message() {
             trap 'exit 1' ERR
             local msg1="${1:-0}"
-            local msg2=$(echo "${*}" | cüt "${msg1}"  ;)
+            local msg2=""
+						msg2="$(echo "${*}" | cüt "${msg1}"  ;)"
             # local msg2=$(echo "${*}" | sed 's/'"""${msg1}"""'//g'  ;)
             echo  -e "${PURPLE}${PURPLE}+-- ${LIGHTYELLOW} ${msg1} ${CYAN} ${msg2} ${RESET}"
         }
@@ -817,7 +1501,8 @@ CERO="\033[01;0m"
         function Comment() {
             trap 'exit 1' ERR
             local msg1="${1:-0}"
-            local msg2=$(echo "${*}" | cüt "${msg1}"  ;)
+            local msg2=""
+						msg2="$(echo "${*}" | cüt "${msg1}"  ;)"
             # local msg2=$(echo "${*}" | sed 's/'"""${msg1}"""'//g'  ;)
             echo  -e "${PURPLE}${CYAN}+---${DARKBLUE} ${LIGHTYELLOW} ${msg1} ${CYAN} ${msg2} ${RESET}"
         }
@@ -826,16 +1511,18 @@ CERO="\033[01;0m"
         function Working() {
             trap 'exit 1' ERR
             local msg1="${1:-0}"
-            local msg2=$(echo "${*}" | cüt "${msg1}"  ;)
+            local msg2=""
+						msg2="$(echo "${*}" | cüt "${msg1}"  ;)"
             # local msg2=$(echo "${*}" | sed 's/'"""${msg1}"""'//g'  ;)
             echo  -e "\n\n${PURPLE}π‘“……… ${CYAN} ${msg1} ${DARKBLUE} ${msg2} ${LIGHTYELLOW}  ${CYAN} ${RESET}\n\n"
         }
         alias working=Working
 
         function not() {
-            local order="empty"  # Tasjgjgggg
+            # local order="empty"  # Tasjgjgggg
             if [[ -n "${1+x}"  ]] ; then  # check if a variable is set and not empty
-                NODE_VERSION="${1}"
+							# shellcheck disable=2034
+              NODE_VERSION="${1}"
             fi
         } # end not
 
@@ -846,10 +1533,10 @@ CERO="\033[01;0m"
             #     directory_exists "/root/.pyenv
             #     /home/vagrant/.pyenv"
             #
-            local _TESTING _ONE_DIR _DIRS="${@}"
-            if [ ! -z "${DIRS-x}" ] ; then # if its set and not empty
+            local _TESTING _ONE_DIR _DIRS="${*}"
+            if [[  -n "${DIRS-x}" ]] ; then # if its set and not empty
             {
-                _DIRS=$(switch_spaces_to_newlines <<< "${@}")
+                _DIRS=$(switch_spaces_to_newlines <<< "${*}")
                 while read -r _ONE_DIR; do
                 # if not empty
                 if [ ! -z "${_ONE_DIR}" ] ; then
@@ -882,10 +1569,10 @@ CERO="\033[01;0m"
             #     does_not_exist "/root/.pyenv
             #     /home/vagrant/.pyenv"
             #
-            local _TESTING _ONE_DIR  _DIRS="${@}"
-            if [ ! -z "${_DIRS-x}" ] ; then # if its set and not empty
+            local _TESTING _ONE_DIR  _DIRS="${*}"
+            if [[ -n "${_DIRS-x}" ]] ; then # if its set and not empty
             {
-                _DIRS=$(switch_spaces_to_newlines <<< "${@}")
+                _DIRS=$(switch_spaces_to_newlines <<< "${*}")
                 while read -r _ONE_DIR; do
                 # if not empty
                 if [ ! -z "${_ONE_DIR}" ] ; then
@@ -996,10 +1683,10 @@ CERO="\033[01;0m"
             #          if  ! it_exists "/home/vagrant/.zshrc" ; then    is like is NOT installed
             #          if  it_exists "/root/.zshrc ; then      it makes more sense to make it this way
             #
-            local ONE_FILE FILES="${@}"
+            local ONE_FILE FILES="${*}"
             if [ -n "${FILES-x}" ] ; then # if its set and not empty
             {
-                FILES=$(switch_spaces_to_newlines <<< "${@}")
+                FILES=$(switch_spaces_to_newlines <<< "${*}")
                 # echo testing $FILES
                 while read -r ONE_FILE; do
                 {
@@ -1109,10 +1796,10 @@ CERO="\033[01;0m"
             #
             local TESTING=""
             local ONE_FILE=""
-            local -a FILES="${@}"
+            local FILES="${*}"
             if [ -n "${FILES-x}" ] ; then # if its set and not empty
             {
-                FILES=$(switch_spaces_to_newlines <<< "${@}")
+                FILES=$(switch_spaces_to_newlines <<< "${*}")
                 while read -r ONE_FILE; do
                 if [ -n "${ONE_FILE}" ] ; then # if not empty
                     TESTING="that file ${CYAN}${ONE_FILE}${LIGHTYELLOW} exists"
@@ -1221,10 +1908,10 @@ CERO="\033[01;0m"
             #
             local FOUND_LINK_TARGET=""
             local ONE_LINK_ORDER=""
-            local -a _LINKS="${@}"
+            local _LINKS="${*}"
             if [ -n "${_LINKS-x}" ] ; then # if its set and not empty
             {
-                _LINKS=$(switch_spaces_to_newlines <<< "${@}")
+                _LINKS=$(switch_spaces_to_newlines <<< "${*}")
                 while read -r ONE_LINK_ORDER; do
                     # if not empty
                     if [ -n "${ONE_LINK_ORDER}" ] ; then
@@ -1252,10 +1939,11 @@ CERO="\033[01;0m"
                             passed "${TESTING}"
 
                             # Test pointing
-                            if [[ "${CHECK_TARGET_TOO}" == "YES" && ! -z "${ONE_LINK_TARGET}" ]] ; then
+                            if [[ "${CHECK_TARGET_TOO}" == "YES" &&  -n "${ONE_LINK_TARGET}" ]] ; then
                             {
                                 TESTING="${PURPLE} +-- and that softlink ${CYAN}${ONE_LINK_LOCATION}${LIGHTYELLOW} points to ${CYAN}${ONE_LINK_TARGET}${GREEN} location \n"
-                                FOUND_LINK_TARGET=$(ls -l ${ONE_LINK_LOCATION} | awk '{print $11}') # Find target symlink
+                                # shellcheck disable=SC2012
+                                FOUND_LINK_TARGET=$(ls -l "${ONE_LINK_LOCATION}" | awk '{print $11}') # Find target symlink
                                 if [[ "${FOUND_LINK_TARGET}" == "${ONE_LINK_TARGET}" ]] ; then
                                 {
                                     # points to right location
@@ -1263,7 +1951,7 @@ CERO="\033[01;0m"
 
                                     TESTING="that softlink ${CYAN}${ONE_LINK_LOCATION}${LIGHTYELLOW} is not broken"
                                     local empty_means_not_broken=""
-                                    empty_means_not_broken="$(find "${ONE_LINK_LOCATION}" -type l ! -exec test -e {} \; -print  2>&1 | xargs -I {} ls -la "{}")"
+                                    empty_means_not_broken="$(find "${ONE_LINK_LOCATION}" -print0 -type l ! -exec test -e {} \; -print  2>&1 | xargs -I {} ls -la "{}")"
                                     if [[ -z "${empty_means_not_broken}" ]] ; then
                                     {
                                         # points to right location
@@ -1275,15 +1963,18 @@ CERO="\033[01;0m"
                                     {
                                         TESTING="but softlink ${CYAN}${ONE_LINK_LOCATION}${LIGHTYELLOW} is was not created"
                                         failed "${TESTING}"
+                                        # shellcheck disable=SC2317
                                         return 1
                                     }
                                     elif  [[ "${empty_means_not_broken}" == *"Permission denied"* ]] ; then
                                     {
                                         TESTING="but softlink ${CYAN}${ONE_LINK_LOCATION}${LIGHTYELLOW}. Permission denied. Check Target -> ${ONE_LINK_TARGET} is accesible."
                                         failed "${TESTING}"
+                                        # shellcheck disable=SC2317
                                         return 1
                                     } else {
                                         failed "${TESTING}"
+                                        # shellcheck disable=SC2317
                                         return 1
                                     }
                                     fi
@@ -1292,6 +1983,7 @@ CERO="\033[01;0m"
                                 {
                                     TESTING+="${GREEN}     +++ expected${LIGHTYELLOW}:${CYAN}${ONE_LINK_TARGET}${LIGHTYELLOW}:${RED} --- actual${LIGHTYELLOW}:${RED}${FOUND_LINK_TARGET}${LIGHTYELLOW}:"
                                     failed "${TESTING}"
+                                    # shellcheck disable=SC2317
                                     return 1
                                 }
                                 fi
@@ -1302,6 +1994,7 @@ CERO="\033[01;0m"
                         else
                         {
                             failed "${TESTING}"
+                            # shellcheck disable=SC2317
                             return 1
                         }
                         fi # ONE_LINK_LOCATION Exists
@@ -1365,17 +2058,19 @@ CERO="\033[01;0m"
                             passed "${TESTING}"
 
                             # Test pointing
-                            if [[ "${CHECK_TARGET_TOO}" == "YES" && ! -z "${ONE_LINK_TARGET}" ]] ; then
+                            if [[ "${CHECK_TARGET_TOO}" == "YES" && -n "${ONE_LINK_TARGET}" ]] ; then
                             {
                                 TESTING="${PURPLE} +-- and that softlink ${CYAN}${ONE_LINK_LOCATION}${LIGHTYELLOW} points to ${CYAN}${ONE_LINK_TARGET}${GREEN} location \n"
-                                FOUND_LINK_TARGET=$(ls -l ${ONE_LINK_LOCATION} | cut -d'>' -f2 | trim) # Find target symlink
+                                # shellcheck disable=SC2012
+                                FOUND_LINK_TARGET=$(ls -l "${ONE_LINK_LOCATION}" | cut -d'>' -f2 | trim) # Find target symlink
                                 if [[ "${FOUND_LINK_TARGET}" == "${ONE_LINK_TARGET}" ]] ; then
                                 {
                                     # points to right location
                                     passed "${TESTING}"
 
                                     TESTING="that softlink ${CYAN}${ONE_LINK_LOCATION}${LIGHTYELLOW} is not broken"
-                                    local empty_means_not_broken=$(find ${ONE_LINK_LOCATION} -type l ! -exec test -e {} \; -print  2>&1 | xargs -I {} ls -la "{}")
+                                    local empty_means_not_broken=""
+																		empty_means_not_broken=$(find "${ONE_LINK_LOCATION}" -print0 -type l ! -exec test -e {} \; -print  2>&1 | xargs -I {} ls -la "{}")
                                     if [[ -z "${empty_means_not_broken}" ]] ; then
                                     {
                                         # points to right location
@@ -1387,15 +2082,18 @@ CERO="\033[01;0m"
                                     {
                                         TESTING="but softlink ${CYAN}${ONE_LINK_LOCATION}${LIGHTYELLOW} is was not created"
                                         failed "${TESTING}"
+                                        # shellcheck disable=SC2317
                                         return 1
                                     }
                                     elif  [[ "${empty_means_not_broken}" == *"Permission denied"* ]] ; then
                                     {
                                         TESTING="but softlink ${CYAN}${ONE_LINK_LOCATION}${LIGHTYELLOW}. Permission denied. Check Target -> ${ONE_LINK_TARGET} is accesible."
                                         failed "${TESTING}"
+                                        # shellcheck disable=SC2317
                                         return 1
                                     } else {
                                         failed "${TESTING}"
+                                        # shellcheck disable=SC2317
                                         return 1
                                     }
                                     fi
@@ -1404,6 +2102,7 @@ CERO="\033[01;0m"
                                 {
                                     TESTING+="${GREEN}     +++ expected${LIGHTYELLOW}:${CYAN}${ONE_LINK_TARGET}${LIGHTYELLOW}:${RED}${RESET} --- actual:${FOUND_LINK_TARGET}:"
                                     failed "${TESTING}"
+                                    # shellcheck disable=SC2317
                                     return 1
                                 }
                                 fi
@@ -1414,6 +2113,7 @@ CERO="\033[01;0m"
                         else
                         {
                             failed "${TESTING}"
+                            # shellcheck disable=SC2317
                             return 1
                         }
                         fi # ONE_LINK_LOCATION Exists
@@ -1465,17 +2165,19 @@ CERO="\033[01;0m"
                             passed "${TESTING}"
 
                             # Test pointing
-                            if [[ "${CHECK_TARGET_TOO}" == "YES" && ! -z "${ONE_LINK_TARGET}" ]] ; then
+                            if [[ "${CHECK_TARGET_TOO}" == "YES" && -n "${ONE_LINK_TARGET}" ]] ; then
                             {
                                 TESTING="${PURPLE} +-- and that softlink ${CYAN}${ONE_LINK_LOCATION}${LIGHTYELLOW} points to ${CYAN}${ONE_LINK_TARGET}${GREEN} location \n"
-                                FOUND_LINK_TARGET=$(ls -l ${ONE_LINK_LOCATION} | cut -d'>' -f2 | trim) # Find target symlink
+																# shellcheck disable=SC2012
+                                FOUND_LINK_TARGET=$(ls -l "${ONE_LINK_LOCATION}" | cut -d'>' -f2 | trim) # Find target symlink
                                 if [[ "${FOUND_LINK_TARGET}" == "${ONE_LINK_TARGET}" ]] ; then
                                 {
                                     # points to right location
                                     passed "${TESTING}"
 
                                     TESTING="that softlink ${CYAN}${ONE_LINK_LOCATION}${LIGHTYELLOW} is not broken"
-                                    local empty_means_not_broken=$(find ${ONE_LINK_LOCATION} -type l ! -exec test -e {} \; -print  2>&1 | xargs -I {} ls -la "{}")
+                                    local empty_means_not_broken=""
+																		empty_means_not_broken=$(find "${ONE_LINK_LOCATION}" -print0 -type l ! -exec test -e {} \; -print  2>&1 | xargs -I {} ls -la "{}")
                                     if [[ -z "${empty_means_not_broken}" ]] ; then
                                     {
                                         # points to right location
@@ -1536,14 +2238,14 @@ CERO="\033[01;0m"
             #     check_equality $(cat ~/.pyenv/version)="2.7.11"
             #
             local -i _DEBUG=${DEBUG:-0}
-						(( _DEBUG )) && echo "FUNCNAME[0]: <${FUNCNAME[0]}>"
-            local -a ARGS="${@}"
+            (( _DEBUG )) && echo "FUNCNAME[0]: <${FUNCNAME[0]}>"
+            local ARGS="${*}"
             local LEFT_VALUE=""
             local RIGHT_VALUE=""
             local ONE_EQUALITY_ORDER=""
             if [ -n "${ARGS-x}" ] ; then # if its set and not empty
             {
-                #ARGS=$(switch_spaces_to_newlines <<< "${@}")
+                #ARGS=$(switch_spaces_to_newlines <<< "${*}")
                 while read -r ONE_EQUALITY_ORDER; do
                     # if not empty
                     if [ -n "${ONE_EQUALITY_ORDER}" ] ; then
@@ -1557,6 +2259,7 @@ CERO="\033[01;0m"
                         if [[ -z "${LEFT_VALUE-x}" ]] ; then
                         {
                             failed "${TESTING}"
+                            # shellcheck disable=SC2317
                             return 1
                         }
                         fi
@@ -1565,6 +2268,7 @@ CERO="\033[01;0m"
                         if [[ -z "${RIGHT_VALUE-x}" ]] ; then
                         {
                             failed "${TESTING}"
+                            # shellcheck disable=SC2317
                             return 1
                         }
                         fi
@@ -1578,6 +2282,7 @@ CERO="\033[01;0m"
                         else
                         {
                             failed "${TESTING}"
+                            # shellcheck disable=SC2317
                             return 1
                         }
                         fi
@@ -1626,11 +2331,12 @@ CERO="\033[01;0m"
                 #
                 enforce_variable_with_value OSTYPE "${OSTYPE}"
                 case "${OSTYPE}" in
-                  (darwin*) failed "apt and dpkg in mac! is weird. Platform $OSTYPE using apt and dpkg is not supported " ;;
-                  (cygwin*) failed "apt and dpkg in cywin! is weird. Platform $OSTYPE using apt and dpkg is not supported " ;;
+                  (darwin*) failed "apt and dawin in mac! is weird. Platform $OSTYPE using apt and darwin is not supported " ;;
+                  (cygwin*) failed "apt and dpkg in cywin! is weird. Platform $OSTYPE using apt and cywin is not supported " ;;
                   (linux*) passed "Looks like a linux!" ;;
-                  (msys*) failed "apt and dpkg in msys! is weird. Platform $OSTYPE using apt and dpkg is not supported "  ;;
+                  (msys*) failed "apt and dpkg in msys! is weird. Platform $OSTYPE using apt and msys is not supported "  ;;
                   (*) failed "Platform $OSTYPE not supported"
+                  # shellcheck disable=SC2317
                   return 1 ;;
                 esac
                 return 0
@@ -1649,6 +2355,7 @@ CERO="\033[01;0m"
                   (linux*) passed "Looks like a linux! is there linuxbrew?" && Checking "if linuxbrew installed";;
                   (msys*) failed "Brew for Platform $OSTYPE is not supported " ;;
                   (*) failed "Platform $OSTYPE not supported"
+                  # shellcheck disable=SC2317
                   return 1 ;;
                 esac
                 return 0
@@ -1667,6 +2374,7 @@ CERO="\033[01;0m"
                   (linux*) passed "Looks like a linux!" ;;
                   (msys*) failed "rmp and dnf in msys! is weird. Platform $OSTYPE using rmp and dnf is not supported "  ;;
                   (*) failed "Platform $OSTYPE not supported"
+                  # shellcheck disable=SC2317
                   return 1 ;;
                 esac
                 return 0
@@ -1678,16 +2386,18 @@ CERO="\033[01;0m"
                 #
                 #     ensure_apt_and_dnf_do_not_mix
                 #
-                if ( ( command -v apt >/dev/null 2>&1; ) && ( command -v dnf >/dev/null 2>&1; ) ) ; then
+                if ( ( command -v apt-get >/dev/null 2>&1; ) && ( command -v dnf >/dev/null 2>&1; ) ) ; then
                 {
                     enforce_variable_with_value OSTYPE "${OSTYPE}"
                     case "${OSTYPE}" in
-                      (darwin*) failed "apt and dnf in mac! is weird. Platform $OSTYPE using apt and dnf is not supported " ;;
-                      (cygwin*) failed "apt and dnf in cywin! is weird. Platform $OSTYPE using apt and dnf is not supported " ;;
-                      (linux*) failed "apt and dnf in same Linux! is weird. Platform $OSTYPE using apt and dnf is not supported " ;;
-                      (msys*) failed "apt and dnf in msys! is weird. Platform $OSTYPE using apt and dnf is not supported "  ;;
-                      (*) failed "apt and dnf in $OSTYPE! is weird. Platform $OSTYPE using apt and dnf is not supported "
-                      failed "apt and dnf in $OSTYPE! is weird. Platform $OSTYPE using apt and dnf is not supported "
+                      (darwin*) failed "apt and dnf in mac! is weird. Platform $OSTYPE using apt-get and dnf is not supported " ;;
+                      (cygwin*) failed "apt and dnf in cywin! is weird. Platform $OSTYPE using apt-get and dnf is not supported " ;;
+                      (linux*) failed "apt and dnf in same Linux! is weird. Platform $OSTYPE using apt-get and dnf is not supported " ;;
+                      (msys*) failed "apt and dnf in msys! is weird. Platform $OSTYPE using apt-get and dnf is not supported "  ;;
+                      (*) failed "apt and dnf in $OSTYPE! is weird. Platform $OSTYPE using apt-get and dnf is not supported "
+                      # shellcheck disable=SC2317
+                      failed "apt and dnf in $OSTYPE! is weird. Platform $OSTYPE using apt-get and dnf is not supported "
+                      # shellcheck disable=SC2317
                       return 1 ;;
                     esac
                 }
@@ -1702,6 +2412,7 @@ CERO="\033[01;0m"
                       (linux*) failed "apt and rpm in same Linux! is weird. Platform $OSTYPE using apt and rpm is not supported " ;;
                       (msys*) failed "apt and rpm in msys! is weird. Platform $OSTYPE using apt and rpm is not supported "  ;;
                       (*) failed "apt and rpm in $OSTYPE! is weird. Platform $OSTYPE using apt and rpm is not supported "
+                      # shellcheck disable=SC2317
                       return 1 ;;
                     esac
                 }
@@ -1725,6 +2436,7 @@ CERO="\033[01;0m"
             }
             fi
             failed "${TESTING}"
+            # shellcheck disable=SC2317
             return 1
         } # end ensure_is_defined_and_not_empty
 
@@ -1754,6 +2466,7 @@ CERO="\033[01;0m"
             }
             fi
             failed "${TESTING}"
+            # shellcheck disable=SC2317
             return 1
         } # end ensure_is_defined_and_empty
 
@@ -1804,7 +2517,7 @@ function _run_command(){
   }
   fi
   _err=$?
-  enforce_variable_with_value _node_run_command ${_node_run_command}
+  enforce_variable_with_value _node_run_command "${_node_run_command}"
   [ $_err -eq 0 ] && passed "${_node_run_command}"
   [ $_err -ne 0 ] && >&2 echo -e "${RED} ✘ ${RESET}${_node_run_command} __run_command returns"
   return $_err
@@ -1812,13 +2525,15 @@ function _run_command(){
 
 
         # REPEATED in execute_command
-
+        # shellcheck disable=SC2317
         trim_start_space() {
             sed -e 's/^[[:space:]]*//' | sed 's/^\ //g' | sed 's/^\t//g'
         }
+        # shellcheck disable=SC2317
         trim_end_space() {
             sed -e 's/[[:space:]]*$//' | sed 's/\ $//g' | sed 's/\t$//g'
         }
+        # shellcheck disable=SC2317
         trim() {
             trim_start_space | trim_end_space
         }
@@ -1878,11 +2593,11 @@ function _run_command(){
             #     expect $(echo "hola") ≠ "hello"
             #       0       1            2  3   4     5
             local statement=""
-            statement="""${@}"""
+            statement="""${*}"""
                 #| sed 's/'"="'/3QU4L51GN/g' \
                 #| sed 's/'"!"'/3XCL4M4T10N/g' \
             local -i _DEBUG=${DEBUG:-0}
-						(( _DEBUG )) && echo -e "0.${RED}${FUNCNAME[1]} that value ${RED},,${CYAN}${statement}${RED}''${RESET}"
+            (( _DEBUG )) && echo -e "0.${RED}${FUNCNAME[1]} that value ${RED},,${CYAN}${statement}${RED}''${RESET}"
             # exit 0
             local inputo=""
             inputo=$(echo """${statement}""" \
@@ -2132,32 +2847,32 @@ function _run_command(){
                 expect "${nada}" "not to be equal to" "${exito[$COUNTER]}"
                 expect "${caso}" to be equal to "${exito[$COUNTER]}"
 
-                expect $(echo "${caso}") to be equal "${exito[$COUNTER]}"
-                expect $(echo "${caso}") to equal to "${exito[$COUNTER]}"
-                expect $(echo "${caso}") to equal "${exito[$COUNTER]}"
-                expect $(echo "${caso}") be equal to "${exito[$COUNTER]}"
-                expect $(echo "${caso}") be equal "${exito[$COUNTER]}"
-                expect $(echo "${caso}") to be "${exito[$COUNTER]}"
-                expect $(echo "${caso}") be "${exito[$COUNTER]}"
-                expect $(echo "${caso}") = "${exito[$COUNTER]}"
+                expect "$(echo "${caso}")" to be equal "${exito[$COUNTER]}"
+                expect "$(echo "${caso}")" to equal to "${exito[$COUNTER]}"
+                expect "$(echo "${caso}")" to equal "${exito[$COUNTER]}"
+                expect "$(echo "${caso}")" be equal to "${exito[$COUNTER]}"
+                expect "$(echo "${caso}")" be equal "${exito[$COUNTER]}"
+                expect "$(echo "${caso}")" to be "${exito[$COUNTER]}"
+                expect "$(echo "${caso}")" be "${exito[$COUNTER]}"
+                expect "$(echo "${caso}")" = "${exito[$COUNTER]}"
 
-                expect $(echo "${caso}") not to be equal to "hello"
-                expect $(echo "${caso}") to not be equal to "hello"
-                expect $(echo "${caso}") to be not equal to "hello"
-                expect $(echo "${caso}") to be equal not to "hello"
-                expect $(echo "${caso}") not to be equal "hello"
-                expect $(echo "${caso}") to not be equal "hello"
-                expect $(echo "${caso}") to be not equal "hello"
-                expect $(echo "${caso}") not to equal "hello"
-                expect $(echo "${caso}") to not equal "hello"
-                expect $(echo "${caso}") to equal not "hello"
-                expect $(echo "${caso}") not to be "hello"
-                expect $(echo "${caso}") to not be "hello"
-                expect $(echo "${caso}") to be not "hello"
-                expect $(echo "${caso}") not be "hello"
-                expect $(echo "${caso}") be not "hello"
-                expect $(echo "${caso}") not "hello"
-                expect $(echo "${caso}") ≠ "hello"
+                expect "$(echo "${caso}")" not to be equal to "hello"
+                expect "$(echo "${caso}")" to not be equal to "hello"
+                expect "$(echo "${caso}")" to be not equal to "hello"
+                expect "$(echo "${caso}")" to be equal not to "hello"
+                expect "$(echo "${caso}")" not to be equal "hello"
+                expect "$(echo "${caso}")" to not be equal "hello"
+                expect "$(echo "${caso}")" to be not equal "hello"
+                expect "$(echo "${caso}")" not to equal "hello"
+                expect "$(echo "${caso}")" to not equal "hello"
+                expect "$(echo "${caso}")" to equal not "hello"
+                expect "$(echo "${caso}")" not to be "hello"
+                expect "$(echo "${caso}")" to not be "hello"
+                expect "$(echo "${caso}")" to be not "hello"
+                expect "$(echo "${caso}")" not be "hello"
+                expect "$(echo "${caso}")" be not "hello"
+                expect "$(echo "${caso}")" not "hello"
+                expect "$(echo "${caso}")" ≠ "hello"
                 (( COUNTER++ )) # if (( $COUNTER > 37 )) ; then
             }
             done
@@ -2211,6 +2926,7 @@ function _run_command(){
             fi
             echo "${SERVICE_STATUS}"
             failed "${TESTING}"
+						# shellcheck disable=SC2317
             return 1
         } # end is_service_running
 
@@ -2229,7 +2945,7 @@ function _run_command(){
               fi
               (( _DEBUG )) && echo "type_function_exists:TYPE is not installed ${*} "
               (( _DEBUG )) && echo "type_function_exists:trying with command ${*} "
-              if [[ "$( ( ( su - $SUDO_USER -c 'command -v '"${*}"' >/dev/null 2>&1' ) ) && echo "hola" )" == *"hola"* ]] ; then
+              if [[ "$( ( ( su - "$SUDO_USER" -c 'command -v '"${*}"' >/dev/null 2>&1' ) ) && echo "hola" )" == *"hola"* ]] ; then
               {
                 (( _DEBUG )) && echo "type_function_exists:COMMAND is installed ${*} "
                 return 0
@@ -2317,6 +3033,7 @@ export is_not_installed
                         if !  is_installed "${SERVICE_NAME}"; then
                         {
                             failed "${TESTING}" # assumed else
+						                # shellcheck disable=SC2317
                             return 1
                         }
                         fi
@@ -2338,10 +3055,13 @@ export is_not_installed
                 }
                 fi
                 failed "${TESTING}" # assumed else
+						    # shellcheck disable=SC2317
                 return 1
             }
             fi
+						# shellcheck disable=SC2317
             failed "${TESTING}" # assumed else
+						# shellcheck disable=SC2317
             return 1
         } # end verify_is_installed
 
@@ -2351,7 +3071,8 @@ export is_not_installed
             #          if  ! version_installed_is "node --version"  "${node_version}" ;           then    is like     version installed is  12.3.4.1 ?
             #          if  version_installed_is   "phantomjs --version"  "${phantomjs_version}" ; then    it like     NOT version is installed version 12.31.23 ?
             #
-            local give_me_something=$(eval """${1}""" 2>&1 | extract_version | head -1)
+            local give_me_something=""
+						give_me_something=$(eval """${1}""" 2>&1 | extract_version | head -1)
             local expected="${2}"
             local TESTING="that installed version for ${give_me_something} is ${CYAN}${expected}${GREEN}"
             # passed "${give_me_something}" passed "${expected}" failed  "${TESTING}"
@@ -2412,7 +3133,7 @@ function version_lt() {
             local COMMAND_TO_EVAL=""
             if ${1} &>/dev/null ; then
             {
-              COMMAND_TO_EVAL=$(echo -n $(eval ${1}))
+              COMMAND_TO_EVAL=$(echo -n "$(eval "${1}")")
               _err=$?
               # echo "1 $_err  ${COMMAND_TO_EVAL}"
               evaled=$(echo -n "${COMMAND_TO_EVAL}" | extract_version | head -1)
@@ -2435,7 +3156,7 @@ function version_lt() {
               {
                 # echo "6 $_err  ${COMMAND_TO_EVAL}"
                 # echo "1"
-                COMMAND_TO_EVAL=$(echo -n $(eval ${1}))
+                COMMAND_TO_EVAL=$(echo -n "$(eval "${1}")")
                 _err=$?
                 # echo "1 $_err  ${COMMAND_TO_EVAL}"
                 evaled=$(echo -n "${COMMAND_TO_EVAL}" | extract_version | head -1)
@@ -2453,7 +3174,7 @@ function version_lt() {
             if ${2} &>/dev/null; then
             {
               # echo "2 $_err ${2}"
-              VERSION_EXPECTED=$(eval ${2})
+              VERSION_EXPECTED=$(eval "${2}")
               _err=$?
               expected=$(echo -n "${VERSION_EXPECTED}" | extract_version | head -1)
               # expected<<<$($VERSION_EXPECTED)
@@ -2472,7 +3193,7 @@ function version_lt() {
               else
               {
                 # echo "2 $_err ${2}"
-                VERSION_EXPECTED=$(eval ${2})
+                VERSION_EXPECTED=$(eval "${2}")
                 expected=$(echo -n "${VERSION_EXPECTED}" | extract_version | head -1)
                 # expected<<<$($VERSION_EXPECTED)
                 # expected=$(${VERSION_EXPECTED})
@@ -2491,6 +3212,7 @@ function version_lt() {
             fi
             # echo $(${COMMAND_TO_EVAL})
             failed "${TESTING}"
+						# shellcheck disable=SC2317
             exit 1
         } # end verify_installed_version
 
@@ -2501,7 +3223,8 @@ function version_lt() {
             #            verify_installed_version "phantomjs --version"  "${phantomjs_version}"
             #            verify_installed_version "casperjs --version"  "${casper_version}"
             #
-            local EVAL_GET_VERSION_STRING=$(eval """${1}""" 2>&1 | head -1)
+            local EVAL_GET_VERSION_STRING=""
+						EVAL_GET_VERSION_STRING=$(eval """${1}""" 2>&1 | head -1)
             local VERSION_EXPECTED="${2}"
 
             local TESTING="that installed version for ${1} is ${CYAN}${VERSION_EXPECTED}${GREEN}"
@@ -2620,6 +3343,7 @@ function _ensure_touch_dir_and_file() {
 
           local _result=""
           local -i counter=1
+					local -i _err=0
           local one=""
           while read -r one ; do
           {
@@ -2715,6 +3439,7 @@ function _ensure_touch_dir_and_file() {
           }
           fi
           failed "Not found ${_executable_test} ${_argumentexecutable_test} or of ${_possibles} "
+					# shellcheck disable=SC2317
           return 1
           # if ( command -v ${_target_found} >/dev/null 2>&1; ) ; then
           # {
@@ -2737,16 +3462,22 @@ function _ensure_touch_dir_and_file() {
                 failed "_if_not_is_installed ensure_apt_and_dnf_do_not_mix"
             }
             fi
-            if ( ( command -v apt >/dev/null 2>&1; ) && ( command -v dpkg >/dev/null 2>&1; ) ) ; then
+            if ( ( command -v apt-get >/dev/null 2>&1; ) && ( command -v dpkg >/dev/null 2>&1; ) ) ; then
             {
                 ensure_apt_dpkg_in_linux
-                _msg_info_list="$(apt info $1  >/dev/null 2>&1)"
+                _msg_info_list="$(apt-get info "$1"  >/dev/null 2>&1)"
+                ret=$?
+            }
+            elif ( ( command -v apt >/dev/null 2>&1; ) && ( command -v dpkg >/dev/null 2>&1; ) ) ; then
+            {
+                ensure_apt_dpkg_in_linux
+                _msg_info_list="$(apt info "$1"  >/dev/null 2>&1)"
                 ret=$?
             }
             elif ( ( command -v rpm >/dev/null 2>&1; ) && ( command -v dnf >/dev/null 2>&1; ) ) ; then
             {
                 ensure_rpm_dnf_in_linux
-                _msg_info_list="$(dnf info $1  >/dev/null 2>&1)"
+                _msg_info_list="$(dnf info "$1"  >/dev/null 2>&1)"
                 ret=$?
             }
             else
@@ -2853,8 +3584,8 @@ function _ensure_touch_dir_and_file() {
                     ret=0
                     if (( _DEBUG )) ; then
                     {
-                      echo 'echo "$msg" | grep "$2"'
-                      echo 'echo "$msg" | grep "$2"'
+                      echo "echo \"$msg\" | grep \"$2\""
+                      echo "echo \"$msg\" | grep \"$2\""
                       ([[ -n "$msg" ]] ||  echo "6.5if file is empty")
                     }
                     fi
@@ -2945,8 +3676,10 @@ fi
             #
             local TARGET_USER="${1}"
             local TESTING="that user ${TARGET_USER} is ${CYAN}exists${GREEN}"
-            local LIST_ALL_USERS=$(cut -d: -f1 /etc/passwd) # REF: http://askubuntu.com/questions/410244/a-command-to-list-all-users-and-how-to-add-delete-modify-users
-            local USERID=$(id -u ${TARGET_USER})
+            local LIST_ALL_USERS=""
+						LIST_ALL_USERS=$(cut -d: -f1 /etc/passwd) # REF: http://askubuntu.com/questions/410244/a-command-to-list-all-users-and-how-to-add-delete-modify-users
+            local USERID=""
+						USERID=$(id -u "${TARGET_USER}")
             # Alternative to check getent passwd $user  > /dev/null
             # Alternative to check getent passwd mongodb  > /dev/null
             [ -z "${USERID}" ] &&  return 1 #failed
@@ -3010,8 +3743,8 @@ fi
             # [ $err_buff -eq 0 ] && [ $1 -gt 0 ] && err_buff=$1
             local bulk="${*}"
             local error_happened=""
-            [[ "${PROCESSOR_ERROR}" == *"MAC"* ]] && [ $err_buff != 0 ] && error_happened="1"
-            [[ "${PROCESSOR_ERROR}" == *"INTEL"* ]] && (( $err_buff != 0 )) && error_happened="1"
+            [[ "${PROCESSOR_ERROR}" == *"MAC"* ]] && [ $err_buff -ne 0 ] && error_happened="1"
+            [[ "${PROCESSOR_ERROR}" == *"INTEL"* ]] && (( err_buff != 0 )) && error_happened="1"
             if [ "${error_happened}" ]  ||  ( has_error_keyword "${bulk}" ) ; then
             {
               if [[ "${bulk}" == *"error-devel"* ]] ; then
@@ -3079,18 +3812,23 @@ fi
 
         function testvercomp() {
             local -i _DEBUG=${DEBUG:-0}
-            vercomp $1 $2
-            case $? in
+						local  one="$1"
+						local  two="$2"
+						local  three="$3"
+						local -i _err=0
+            vercomp "$one" "$two"
+						_err=$?
+            case ${_err} in
                 0) op='=';;
                 1) op='>';;
                 2) op='<';;
             esac
-            if [[ $op != $3 ]]
+            if [[ $op != "$three" ]]
             then
-                (( _DEBUG )) && echo "struct_testing.testvercomp() FAIL: Expected '$3', Actual '$op', Arg1 '$1', Arg2 '$2'"
+                (( _DEBUG )) && echo "struct_testing.testvercomp() FAIL: Expected '$three', Actual '$op', Arg1 '$one', Arg2 '$two'"
                 return 1
             else
-                (( _DEBUG )) && echo "struct_testing.testvercomp() Pass: '$1 $op $2'"
+                (( _DEBUG )) && echo "struct_testing.testvercomp() Pass: '$one $op $two'"
                 return 0
             fi
             # Tests
@@ -3130,11 +3868,12 @@ fi
             (( _DEBUG )) && echo "${*}"
             enforce_parameter_with_value 1** _words "${_words}" "HERE IS SOME TEXT"
             # local env_bash_version=$(extract_version  <<< $(/usr/bin/env bash --version) | head -1)
-            local env_bash_version=$(extract_version  <<< $(echo $BASH_VERSION) | head -1)
-            [ -z "${BASH_VERSION}" ] && env_bash_version=$(extract_version  <<< $(/usr/bin/env bash --version) | head -1)
-            (( _DEBUG )) && echo "bash version", $env_bash_version
+            local env_bash_version=""
+						env_bash_version=$(extract_version  <<< "$BASH_VERSION" | head -1)
+            [ -z "${BASH_VERSION}" ] && env_bash_version=$(extract_version  <<< "$(/usr/bin/env bash --version)" | head -1)
+            (( _DEBUG )) && echo "bash version $env_bash_version"
             [ -z "${1}" ] && return 1  # no argument passed
-            if ( testvercomp $env_bash_version 4 ">" ) ; then
+            if ( testvercomp "$env_bash_version" 4 ">" ) ; then
             {
                 # greater than version 3
                 echo -n "${1,,}"         # bash Convert string to lowercase Bash 4 REF: https://stackoverflow.com/questions/2264428/converting-string-to-lower-case-in-bash-shell-scripting
@@ -3178,7 +3917,8 @@ fi
             # echo "2:", $2
             [ -z "${*}" ] && return 1  # Nothing was passed
             # echo "hola"
-            local all=$(switch_spaces_to_newlines <<< "${*}")
+            local all=""
+						all=$(switch_spaces_to_newlines <<< "${*}")
             # echo "all:", "$all"
             # local seoking="" # $(trim <<< "${1}")
             local seeking="" # $(to_lowercase "${seoking}")
@@ -3192,7 +3932,7 @@ fi
                 {
                     (( COUNTER++ ))
                     # echo "--circle", $one_item, $COUNTER
-                    if (( $COUNTER == 1 )) ; then
+                    if (( COUNTER == 1 )) ; then
                     {
                         # echo "in"
                         # seoking=$(trim <<< "${one_item}")
@@ -3316,14 +4056,19 @@ fi
                 # (( _DEBUG )) && echo "\n rpm \n \n $packages \n \n rpm"
 
             }
+            elif [[ ${_OS:-} != "brew" ]] && ( ( command -v apt-get >/dev/null 2>&1; ) && ( command -v dpkg >/dev/null 2>&1; ) ) ; then
+            {
+                ensure_apt_dpkg_in_linux
+                packages=$(dpkg -l | grep -E "$one_required" | cut -d' ' -f3 2>&1)
+            }
             elif [[ ${_OS:-} != "brew" ]] && ( ( command -v apt >/dev/null 2>&1; ) && ( command -v dpkg >/dev/null 2>&1; ) ) ; then
             {
                 ensure_apt_dpkg_in_linux
                 packages=$(dpkg -l | grep -E "$one_required" | cut -d' ' -f3 2>&1)
             }
-					  elif [[ ${_OS:-} != "brew" ]] && ( ( command -v pacman >/dev/null 2>&1; )) ; then
+            elif [[ ${_OS:-} != "brew" ]] && ( ( command -v pacman >/dev/null 2>&1; )) ; then
             {
-							packages=$(pacman -Q | grep -E "$one_required" | awk '{print $1}'  2>&1)
+              packages=$(pacman -Q | grep -E "$one_required" | awk '{print $1}'  2>&1)
             }
             else # brew
             {
@@ -3391,7 +4136,33 @@ fi
                 install_this=$(echo -n "${install_this}" | sed -e 's/^[[:space:]]*//' ) # trim_spaces before //
               }
               fi
-              if [[ ${_OS:-} != "brew" ]] && ( ( command -v apt >/dev/null 2>&1; ) && ( command -v dpkg >/dev/null 2>&1; ) ) ; then
+              if [[ ${_OS:-} != "brew" ]] && ( ( command -v apt-get >/dev/null 2>&1; ) && ( command -v dpkg >/dev/null 2>&1; ) ) ; then
+              {
+                if (( _DEBUG )) ; then
+                  echo "apt search using dpkg"
+                fi
+                # REF: https://www.cyberciti.biz/faq/find-out-if-package-is-installed-in-linux/
+                if query=$(dpkg-query -W -f='${Status} ${Version}\n' "$one_required"  2>&1) ; then
+                {
+                    echo -e " ${CYAN}  CHECKING ${YELLOW} $one_required${RESET}"
+                }
+                fi
+                #if [[ "${query}" == "install ok"* ]] && ( is_included "$one_required" "${packages}" ); then
+                if [[ "${query}" == "install ok"* ]] ; then
+                {
+                    passed " ${GREEN} $one_required ${YELLOW} INSTALLED${RESET} ."
+                }
+                else
+                {
+                    echo -e " ${RED}  NEED TO INSTALL ${YELLOW} $one_required${RESET} ${RED}...${query}"
+                    missing="${missing} ${install_this}"
+                    if (( _DEBUG )) ; then
+                      echo  "${install_this}"
+                    fi
+                }
+                fi
+              }
+              elif [[ ${_OS:-} != "brew" ]] && ( ( command -v apt >/dev/null 2>&1; ) && ( command -v dpkg >/dev/null 2>&1; ) ) ; then
               {
                 if (( _DEBUG )) ; then
                   echo "apt search using dpkg"
@@ -3426,7 +4197,7 @@ fi
                   echo "rpm --------2"
                   echo "${packages}" | grep "$one_required"| grep "^$one_required"
                   echo "rpm --------3"
-                  echo "${packages}" | egrep -E "$one_required"| grep "^$one_required" | cut -d'-' -f1
+                  echo "${packages}" | grep -E "$one_required"| grep "^$one_required" | cut -d'-' -f1
                   echo "rpm --------4"
                   echo "rpm RETURNED:$?"
                 fi
@@ -3508,7 +4279,15 @@ fi
               fi
               missing=$(echo -n "${missing}" | sed -e 's/^[[:space:]]*//' ) # trim_start_space
               echo -e " ${CYAN} Installing missing packages: ${YELLOW} ${missing} ${RESET} ."
-              if [[ ${_OS:-} != "brew" ]] && ( ( command -v apt >/dev/null 2>&1; )  && ( command -v dpkg >/dev/null 2>&1; ) ); then
+              if [[ ${_OS:-} != "brew" ]] && ( ( command -v apt-get >/dev/null 2>&1; )  && ( command -v dpkg >/dev/null 2>&1; ) ); then
+              {
+                if (( _DEBUG )) ; then
+                  echo "apt install"
+                fi
+                install_result=$(exec apt-get install "${missing}" -yfq   2>&1) # capture all input and output
+                err_buff=$?
+              }
+              elif [[ ${_OS:-} != "brew" ]] && ( ( command -v apt >/dev/null 2>&1; )  && ( command -v dpkg >/dev/null 2>&1; ) ); then
               {
                 if (( _DEBUG )) ; then
                   echo "apt install"
@@ -3521,7 +4300,7 @@ fi
                 if (( _DEBUG )) ; then
                   echo "dnf install ${missing}"
                 fi
-                install_result=$(exec dnf install ${missing} -y  2>&1) # capture all input and output
+                install_result=$(exec dnf install "${missing}" -y  2>&1) # capture all input and output
                 if (( _DEBUG )) ; then
                   echo "dnf install_result"
                 fi
@@ -3571,14 +4350,15 @@ fi
                   echo "errors install"
                 fi
                 local error_happened=""
-                [[ "${PROCESSOR_ERROR}" == *"MAC"* ]] && [ $err_buff != 0 ] && error_happened="1"
-                [[ "${PROCESSOR_ERROR}" == *"INTEL"* ]] && (( $err_buff != 0 )) && error_happened="1"
+                [[ "${PROCESSOR_ERROR}" == *"MAC"* ]] && [ $err_buff -ne 0 ] && error_happened="1"
+                [[ "${PROCESSOR_ERROR}" == *"INTEL"* ]] && (( err_buff != 0 )) && error_happened="1"
                 if [ "${error_happened}" ]  ||  ( has_error_keyword "${install_result}" ) ; then
                 {
                   echo -e "${PURPLE_BLUE} action ${RED}failed ${YELLOW226}!!!  ${RESET}"
                   local REPLACERED="\\\\033[01;31m"
                   local REPLACECYAN="\\\\033[01;36m"
-                  local display_install_result=$(echo -e "${install_result}" | sed "s/\(FAILED\|failed\|additional\ disk\|Failed\|ERROR\|Error\|error\|cannot\|continue\|logged\|inspection\|not\|exit\|more\|details\)/${REPLACERED}\1${REPLACECYAN}/g")
+                  local display_install_result=""
+									display_install_result=$(echo -e "${install_result}" | sed "s/\(FAILED\|failed\|additional\ disk\|Failed\|ERROR\|Error\|error\|cannot\|continue\|logged\|inspection\|not\|exit\|more\|details\)/${REPLACERED}\1${REPLACECYAN}/g")
                   [[ "${install_result}" == *"Could not resolve"* ]] && echo -e "${BRIGHT_BLUE87} It appears YOU HAVE ${YELLOW226}NO INTERNET CONNECTION \o_0/ ${RESET}"
                   [[ "${install_result}" == *"Repository not found"* ]] && echo -e "${BRIGHT_BLUE87} It appears YOU HAVE ${YELLOW226}NO ACCESS TO THIS FOR YOU ${RED} ${GIT_USER_NAME} ${RESET}"
                   [[ "${install_result}" == *"Could not read from"* ]] && echo -e "${BRIGHT_BLUE87} It appears it exists but you are ${RED}NOT ${YELLOW226} ALLOWED ${RED} ${GIT_USER_NAME} ${YELLOW226}!!! ${RESET}"
@@ -3590,8 +4370,7 @@ fi
             }
             fi
             return 0
-        }
-        # end install_requirements
+        } # end install_requirements
 
         function install_apt_get_requirements() {
             # Sample use
@@ -3693,16 +4472,34 @@ fi
             #
 
             # room for detecting Linux and OS systems
+            # shellcheck disable=SC2317
             local OS="${1}"
             local removing=""
             local one_required=""
-            local required=$(grep -vE '^#'<<<$(grep -vE '^\s+#'<<<"${2}"))
+            local required=""
+						required="$(grep -vE '^#'<<<"$(grep -vE '^\s+#'<<<"${2}")")"
             for one_required in ${required}; do
             {
-              if ( ( command -v apt >/dev/null 2>&1; ) && ( command -v dpkg >/dev/null 2>&1; ) ) ; then
+              if ( ( command -v apt-get >/dev/null 2>&1; ) && ( command -v dpkg >/dev/null 2>&1; ) ) ; then
               {
                 dpkg -l | grep -E "$one_required" &>/dev/null
-                if [ $? == 0 ]; then
+								_err=$?
+                if [ ${_err} == 0 ]; then
+                {
+                    echo -e " ${RED}  NEED TO REMOVE ${YELLOW} $one_required${RESET} ."
+                    removing="${removing} ${one_required}"
+                }
+                else
+                {
+                    passed " ${GREEN} $one_required ${YELLOW} NOT PRESENT${RESET} ."
+                }
+                fi
+              }
+              elif ( ( command -v apt >/dev/null 2>&1; ) && ( command -v dpkg >/dev/null 2>&1; ) ) ; then
+              {
+                dpkg -l | grep -E "$one_required" &>/dev/null
+								_err=$?
+                if [ ${_err} == 0 ]; then
                 {
                     echo -e " ${RED}  NEED TO REMOVE ${YELLOW} $one_required${RESET} ."
                     removing="${removing} ${one_required}"
@@ -3716,7 +4513,8 @@ fi
               elif ( ( command -v rpm >/dev/null 2>&1; ) && ( command -v dnf >/dev/null 2>&1; ) ) ; then
               {
                 rpm -qa | grep -E  "$one_required" &>/dev/null
-                if [ $? == 0 ]; then
+								_err=$?
+                if [ ${_err} == 0 ]; then
                 {
                     echo -e " ${RED}  NEED TO REMOVE ${YELLOW} $one_required${RESET} ."
                     removing="${removing} ${one_required}"
@@ -3732,19 +4530,29 @@ fi
             }
             done
 
-            removing=$(echo ${removing} | sed -e 's/^[[:space:]]*//' | sed 's/^\ //g' | sed 's/^\t//g' ) # trim_start_space
+            removing=$(echo "${removing}" | sed -e 's/^[[:space:]]*//' | sed 's/^\ //g' | sed 's/^\t//g' ) # trim_start_space
 
-            if ( ( command -v apt >/dev/null 2>&1; ) && ( command -v dpkg >/dev/null 2>&1; ) ) ; then
+            if ( ( command -v apt-get >/dev/null 2>&1; ) && ( command -v dpkg >/dev/null 2>&1; ) ) ; then
             {
               [[ -n "${removing}" ]] && echo -e " ${CYAN} Apt-get removing packages: ${YELLOW} ${removing} ${RESET} ."
-              [[ -n "${removing}" ]] && local remove_result=$(exec apt-get remove ${removing} -yfq   2>&1 && exec apt-get purge ${removing} -yfq   2>&1 && exec apt-get autoremove -yfq   2>&1) # capture all input and output
+							# shellcheck disable=SC2155
+              [[ -n "${removing}" ]] && local remove_result=$(exec apt-get remove "${removing}" -yfq   2>&1 && exec apt-get purge "${removing}" -yfq   2>&1 && exec apt-get autoremove -yfq   2>&1) # capture all input and output
+              local err_buff=$?
+              [[ -n "${remove_result}" ]] && handle_error "${err_buff}" "${remove_result}"
+            }
+            elif ( ( command -v apt >/dev/null 2>&1; ) && ( command -v dpkg >/dev/null 2>&1; ) ) ; then
+            {
+							# shellcheck disable=SC2155
+              [[ -n "${removing}" ]] && echo -e " ${CYAN} Apt-get removing packages: ${YELLOW} ${removing} ${RESET} ."
+              [[ -n "${removing}" ]] && local remove_result=$(exec apt remove "${removing}" -yfq   2>&1 && exec apt purge "${removing}" -yfq   2>&1 && exec apt autoremove -yfq   2>&1) # capture all input and output
               local err_buff=$?
               [[ -n "${remove_result}" ]] && handle_error "${err_buff}" "${remove_result}"
             }
             elif ( ( command -v rpm >/dev/null 2>&1; ) && ( command -v dnf >/dev/null 2>&1; ) ) ; then
             {
               [[ -n "${removing}" ]] && echo -e " ${CYAN} Dnf removing packages: ${YELLOW} ${removing} ${RESET} ."
-              [[ -n "${removing}" ]] && local remove_result=$(exec dnf uninstall ${removing} -y   2>&1 && exec dnf purge ${removing} -y  2>&1 && exec dnf autoremove -y   2>&1) # capture all input and output
+							# shellcheck disable=SC2155
+              [[ -n "${removing}" ]] && local remove_result=$(exec dnf uninstall "${removing}" -y   2>&1 && exec dnf purge "${removing}" -y  2>&1 && exec dnf autoremove -y   2>&1) # capture all input and output
               local err_buff=$?
               [[ -n "${remove_result}" ]] && handle_error "${err_buff}" "${remove_result}"
             }
@@ -3878,7 +4686,7 @@ fi
           }
           done <<< "${CHANGED_FILES_WITH_STATUS_WITH_TAB_CHANGED_TO_PIPE}"
           #done <<< "${CHANGED_FILES_WITH_STATUS_WITH_TAB_CHANGED_TO_PIPE}"
-          echo $LONGEST_NAME
+          echo "$LONGEST_NAME"
         }
         # end get_longest_name_length
         # duplicated at commit
@@ -3896,10 +4704,10 @@ fi
           #               echo ${FILENAME}${SPACER}
           #
           local pad="${1}"
-          local total=${2}
+          local -i total=${2}
           [ ${total} -lt 1 ] && echo "${YELLOW} Warning ${FUNCNAME[*]}: ${CYAN} Expected number 'total' to be more than 0 and I got :${total}: value ${RESET}" && total=10
           [ -z "${pad}" ] && [ "${#pad}" -lt 1 ] && echo "${YELLOW} Warning ${FUNCNAME[*]}: ${CYAN} Expected padding 'pad' to be something and I got :${pad}: value ${RESET}" && pad=" "
-          for ((x = 0; x < ${total}; x++)); do
+          for ((x = 0; x < total; x++)); do
             #echo "${1}"
             printf %s "${pad}"
           done
@@ -3914,8 +4722,9 @@ fi
           local longest=${2}
           local pad="${3}"
           local length="${#string}"   # get string length
-          local calculate=$(( $longest - $length ))
-          local padding=$(repeat_single_char_spacer "${pad}" ${calculate})
+          local calculate=$(( longest - length ))
+          local padding=""
+					padding=$(repeat_single_char_spacer "${pad}" ${calculate})
           echo "${string}${padding}"
         }
         # end add_right_padding
@@ -3928,8 +4737,9 @@ fi
           local longest=${2}
           local string="${3}"
           local length="${#string}"   # get string length
-          local calculate=$(( $longest - $length ))
-          local padding=$(repeat_single_char_spacer ${pad} $calculate)
+          local calculate=$(( longest - length ))
+          local padding=""
+					padding=$(repeat_single_char_spacer ${pad} $calculate)
           echo "${padding}${string}"
         }
         # end add_left_padding
@@ -3990,10 +4800,12 @@ x, sent             , sentimineo ,
             local ONE_TEST
             local ONE_VERSION
             local ONE_WHICH
-            local MIDDLE__LONGEST=$(get_longest_name_length "$(date)")
+            local MIDDLE__LONGEST=""
+						MIDDLE__LONGEST=$(get_longest_name_length "$(date)")
             local VERSION_EXTRACT_COMMAND
             (( MIDDLE__LONGEST ++ ))
             (( MIDDLE__LONGEST ++ ))
+						# shellcheck disable=SC2034
             local TABLE_VERSION_LENGTH
             local GOODIES="
 echo \" \"
@@ -4005,7 +4817,7 @@ echo -e \"
             {
               if [[ -n "${one_line}" ]] ; then
               {
-                IFS=\, read FILTER_THIS ONE_TITLE ONE_COMMAND ONE_TEST<<EOF
+                IFS=\, read -r FILTER_THIS ONE_TITLE ONE_COMMAND ONE_TEST<<EOF
 ${one_line}
 EOF
     echo "sudo -u ${USER_TO_INSTALL} -i -- command -v ${ONE_COMMAND}"
@@ -4093,7 +4905,8 @@ complete -o nospace -F _wp_complete wp
             #            chown_it "${USER_TO_INSTALL}" /usr/local/rvm
             #            chown_it "${USER_TO_INSTALL}" /usr/local/rvm /usr/local/.nvm /usr/local/.nvm  /usr/local/rvm  /root/.temp
             local USER_TO_INSTALL="${1}"
-            local paths=$(switch_spaces_to_newlines <<< "${2}")
+            local paths=""
+						paths=$(switch_spaces_to_newlines <<< "${2}")
             local actions="
                 [ -e \"{#}\" ] && chown -R \"${USER_TO_INSTALL}\":\"${USER_TO_INSTALL}\" \"{#}\"
             "
@@ -4128,7 +4941,8 @@ complete -o nospace -F _wp_complete wp
             #            chmod_it 644 /usr/local/rvm
             #            chmod_it "${chmodmod}" /usr/local/rvm /usr/local/.nvm /usr/local/.nvm  /usr/local/rvm  /root/.temp
             local chmodmod="${1}"
-            local paths=$(switch_spaces_to_newlines <<< "${2}")
+            local paths=""
+						paths=$(switch_spaces_to_newlines <<< "${2}")
             local actions="
                 [ -e \"{#}\" ] && chmod \"${chmodmod}\" \"{#}\"
             "
@@ -4174,7 +4988,8 @@ complete -o nospace -F _wp_complete wp
             # Sample use
             #            remove_it  /usr/local/rvm
             #            remove_it  /usr/local/rvm /usr/local/.nvm  /usr/local/rvm  /root/.temp
-            local paths=$(switch_spaces_to_newlines <<< "${@}")
+            local paths=""
+						paths=$(switch_spaces_to_newlines <<< "${@}")
             local actions="
                 [ -e \"{#}\" ] && rm -rf \"{#}\"
                 [ -L \"{#}\" ] && unlink \"{#}\"
@@ -4233,12 +5048,12 @@ complete -o nospace -F _wp_complete wp
                     action="${action/\{\#\}/${one_item}}"
                     eval """${action}"""
                     # child=$!
-		    ret=$?
-		    wait
+        ret=$?
+        wait
                     if [ $ret -gt 0 ] ; then
                     {
                       # wait $child
-		      wait
+          wait
                       warning "${YELLOW}Error SIGNAL_RETURN(${RED}${ret}${YELLOW}) executing: \n${action}"
                     }
                     fi
@@ -4329,7 +5144,8 @@ enter_last_only_removed() {
             # ' Here I changed \n to 0N33NT3R' why? - For a weird reasons when assigning a var " " it adds \n to the  end of it so t="a" is actually t="a\n"
         function contains_newlines() {
             # echo "${@}" | enter_encode
-            local trimmed_testing=$(echo "${@}" | enter_encode)
+            local trimmed_testing=""
+						trimmed_testing=$(echo "${@}" | enter_encode)
             if [[ "${trimmed_testing}" == *"0N33NT3R"* ]] ; then
             {
               return 0 # true contains enters
@@ -4353,13 +5169,14 @@ enter_last_only_removed() {
             #            sudo out_of_root_folder_and_soft_link_back "${USER_TO_INSTALL}" .bundle .gem .gems
         function out_of_root_folder_and_soft_link_back() {
             local USER_TO_INSTALL="${1}"
-            if ( contains_newlines "${@}" ); then
+            if ( contains_newlines "${*}" ); then
             {
-                local targets="${@}"
+                local targets="${*}"
             }
             else
             {
-                local targets=$(echo "${@}" | switch_spaces_to_newlines)
+                local targets=""
+								targets=$(echo "${*}" | switch_spaces_to_newlines)
             }
             fi
             echo "${targets}"
@@ -4380,11 +5197,12 @@ enter_last_only_removed() {
             local USER_TO_INSTALL="${1}"
             if contains_newlines "${@}" ; then
             {
-                local targets="${@}"
+                local targets="${*}"
             }
             else
             {
-                local targets=$(echo "${@}" | switch_spaces_to_newlines)
+                local targets=""
+								targets=$(echo "${@}" | switch_spaces_to_newlines)
             }
             fi
             local actions="
@@ -4400,7 +5218,7 @@ enter_last_only_removed() {
         function move_to_user_folder_and_soft_link_root_to_it() {
             local USER_TO_INSTALL="${1}"
             local target="${2}"
-            [ -d "/home/${USER_TO_INSTALL}/${target}/" ] &&  rm -rf "/home/${USER_TO_INSTALL}/${target}/"
+            [ -d "/home/${USER_TO_INSTALL}/${target}/" ] &&  rm -rf "/home/${USER_TO_INSTALL:?}/${target:?}/"
             [ -d "/root/${target}/" ] &&  mv "/root/${target}" "/home/${USER_TO_INSTALL}/"
             [ -d "/home/${USER_TO_INSTALL}/${target}/" ] &&  ln -sf  "/home/${USER_TO_INSTALL}/${target}" "/root/${target}"
             [ -d "/home/${USER_TO_INSTALL}/${target}/" ] &&  chown -R "${USER_TO_INSTALL}":"${USER_TO_INSTALL}" "/home/${USER_TO_INSTALL}/${target}/"
@@ -4411,7 +5229,7 @@ enter_last_only_removed() {
         function move_to_user_file_and_soft_link_root_to_it() {
             local USER_TO_INSTALL="${1}"
             local target="${2}"
-            [ -f "/home/${USER_TO_INSTALL}/${target}" ] &&  rm -rf "/home/${USER_TO_INSTALL}/${target}"
+            [ -f "/home/${USER_TO_INSTALL}/${target}" ] &&  rm -rf "/home/${USER_TO_INSTALL:?}/${target:?}"
             [ -f "/root/${target}" ] &&  mv "/root/${target}" "/home/${USER_TO_INSTALL}"
             [ -f "/home/${USER_TO_INSTALL}/${target}" ] &&  ln -sf  "/home/${USER_TO_INSTALL}/${target}" "/root/${target}"
             [ -f "/home/${USER_TO_INSTALL}/${target}" ] &&  chown -R "${USER_TO_INSTALL}":"${USER_TO_INSTALL}" "/home/${USER_TO_INSTALL}/${target}"
@@ -4499,10 +5317,10 @@ function _find_downloads_folder(){
   if [[ "$(uname)" == "Darwin" ]] ; then
     # Do something under Mac OS X platform
     DOWNLOADFOLDER=/Users/"${SUDO_USER}"/Downloads
-  elif [[ "$(expr substr $(uname -s) 1 5)" == "Linux" ]] ; then
+  elif [[ "$(cut -c1-5 <<< "$(uname -s)")" == "Linux" ]] ; then
     # Do something under GNU/Linux platform
     DOWNLOADFOLDER=/home/"${SUDO_USER}"/Downloads
-  elif [[ "$(expr substr $(uname -s) 1 10)" == "MINGW32_NT" ]] ; then
+  elif [[ "$(cut -c1-10 <<< "$(uname -s)")" == "MINGW32_NT" ]] ; then
     # Do something under Windows NT platform
     DOWNLOADFOLDER=/C/Users/"${SUDO_USER}"/Downloads
     # nothing here
@@ -4541,16 +5359,17 @@ function _find_downloads_folder(){
     fi
     # check again for value in case that fails also
     #  if so, then create with mkdir process, I assume this will always work, #nevermakeassumptions btw
-    if [ -z "${DOWNLOADFOLDER}" ] || [ ${_err} -gt 0 ] ; then
+    if [[ -z "${DOWNLOADFOLDER}" ]] || [ ${_err} -gt 0 ] ; then
     {
       DOWNLOADFOLDER="$(mktemp -d 2>/dev/null || mktemp -d -t 'tempdownloads')"
       _err=$?
     }
     fi
     # check empty of error
-    if [ -z "${DOWNLOADFOLDER}" ] || [ ${_err} -gt 0 ] ; then
+    if [[ -z "${DOWNLOADFOLDER}" ]] || [ ${_err} -gt 0 ] ; then
     {
       return 1  # here one is for error
+			# shellcheck disable=SC2317
       exit 1
     }
     fi
@@ -4565,13 +5384,16 @@ function _find_downloads_folder(){
     echo -n "${DOWNLOADFOLDER}"
     return 0
   }
-  else
-  {
-    local _temp_dir="$(mktemp -d 2>/dev/null || mktemp -d -t 'tempdownloads')"
+  fi
+	# else implicit
+	#
+    local _temp_dir=""
+		_temp_dir="$(mktemp -d 2>/dev/null || mktemp -d -t 'tempdownloads')"
     _err=$?
-    if [ -z "${_temp_dir}" ] || [ ${_err} -gt 0 ] ; then
+    if [[ -z "${_temp_dir}" ]] || [ ${_err} -gt 0 ] ; then
     {
       return 1  # here one is for error
+			# shellcheck disable=SC2317
       exit 1
     }
     fi
@@ -4583,9 +5405,6 @@ function _find_downloads_folder(){
     fi
     echo -n "${_temp_dir}"
     return 0
-   }
-  fi
-  return 1
 } # end _find_downloads_folder
 
 function _download_win() {
@@ -4598,11 +5417,12 @@ function progressfilt() {
     # $ wget --progress=bar:force http://somesite.com/TheFile.jpeg 2>&1 | progressfilt
     # 100%[======================================>] 15,790      48.8K/s   in 0.3s
     # 2011-01-13 22:09:59 (48.8 KB/s) - 'TheFile.jpeg' saved [15790/15790]
-    local _err=$?
+    local -i _err=$?
     if [ ${_err} -ne 0 ] ; then
     {
        echo "$0:progressfilt: error: ${_err} cannot continue"
        return ${_err}
+	     # shellcheck disable=SC2317
        exit ${_err}
     }
     fi
@@ -4616,7 +5436,7 @@ function progressfilt() {
         }
         else
         {
-            if [[ $c != $cr && $c != $nl ]];   then
+            if [[ $c != "$cr" && $c != "$nl" ]];   then
             {
               count=0
             }
@@ -4642,6 +5462,7 @@ function _download_mac() {
   #       _download_mac "${URL}" "${USER_HOME}/Downloads"
   #
   local target_url="${1}"
+	local -i _err=0
   local download_folder=""
   if [ -n "${2}" ] ; then # if not empty
   {
@@ -4672,11 +5493,14 @@ function _download_mac() {
   # printf '$0 is: %s\n$BASH_SOURCE is: %s\n' "$0" "$BASH_SOURCE"
   # echo "# my name ------------------>  ${0##*/} "
   # echo
-  [ -z "${1}" ] && failed "\\n${BASH_SOURCE}:${BASH_LINENO[-0]} ${FUNCNAME[-0]}\(\) \\n$0:${BASH_LINENO[1]} ${FUNCNAME[1]}\(\) \\nCould not load 1.target_url string or it was empty. Expected one Parameter 1:<> URL <target url>"
-  [ -z "${2}" ] && failed "\\n${BASH_SOURCE}:${BASH_LINENO[-0]} ${FUNCNAME[-0]}\(\) \\n$0:${BASH_LINENO[1]} ${FUNCNAME[1]}\(\) \\nCould not load 2.download_folder string or it was empty. Expected one Parameter 2:<> <download folder>"
-  if enforce_web_is_reachable $(echo "${target_url}") && [ $? -gt 0 ] ;  then # if not empty
+  [ -z "${1}" ] && failed "\\n${BASH_SOURCE[0]}:${BASH_LINENO[-0]} ${FUNCNAME[-0]}\(\) \\n$0:${BASH_LINENO[1]} ${FUNCNAME[1]}\(\) \\nCould not load 1.target_url string or it was empty. Expected one Parameter 1:<> URL <target url>"
+  [ -z "${2}" ] && failed "\\n${BASH_SOURCE[0]}:${BASH_LINENO[-0]} ${FUNCNAME[-0]}\(\) \\n$0:${BASH_LINENO[1]} ${FUNCNAME[1]}\(\) \\nCould not load 2.download_folder string or it was empty. Expected one Parameter 2:<> <download folder>"
+  enforce_web_is_reachable "${target_url}"
+	_err=$?
+	if [ ${_err} -gt 0 ] ;  then # if not empty
+  # 20250405 if enforce_web_is_reachable "$(echo "${target_url}")" && [ $? -gt 0 ] ;  then # if not empty
   {
-    failed \\n${BASH_SOURCE}:${BASH_LINENO[-0]} ${FUNCNAME[-0]}\(\) \\n$0:${BASH_LINENO[1]} ${FUNCNAME[1]}\(\) \\nCould not load 1.target_url URL is Broken or not Reachable "<<${target_url}>>"
+    failed "\\n${BASH_SOURCE[0]}:${BASH_LINENO[-0]} ${FUNCNAME[-0]}\(\) \\n$0:${BASH_LINENO[1]} ${FUNCNAME[1]}\(\) \\nCould not load 1.target_url URL is Broken or not Reachable <<${target_url}>>"
   }
   fi
   # -c Resume Downloads  -c option only works with FTP / HTTP servers that support the “range” header
@@ -4696,8 +5520,8 @@ set +ex
   elif ( command -v wget >/dev/null 2>&1; ) ; then
   {
     # REF: https://www.linuxquestions.org/questions/linux-general-1/how-to-create-a-bash-script-to-wait-for-wget-to-finish-and-then-continue-621754/
-    for url in $(echo "${download_folder}"); do
-    {
+    # for url in ${download_folder}; do
+    # {
       # _try wget -c --directory-prefix=\"${USER_HOME}/Downloads/\"  --quiet --no-check-certificate "${download_folder}" 2>/dev/null   # suppress only wget download messages, but keep wget output for variable
       echo "wget -c --progress=bar:force --directory-prefix=\"${download_folder}\" --no-check-certificate \"${target_url}\" 2>&1 | progressfilt"
 set -ex
@@ -4706,8 +5530,8 @@ set -ex
       ls -la
 set +ex
       # wget -c --directory-prefix=\"${USER_HOME}/Downloads/\"  --quiet --no-check-certificate "${download_folder}" 2>/dev/null   # suppress only wget download messages, but keep wget output for variable
-    }
-    done
+    # }
+    # done
   }
   else
   {
@@ -4721,10 +5545,10 @@ function _download() {
     if [[ "$(uname)" == "Darwin" ]] ; then
     # Do something under Mac OS X platform
       _download_mac "${@}"
-    elif [[ "$(expr substr $(uname -s) 1 5)" == "Linux" ]] ; then
+    elif [[ "$(cut -c1-5 <<< "$(uname -s)")" == "Linux" ]] ; then
     # Do something under GNU/Linux platform
       _download_linux "${@}"
-    elif [[ "$(expr substr $(uname -s) 1 10)" == "MINGW32_NT" ]] ; then
+    elif [[ "$(cut -c1-10 <<< "$(uname -s)")" == "MINGW32_NT" ]] ; then
     # Do something under Windows NT platform
       _download_win "${*}"
     # nothing here
@@ -4755,20 +5579,21 @@ function _download_linux() {
   # fi
 
   local -i _err=0
-  local thisscriptname=$(dirname "struct_testing")
+  # local thisscriptname=""
+	# thisscriptname=$(dirname "struct_testing")
   _trap_try_start
   local target_url="${1}"
   local download_folder=""
-  if [ -n "${2}" ] ; then # if not empty
+  if [ -n "${2}" ] ; then # #iif not empty
   {
       download_folder="${2}"
   }
   fi
-  Comment "$0:$LINENO $FUNCNAME      target url 1:<${1}>"
-  [ -z "${1}" ] && Comment "$0:$LINENO $FUNCNAME empty"
-  Comment "$0:$LINENO $FUNCNAME download folder 2:<${download_folder}>"
-  [ -z "${2}" ] && Comment "$0:$LINENO $FUNCNAME empty"
-  Comment "$0:$LINENO $FUNCNAME   download file 3:<${3}>"
+  Comment "$0:$LINENO ${FUNCNAME[0]}      target url 1:<${1}>"
+  [ -z "${1}" ] && Comment "$0:$LINENO ${FUNCNAME[0]} empty"
+  Comment "$0:$LINENO ${FUNCNAME[0]} download folder 2:<${download_folder}>"
+  [ -z "${2}" ] && Comment "$0:$LINENO ${FUNCNAME[0]} empty"
+  Comment "$0:$LINENO ${FUNCNAME[0]}   download file 3:<${3}>"
   #   file_exists_with_spaces "${download_folder }"
   directory_exists_with_spaces "${download_folder}"
     #   [ -z "${3}" ] && echo "empty"
@@ -4781,12 +5606,15 @@ function _download_linux() {
     # printf '$0 is: %s\n$BASH_SOURCE is: %s\n' "$0" "$BASH_SOURCE"
     # echo "# my name ------------------>  ${0##*/} "
     # echo
-  [ -z "${1}" ] && failed "\\n${BASH_SOURCE}:${BASH_LINENO[-0]} ${FUNCNAME[-0]}\(\) \\n$0:${BASH_LINENO[1]} ${FUNCNAME[1]}\(\) \\nCould not load 1.target_url string or it was empty. Expected one Parameter 1:<> URL <target url>"
-  [ -z "${2}" ] && failed "\\n${BASH_SOURCE}:${BASH_LINENO[-0]} ${FUNCNAME[-0]}\(\) \\n$0:${BASH_LINENO[1]} ${FUNCNAME[1]}\(\) \\nCould not load 2.download_folder string or it was empty. Expected one Parameter 2:<> <download folder>"
-  [ -z "${3}" ] && failed "\\n${BASH_SOURCE}:${BASH_LINENO[-0]} ${FUNCNAME[-0]}\(\) \\n$0:${BASH_LINENO[1]} ${FUNCNAME[1]}\(\) \\nCould not load 3.download_file string or it was empty. Expected one Parameter 3:<> <download file>"
-  if enforce_web_is_reachable "${1}" && [ $? -gt 0 ] ;  then # if not empty
+  [ -z "${1}" ] && failed "\\n${BASH_SOURCE[0]}:${BASH_LINENO[-0]} ${FUNCNAME[-0]}\(\) \\n$0:${BASH_LINENO[1]} ${FUNCNAME[1]}\(\) \\nCould not load 1.target_url string or it was empty. Expected one Parameter 1:<> URL <target url>"
+  [ -z "${2}" ] && failed "\\n${BASH_SOURCE[0]}:${BASH_LINENO[-0]} ${FUNCNAME[-0]}\(\) \\n$0:${BASH_LINENO[1]} ${FUNCNAME[1]}\(\) \\nCould not load 2.download_folder string or it was empty. Expected one Parameter 2:<> <download folder>"
+  [ -z "${3}" ] && failed "\\n${BASH_SOURCE[0]}:${BASH_LINENO[-0]} ${FUNCNAME[-0]}\(\) \\n$0:${BASH_LINENO[1]} ${FUNCNAME[1]}\(\) \\nCould not load 3.download_file string or it was empty. Expected one Parameter 3:<> <download file>"
+	enforce_web_is_reachable "${1}"
+  _err=$?
+  # 20250405 if enforce_web_is_reachable "${1}" && [ $? -gt 0 ] ;  then # if not empty
+  if [ ${_err} -gt 0 ] ;  then # if not empty
   {
-    failed \\n${BASH_SOURCE}:${BASH_LINENO[-0]} ${FUNCNAME[-0]}\(\) \\n$0:${BASH_LINENO[1]} ${FUNCNAME[1]}\(\) \\nCould not load 1.target_url URL is Broken or not Reachable "<<${1}>>"
+    failed "\\n${BASH_SOURCE[0]}:${BASH_LINENO[-0]} ${FUNCNAME[-0]}\(\) \\n$0:${BASH_LINENO[1]} ${FUNCNAME[1]}\(\) \\nCould not load 1.target_url URL is Broken or not Reachable <<${1}>>"
   }
   fi
 
@@ -4801,42 +5629,46 @@ function _download_linux() {
     # ensure wget or "Wget is required"
     # # REF: about :> http://unix.stackexchange.com/questions/37507/what-does-do-here
     _trap_try_start
-    local _temp_dir="$(mktemp -d 2>/dev/null || mktemp -d -t '_download_linux')"
-    :> ${_temp_dir}/wgetrc   # here :> equals to Equivalent to the following: cat /dev/null > wgetrc which Nulls out the file called "wgetrc" in the current directory. As in creates an empty file "wgetrc" if one doesn't exist or overwrites one with nothing if it does.
+    local _temp_dir=""
+		_temp_dir="$(mktemp -d 2>/dev/null || mktemp -d -t '_download_linux')"
+    :> "${_temp_dir}/wgetrc"   # here :> equals to Equivalent to the following: cat /dev/null > wgetrc which Nulls out the file called "wgetrc" in the current directory. As in creates an empty file "wgetrc" if one doesn't exist or overwrites one with nothing if it does.
     _err=$?
     _trap_catch_check ${_err}
-    file_exists_with_spaces ${_temp_dir}/wgetrc
+    file_exists_with_spaces "${_temp_dir}/wgetrc"
     _trap_try_start
-    echo "noclobber=off" >> ${_temp_dir}/wgetrc
     _err=$?
+    echo "noclobber=off" >> "${_temp_dir}/wgetrc"
     _trap_catch_check ${_err}
-    echo "dirstruct=off" >> ${_temp_dir}/wgetrc
+    # shellcheck disable=SC2129
+    echo "dirstruct=off" >> "${_temp_dir}/wgetrc"
     # echo "verbose=off" >> ${_temp_dir}/wgetrc     # NOTE Can't be verbose and quiet at the same time.--quiet
-    echo "verbose=on" >> ${_temp_dir}/wgetrc     # NOTE Can't be verbose and quiet at the same time.--quiet
-    echo "progress=bar:default" >> ${_temp_dir}/wgetrc
-    echo "tries=3" >> ${_temp_dir}/wgetrc
-    echo "max-redirect=10" >> ${_temp_dir}/wgetrc
-    echo "check_certificate=off" >> ${_temp_dir}/wgetrc
-    echo "mirror=on" >> ${_temp_dir}/wgetrc
-    echo "content_disposition=on" >> ${_temp_dir}/wgetrc
-    echo "dir_prefix=." >> ${_temp_dir}/wgetrc
-    # echo "dir_prefix=${download_folder}" >> ${_temp_dir}/wgetrc
-    echo "directory-prefix=${download_folder}" >> ${_temp_dir}/wgetrc
-    # echo "output-document=${download_file}" >> ${_temp_dir}/wgetrc    # Set the output filename--the same as '-O FILE'.
-    # echo "input=${target_url}" >> ${_temp_dir}/wgetrc    #  Read the URLs from STRING, like '-i FILE'.
+    echo "verbose=on" >> "${_temp_dir}/wgetrc"     # NOTE Can't be verbose and quiet at the same time.--quiet
+    echo "progress=bar:default" >> "${_temp_dir}/wgetrc"
+    echo "tries=3" >> "${_temp_dir}/wgetrc"
+    echo "max-redirect=10" >> "${_temp_dir}/wgetrc"
+    echo "check_certificate=off" >> "${_temp_dir}/wgetrc"
+    echo "mirror=on" >> "${_temp_dir}/wgetrc"
+    echo "content_disposition=on" >> "${_temp_dir}/wgetrc"
+    echo "dir_prefix=." >> "${_temp_dir}/wgetrc"
+    # echo "dir_prefix=${download_folder}" >> "${_temp_dir}/wgetrc"
+    echo "directory-prefix=${download_folder}" >> "${_temp_dir}/wgetrc"
+    # echo "output-document=${download_file}" >> "${_temp_dir}/wgetrc"    # Set the output filename--the same as '-O FILE'.
+    # echo "input=${target_url}" >> "${_temp_dir}/wgetrc"    #  Read the URLs from STRING, like '-i FILE'.
     # _trap_try_start # _trap_catch_check
     # WGETRC=wgetrc wget --directory-prefix="${USER_HOME}/Downloads/" --quiet --no-check-certificate "${target_url}" 2>/dev/null
     #  _trap_catch_check
     # WGETRC=${_temp_dir}/wgetrc  wget --quiet --no-check-certificate "${target_url}" 2>/dev/null   # suppress only wget download messages, but keep wget output for variable
     # _try "WGETRC=${_temp_dir}/wgetrc  wget --mirror --directory-prefix=\"${download_folder}\" --quiet --no-check-certificate \"${target_url}\"" # 2>/dev/null"
     _trap_try_start # _trap_catch_check
-    WGETRC=${_temp_dir}/wgetrc
+    # shellcheck disable=SC2034
+		WGETRC=${_temp_dir}/wgetrc
     # WGETRC=${_temp_dir}/wgetrc  wget --max-redirect=10 --mirror --directory-prefix="${download_folder}" --no-check-certificate "${target_url}" # 2>/dev/null"
     # WGETRC=${_temp_dir}/wgetrc  wget --mirror --content-disposition "${download_folder}" "${download_file}" --no-check-certificate "${target_url}" # 2>/dev/null"
-    local WGETCOMMAND=""
+    # shellcheck disable=SC2034
+		local WGETCOMMAND=""
     echo "WGET:"
     echo "OPTIONS WGETRC:"
-    cat -n ${_temp_dir}/wgetrc
+    cat -n "${_temp_dir}/wgetrc"
     echo "COMMAND WGET:"
     passed "WGETRC=${_temp_dir}/wgetrc  wget --max-redirect=10 --mirror --directory-prefix=${download_folder} -O ${download_file} --no-check-certificate ${target_url}"
     cd "${download_folder}"
@@ -4869,8 +5701,8 @@ function _download_linux() {
     _assure_success $?
     echo "${msg:-}"
     echo -e "\033[7m*** Download Wget executed completed.\033[0m"
-    rm -f ${_temp_dir}/wgetrc
-    file_does_not_exist_with_spaces ${_temp_dir}/wgetrc
+    rm -f "${_temp_dir}/wgetrc"
+    file_does_not_exist_with_spaces "${_temp_dir}/wgetrc"
     # file_exists_with_spaces "${download_folder}/${download_file}"
   elif ( command -v curl >/dev/null 2>&1; ); then
     ensure curl or "curl is required"
@@ -4882,7 +5714,7 @@ function _download_linux() {
 
     # _assure_success
   else
-    failed \\n${BASH_SOURCE}:${BASH_LINENO[-0]} ${FUNCNAME[-0]}\(\) \\n$0:${BASH_LINENO[1]} ${FUNCNAME[1]}\(\) \\n"I cannot find wget or curl programs to perform a download action! ${target_url}"
+    failed "\\n${BASH_SOURCE[0]}:${BASH_LINENO[-0]} ${FUNCNAME[-0]}\(\) \\n$0:${BASH_LINENO[1]} ${FUNCNAME[1]}\(\) \\nI cannot find wget or curl programs to perform a download action! ${target_url}"
   fi
 } # end _download_linux
 
@@ -4892,7 +5724,8 @@ function _assure_success() {
   local -i _param=${1:-0}
   if [ ${_err} -gt 0 ] || [ ${_param} -gt 0 ] ; then
     failed -e "\033[38;5;1m Something went wrong \033[0m"
-    exit 1
+    # shellcheck disable=SC2317
+		exit 1
   fi
   wait
 }
@@ -4921,30 +5754,31 @@ function _action_runner() {
   local -i _err=0
   while read -r action ; do
   {
-    if [[ ! -z "${action}" ]] ; then # if not empty
+    if [[ -n "${action}" ]] ; then # if not empty
     {
       _trap_try_start
       echo "${action}"
-      exec "${action}"
+      "${action}"
       _err=$?
       _trap_catch_check ${_err}
     }
     fi
   }
-  done <<< "${@}"
+  done <<< "${*}"
 } # end _action_runner
 
 function _try_runner() {
   local -i _err=0
-  local body=$(_function_body "${1}")
+  local body=""
+	body=$(_function_body "${1}")
   function_exists "${1}"
   while read -r action ; do
   {
-    if [[ ! -z "${action}" ]] ; then # if not empty
+    if [[ -n "${action}" ]] ; then # if not empty
     {
       _trap_try_start
       echo "${action}"
-      exec "${action}"
+      "${action}"
       _err=$?
       _trap_catch_check ${_err}
     }
@@ -4960,11 +5794,14 @@ function _function_body() {
   # ensure tail or Cancel. Missing tail command
   # ensure declare or Cancel. Missing declare command
   # ensure wc or Cancel. Missing declare command
-  local functioncomplete=$(declare -f "${functionname}")
+  local functioncomplete=""
+	functioncomplete=$(declare -f "${functionname}")
   # echo complete:"${functioncomplete}"
-  local functionbody=$(echo "${functioncomplete}" | cüt "${functionname} ()")
+  local functionbody=""
+	functionbody=$(echo "${functioncomplete}" | cüt "${functionname} ()")
   # echo body:"${functionbody}"
-  local functionlength=$(echo "${functionbody}" | wc -l)
+  local functionlength=""
+	functionlength=$(echo "${functionbody}" | wc -l)
   # echo length:${functionlength}
   # echo less:${functionlengthless}
   (( functionlength-- ))
@@ -4980,22 +5817,24 @@ function _function_body() {
 
 function _try_body() {
   local -i _err=0
-  local body=$(_function_body "${1}")
+  local body=""
+	body=$(_function_body "${1}")
   _trap_try_start
   echo "${body}"
-  exec "${body}"
+  "${body}"
   _err=$?
   _trap_catch_check ${_err}
 }
 
 function _try() {
   local -i _err=0
-  local body="${@}"
+  local body="${*}"
   _trap_try_start
   echo -e "\033[01;7m***${body}\033[0m***"
   local msg="${body}"
   _err=$?
-  declare -i ret=$(_trap_catch_check ${_err})
+  declare -i ret=0
+	ret=$(_trap_catch_check ${_err})
   echo "${msg}"
   unset body
   unset msg
@@ -5015,7 +5854,7 @@ function function_is_defined_with_spaces() {
             #          if  ! function_is_defined_with_spaces "/home/vagrant/.zshrc" ; then    is like is NOT installed
             #          if  function_is_defined_with_spaces "/root/.zshrc ; then      it makes more sense to make it this way
             #
-            local ONE_FUNCTION FUNCTIONS="${@}"
+            local ONE_FUNCTION FUNCTIONS="${*}"
             if [[ -n "${FILES-x}" ]] ; then # if its set and not empty
             {
                 while read -r ONE_FUNCTION; do
@@ -5043,7 +5882,7 @@ function function_is_defined() {
             #          if  ! function_is_defined determine_os_and_fire_action ; then    is like is NOT installed
             #          if  function_is_defined "$FUNCTION_TO_CALL" ; then      it makes more sense to make it this way
             #
-            local ONE_FUNCTION FUNCTIONS="${@}"
+            local ONE_FUNCTION FUNCTIONS="${*}"
             if [[ -n "${FILES-x}" ]] ; then # if its set and not empty
             {
                 FUNCTIONS=$(switch_spaces_to_newlines <<< "${@}")
@@ -5076,7 +5915,7 @@ function function_exists() {
             #                      Function2
             #                      Function2"
             #
-            local TESTING ONE_FUNCTION FUNCTIONS="${@}"
+            local TESTING ONE_FUNCTION FUNCTIONS="${*}"
             if [[ -n "${FUNTIONS-x}" ]] ; then # if its set and not empty
             {
                 FUNCTIONS=$(switch_spaces_to_newlines <<< "${@}")
@@ -5112,7 +5951,9 @@ function function_exists_with_spaces() {
             #                      Function2
             #                      Function2"
             #
-            local TESTING ONE_FUNCTION FUNCTIONS="${@}"
+            local TESTING=""
+						local ONE_FUNCTION=""
+						local FUNCTIONS="${*}"
             if [[ -n "${FUNTIONS-x}" ]] ; then # if its set and not empty
             {
               while read -r ONE_FUNCTION; do
@@ -5134,573 +5975,6 @@ function function_exists_with_spaces() {
             unset TESTING
 } # end function_exists_with_spaces
 
-function get_linux_architecture(){
-  # How to use
-  #    FUNCTION_TO_CALL=$(get_linux_architecture "debian")
-  # > _debian__64
-  # > _debian__32
-  #    FUNCTION_TO_CALL=$(get_linux_architecture "${DISTRO}")
-  #
-  local system_nick="${1}"
-  local return_function_to_call=""
-  if [[ "$(uname -i)" == "x86_64" ]] ; then
-  {
-    return_function_to_call="_${system_nick}__64"
-  }
-  elif [[ "$(uname -i)" == "i686"   ]] ; then
-  {
-    return_function_to_call="_${system_nick}__32"
-  }
-  elif [[ "$(uname -i)" == "arm64"   ]] ; then
-  {
-    return_function_to_call="_${system_nick}__arm64"
-  }
-  else
-  {
-    return_function_to_call="_${system_nick}__$(uname -i)"
-    # warning "struct_testing:$LINENO ERROR to determine "$(uname -a)" architecture (uname -i)  for: <${return_function_to_call}>"
-  }
-  fi
-  if [ -z ${return_function_to_call} ] || [[ "${return_function_to_call}" =~ 'nknown' ]] ; then
-  {
-    if [[ "$(uname -a)" =~  'x86_64' ]] ; then
-    {
-      return_function_to_call="_${system_nick}__64"
-    }
-    fi
-    if [[ "$(uname -a)" =~  'i686' ]] ; then
-    {
-      return_function_to_call="_${system_nick}__32"
-    }
-    fi
-    if [[ "$(uname -a)" =~  'arm64' ]] ; then
-    {
-      return_function_to_call="_${system_nick}__arm64"
-    }
-    fi
-  }
-  fi
-  echo -n ${return_function_to_call}
-  return 0
-} # end get_linux_architecture
-
-function get_mac_architecture(){
-  # How to use
-  #    FUNCTION_TO_CALL=$(get_mac_architecture "darwin")
-  # > _darwin__64
-  # > _darwin__32
-  #    FUNCTION_TO_CALL=$(get_mac_architecture "${DISTRO}")
-  #
-  local system_nick="${1}"
-  local return_function_to_call=""
-  if [[ "$(uname -m)" == "x86_64" ]] ; then
-  {
-    return_function_to_call="_${system_nick}__64"
-  }
-  elif [[ "$(uname -m)" == "i686"   ]] ; then
-  {
-    return_function_to_call="_${system_nick}__32"
-  }
-  elif [[ "$(uname -m)" == "arm64"   ]] ; then
-  {
-    return_function_to_call="_${system_nick}__arm64"
-  }
-  else
-  {
-    return_function_to_call="_${system_nick}__$(uname -m)"
-    warning "struct_testing:$LINENO ERROR to determine "$(uname -a)" architecture (uname -m)  for: <${return_function_to_call}>"
-  }
-  fi
-  if [ -z ${return_function_to_call} ] || [[ "${return_function_to_call}" =~ 'nknown' ]] ; then
-  {
-     if [[ "$(uname -a)" =~  'x86_64' ]] ; then
-     {
-       return_function_to_call="_${system_nick}__64"
-     }
-     fi
-     if [[ "$(uname -a)" =~  'i686' ]] ; then
-     {
-       return_function_to_call="_${system_nick}__32"
-     }
-     fi
-     if [[ "$(uname -a)" =~  'arm64' ]] ; then
-     {
-       return_function_to_call="_${system_nick}__arm64"
-     }
-     fi
-  }
-  fi
-  echo -n ${return_function_to_call}
-  return 0
-} # end get_mac_architecture
-
-function _get_debian_style_version_number_maybe(){
-  # Sample use:
-  #     local target_name="ubuntu"
-  #     local _debian_style_version_number_maybe=$(_get_debian_style_version_number_maybe)
-  #     FUNCTION_TO_CALL=$(get_linux_architecture "${target_name}${_debian_style_version_number_maybe}")
-  #
-  trap '>&2 echo -e "${RED}" && echo "ERROR failed $0:$LINENO struct_testing _get_debian_style_version_number_maybe()  " && >&1 echo -n "" && return 1' ERR
-  local -i _err=0
-  local _response=""
-  local -i linuxversion=0
-  linuxversion=$(cut -d. -f1 <<< $(cut -d'"' -f2 <<< $(grep VERSION_ID= <<< $(cat /etc/*-release) ) ) )
-  _err=$?
-  if [ ${_err} -eq 0 ] && [ ${linuxversion} -gt 0 ] ;  then
-  {
-    local -i testnumber=0
-    testnumber=$(( linuxversion + 1 ))
-    testnumber=$(( testnumber - 1 ))
-    if [ ${testnumber} -eq ${linuxversion} ] ; then
-    {
-      _response=${linuxversion}
-      echo -n "_${_response}"
-      return 0
-    }
-    fi
-  }
-  fi
-  echo -n "${_response}"
-  return 1
-} # end _get_debian_style_version_number_maybe
-
-function _get_redhat_style_version_number_maybe(){
-  # Sample use:
-  #     local target_name="fedora"
-  #     local _redhat_style_version_number_maybe=$(_get_redhat_style_version_number_maybe)
-  #     FUNCTION_TO_CALL=$(get_linux_architecture "${target_name}${_redhat_style_version_number_maybe}")
-  #
-  #
-  trap '>&2 echo -e "${RED}" && echo "ERROR failed $0:$LINENO struct_testing _get_redhat_style_version_number_maybe()  " && >&1 echo -n "" && return 1' ERR
-  local -i _err=0
-  local _response=""
-  local -i linuxversion=0
-  linuxversion=$(cut -d= -f2 <<< $(grep VERSION_ID= <<< $(cat /etc/*-release) ) )
-  _err=$?
-  if [ ${_err} -eq 0 ] && [ ${linuxversion} -gt 0 ] ;  then
-  {
-    local -i testnumber=0
-    testnumber=$(( linuxversion + 1 ))
-    testnumber=$(( testnumber - 1 ))
-    if [ ${testnumber} -eq ${linuxversion} ] ; then
-    {
-      _response=${linuxversion}
-      echo -n "_${_response}"
-      return 0
-    }
-    fi
-  }
-  fi
-  echo -n "${_response}"
-  return 1
-} # end _get_redhat_style_version_number_maybe
-
-function _get_mac_style_release_number_maybe(){
-  # Sample use:
-  #     local target_name="darwin"
-  #     local _mac_style_version_number_maybe=$(_get_mac_style_release_number_maybe)
-  #     FILE_TO_CALL=$(get_linux_architecture "${target_name}${_mac_style_version_number_maybe}")
-  #
-  #
-  trap '>&2 echo -e "${RED}" && echo "ERROR failed $0:$LINENO struct_testing _get_mac_style_release_number_maybe()  " && >&1 echo -n "" && return 1' ERR
-  local -i _err=0
-  local _response=""
-  local -i macversion=0
-  macversion=$(cut -d. -f1 <<< $( uname -r ) )
-  # macversion=$(sw_vers | grep ProductVersion | cut -d: -f2 | xargs | cut -d. -f1,2 | sed 's/\./_/g' )
-  _err=$?
-  if [ ${_err} -eq 0 ] && [ ${macversion} -gt 0 ] ;  then
-  {
-    local -i testnumber=0
-    testnumber=$(( macversion + 1 ))
-    testnumber=$(( testnumber - 1 ))
-    if [ ${testnumber} -eq ${macversion} ] ; then
-    {
-      _response=${macversion}
-      echo -n "_${_response}"
-      return 0
-    }
-    fi
-  }
-  fi
-  echo -n "${_response}"
-  return 1
-} # end _get_mac_style_release_number_maybe
-
-function _get_mac_style_version_number_maybe(){
-  # Sample use:
-  #     local target_name="darwin"
-  #     local _mac_style_version_number_maybe=$(_get_mac_style_version_number_maybe)
-  #     FILE_TO_CALL=$(get_linux_architecture "${target_name}${_mac_style_version_number_maybe}")
-  #
-  #
-  trap '>&2 echo -e "${RED}" && echo "ERROR failed $0:$LINENO struct_testing _get_mac_style_version_number_maybe()  " && >&1 echo -n "" && return 1' ERR
-  local -i _err=0
-  local _response=""
-  local -i macversion1=0
-  local -i macversion2=0
-  local macversion=0
-  # macversion=$(cut -d. -f1 <<< $( uname -r ) )
-  macversion1=$(sw_vers | grep ProductVersion | cut -d: -f2 | xargs | cut -d. -f1 | sed 's/\./_/g' )
-  _err=$?
-  if [ ${_err} -eq 0 ] && [ ${macversion1} -gt 0 ] ;  then
-  {
-    local -i testnumber=0
-    testnumber=$(( macversion1 + 1 ))
-    testnumber=$(( testnumber - 1 ))
-    if [ ${testnumber} -eq ${macversion1} ] ; then
-    {
-      macversion2=$(sw_vers | grep ProductVersion | cut -d: -f2 | xargs | cut -d. -f2 | sed 's/\./_/g' )
-      _err=$?
-      if [ ${_err} -eq 0 ] && [ ${macversion2} -gt 0 ] ;  then
-      {
-        local -i testnumber=0
-        testnumber=$(( macversion2 + 1 ))
-        testnumber=$(( testnumber - 1 ))
-        if [ ${testnumber} -eq ${macversion2} ] ; then
-        {
-          macversion="${macversion1}_${macversion2}"
-          _response=${macversion}
-          echo -n "_${_response}"
-          return 0
-        }
-        fi
-      }
-      fi
-    }
-    fi
-  }
-  fi
-
-  echo -n "${_response}"
-  return 1
-} # end _get_mac_style_version_number_maybe
-
-function determine_os_and_fire_action() {
-  # Interface
-  # How to use
-  # First implement the target functions
-  #              _fedora__64(){ }
-  #              _fedora__32(){ }
-  #              _ubuntu__64(){ }
-  #              _ubuntu__32(){ }
-  #              _mingw__64(){ }
-  #              _mingw__32(){ }
-  #              _darwin__64(){ }
-  #              _darwin__32(){ }
-  # Then call this function
-  #              determine_os_and_fire_action  """${*}"""
-  # remember to pass the  """${*}""" for the parameters to pass
-  # If will fail is the function has not been implemented with Error message
-  # of the function that is missing like _archlinux__64
-  local FUNCTION_TO_CALL_WITH_VERSION=""
-  local FUNCTION_TO_CALL=""
-  local PARAMETERS="${*:-}"
-  local -i _DEBUG=${DEBUG:-0}
-  local -i _err=0
-  # Check operating systems
-  # echo  ${@}
-  if [[ "$(uname)" == "Darwin" ]] ; then
-  {
-    if (( _DEBUG )) ; then
-      echo "Darwin"
-    fi
-    # Do something under Mac OS X platform
-    # FUNCTION_TO_CALL='_darwin__64'
-    # PARAMETERS="$@"
-    local target_name="darwin"
-    local _mac_style_version_number_maybe=$(_get_mac_style_version_number_maybe)
-    _err=$?
-    if [ ${_err} -eq 0 ] ; then
-    {
-      FUNCTION_TO_CALL_WITH_VERSION=$(get_mac_architecture "${target_name}${_mac_style_version_number_maybe}")
-    }
-    fi
-    FUNCTION_TO_CALL=$(get_mac_architecture "${target_name}")
-    PARAMETERS="$@"
-  }
-  elif [[ "$(expr substr $(uname -s) 1 5)" == "Linux" ]] ; then
-  {
-    if (( _DEBUG )) ; then
-      echo "Linux"
-    fi
-    # Do something under GNU/Linux platform
-    # Determine OS platform
-    local UNAME=$(uname | tr "[:upper:]" "[:lower:]")
-    if (( _DEBUG )) ; then
-      echo "UNAME: $UNAME"
-    fi
-    local DISTRO=""
-    local ID=""
-    local VERSION_ID=""
-    # If Linux, try to determine specific distribution
-    if [[ "$UNAME" == "linux" ]]; then
-    {
-      # If available, use LSB to identify distribution
-      if [ -f /etc/lsb-release -o -d /etc/lsb-release.d ]; then
-      {
-        if ( command -v lsb_release >/dev/null 2>&1; ); then
-        {
-          if (( _DEBUG )) ; then
-            echo "RELEASE Option: 1"
-          fi
-          DISTRO=$(lsb_release -i | cut -d: -f2 | sed s/'^\t'// | head -1)
-        }
-        else
-        {
-          if (( _DEBUG )) ; then
-            echo "RELEASE Option: 2"
-          fi
-          DISTRO=$(ls -d /etc/[A-Za-z]*[_-][rv]e[lr]* | grep -v "lsb" | cut -d'/' -f3 | cut -d'-' -f1 | cut -d'_' -f1 | head -1)
-        }
-        fi
-      }
-      else # Otherwise, use release info file
-      {
-        if ( command -v lsb_release >/dev/null 2>&1; ); then
-        {
-          if (( _DEBUG )) ; then
-            echo "RELEASE Option: 1"
-          fi
-          DISTRO=$(lsb_release -i | cut -d: -f2 | sed s/'^\t'// | head -1)
-        }
-        else
-        {
-          if (( _DEBUG )) ; then
-            echo "RELEASE Option: 3"
-          fi
-          DISTRO=$(ls -d /etc/[A-Za-z]*[_-][rv]e[lr]* | grep -v "lsb" | cut -d'/' -f3 | cut -d'-' -f1 | cut -d'_' -f1 | head -1)
-        }
-        fi
-      }
-      fi
-    }
-    fi
-    if (( _DEBUG )) ; then
-      echo "DISTRO:$DISTRO"
-    fi
-    if [[ -z "$DISTRO" ]]; then  # if empty
-    {
-      if (( _DEBUG )) ; then
-        echo "DISTRO empty"
-      fi
-      # If available, use /etc/os-release to identify distribution
-        if [ -f /etc/os-release ]; then
-        {
-          source /etc/os-release
-          # file_exists "/etc/os-release"
-          _err=$?
-    _assure_success ${_err}
-          # source /etc/os-release
-          # $ echo $ID
-          # fedora
-          # $ echo $VERSION_ID
-          # 17
-          # $ echo $VERSION
-          # 17 (Beefy Miracle)
-          DISTRO=$ID
-        }
-        fi
-    }
-    fi
-    if [[ -z "$DISTRO" ]] ; then  # if empty
-    {
-        failed "to determine DISTRO for this linux. uname -a, cat /etc/os-release, lsb_release -i"
-    }
-    fi
-
-    if [[ "$DISTRO" == *"edora"* ]]; then
-    {
-      local target_name="fedora"
-      local _redhat_style_version_number_maybe=$(_get_redhat_style_version_number_maybe)
-      _err=$?
-      if [ ${_err} -eq 0 ] ; then
-      {
-        FUNCTION_TO_CALL_WITH_VERSION=$(get_linux_architecture "${target_name}${_redhat_style_version_number_maybe}")
-      }
-      fi
-      FUNCTION_TO_CALL=$(get_linux_architecture "${target_name}")
-      PARAMETERS="$@"
-    }
-    elif [[ "$DISTRO" == *"untu"* ]]; then
-    {
-      # ubuntu lsb_release -i | sed 's/Distributor\ ID://g' = \tUbuntu\n
-      local target_name="ubuntu"
-      local _debian_style_version_number_maybe=$(_get_debian_style_version_number_maybe)
-      _err=$?
-      if [ ${_err} -eq 0 ] ; then
-      {
-        FUNCTION_TO_CALL_WITH_VERSION=$(get_linux_architecture "${target_name}${_debian_style_version_number_maybe}")
-      }
-      fi
-      FUNCTION_TO_CALL=$(get_linux_architecture "${target_name}")
-      PARAMETERS="$@"
-    }
-    elif [[ "$DISTRO" == *"bian"* ]]; then
-    {
-      local target_name="debian"
-      local _debian_style_version_number_maybe=$(_get_debian_style_version_number_maybe)
-      _err=$?
-      if [ ${_err} -eq 0 ] ; then
-      {
-        FUNCTION_TO_CALL_WITH_VERSION=$(get_linux_architecture "${target_name}${_debian_style_version_number_maybe}")
-      }
-      fi
-      FUNCTION_TO_CALL=$(get_linux_architecture "${target_name}")
-      PARAMETERS="$@"
-    }
-    else
-    {
-      local target_name="${DISTRO}"
-      local _redhat_style_version_number_maybe=$(_get_redhat_style_version_number_maybe)
-      _err=$?
-      if [ ${_err} -eq 0 ] ; then
-      {
-        FUNCTION_TO_CALL_WITH_VERSION=$(get_linux_architecture "${target_name}${_redhat_style_version_number_maybe}")
-      }
-      fi
-      FUNCTION_TO_CALL=$(get_linux_architecture "${target_name}")
-      PARAMETERS="$@"
-    }
-    fi
-    if (( _DEBUG )) ; then
-      echo "FUNCTION_TO_CALL: $FUNCTION_TO_CALL"
-      echo "uname -i: $(uname -i)"
-    fi
-    # For everything else (or if above failed), just use generic identifier
-    unset UNAME
-    unset DISTRO
-    unset ID
-  }
-  elif [[ "$(expr substr $(uname -s) 1 10)" == "MINGW32_NT" ]] ; then
-  {
-    # Do something under Windows NT platform
-    if [[ "$(uname -i)" == "x86_64" ]] ; then
-    {
-      # local target_name="${DISTRO}"
-      # local _redhat_style_version_number_maybe=$(_get_redhat_style_version_number_maybe)
-      # FUNCTION_TO_CALL_WITH_VERSION=$(get_linux_architecture "${target_name}${_redhat_style_version_number_maybe}")
-      # FUNCTION_TO_CALL=$(get_linux_architecture "${target_name}")
-      FUNCTION_TO_CALL='_mingw__64'
-      PARAMETERS="$*"
-    }
-    elif [[ "$(uname -i)" == "i686"   ]] ; then
-    {
-      # local target_name="${DISTRO}"
-      # local _redhat_style_version_number_maybe=$(_get_redhat_style_version_number_maybe)
-      # FUNCTION_TO_CALL_WITH_VERSION=$(get_linux_architecture "${target_name}${_redhat_style_version_number_maybe}")
-      # FUNCTION_TO_CALL=$(get_linux_architecture "${target_name}")
-      FUNCTION_TO_CALL='_mingw__32'
-      PARAMETERS="$*"
-    }
-    fi
-    # nothing here
-  }
-  elif [[ "$(expr substr $(uname -s) 1 10)" == "MINGW64_NT" ]] ; then
-  {
-    # Do something under Windows NT platform
-    if [[ "$(uname -i)" == "x86_64" ]] ; then
-    {
-      # local target_name="${DISTRO}"
-      # local _redhat_style_version_number_maybe=$(_get_redhat_style_version_number_maybe)
-      # FUNCTION_TO_CALL_WITH_VERSION=$(get_linux_architecture "${target_name}${_redhat_style_version_number_maybe}")
-      # FUNCTION_TO_CALL=$(get_linux_architecture "${target_name}")
-      FUNCTION_TO_CALL='_mingw__64'
-      PARAMETERS="$*"
-    }
-    elif [[ "$(uname -i)" == "i686"   ]] ; then
-    {
-      # local target_name="${DISTRO}"
-      # local _redhat_style_version_number_maybe=$(_get_redhat_style_version_number_maybe)
-      # FUNCTION_TO_CALL_WITH_VERSION=$(get_linux_architecture "${target_name}${_redhat_style_version_number_maybe}")
-      # FUNCTION_TO_CALL=$(get_linux_architecture "${target_name}")
-      FUNCTION_TO_CALL='_mingw__32'
-      PARAMETERS="$*"
-    }
-    fi
-    # nothing here
-  }
-  else
-  {
-    failed "system not recognized"
-  }
-  fi
-  if [[ -z "${FUNCTION_TO_CALL}" ]]; then  # if empty
-  {
-     failed "struct_testing:$LINENO ERROR to determine FUNCTION_TO_CALL for this OS. uname -a, cat /etc/os-release, lsb_release -i <${FUNCTION_TO_CALL}>"
-  }
-  else
-  {
-    if function_is_defined "${FUNCTION_TO_CALL_WITH_VERSION}" ; then
-    {
-      passed "${FUNCTION_TO_CALL_WITH_VERSION}" "${PARAMETERS:-}" "${THISSCRIPTPARAMS:-}"
-      ${FUNCTION_TO_CALL_WITH_VERSION} "${PARAMETERS:-}" "${THISSCRIPTPARAMS:-}"
-      _err=$?
-      _assure_success ${_err}
-    }
-    else
-    {
-      warning "struct_testing:$LINENO  could not find function with version for this OS or DISTRO: ${FUNCTION_TO_CALL_WITH_VERSION}"
-      Installing "would look at adding this:
-${FUNCTION_TO_CALL_WITH_VERSION}() {
-  trap 'echo Error:\$?' ERR INT
-  local _parameters=\"\${*-}\"
-  local -i _err=0
-  callsomething \"\${_parameters-}\"
-  _err=\$?
-  if [ \${_err} -gt 0 ] ; then
-  {
-    failed \"\$0:\$LINENO while running callsomething above _err:\${_err}\"
-  }
-  fi
-} # end ${FUNCTION_TO_CALL_WITH_VERSION}
-"
-
-      Checking "struct_testing:$LINENO  if we can find a nonversion function: ${FUNCTION_TO_CALL}"
-      if function_is_defined "${FUNCTION_TO_CALL}" ; then
-      {
-        passed "${FUNCTION_TO_CALL}" "${PARAMETERS:-}" "${THISSCRIPTPARAMS:-}"
-        ${FUNCTION_TO_CALL} "${PARAMETERS:-}" "${THISSCRIPTPARAMS:-}"
-  _err=$?
-        _assure_success ${_err}
-      }
-      else
-      {
-        warning "struct_testing:$LINENO  could not find function for this OS or DISTRO: ${FUNCTION_TO_CALL}"
-        Installing "would look at adding this:
-${FUNCTION_TO_CALL}() {
-  trap 'echo Error:\$?' ERR INT
-  local _parameters=\"\${*-}\"
-  local -i _err=0
-  callsomething \"\${_parameters-}\"
-  _err=\$?
-  if [ \${_err} -gt 0 ] ; then
-  {
-    failed \"\$0:\$LINENO  while running callsomething above _err:\${_err}\"
-  }
-  fi
-} # end ${FUNCTION_TO_CALL}
-"
-
-        failed "struct_testing:$LINENO  to find function for this OS or DISTRO: ${FUNCTION_TO_CALL} ${PARAMETERS:-} ${THISSCRIPTPARAMS:-}
-        Cannot proceed until you add this function above missing
-        "
-  _err=$?
-        _assure_success ${_err}
-      }
-      fi
-
-    }
-    fi
-
-  }
-  fi
-  _assure_success $?
-  unset FUNCTION_TO_CALL
-  unset PARAMETERS
-  return ${_err}
-} # end determine_os_and_fire_action
-
 function _move_to_target_dir() {
   # Sample use
   #
@@ -5715,7 +5989,9 @@ function _move_to_target_dir() {
   local TARGETFOLDER="${3}" # param order      varname           varvalue                   sample_value
   enforce_parameter_with_value     "3"        TARGETFOLDER     "${TARGETFOLDER}"   "${USER_HOME}/_/software"
 
-  local NEWDIRCODENAME=$(ls -1tr "${DOWNLOADFOLDER}/"  | tail  -1)
+  local NEWDIRCODENAME=""
+	# shellcheck disable=SC2012
+	NEWDIRCODENAME="$(ls -1tr "${DOWNLOADFOLDER}/"  | tail  -1)"
   local FROMUZIPPED="${DOWNLOADFOLDER}/${NEWDIRCODENAME}"
   directory_exists_with_spaces  "${FROMUZIPPED}"
 
@@ -5744,14 +6020,16 @@ function _backup_current(){
 
   if  it_exists_with_spaces "${__dir}" ; then
   {
-     local folder_date=$(date +"%Y%m%d")
+     local folder_date=""
+		 folder_date=$(date +"%Y%m%d")
      if  it_exists_with_spaces "${__dir}_${folder_date}" ; then
      {
        warning "A backup already exists for today ${ret}:${msg} \n ... adding time"
        folder_date=$(date +"%Y%m%d%H%M")
      }
      fi
-     local msg=$(mv "${__dir}" "${__dir}_${folder_date}")
+     local msg=""
+		 msg=$(mv "${__dir}" "${__dir}_${folder_date}")
      local ret=$?
      if [ $ret -gt 0 ] ; then
      {
@@ -5874,7 +6152,7 @@ function _do_not_downloadtwice(){
 } # end _do_not_downloadtwice
 
 function _remove_downloaded_codename_or_err(){
-  local _err=${1}
+  local -i  _err=${1}
   local DOWNLOADFOLDER_CODENAME="${2}"
   if [ $_err -eq 0 ] ; then
   {
@@ -5932,9 +6210,25 @@ function _install_apt() {
     ensure apt or "Canceling Install. Could not find apt command to execute install"
     _trap_try_start # _trap_catch_check
     local msg=""
-    msg=$(apt install -y "${TARGET_DOWNLOAD_PATH}")
-    _err=$?
-    _trap_catch_check ${_err}
+    local doing_apt_get="apt"
+            if ( ( command -v apt-get >/dev/null 2>&1; ) && ( command -v dpkg >/dev/null 2>&1; ) ) ; then
+            {
+                ensure_apt_dpkg_in_linux
+                doing_apt_get="apt-get"
+                msg=$(apt-get install -y "${TARGET_DOWNLOAD_PATH}")
+                _err=$?
+                _trap_catch_check ${_err}
+
+            }
+            elif ( ( command -v apt >/dev/null 2>&1; ) && ( command -v dpkg >/dev/null 2>&1; ) ) ; then
+            {
+                ensure_apt_dpkg_in_linux
+                msg=$(apt install -y "${TARGET_DOWNLOAD_PATH}")
+                _err=$?
+                _trap_catch_check ${_err}
+
+            }
+            fi
     echo "${msg}"
     if [[ "${msg}" == *"not an dpkg package"* ]] ; then
     {
@@ -5946,14 +6240,14 @@ function _install_apt() {
     {
       echo "Suggested Fix "
       echo "# when error error: Failed dependencies:
-            #        libQt5Svg.so.5()(64bit) is needed by "${CODENAME}"
+            #        libQt5Svg.so.5()(64bit) is needed by \"${CODENAME}\"
             # then correct with
             # fix with
             # then fix with
-            # exec apt install -y qt5-devel qt-creator qt5-qtbase qt5-qtbase-devel
+            # exec ${doing_apt_get} install -y qt5-devel qt-creator qt5-qtbase qt5-qtbase-devel
             # dpkg again"
       Attempting to fix
-      apt install -y qt5-devel qt-creator qt5-qtbase qt5-qtbase-devel
+      ${doing_apt_get} install -y qt5-devel qt-creator qt5-qtbase qt5-qtbase-devel
       _install_apt "${TARGET_URL}" "${DOWNLOADFOLDER}"  "${CODENAME}" 1
     }
     elif [[ "${msg}" == *"libQt5WebKit.so.5"* ]] && [[ "${msg}" == *"is needed"* ]] && (( LOOP )) ; then
@@ -5964,7 +6258,7 @@ function _install_apt() {
             # then correct with
             # fix with
             # then fix with
-            # exec apt install -y qt5-devel qt-creator qt5-qtbase qt5-qtbase-devel
+            # exec ${doing_apt_get} install -y qt5-devel qt-creator qt5-qtbase qt5-qtbase-devel
             # I could not install it automatically
             # dpkg again"
       failed "ERROR MSG:\n ${msg}"
@@ -6041,7 +6335,7 @@ function _install_rpm() {
     {
       echo "Suggested Fix "
       echo "# when error error: Failed dependencies:
-            #        libQt5Svg.so.5()(64bit) is needed by "${CODENAME}"
+            #        libQt5Svg.so.5()(64bit) is needed by \"${CODENAME}\"
             # then correct with
             # fix with
             # then fix with
@@ -6055,7 +6349,7 @@ function _install_rpm() {
     {
       echo "Suggested Fix "
       echo "# when error error: Failed dependencies:
-            #        libQt5Svg.so.5()(64bit) is needed by "${CODENAME}"
+            #        libQt5Svg.so.5()(64bit) is needed by \"${CODENAME}\"
             # then correct with
             # fix with
             # then fix with
@@ -6113,7 +6407,7 @@ function raise_to_sudo_and_user_home() {
   #
 
     unset HAVE_SUDO_ACCESS # unset this from the environment
-
+    # shellcheck disable=SC2317
     have_sudo_access() {
       if [[ ! -x "/usr/bin/sudo" ]]
       then
@@ -6146,7 +6440,7 @@ function raise_to_sudo_and_user_home() {
       fi
 
       return "${HAVE_SUDO_ACCESS}"
-    }
+    } # end have_sudo_access
     # string formatters
     if [[ -t 1 ]]
     then
@@ -6155,13 +6449,17 @@ function raise_to_sudo_and_user_home() {
       tty_escape() { :; }
     fi
     tty_mkbold() { tty_escape "1;$1"; }
-    tty_underline="$(tty_escape "4;39")"
+    # shellcheck disable=SC2317
+    tty_underline=""
+		tty_underline="$(tty_escape "4;39")"
     tty_blue="$(tty_mkbold 34)"
+    # shellcheck disable=SC2317
     tty_red="$(tty_mkbold 31)"
     tty_bold="$(tty_mkbold 39)"
     tty_reset="$(tty_escape 0)"
 
 
+    # shellcheck disable=SC2317
     shell_join() {
       local arg
       printf "%s" "$1"
@@ -6171,14 +6469,16 @@ function raise_to_sudo_and_user_home() {
         printf " "
         printf "%s" "${arg// /\ }"
       done
-    }
+    } # end shell_join
 
 
 
+    # shellcheck disable=SC2317
     ohai() {
       printf "${tty_blue}==>${tty_bold} %s${tty_reset}\n" "$(shell_join "$@")"
     }
 
+    # shellcheck disable=SC2317
     execute() {
       if ! "$@"
       then
@@ -6186,6 +6486,7 @@ function raise_to_sudo_and_user_home() {
       fi
     }
 
+    # shellcheck disable=SC2317
     execute_sudo() {
       local -a args=("$@")
       if have_sudo_access
@@ -6215,6 +6516,7 @@ function raise_to_sudo_and_user_home() {
       # shellcheck disable=SC2031
       if ! ( env | grep "USER_HOME" &>/dev/null ) ; then
       {
+				# shellcheck disable=SC2155
           typeset USER_HOME="$(echo -n $(bash -c "cd ~${SUDO_USER:-} && pwd"))"  # Get the caller's of sudo home dir LINUX and MAC
       }
       fi
@@ -6258,12 +6560,13 @@ function raise_to_sudo_and_user_home() {
     fi
     [[ -z "${bootbasicsource}" ]] && echo -e "\n \n  ERROR! Loading execute_boot_basic.sh  bootbasicsource did not download or is empty " && exit 1
     local _temp_dir=""
-		_temp_dir="$(mktemp -d 2>/dev/null || mktemp -d -t 'execute_boot_basic_source')"
+    _temp_dir="$(mktemp -d 2>/dev/null || mktemp -d -t 'execute_boot_basic_source')"
     echo "${bootbasicsource}">"${_temp_dir}/execute_boot_basic_source"
     if (( _DEBUG )) ; then
       echo "$0 execute_command_intuivo_cli/struct_testing load_execute_boot_basic_with_sudo() Temp execute_boot_basic.sh location ${_temp_dir}/execute_boot_basic_source"
     fi
     echo "2. sudologic execute_boot_basic.sh Temp location ${_temp_dir}/execute_boot_basic_source"
+		# shellcheck disable=SC1091
     source "${_temp_dir}/execute_boot_basic_source"
     _err=$?
     [ $_err -gt 0 ] &&  echo -e "\n \n  ERROR! Loading execute_boot_basic.sh. Occured while running 'source' err:$_err  \n \n  " && exit 1
@@ -6367,9 +6670,9 @@ function enforce_web_is_reachable(){
   # enforce_web_is_reachable  "cms.artbox.one"
   #
   local _url="${1}"
-	local -i _err=0
+  local -i _err=0
   local _domain=""
-	_domain=$(extract_domainname "${_url}")
+  _domain=$(extract_domainname "${_url}")
   enforce_variable_with_value _domain "${_domain}"
   echo "  Checking for connection to ${_domain}"
   local msg
@@ -6394,6 +6697,7 @@ function enforce_ip_resolves(){
   # enforce_ip_resolves  "pis.pixum.com" to "127.0.0.1"
   # enforce_ip_resolves  "pis.pixum.com" not-to "127.0.0.1"
   #
+	# shellcheck disable=SC2235
   if [[ -n "${1}" ]] && ([[ "${2}" == "not-to" ]] || [[ "${2}" == "to" ]]) && [[ -n "${3}" ]]; then
   {
     echo "  Checking ip for to ${1} ${2} be ${3}"
@@ -6403,6 +6707,7 @@ function enforce_ip_resolves(){
     echo "Wrong usage, sample call is:  enforce_ip_resolves  \"pis.pixum.com\" to \"127.0.0.1\" "
     echo "Wrong usage, sample call is:  enforce_ip_resolves  \"pis.pixum.com\" not-to \"127.0.0.1\" "
     failed callling enforce_ip_resolves
+    # shellcheck disable=SC2317
     exit 1
   }
   fi
@@ -6427,6 +6732,7 @@ function enforce_ip_resolves(){
   if [[ "${2}" == "not-to" ]] && [[ "${msg}" == "${3}" ]] ; then
   {
     failed "${TESTING}"
+    # shellcheck disable=SC2317
     exit 1
   }
   fi
@@ -6492,6 +6798,7 @@ function check_if_package_is_installed() {
             }
             fi
             failed "I don't know how to check for this package existance I tried apt-get apt dnf did no exist ${CERO}"
+            # shellcheck disable=SC2317
             return 1
 } # end check_if_package_is_installed
 
@@ -6519,6 +6826,7 @@ function _remove_package() {
             }
             fi
             failed "to remove package I don't know how to remove  here I tried existence of apt-get apt dnf did no exist ${CERO}"
+            # shellcheck disable=SC2317
             return 1
 } # end _remove_package
 
@@ -6528,8 +6836,8 @@ function _package_list_installer() {
   # Sample use
   # trap  '_trap_on_error $0 "${?}" LINENO BASH_LINENO FUNCNAME BASH_COMMAND $FUNCNAME $BASH_LINENO $LINENO   $BASH_COMMAND'  ERR
   local package
-	local packages=""
-	packages="${*-}"
+  local packages=""
+  packages="${*-}"
   trap 'echo -e "${RED}" && echo "ERROR failed $0:$LINENO _package_list_installer " && echo -e "${RESET}" && return 0' ERR
 
   if ! install_requirements "linux" "${packages}" ; then
@@ -6565,7 +6873,7 @@ function _git_clone() {
   local _target="${2}"
   Checking "${SUDO_USER}" "${_target}"
   local _cwd=""
-	_cwd="$(pwd)"
+  _cwd="$(pwd)"
   Checking "_cwd:${_cwd}"
   if  it_exists_with_spaces "${_target}" ; then # && it_exists_with_spaces "${_target}/.git" ; then
   {
@@ -6607,7 +6915,7 @@ function _git_clone() {
       warning Could not git clone "${_source}" "${_target}"
     }
     else
-		{
+    {
       if git branch --set-upstream-to=origin/master master ; then
       {
         warning "Could not do git branch --set-upstream-to=origin/master master"
@@ -6623,7 +6931,7 @@ function _git_clone() {
         warning "Could not git config pull.rebase false"
       }
       fi
-		}
+    }
     fi
   }
   fi
@@ -6769,7 +7077,7 @@ function _trust_dmgs_application() {
   fi
   enforce_parameter_with_value 1 APPDIR "${APPDIR}" "Beyond Compare.app"
   echo  Removing macOS gatekeeper quarantine attribute
-  chown  -R $SUDO_USER "/Applications/${APPDIR}"
+  chown  -R "$SUDO_USER" "/Applications/${APPDIR}"
   chgrp  -R staff "/Applications/${APPDIR}"
   #xattr -d com.apple.quarantine  "/Applications/${APPDIR}"
   return 0
@@ -6791,7 +7099,7 @@ function _install_dmgs_dmg__64() {
   #
   local CODENAME="${1}"
   local extension=""
-	extension="$(echo "${CODENAME}" | rev | cut -d'.' -f 1 | rev)"
+  extension="$(echo "${CODENAME}" | rev | cut -d'.' -f 1 | rev)"
   local APPDIR="${2}"
   local TARGET_URL="${3}"
   # CODENAME="$(basename "${TARGET_URL}" )"
@@ -6803,7 +7111,7 @@ function _install_dmgs_dmg__64() {
   # local UNZIPDIR="$(echo -en "${APPDIR}" | sed 's/.app//g')"
   # echo "$(pwd)"
   local UNZIPDIR=""
-	UNZIPDIR="$(dirname  "${APPDIR}")"
+  UNZIPDIR="$(dirname  "${APPDIR}")"
   local APPDIR="${APPDIR##*/}"    # same as  $(basename "${APPDIR}")
   #local APPDIR=$(basename "${APPDIR}")
   # local APPDIR="$(echo -en "${CODENAME}" | sed 's/.dmg//g'| sed 's/-//g').app"
