@@ -6327,12 +6327,13 @@ function _install_rpm() {
     _err=$?
     _trap_catch_check ${_err}
     echo "${msg}"
-    if  [[ "${msg}" == *"Can not load RPM file"* ]] || [[ "${msg}" == *"not an rpm package"* ]] || [[ "${msg}" == *"cannot be installed"* ]] ; then
+    if  [[ "${msg}" == *"Can not load RPM file"* ]] || [[ "${msg}" == *"not an rpm package"* ]] || [[ "${msg}" == *"cannot be installed"* ]] || [[ "${msg}" == *"not a rpm"* ]]  ; then
     {
       Warning Package appearts broken, downloading again
+      Attempting to fix
       rm -rf "${TARGET_DOWNLOAD_PATH}"
       _download "${TARGET_URL}" "${DOWNLOADFOLDER}"  "${CODENAME}"
-      _install_rpm "${TARGET_URL}" "${DOWNLOADFOLDER}"  "${CODENAME}"
+      _install_rpm "${TARGET_URL}" "${DOWNLOADFOLDER}"  "${CODENAME}" 1
     }
     elif [[ "${msg}" == *"libQt5WebKit.so.5"* ]] && [[ "${msg}" == *"is needed"* ]] && (( ! LOOP )) ; then
     {
