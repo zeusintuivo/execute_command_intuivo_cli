@@ -5679,7 +5679,9 @@ function _download_linux() {
     {
        cd "${download_folder}"
        _trap_try_start
-       wget --max-redirect=10 --mirror --directory-prefix="${download_folder}" -O "${download_file}" --no-check-certificate "${target_url}" # 2>/dev/null"
+
+       # wget --max-redirect=10 --mirror --directory-prefix="${download_folder}" -O "${download_file}" --no-check-certificate "${target_url}" # 2>/dev/null"
+       wget --max-redirect=10 -O "${download_folder}/${download_file}"  "${target_url}" # 2>/dev/null"
        _err=$?
        _trap_catch_check ${_err}
     }
@@ -5687,7 +5689,8 @@ function _download_linux() {
     {
       _trap_try_start
       echo -e RUNNING:\nsu - "$SUDO_USER" -c 'cd "'"${download_folder}"'" && wget --max-redirect=10 --mirror --directory-prefix="'"${download_folder}"'" -O "'"${download_file}"'" --no-check-certificate '"${target_url}"' && pwd ' # 2>/dev/null"
-      su - "$SUDO_USER" -c 'cd "'"${download_folder}"'" && wget --max-redirect=10 --mirror --directory-prefix="'"${download_folder}"'" -O "'"${download_file}"'" --no-check-certificate '"${target_url}"' && pwd ' # 2>/dev/null"
+      # su - "$SUDO_USER" -c 'cd "'"${download_folder}"'" && wget --max-redirect=10 --mirror --directory-prefix="'"${download_folder}"'" -O "'"${download_file}"'" --no-check-certificate '"${target_url}"' && pwd ' # 2>/dev/null"
+      su - "$SUDO_USER" -c 'cd "'"${download_folder}"'" && wget --max-redirect=10 -O "'"${download_folder}/${download_file}"'" '"${target_url}"' && pwd ' # 2>/dev/null"
       _err=$?
       _trap_catch_check ${_err}
     }
