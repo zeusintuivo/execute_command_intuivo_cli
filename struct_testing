@@ -4284,7 +4284,7 @@ fi
                 if (( _DEBUG )) ; then
                   echo "apt install"
                 fi
-                install_result=$(exec apt-get install "${missing}" -yfq   2>&1) # capture all input and output
+                install_result=$(exec apt-get install ${missing} -yfq   2>&1) # capture all input and output
                 err_buff=$?
               }
               elif [[ ${_OS:-} != "brew" ]] && ( ( command -v apt >/dev/null 2>&1; )  && ( command -v dpkg >/dev/null 2>&1; ) ); then
@@ -4292,7 +4292,7 @@ fi
                 if (( _DEBUG )) ; then
                   echo "apt install"
                 fi
-                install_result=$(exec apt install "${missing}" -yfq   2>&1) # capture all input and output
+                install_result=$(exec apt install ${missing} -yfq   2>&1) # capture all input and output
                 err_buff=$?
               }
               elif [[ ${_OS:-} != "brew" ]] && ( ( command -v rpm >/dev/null 2>&1; ) && ( command -v dnf >/dev/null 2>&1; ) ) ; then
@@ -4300,11 +4300,11 @@ fi
                 if (( _DEBUG )) ; then
                   echo "dnf install ${missing}"
                 fi
-                install_result=$(exec dnf install "${missing}" -y  2>&1) # capture all input and output
+                install_result=$(exec dnf install ${missing} -y  2>&1) # capture all input and output
+                err_buff=$?
                 if (( _DEBUG )) ; then
                   echo "dnf install_result"
                 fi
-                err_buff=$?
               }
               else # brew install
               {
@@ -4358,12 +4358,24 @@ fi
                   local REPLACERED="\\\\033[01;31m"
                   local REPLACECYAN="\\\\033[01;36m"
                   local display_install_result=""
-									display_install_result=$(echo -e "${install_result}" | sed "s/\(FAILED\|failed\|additional\ disk\|Failed\|ERROR\|Error\|error\|cannot\|continue\|logged\|inspection\|not\|exit\|more\|details\)/${REPLACERED}\1${REPLACECYAN}/g")
-                  [[ "${install_result}" == *"Could not resolve"* ]] && echo -e "${BRIGHT_BLUE87} It appears YOU HAVE ${YELLOW226}NO INTERNET CONNECTION \o_0/ ${RESET}"
-                  [[ "${install_result}" == *"Repository not found"* ]] && echo -e "${BRIGHT_BLUE87} It appears YOU HAVE ${YELLOW226}NO ACCESS TO THIS FOR YOU ${RED} ${GIT_USER_NAME} ${RESET}"
-                  [[ "${install_result}" == *"Could not read from"* ]] && echo -e "${BRIGHT_BLUE87} It appears it exists but you are ${RED}NOT ${YELLOW226} ALLOWED ${RED} ${GIT_USER_NAME} ${YELLOW226}!!! ${RESET}"
-                  [[ "${install_result}" == *"additional disk"* ]] && echo -e "${BRIGHT_BLUE87} It appears .. ${RED}There is no space  ${YELLOW226}!!! !!!  ${RED}\\${BRIGHT_BLUE87}o${RED}_${BRIGHT_BLUE87}0${RED}/ ${RESET}"
-                  failed "${RESET} \n .... \n ... ${display_install_result} \n ... \n ..."
+                  if [[ "${install_result}" == *"--skip-unavailable"* ]] ; then
+                  {
+                    install_result=$(exec dnf install ${missing} --skip-unavailable  -y  2>&1) # capture all input and output
+                    err_buff=$?
+
+                  }
+                  fi
+                  if [[ -n "${install_result}" ]] || [ $err_buff -ne 0 ] ; then
+                  {
+									  display_install_result=$(echo -e "${install_result}" | sed "s/\(FAILED\|failed\|additional\ disk\|Failed\|ERROR\|Error\|error\|cannot\|continue\|logged\|inspection\|not\|exit\|more\|details\)/${REPLACERED}\1${REPLACECYAN}/g")
+                    [[ "${install_result}" == *"Could not resolve"* ]] && echo -e "${BRIGHT_BLUE87} It appears YOU HAVE ${YELLOW226}NO INTERNET CONNECTION \o_0/ ${RESET}"
+                    [[ "${install_result}" == *"Repository not found"* ]] && echo -e "${BRIGHT_BLUE87} It appears YOU HAVE ${YELLOW226}NO ACCESS TO THIS FOR YOU ${RED} ${GIT_USER_NAME} ${RESET}"
+                    [[ "${install_result}" == *"Could not read from"* ]] && echo -e "${BRIGHT_BLUE87} It appears it exists but you are ${RED}NOT ${YELLOW226} ALLOWED ${RED} ${GIT_USER_NAME} ${YELLOW226}!!! ${RESET}"
+                    [[ "${install_result}" == *"additional disk"* ]] && echo -e "${BRIGHT_BLUE87} It appears .. ${RED}There is no space  ${YELLOW226}!!! !!!  ${RED}\\${BRIGHT_BLUE87}o${RED}_${BRIGHT_BLUE87}0${RED}/ ${RESET}"
+
+                    failed "${RESET} \n .... \n ... ${display_install_result} \n ... \n ..."
+                  }
+                  fi
                 }
                 fi
 
@@ -4536,7 +4548,7 @@ fi
             {
               [[ -n "${removing}" ]] && echo -e " ${CYAN} Apt-get removing packages: ${YELLOW} ${removing} ${RESET} ."
 							# shellcheck disable=SC2155
-              [[ -n "${removing}" ]] && local remove_result=$(exec apt-get remove "${removing}" -yfq   2>&1 && exec apt-get purge "${removing}" -yfq   2>&1 && exec apt-get autoremove -yfq   2>&1) # capture all input and output
+              [[ -n "${removing}" ]] && local remove_result=$(exec apt-get remove ${removing} -yfq   2>&1 && exec apt-get purge ${removing} -yfq   2>&1 && exec apt-get autoremove -yfq   2>&1) # capture all input and output
               local err_buff=$?
               [[ -n "${remove_result}" ]] && handle_error "${err_buff}" "${remove_result}"
             }
@@ -4544,7 +4556,7 @@ fi
             {
 							# shellcheck disable=SC2155
               [[ -n "${removing}" ]] && echo -e " ${CYAN} Apt-get removing packages: ${YELLOW} ${removing} ${RESET} ."
-              [[ -n "${removing}" ]] && local remove_result=$(exec apt remove "${removing}" -yfq   2>&1 && exec apt purge "${removing}" -yfq   2>&1 && exec apt autoremove -yfq   2>&1) # capture all input and output
+              [[ -n "${removing}" ]] && local remove_result=$(exec apt remove ${removing} -yfq   2>&1 && exec apt purge ${removing} -yfq   2>&1 && exec apt autoremove -yfq   2>&1) # capture all input and output
               local err_buff=$?
               [[ -n "${remove_result}" ]] && handle_error "${err_buff}" "${remove_result}"
             }
@@ -4552,7 +4564,7 @@ fi
             {
               [[ -n "${removing}" ]] && echo -e " ${CYAN} Dnf removing packages: ${YELLOW} ${removing} ${RESET} ."
 							# shellcheck disable=SC2155
-              [[ -n "${removing}" ]] && local remove_result=$(exec dnf uninstall "${removing}" -y   2>&1 && exec dnf purge "${removing}" -y  2>&1 && exec dnf autoremove -y   2>&1) # capture all input and output
+              [[ -n "${removing}" ]] && local remove_result=$(exec dnf uninstall ${removing} -y   2>&1 && exec dnf purge ${removing} -y  2>&1 && exec dnf autoremove -y   2>&1) # capture all input and output
               local err_buff=$?
               [[ -n "${remove_result}" ]] && handle_error "${err_buff}" "${remove_result}"
             }
